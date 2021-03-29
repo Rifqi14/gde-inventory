@@ -467,8 +467,19 @@
                 margin-top:5rem;
                 }
             </style>
+            <div class="content-wrapper">
+                <section class="content-header">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="card col-md-12">
+                                @yield('breadcrumb')
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                @yield('content')
+            </div>
             <!-- Content Wrapper. Contains page content -->
-            @yield('content')
             <!-- /.content-wrapper -->	
             <footer class="main-footer accent-danger">
                 <strong>Copyright &copy; {{ date('Y') }} <a href="">Project Management Unit</a>.</strong>

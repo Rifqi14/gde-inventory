@@ -4,11 +4,25 @@
 
 @endsection
 
+@section('breadcrumb')
+<div class="row mb-3 mt-3">
+    <div class="col-sm-4">
+        <!-- <h5 class="m-0 ml-2 text-dark text-md breadcrumb">Grievance Redress &nbsp;<small class="font-uppercase"></small></h5> -->
+        <h1 id="title-branch" class="m-0 text-dark">
+            Dashboard				
+        </h1>
+    </div>
+    <div class="col-sm-8">
+        <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
+            <li class="breadcrumb-item">Home</li>
+            <li class="breadcrumb-item">Dashboard</li>
+        </ol>
+    </div>
+</div>
+@endsection
+
 @section('content')
-<div class="content-wrapper">
-    <!-- Content Header (Page header) -->
-    <!-- /.content-header -->
-    <!-- Main content -->
+<!-- Main content -->
     <div class="content">
         <div class="container-fluid">
             <div class="row">
@@ -35,7 +49,6 @@
         <!-- /.container-fluid -->
     </div>
     <!-- /.content -->
-</div>
 @endsection
 
 @section('script')
