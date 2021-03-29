@@ -5,7 +5,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
         <meta name="robots" content="noindex,nofollow" />
-        <base href="https://pmugde.com/admin/" />
+        <base href="{{ url('admin') }}" />
         <title>Overview</title>
         <link rel="apple-touch-icon" sizes="57x57" href="{{asset('assets/img/favicon.ico')}}">
         <link rel="apple-touch-icon" sizes="60x60" href="{{asset('assets/img/favicon.ico')}}">
@@ -85,7 +85,7 @@
             		message:'Yakin Akan Keluar?',
             		callback: function(result) {
             			if(result) {
-            				document.location = 'https://pmugde.com/admin/login/logout';
+            				document.location = '{{ url('admin/login/logout') }}';
             			}
             		}
             	});
@@ -118,7 +118,7 @@
                 <!-- Right navbar links -->
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="https://pmugde.com/admin/login/logout"><i
+                        <a class="nav-link" href="{{ url('admin/login/logout') }}"><i
                             class="fas fa-power-off"></i></a>
                     </li>
                 </ul>
@@ -126,7 +126,7 @@
             <!-- /.navbar -->	<!-- Main Sidebar Container -->
             <aside class="main-sidebar elevation-2 sidebar-light-danger">
                 <!-- Brand Logo -->
-                <a href="https://pmugde.com/" class="brand-link">
+                <a href="{{ url('') }}" class="brand-link">
                     <div class="row">
                         <div class="col-md-2">
                             <img src="{{asset('assets/img/pmu.png')}}" alt="Project Management Unit Logo" class="brand-image img-circle elevation-1 ml-0 p-1" style="opacity: .8">
