@@ -19,3 +19,9 @@ Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/admin', 'Admin\DashboardController@index')->name('dashboard.index');
+
+Route::group(['prefix' => 'admin'], function () {
+    Route::get('/user/read', 'Admin\UserController@read')->name('user.read');
+    Route::get('/user/select', 'Admin\UserController@select')->name('user.select');
+    Route::resource('/user', 'Admin\UserController');
+});
