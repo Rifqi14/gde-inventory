@@ -1,24 +1,47 @@
 @extends('admin.layouts.app')
 
 @section('stylesheets')
-
+<style>
+    .card {
+    box-shadow: none !important;
+    } 
+    .card-title {
+    font-weight: 550;
+    font-size: 1.3rem !important;
+    }
+    .card-header {
+    border-bottom: 1.5px solid black;
+    }
+    #welcome {
+    font-size: 4rem;
+    font-weight: 500;
+    margin-bottom: 0;
+    color:#afb6b6 !important;
+    }
+    #fullname {
+    font-size: 4rem;
+    font-weight: 600;
+    color: #030356;
+    margin-top: -30px;
+    }
+    #ps{
+    font-style: italic;
+    font-size:1.15rem !important;
+    }
+    #link {
+    color: #030356 !important;
+    }
+    #logo{
+    width: 25%;
+    }
+    #bgks{
+    margin-top:5rem;
+    }
+</style>
 @endsection
 
 @section('breadcrumb')
-<div class="row mb-3 mt-3">
-    <div class="col-sm-4">
-        <!-- <h5 class="m-0 ml-2 text-dark text-md breadcrumb">Grievance Redress &nbsp;<small class="font-uppercase"></small></h5> -->
-        <h1 id="title-branch" class="m-0 text-dark">
-            Dashboard				
-        </h1>
-    </div>
-    <div class="col-sm-8">
-        <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
-            <li class="breadcrumb-item">Home</li>
-            <li class="breadcrumb-item">Dashboard</li>
-        </ol>
-    </div>
-</div>
+
 @endsection
 
 @section('content')

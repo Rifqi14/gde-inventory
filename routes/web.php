@@ -19,3 +19,7 @@ Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/admin', 'Admin\DashboardController@index')->name('dashboard.index');
+//Route Menu
+Route::get('/menu/select', 'Admin\MenuController@select')->name('menu.select');
+Route::post('/menu/order', 'Admin\MenuController@order')->name('menu.order');
+Route::resource('/menu', 'Admin\MenuController')->only(['index', 'store', 'edit', 'update', 'destroy']);;
