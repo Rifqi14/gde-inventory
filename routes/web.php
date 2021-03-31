@@ -19,6 +19,7 @@ Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
 Route::group(['prefix' => 'admin'], function () {
+    Route::get('/login', 'Admin\DashboardController@index')->name('login');
     Route::get('/', 'Admin\DashboardController@index')->name('dashboard.index');
     Route::get('/user/read', 'Admin\UserController@read')->name('user.read');
     Route::get('/user/select', 'Admin\UserController@select')->name('user.select');
@@ -27,4 +28,12 @@ Route::group(['prefix' => 'admin'], function () {
     Route::get('/menu/select', 'Admin\MenuController@select')->name('menu.select');
     Route::post('/menu/order', 'Admin\MenuController@order')->name('menu.order');
     Route::resource('/menu', 'Admin\MenuController')->only(['index', 'store', 'edit', 'update', 'destroy']);
+    //Route Role
+    Route::get('/role/set/{id}', 'Admin\RoleController@set')->name('role.set');
+    Route::get('/role/read', 'Admin\RoleController@read')->name('role.read');
+    Route::get('/role/select', 'Admin\RoleController@select')->name('role.select');
+    Route::get('/role/selecttitle', 'Admin\RoleController@selecttitle')->name('role.selecttitle');
+    Route::resource('/role', 'Admin\RoleController');
+    //Route Role Menu
+    Route::post('/rolemenu/update', 'Admin\RoleMenuController@update')->name('rolemenu.update');
 });
