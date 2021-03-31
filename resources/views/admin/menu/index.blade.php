@@ -1,5 +1,5 @@
 @extends('admin.layouts.app')
-
+@section('title', 'Menu')
 @section('stylesheets')
 <link rel="stylesheet" href="{{ asset('assets/css/nestable/nestable.css') }}">
 <style type="text/css">
