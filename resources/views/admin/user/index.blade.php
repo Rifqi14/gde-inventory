@@ -116,7 +116,7 @@ Registered User
 </div>
 @endsection
 
-@push('scripts')
+@section('scripts')
 <script type="text/javascript">
     $(document).ready(function() {
 		dataTable = $('#user-table').DataTable({
@@ -250,4 +250,4 @@ Registered User
 		});
 	}
 </script>
-@endpush
+@endsection

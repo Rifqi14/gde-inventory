@@ -97,9 +97,5 @@
 @endsection
 
 @section('script')
-<script>
-    $(function(){
-          $('.linku').css('display', 'none')
-        })
-</script>
+
 @endsection
