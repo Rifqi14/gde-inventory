@@ -104,7 +104,7 @@ class UserController extends Controller
     public function show($id)
     {
         $query = DB::table('users');
-        $query->select('users.*', 'roles.display_name', 'role_users.role_id', 'spv.name as spv_name');
+        $query->select('users.*', 'roles.name as group_description', 'role_users.role_id', 'spv.name as spv_name');
         $query->leftJoin('users as spv', 'spv.id', '=', 'users.spv_id');
         $query->leftJoin('role_users', 'role_users.user_id', '=', 'users.id');
         $query->leftJoin('roles', 'role_users.role_id', '=', 'roles.id');
@@ -126,7 +126,7 @@ class UserController extends Controller
     public function edit($id)
     {
         $query = DB::table('users');
-        $query->select('users.*', 'roles.display_name', 'role_users.role_id', 'spv.name as spv_name');
+        $query->select('users.*', 'roles.name as group_description', 'role_users.role_id', 'spv.name as spv_name');
         $query->leftJoin('users as spv', 'spv.id', '=', 'users.spv_id');
         $query->leftJoin('role_users', 'role_users.user_id', '=', 'users.id');
         $query->leftJoin('roles', 'role_users.role_id', '=', 'roles.id');
@@ -251,11 +251,12 @@ class UserController extends Controller
 
         //Count Data
         $query = DB::table('users');
-        $query->select('users.*');
-        $query->leftJoin('role_user', 'role_user.user_id', '=', 'users.id');
-        $query->leftJoin('roles', 'role_user.role_id', '=', 'roles.id');
-        $query->whereRaw("upper(display_name) like '%$display_name%'");
+        $query->select('users.*', 'roles.name as group_description');
+        $query->leftJoin('role_users', 'role_users.user_id', '=', 'users.id');
+        $query->leftJoin('roles', 'role_users.role_id', '=', 'roles.id');
+        $query->whereRaw("upper(roles.name) like '%$display_name%'");
         $query->whereRaw("upper(users.name) like '%$name%'");
+        $query->whereRaw("upper(users.username) like '%$username%'");
         $query->whereRaw("upper(email) like '%$email%'");
         if ($request->status != '') {
             $query->where('status', '=', $request->status);
