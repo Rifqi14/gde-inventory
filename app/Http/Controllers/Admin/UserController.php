@@ -283,4 +283,35 @@ class UserController extends Controller
             'data' => $data
         ], 200);
     }
+
+    public function supervisor_read(Request $request)
+    {
+        $start = $request->page ? $request->page - 1 : 0;
+        $length = $request->limit;
+        $name = strtoupper($request->name);
+        // $creation_user = Auth::guard('admin')->user()->id;
+
+        //Count Data
+        $query = DB::table('users');
+        $query->select('users.*');
+        $query->whereRaw("upper(name) like '%$name%'");
+        // $query->where('id', '!=', $creation_user);
+
+        $row = clone $query;
+        $recordsTotal = $row->count();
+
+        $query->offset($start);
+        $query->limit($length);
+        $roles = $query->get();
+
+        $data = [];
+        foreach ($roles as $role) {
+            $role->no = ++$start;
+            $data[] = $role;
+        }
+        return response()->json([
+            'total' => $recordsTotal,
+            'rows' => $data
+        ], 200);
+    }
 }
