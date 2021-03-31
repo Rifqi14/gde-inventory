@@ -118,7 +118,7 @@ Registered User
 
 @section('scripts')
 <script type="text/javascript">
-    $(document).ready(function() {
+    $(function() {
 		dataTable = $('#user-table').DataTable({
             processing: true,
             language: {
@@ -227,15 +227,16 @@ Registered User
 					data:data,
 					type:'DELETE',
 					success:function(response){
-						if(response.success){
-							Swal.fire(
-								'Deleted!',
-								'Data Berhasil Di Hapus.',
-								'success'
-							)
-							setTimeout(() => {
-								document.location = "{{url('admin/user')}}";
-							}, 1000);
+						if(response.status){
+                            dataTable.ajax.reload(null, false);
+							// Swal.fire(
+							// 	'Deleted!',
+							// 	'Data Berhasil Di Hapus.',
+							// 	'success'
+							// )
+							// setTimeout(() => {
+							// 	document.location = "{{url('admin/user')}}";
+							// }, 1000);
 						}
 						else{
 							Swal.fire(

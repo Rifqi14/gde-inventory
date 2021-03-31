@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\User;
 use App\Role;
+use App\Models\RoleUser;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\View;
@@ -31,7 +32,7 @@ class UserController extends Controller
     public function create()
     {
         $url    = route('user.store');
-        return view('admin.user.content', compact('url'));
+        return view('admin.user.create', compact('url'));
     }
 
     /**
@@ -43,8 +44,8 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'role_id' => 'required',
-            'name' => 'required',
+            'group_id' => 'required',
+            'realname' => 'required',
             'username' => 'required|unique:users',
             'email' => 'required|email|unique:users',
             'password' => 'required',
@@ -54,11 +55,11 @@ class UserController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => $validator->errors()->first()
-            ], 400);
+            ], 200);
         }
 
         $user = User::create([
-            'name' => $request->name,
+            'name' => $request->realname,
             'email' => $request->email,
             'username' => $request->username,
             'password' => Hash::make($request->password),
@@ -69,8 +70,20 @@ class UserController extends Controller
         if (!$user) {
             return response()->json([
                 'status' => false,
-                'message'     => $user
-            ], 400);
+                'message'     => 'Cant create user'
+            ], 200);
+        }
+
+        $group = RoleUser::create([
+            'role_id' => $request->group_id,
+            'user_id' => $user->id
+        ]);
+
+        if (!$group) {
+            return response()->json([
+                'status' => false,
+                'message'     => "Cant create user"
+            ], 200);
         }
 
         // $images = $request->file('images');
@@ -91,6 +104,7 @@ class UserController extends Controller
         // $user->attachRole($role);
         return response()->json([
             'status'     => true,
+            'message'     => 'Created success',
             'results'     => route('user.index'),
         ], 200);
     }
@@ -135,7 +149,7 @@ class UserController extends Controller
 
         $url    = route('user.update', ['id' => $user->id]);
         if ($user) {
-            return view('admin.user.content', compact('user', 'url'));
+            return view('admin.user.edit', compact('user', 'url'));
         } else {
             abort(404);
         }
@@ -151,8 +165,9 @@ class UserController extends Controller
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'role_id'     => 'required',
-            'name'     => 'required',
+            'group_id'     => 'required',
+            'realname' => 'required',
+            'username' => 'required|unique:users,username,' . $id,
         ]);
 
         if ($validator->fails()) {
@@ -163,7 +178,8 @@ class UserController extends Controller
         }
 
         $user = User::find($id);
-        $user->name = $request->name;
+        $user->name = $request->realname;
+        $user->username = $request->username;
         $user->is_active = $request->is_active ? 1 : 0;
         $user->spv_id = $request->spv_id ? $request->spv_id : null;
         if ($request->password) {
@@ -244,7 +260,7 @@ class UserController extends Controller
         $sort = $request->columns[$request->order[0]['column']]['data'];
         $dir = $request->order[0]['dir'];
         $display_name = strtoupper($request->display_name);
-        $name = strtoupper($request->name);
+        $name = strtoupper($request->realname);
         $username = strtoupper($request->username);
         $email = strtoupper($request->email);
         $status = strtoupper($request->status);

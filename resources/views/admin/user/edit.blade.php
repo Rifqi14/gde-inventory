@@ -33,7 +33,7 @@ User Registration
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <form class="form-horizontal no-margin" action="{{$url}}" id="form" action="#" method="post" />
+                    <form class="form-horizontal no-margin" action="{{$url}}" id="form" method="post" />
                     {{ csrf_field() }}
                     @if(@$user)
                     @method('PUT')
@@ -54,21 +54,21 @@ User Registration
                             <label class="col-md-2 col-xs-12 control-label" for="username">Username:</label>
                             <div class="col-sm-6 controls">
                                 <input type="text" class="form-control" id="username" name="username"
-                                    placeholder="Username..." />
+                                    placeholder="Username..." value="{{$user->username}}" />
                             </div>
                         </div>
                         <div class="form-group row">
                             <label class="col-md-2 col-xs-12 control-label" for="realname">Full Name:</label>
                             <div class="col-sm-6 controls">
                                 <input type="text" class="form-control" id="realname" name="realname"
-                                    placeholder="Full Name..." />
+                                    placeholder="Full Name..." value="{{$user->name}}" />
                             </div>
                         </div>
                         <div class="form-group row">
                             <label class="col-md-2 col-xs-12 control-label" for="email">E-mail:</label>
                             <div class="col-sm-6 controls">
-                                <input type="text" class="form-control" id="email" name="email"
-                                    placeholder="E-mail..." />
+                                <input type="text" class="form-control" id="email" name="email" placeholder="E-mail..."
+                                    value="{{$user->email}}" readonly />
                             </div>
                         </div>
                         <div class="form-group row">
@@ -89,8 +89,8 @@ User Registration
                             <label class="col-md-2 col-xs-12 control-label" for="password">Status:</label>
                             <div class="col-sm-6 controls">
                                 <select name="is_active" id="is_active" class="select2 form-control">
-                                    <option value="1">Active</option>
-                                    <option value="0">Disabled</option>
+                                    <option value="1" {{($user->is_active == 1)?'selected':''}}>Active</option>
+                                    <option value="0" {{($user->is_active == 0)?'selected':''}}>Disabled</option>
                                 </select>
                             </div>
                         </div>
@@ -153,6 +153,9 @@ User Registration
 			},
 			allowClear: true,
 		});
+        $("#group_id").select2("trigger", "select", {
+			data: {id:'{{$user->role_id}}', text:'{{$user->group_description}}'}
+		});
 
 		$( "#spv_id" ).select2({
 			ajax: {
@@ -182,19 +185,24 @@ User Registration
 			},
 			allowClear: true,
 		});
+        $("#spv_id").select2("trigger", "select", {
+			data: {id:'{{$user->spv_id}}', text:'{{$user->spv_name}}'}
+		});
 
 		$.validator.setDefaults({
 			submitHandler: function () {
 				$.ajax({
-						url: "$('#form').attr('action')",
-						dataType: 'json', 
-						type:'POST',
-						data: $('#form').serialize(),
+                        url: $('#form').attr('action'),
+                        method: 'post',
+                        data: new FormData($('#form')[0]),
+                        processData: false,
+                        contentType: false,
+                        dataType: 'json',
 						success:function(result){
-							 if(result.success){
+                            $('#form').unblock();
+							 if(result.status){
 								document.location = "{{ route('user.index') }}";
 							}else{
-								waitingDialog.hide();
 								toastr.options = {
 									"closeButton": false,
 									"debug": false,
@@ -212,11 +220,11 @@ User Registration
 									"showMethod": "fadeIn",
 									"hideMethod": "fadeOut"
 								}
-								toastr.warning("Cant Create.");
+								toastr.error("Cant Create.");
 							}
 						},
 						beforeSend: function(){
-							waitingDialog.show();
+							blockMessage('#form', 'Loading', '#fff');
 						}
 				});
 			}
