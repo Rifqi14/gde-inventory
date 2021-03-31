@@ -21,9 +21,15 @@ Route::get('/home', 'HomeController@index')->name('home');
 Route::group(['prefix' => 'admin'], function () {
     Route::get('/login', 'Admin\DashboardController@index')->name('login');
     Route::get('/', 'Admin\DashboardController@index')->name('dashboard.index');
+    //Route User
     Route::get('/user/read', 'Admin\UserController@read')->name('user.read');
     Route::get('/user/select', 'Admin\UserController@select')->name('user.select');
+    Route::get('/user/spv-read', 'Admin\UserController@supervisor_read')->name('user.spv_read');
     Route::resource('/user', 'Admin\UserController');
+    //Route Role
+    Route::get('/role/read', 'Admin\RoleController@read')->name('role.read');
+    Route::get('/role/select', 'Admin\RoleController@select')->name('role.select');
+    Route::resource('/role', 'Admin\RoleController');
     //Route Menu
     Route::get('/menu/select', 'Admin\MenuController@select')->name('menu.select');
     Route::post('/menu/order', 'Admin\MenuController@order')->name('menu.order');

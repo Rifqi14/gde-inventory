@@ -20,6 +20,35 @@ class RoleController extends Controller
         $this->middleware('accessmenu', ['except' => ['select','set','selectitle']]);
     }
 
+    public function select(Request $request)
+    {
+        $start = $request->page ? $request->page - 1 : 0;
+        $length = $request->limit;
+        $name = strtoupper($request->name);
+
+        //Count Data
+        $query = DB::table('roles');
+        $query->select('roles.*');
+        $query->whereRaw("upper(name) like '%$name%'");
+
+        $row = clone $query;
+        $recordsTotal = $row->count();
+
+        $query->offset($start);
+        $query->limit($length);
+        $roles = $query->get();
+
+        $data = [];
+        foreach ($roles as $role) {
+            $role->no = ++$start;
+            $data[] = $role;
+        }
+        return response()->json([
+            'total' => $recordsTotal,
+            'rows' => $data
+        ], 200);
+    }
+
     public function index(){
         return view('admin.role.index');
     }

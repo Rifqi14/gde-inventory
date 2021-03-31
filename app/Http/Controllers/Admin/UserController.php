@@ -104,7 +104,7 @@ class UserController extends Controller
     public function show($id)
     {
         $query = DB::table('users');
-        $query->select('users.*', 'roles.display_name', 'role_users.role_id', 'spv.name as spv_name');
+        $query->select('users.*', 'roles.name as group_description', 'role_users.role_id', 'spv.name as spv_name');
         $query->leftJoin('users as spv', 'spv.id', '=', 'users.spv_id');
         $query->leftJoin('role_users', 'role_users.user_id', '=', 'users.id');
         $query->leftJoin('roles', 'role_users.role_id', '=', 'roles.id');
@@ -126,7 +126,7 @@ class UserController extends Controller
     public function edit($id)
     {
         $query = DB::table('users');
-        $query->select('users.*', 'roles.display_name', 'role_users.role_id', 'spv.name as spv_name');
+        $query->select('users.*', 'roles.name as group_description', 'role_users.role_id', 'spv.name as spv_name');
         $query->leftJoin('users as spv', 'spv.id', '=', 'users.spv_id');
         $query->leftJoin('role_users', 'role_users.user_id', '=', 'users.id');
         $query->leftJoin('roles', 'role_users.role_id', '=', 'roles.id');
@@ -251,11 +251,12 @@ class UserController extends Controller
 
         //Count Data
         $query = DB::table('users');
-        $query->select('users.*');
-        $query->leftJoin('role_user', 'role_user.user_id', '=', 'users.id');
-        $query->leftJoin('roles', 'role_user.role_id', '=', 'roles.id');
-        $query->whereRaw("upper(display_name) like '%$display_name%'");
+        $query->select('users.*', 'roles.name as group_description');
+        $query->leftJoin('role_users', 'role_users.user_id', '=', 'users.id');
+        $query->leftJoin('roles', 'role_users.role_id', '=', 'roles.id');
+        $query->whereRaw("upper(roles.name) like '%$display_name%'");
         $query->whereRaw("upper(users.name) like '%$name%'");
+        $query->whereRaw("upper(users.username) like '%$username%'");
         $query->whereRaw("upper(email) like '%$email%'");
         if ($request->status != '') {
             $query->where('status', '=', $request->status);
@@ -280,6 +281,37 @@ class UserController extends Controller
             'recordsTotal' => $recordsTotal,
             'recordsFiltered' => $recordsTotal,
             'data' => $data
+        ], 200);
+    }
+
+    public function supervisor_read(Request $request)
+    {
+        $start = $request->page ? $request->page - 1 : 0;
+        $length = $request->limit;
+        $name = strtoupper($request->name);
+        // $creation_user = Auth::guard('admin')->user()->id;
+
+        //Count Data
+        $query = DB::table('users');
+        $query->select('users.*');
+        $query->whereRaw("upper(name) like '%$name%'");
+        // $query->where('id', '!=', $creation_user);
+
+        $row = clone $query;
+        $recordsTotal = $row->count();
+
+        $query->offset($start);
+        $query->limit($length);
+        $roles = $query->get();
+
+        $data = [];
+        foreach ($roles as $role) {
+            $role->no = ++$start;
+            $data[] = $role;
+        }
+        return response()->json([
+            'total' => $recordsTotal,
+            'rows' => $data
         ], 200);
     }
 }
