@@ -35,9 +35,7 @@ User Registration
                 <div class="card">
                     <form class="form-horizontal no-margin" action="{{$url}}" id="form" method="post" />
                     {{ csrf_field() }}
-                    @if(@$user)
                     @method('PUT')
-                    @endif
                     <div class="card-body">
                         <span class="title">
                             <hr />
@@ -124,7 +122,7 @@ User Registration
 				$('#form').validate().form();
 			}
 		});
-		$('#is_active').select2({});
+		$('#is_active').select2();
 		$( "#group_id" ).select2({
 			ajax: {
 				url: "{{ route('role.select') }}",
@@ -189,93 +187,133 @@ User Registration
 			data: {id:'{{$user->spv_id}}', text:'{{$user->spv_name}}'}
 		});
 
-		$.validator.setDefaults({
-			submitHandler: function () {
-				$.ajax({
-                        url: $('#form').attr('action'),
-                        method: 'post',
-                        data: new FormData($('#form')[0]),
-                        processData: false,
-                        contentType: false,
-                        dataType: 'json',
-						success:function(result){
-                            $('#form').unblock();
-							 if(result.status){
-								document.location = "{{ route('user.index') }}";
-							}else{
-								toastr.options = {
-									"closeButton": false,
-									"debug": false,
-									"newestOnTop": false,
-									"progressBar": false,
-									"positionClass": "toast-top-right",
-									"preventDuplicates": false,
-									"onclick": null,
-									"showDuration": "300",
-									"hideDuration": "1000",
-									"timeOut": "5000",
-									"extendedTimeOut": "1000",
-									"showEasing": "swing",
-									"hideEasing": "linear",
-									"showMethod": "fadeIn",
-									"hideMethod": "fadeOut"
-								}
-								toastr.error("Cant Create.");
-							}
-						},
-						beforeSend: function(){
-							blockMessage('#form', 'Loading', '#fff');
-						}
-				});
-			}
-		});
-		$('#form').validate({
-			rules: {
-				group_id:{
-					required:true,
-				},
-				username:{
-					required:true,
-				},
-				realname:{
-					required:true,
-				},
-				password:{
-					required:true,
-				},
-				is_active:{
-					required:true,
-				},
-			},
-			messages: {
-				group_id:{
-					required: "This field is required.",
-				},
-				username:{
-					required: "This field is required.",
-				},
-				realname:{
-					required: "This field is required.",
-				},
-				password:{
-					required: "This field is required.",
-				},
-				is_active:{
-					required: "This field is required.",
-				},
-			},
-			errorElement: 'span',
-			errorPlacement: function (error, element) {
-				error.addClass('invalid-feedback');
-				element.closest('.form-group .controls').append(error);
-			},
-			highlight: function (element, errorClass, validClass) {
-				$(element).addClass('is-invalid');
-			},
-			unhighlight: function (element, errorClass, validClass) {
-				$(element).removeClass('is-invalid');
-			}
-		});
+        $("#form").submit(function(e){
+            e.preventDefault()
+            $.ajax({
+                url: $('#form').attr('action'),
+                method: 'post',
+                data: new FormData($('#form')[0]),
+                processData: false,
+                contentType: false,
+                dataType: 'json',
+                success:function(result){
+                    $('#form').unblock();
+                        if(result.status){
+                        document.location = "{{ route('user.index') }}";
+                    }else{
+                        toastr.options = {
+                            "closeButton": false,
+                            "debug": false,
+                            "newestOnTop": false,
+                            "progressBar": false,
+                            "positionClass": "toast-top-right",
+                            "preventDuplicates": false,
+                            "onclick": null,
+                            "showDuration": "300",
+                            "hideDuration": "1000",
+                            "timeOut": "5000",
+                            "extendedTimeOut": "1000",
+                            "showEasing": "swing",
+                            "hideEasing": "linear",
+                            "showMethod": "fadeIn",
+                            "hideMethod": "fadeOut"
+                        }
+                        toastr.warning(result.message);
+                    }
+                },
+                beforeSend: function(){
+                    blockMessage('#form', 'Loading', '#fff');
+                }
+            });
+        })
+
+		// $.validator.setDefaults({
+		// 	submitHandler: function () {
+		// 		$.ajax({
+        //                 url: $('#form').attr('action'),
+        //                 method: 'post',
+        //                 data: new FormData($('#form')[0]),
+        //                 processData: false,
+        //                 contentType: false,
+        //                 dataType: 'json',
+		// 				success:function(result){
+        //                     $('#form').unblock();
+		// 					 if(result.status){
+		// 						document.location = "{{ route('user.index') }}";
+		// 					}else{
+		// 						toastr.options = {
+		// 							"closeButton": false,
+		// 							"debug": false,
+		// 							"newestOnTop": false,
+		// 							"progressBar": false,
+		// 							"positionClass": "toast-top-right",
+		// 							"preventDuplicates": false,
+		// 							"onclick": null,
+		// 							"showDuration": "300",
+		// 							"hideDuration": "1000",
+		// 							"timeOut": "5000",
+		// 							"extendedTimeOut": "1000",
+		// 							"showEasing": "swing",
+		// 							"hideEasing": "linear",
+		// 							"showMethod": "fadeIn",
+		// 							"hideMethod": "fadeOut"
+		// 						}
+		// 						toastr.error("Cant Create.");
+		// 					}
+		// 				},
+		// 				beforeSend: function(){
+		// 					blockMessage('#form', 'Loading', '#fff');
+		// 				}
+		// 		});
+		// 	}
+		// });
+		// $('#form').validate({
+		// 	rules: {
+		// 		group_id:{
+		// 			required:true,
+		// 		},
+		// 		username:{
+		// 			required:true,
+		// 		},
+		// 		realname:{
+		// 			required:true,
+		// 		},
+		// 		password:{
+		// 			required:true,
+		// 		},
+		// 		is_active:{
+		// 			required:true,
+		// 		},
+		// 	},
+		// 	messages: {
+		// 		group_id:{
+		// 			required: "This field is required.",
+		// 		},
+		// 		username:{
+		// 			required: "This field is required.",
+		// 		},
+		// 		realname:{
+		// 			required: "This field is required.",
+		// 		},
+		// 		password:{
+		// 			required: "This field is required.",
+		// 		},
+		// 		is_active:{
+		// 			required: "This field is required.",
+		// 		},
+		// 	},
+		// 	errorElement: 'span',
+		// 	errorPlacement: function (error, element) {
+		// 		error.addClass('invalid-feedback');
+		// 		element.closest('.form-group .controls').append(error);
+		// 	},
+		// 	highlight: function (element, errorClass, validClass) {
+		// 		$(element).addClass('is-invalid');
+		// 	},
+		// 	unhighlight: function (element, errorClass, validClass) {
+		// 		$(element).removeClass('is-invalid');
+		// 	}
+		// });
 
 	});
 </script>

@@ -174,7 +174,7 @@ class UserController extends Controller
             return response()->json([
                 'status'     => false,
                 'message'     => $validator->errors()->first()
-            ], 400);
+            ], 200);
         }
 
         $user = User::find($id);
@@ -190,8 +190,8 @@ class UserController extends Controller
         if (!$user) {
             return response()->json([
                 'status' => false,
-                'message'     => $user
-            ], 400);
+                'message'     => "Cant update user"
+            ], 200);
         }
 
         return response()->json([
