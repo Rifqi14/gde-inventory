@@ -42,4 +42,12 @@ Route::group(['prefix' => 'admin'], function () {
     Route::resource('/role', 'Admin\RoleController');
     //Route Role Menu
     Route::post('/rolemenu/update', 'Admin\RoleMenuController@update')->name('rolemenu.update');
+    //Route Vehicle
+    Route::get('/vehicle/read', 'Admin\VehicleController@read')->name('vehicle.read');
+    Route::get('/vehicle/select', 'Admin\VehicleController@select')->name('vehicle.select');
+    Route::resource('/vehicle', 'Admin\VehicleController');
+    //Route Site
+    Route::get('/site/read', 'Admin\SiteController@read')->name('site.read');
+    Route::get('/site/select', 'Admin\SiteController@select')->name('site.select');
+    Route::resource('/site', 'Admin\SiteController');
 });

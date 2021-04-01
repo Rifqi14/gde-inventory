@@ -35,9 +35,6 @@ User Registration
 				<div class="card">
 					<form class="form-horizontal no-margin" action="{{$url}}" id="form" method="post" />
 					{{ csrf_field() }}
-					@if(@$user)
-					@method('PUT')
-					@endif
 					<div class="card-body">
 						<span class="title">
 							<hr />
@@ -54,21 +51,21 @@ User Registration
 							<label class="col-md-2 col-xs-12 control-label" for="username">Username:</label>
 							<div class="col-sm-6 controls">
 								<input type="text" class="form-control" id="username" name="username"
-									placeholder="Username..." value="{{@$user->username}}" />
+									placeholder="Username..." />
 							</div>
 						</div>
 						<div class="form-group row">
 							<label class="col-md-2 col-xs-12 control-label" for="realname">Full Name:</label>
 							<div class="col-sm-6 controls">
 								<input type="text" class="form-control" id="realname" name="realname"
-									placeholder="Full Name..." value="{{@$user->name}}" />
+									placeholder="Full Name..." />
 							</div>
 						</div>
 						<div class="form-group row">
 							<label class="col-md-2 col-xs-12 control-label" for="email">E-mail:</label>
 							<div class="col-sm-6 controls">
-								<input type="text" class="form-control" id="email" name="email" placeholder="E-mail..."
-									value="{{@$user->email}}" @if(@$user) readonly @endif />
+								<input type="text" class="form-control" id="email" name="email"
+									placeholder="E-mail..." />
 							</div>
 						</div>
 						<div class="form-group row">
@@ -82,26 +79,20 @@ User Registration
 							<label class="col-md-2 col-xs-12 control-label" for="password">Password:</label>
 							<div class="col-sm-6 controls">
 								<input type="password" class="form-control" id="password" name="password"
-									placeholder="Password..." @if(!@$user) required @endif />
+									placeholder="Password..." required />
 							</div>
 						</div>
 						<div class="form-group row">
 							<label class="col-md-2 col-xs-12 control-label" for="password">Status:</label>
 							<div class="col-sm-6 controls">
 								<select name="is_active" id="is_active" class="select2 form-control">
-									@if (@$user)
-									<option value="1" {{($user->is_active == 1)?'selected':''}}>Active</option>
-									<option value="0" {{($user->is_active == 0)?'selected':''}}>Disabled</option>
-									@else
 									<option value="1">Active</option>
 									<option value="0">Disabled</option>
-									@endif
-
 								</select>
 							</div>
 						</div>
 					</div>
-					<div class="card-footer">
+					<div class="card-footer text-right">
 						<button type="submit" class="btn bg-olive color-palette btn-labeled legitRipple text-sm btn-sm">
 							<b><i class="fas fa-save"></i></b>
 							Save
@@ -130,7 +121,7 @@ User Registration
 				$('#form').validate().form();
 			}
 		});
-		$('#is_active').select2({});
+		$('#is_active').select2();
 		$( "#group_id" ).select2({
 			ajax: {
 				url: "{{ route('role.select') }}",
@@ -159,9 +150,6 @@ User Registration
 			},
 			allowClear: true,
 		});
-        // $("#group_id").select2("trigger", "select", {
-		// 	data: {id:'{{@$user->role_id}}', text:'{{@$user->group_description}}'}
-		// });
 
 		$( "#spv_id" ).select2({
 			ajax: {
@@ -191,9 +179,6 @@ User Registration
 			},
 			allowClear: true,
 		});
-        // $("#spv_id").select2("trigger", "select", {
-		// 	data: {id:'{{@$user->spv_id}}', text:'{{@$user->spv_name}}'}
-		// });
 
 		$.validator.setDefaults({
 			submitHandler: function () {
