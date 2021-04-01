@@ -124,7 +124,38 @@ class VehicleController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            // 'site_id'     => 'required',
+            'police_number' => 'required|unique:vehicles,police_number,' . $id,
+            'vehicle_name' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status'     => false,
+                'message'     => $validator->errors()->first()
+            ], 200);
+        }
+
+        $user = Vehicle::find($id);
+        $user->police_number = $request->police_number;
+        $user->vehicle_name = $request->vehicle_name;
+        $user->site_id = $request->site_id;
+        $user->status = $request->status;
+        $user->remarks = $request->remarks;
+        $user->save();
+
+        if (!$user) {
+            return response()->json([
+                'status' => false,
+                'message'     => "Cant update vehicles"
+            ], 200);
+        }
+
+        return response()->json([
+            'status'     => true,
+            'results'     => route('vehicle.index'),
+        ], 200);
     }
 
     /**
@@ -190,7 +221,7 @@ class VehicleController extends Controller
         $police_number = strtoupper($request->police_number);
         $vehicle_name = strtoupper($request->vehicle_name);
         $site_id = $request->site_id;
-        $status = strtoupper($request->status);
+        $status = $request->status;
 
         //Count Data
         $query = DB::table('vehicles');
@@ -202,7 +233,7 @@ class VehicleController extends Controller
             $query->where("vehicles.site_id", $site_id);
         }
         if ($request->status) {
-            $query->whereRaw("upper(vehicles.status) like '%$status%'");
+            $query->where("vehicles.status", $status);
         }
 
         $row = clone $query;

@@ -10,98 +10,98 @@ Create Vehicle
 
 @section('breadcrumb')
 <div class="row mb-3 mt-3">
-    <div class="col-sm-4">
-        <!-- <h5 class="m-0 ml-2 text-dark text-md breadcrumb">Grievance Redress &nbsp;<small class="font-uppercase"></small></h5> -->
-        <h1 id="title-branch" class="m-0 text-dark">
-            Vehicle Database
-        </h1>
-    </div>
-    <div class="col-sm-8">
-        <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
-            <li class="breadcrumb-item">Preferences</li>
-            <li class="breadcrumb-item">Vehicle</li>
-            <li class="breadcrumb-item active">Create</li>
-        </ol>
-    </div>
+	<div class="col-sm-4">
+		<!-- <h5 class="m-0 ml-2 text-dark text-md breadcrumb">Grievance Redress &nbsp;<small class="font-uppercase"></small></h5> -->
+		<h1 id="title-branch" class="m-0 text-dark">
+			Vehicle Database
+		</h1>
+	</div>
+	<div class="col-sm-8">
+		<ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
+			<li class="breadcrumb-item">Preferences</li>
+			<li class="breadcrumb-item">Vehicle</li>
+			<li class="breadcrumb-item active">Create</li>
+		</ol>
+	</div>
 </div>
 @endsection
 
 @section('content')
 <!-- Main content -->
 <section class="content">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <form class="form-horizontal no-margin" action="{{route('vehicle.store')}}" id="form"
-                        method="post" />
-                    {{ csrf_field() }}
-                    <div class="card-body">
-                        <span class="title">
-                            <hr />
-                            <h5 class="text-md text-dark text-bold">User Information</h5>
-                        </span>
-                        <div class="form-group row mt-4">
-                            <label class="col-md-2 col-xs-12 control-label" for="site_id">Unit:</label>
-                            <div class="col-sm-6 controls">
-                                <select type="text" class="select2 form-control" name="site_id"
-                                    data-placeholder="Unit"></select>
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-md-2 col-xs-12 control-label" for="police_number">Police Number:</label>
-                            <div class="col-sm-6 controls">
-                                <input type="text" class="form-control" name="police_number"
-                                    placeholder="Police Number..." />
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-md-2 col-xs-12 control-label" for="vehicle_name">Vehicle Name:</label>
-                            <div class="col-sm-6 controls">
-                                <input type="text" class="form-control" name="vehicle_name"
-                                    placeholder="Vehicle Name..." />
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-md-2 col-xs-12 control-label" for="status">Status:</label>
-                            <div class="col-sm-6 controls">
-                                <select name="status" class="select2 form-control">
-                                    <option value="active">Active</option>
-                                    <option value="non_active">Non Active</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-md-2 col-xs-12 control-label" for="remarks">Remarks:</label>
-                            <div class="col-sm-6 controls">
-                                <textarea class="form-control" name="remarks" rows="4" style="resize: none;"
-                                    placeholder="Remarks..."></textarea>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-footer text-right">
-                        <button type="submit" class="btn bg-olive color-palette btn-labeled legitRipple text-sm btn-sm">
-                            <b><i class="fas fa-save"></i></b>
-                            Save
-                        </button>
-                        <a href="{{ route('user.index') }}"
-                            class="btn btn-sm btn-secondary color-palette btn-labeled legitRipple text-sm">
-                            <b><i class="fas fa-times"></i></b>
-                            Cancel
-                        </a>
-                    </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-12">
+				<div class="card">
+					<form class="form-horizontal no-margin" action="{{route('vehicle.store')}}" id="form"
+						method="post" />
+					{{ csrf_field() }}
+					<div class="card-body">
+						<span class="title">
+							<hr />
+							<h5 class="text-md text-dark text-bold">Vehicle Information</h5>
+						</span>
+						<div class="form-group row mt-4">
+							<label class="col-md-2 col-xs-12 control-label" for="site_id">Unit:</label>
+							<div class="col-sm-6 controls">
+								<select type="text" class="select2 form-control" name="site_id"
+									data-placeholder="Unit"></select>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label class="col-md-2 col-xs-12 control-label" for="police_number">Police Number:</label>
+							<div class="col-sm-6 controls">
+								<input type="text" class="form-control" name="police_number"
+									placeholder="Police Number..." />
+							</div>
+						</div>
+						<div class="form-group row">
+							<label class="col-md-2 col-xs-12 control-label" for="vehicle_name">Vehicle Name:</label>
+							<div class="col-sm-6 controls">
+								<input type="text" class="form-control" name="vehicle_name"
+									placeholder="Vehicle Name..." />
+							</div>
+						</div>
+						<div class="form-group row">
+							<label class="col-md-2 col-xs-12 control-label" for="status">Status:</label>
+							<div class="col-sm-6 controls">
+								<select name="status" class="select2 form-control">
+									<option value="active">Active</option>
+									<option value="non_active">Non Active</option>
+								</select>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label class="col-md-2 col-xs-12 control-label" for="remarks">Remarks:</label>
+							<div class="col-sm-6 controls">
+								<textarea class="form-control" name="remarks" rows="4" style="resize: none;"
+									placeholder="Remarks..."></textarea>
+							</div>
+						</div>
+					</div>
+					<div class="card-footer text-right">
+						<button type="submit" class="btn bg-olive color-palette btn-labeled legitRipple text-sm btn-sm">
+							<b><i class="fas fa-save"></i></b>
+							Save
+						</button>
+						<a href="{{ route('vehicle.index') }}"
+							class="btn btn-sm btn-secondary color-palette btn-labeled legitRipple text-sm">
+							<b><i class="fas fa-times"></i></b>
+							Cancel
+						</a>
+					</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
 </section>
 <!-- /.content -->
 @endsection
 
 @section('scripts')
 <script type="text/javascript">
-    $(function() {
+	$(function() {
 		
 		$(document).on("change", ".select2", function () {
 			if (!$.isEmptyObject($('#form').validate().submitted)) {

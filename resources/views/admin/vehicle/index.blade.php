@@ -174,16 +174,23 @@ Vehicle Database
                 {"data": "site_name", "name": "site_name", width: 50, orderable: false},
                 {"data": "remarks", "name": "remarks", width: 120, orderable: false},
                 {
-                    width: 100,
+                    width: 50,
                     className: "text-center",
                     orderable: false,
                     render: function(data, type, full, meta) {
-                        return `<a href="javascript:;" onclick="edit(${full.id})" class="btn btn-warning btn-sm text-white ">
-                                    <span class="fas fa-pencil-alt" title="Edit"></span>
-                                </a>
-                                <a href="javascript:;" onclick="destroy(${full.id})" class="btn btn-danger btn-sm text-white ">
-                                    <span class="fas fa-trash" title="Delete"></span>
-                                </a>`;
+                        return `<div class="btn-group">
+                                    <button type="button" class="btn btn-flat btn-sm dropdown-toggle" data-toggle="dropdown">
+                                        <i class="fas fa-bars"></i>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="javascript:void(0);" onclick="edit(${full.id})">
+                                            <i class="far fa-edit"></i>Update Data
+                                        </a>
+                                        <a class="dropdown-item " href="javascript:void(0);" onclick="destroy(${full.id})">
+                                            <i class="far fa-trash-alt"></i> Delete Data
+                                        </a>
+                                    </div>
+                                </div>`;
                     }
                 }
             ]
