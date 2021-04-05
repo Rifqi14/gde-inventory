@@ -1,7 +1,7 @@
 @extends('admin.layouts.app')
 
 @section('title')
-User Registration
+Edit Vehicle
 @endsection
 
 @section('stylesheets')
@@ -11,16 +11,15 @@ User Registration
 @section('breadcrumb')
 <div class="row mb-3 mt-3">
     <div class="col-sm-4">
-        <!-- <h5 class="m-0 ml-2 text-dark text-md breadcrumb">Grievance Redress &nbsp;<small class="font-uppercase"></small></h5> -->
         <h1 id="title-branch" class="m-0 text-dark">
-            Registered User
+            Vehicle Database
         </h1>
     </div>
     <div class="col-sm-8">
         <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
             <li class="breadcrumb-item">Preferences</li>
-            <li class="breadcrumb-item">User</li>
-            <li class="breadcrumb-item active">Create</li>
+            <li class="breadcrumb-item">Vehicle</li>
+            <li class="breadcrumb-item active">Edit</li>
         </ol>
     </div>
 </div>
@@ -33,74 +32,60 @@ User Registration
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <form class="form-horizontal no-margin" action="{{$url}}" id="form" action="#" method="post" />
+                    <form class="form-horizontal no-margin" action="{{route('vehicle.update', ['id' => $user->id])}}"
+                        id="form" method="post" />
                     {{ csrf_field() }}
-                    @if(@$user)
                     @method('PUT')
-                    @endif
                     <div class="card-body">
                         <span class="title">
                             <hr />
-                            <h5 class="text-md text-dark text-bold">User Information</h5>
+                            <h5 class="text-md text-dark text-bold">Vehicle Information</h5>
                         </span>
                         <div class="form-group row mt-4">
-                            <label class="col-md-2 col-xs-12 control-label" for="group_id">Group:</label>
+                            <label class="col-md-2 col-xs-12 control-label" for="site_id">Unit:</label>
                             <div class="col-sm-6 controls">
-                                <select type="text" class="select2 form-control" id="group_id" name="group_id"
-                                    data-placeholder="Tag Group"></select>
+                                <select type="text" class="select2 form-control" name="site_id"
+                                    data-placeholder="Unit"></select>
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label class="col-md-2 col-xs-12 control-label" for="username">Username:</label>
+                            <label class="col-md-2 col-xs-12 control-label" for="police_number">Police Number:</label>
                             <div class="col-sm-6 controls">
-                                <input type="text" class="form-control" id="username" name="username"
-                                    placeholder="Username..." />
+                                <input type="text" class="form-control" name="police_number"
+                                    placeholder="Police Number..." value="{{$user->police_number}}" />
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label class="col-md-2 col-xs-12 control-label" for="realname">Full Name:</label>
+                            <label class="col-md-2 col-xs-12 control-label" for="vehicle_name">Vehicle Name:</label>
                             <div class="col-sm-6 controls">
-                                <input type="text" class="form-control" id="realname" name="realname"
-                                    placeholder="Full Name..." />
+                                <input type="text" class="form-control" name="vehicle_name"
+                                    placeholder="Vehicle Name..." value="{{$user->vehicle_name}}" />
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label class="col-md-2 col-xs-12 control-label" for="email">E-mail:</label>
+                            <label class="col-md-2 col-xs-12 control-label" for="status">Status:</label>
                             <div class="col-sm-6 controls">
-                                <input type="text" class="form-control" id="email" name="email"
-                                    placeholder="E-mail..." />
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-md-2 col-xs-12 control-label" for="spv_id">Supervisor:</label>
-                            <div class="col-sm-6 controls">
-                                <select type="text" class="select2 form-control" id="spv_id" name="spv_id"
-                                    data-placeholder="Tag the Supervisor"></select>
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-md-2 col-xs-12 control-label" for="password">Password:</label>
-                            <div class="col-sm-6 controls">
-                                <input type="password" class="form-control" id="password" name="password"
-                                    placeholder="Password..." />
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-md-2 col-xs-12 control-label" for="password">Status:</label>
-                            <div class="col-sm-6 controls">
-                                <select name="is_active" id="is_active" class="select2 form-control">
-                                    <option value="1">Active</option>
-                                    <option value="0">Disabled</option>
+                                <select name="status" class="select2 form-control">
+                                    <option value="active" {{($user->status == "active")?'selected':''}}>Active</option>
+                                    <option value="non_active" {{($user->status == "non_active")?'selected':''}}>Non
+                                        Active</option>
                                 </select>
                             </div>
                         </div>
+                        <div class="form-group row">
+                            <label class="col-md-2 col-xs-12 control-label" for="remarks">Remarks:</label>
+                            <div class="col-sm-6 controls">
+                                <textarea class="form-control" name="remarks" rows="4" style="resize: none;"
+                                    placeholder="Remarks...">{{$user->remarks}}</textarea>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-footer">
+                    <div class="card-footer text-right">
                         <button type="submit" class="btn bg-olive color-palette btn-labeled legitRipple text-sm btn-sm">
                             <b><i class="fas fa-save"></i></b>
                             Save
                         </button>
-                        <a href="{{ route('user.index') }}"
+                        <a href="{{ route('vehicle.index') }}"
                             class="btn btn-sm btn-secondary color-palette btn-labeled legitRipple text-sm">
                             <b><i class="fas fa-times"></i></b>
                             Cancel
@@ -124,10 +109,10 @@ User Registration
 				$('#form').validate().form();
 			}
 		});
-		$('#is_active').select2({});
-		$( "#group_id" ).select2({
+		$('.select2').select2();
+		$( "#unit_id" ).select2({
 			ajax: {
-				url: "{{ route('role.select') }}",
+				url: "{{ route('site.select') }}",
 				type:'GET',
 				dataType: 'json',
 				data: function (params) {
@@ -153,48 +138,24 @@ User Registration
 			},
 			allowClear: true,
 		});
-
-		$( "#spv_id" ).select2({
-			ajax: {
-				url: "{{ route('user.spv_read') }}",
-				type:'GET',
-				dataType: 'json',
-				data: function (params) {
-					return {
-						name:params.term,
-						page:params.page,
-						limit:30,
-					};
-				},
-				processResults: function (data,params) {
-				 var more = (params.page * 30) < data.total;
-				 var option = [];
-				 $.each(data.rows,function(index,item){
-					option.push({
-						id:item.id,  
-						text: item.name
-					});
-				 });
-				  return {
-					results: option, more: more,
-				  };
-				},
-			},
-			allowClear: true,
+        $("#unit_id").select2("trigger", "select", {
+			data: {id:'{{$user->site_id}}', text:'{{$user->site_name}}'}
 		});
 
 		$.validator.setDefaults({
 			submitHandler: function () {
 				$.ajax({
-						url: "$('#form').attr('action')",
-						dataType: 'json', 
-						type:'POST',
-						data: $('#form').serialize(),
+                        url: $('#form').attr('action'),
+                        method: 'post',
+                        data: new FormData($('#form')[0]),
+                        processData: false,
+                        contentType: false,
+                        dataType: 'json',
 						success:function(result){
-							 if(result.success){
-								document.location = "{{ route('user.index') }}";
+							$('#form').unblock();
+							 if(result.status){
+								document.location = "{{ route('vehicle.index') }}";
 							}else{
-								waitingDialog.hide();
 								toastr.options = {
 									"closeButton": false,
 									"debug": false,
@@ -212,47 +173,35 @@ User Registration
 									"showMethod": "fadeIn",
 									"hideMethod": "fadeOut"
 								}
-								toastr.warning("Cant Create.");
+								toastr.warning(result.message);
 							}
 						},
 						beforeSend: function(){
-							waitingDialog.show();
+							blockMessage('#form', 'Loading', '#fff');
 						}
 				});
 			}
 		});
 		$('#form').validate({
 			rules: {
-				group_id:{
+				// site_id:{
+				// 	required:true,
+				// },
+				police_number:{
 					required:true,
 				},
-				username:{
-					required:true,
-				},
-				realname:{
-					required:true,
-				},
-				password:{
-					required:true,
-				},
-				is_active:{
+				vehicle_name:{
 					required:true,
 				},
 			},
 			messages: {
-				group_id:{
+				// site_id:{
+				// 	required: "This field is required.",
+				// },
+				police_number:{
 					required: "This field is required.",
 				},
-				username:{
-					required: "This field is required.",
-				},
-				realname:{
-					required: "This field is required.",
-				},
-				password:{
-					required: "This field is required.",
-				},
-				is_active:{
+				vehicle_name:{
 					required: "This field is required.",
 				},
 			},

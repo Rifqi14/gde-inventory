@@ -52,5 +52,8 @@ Route::group(['prefix' => 'admin'], function () {
     Route::post('/site/preview', 'Admin\SiteController@preview')->name('site.preview');
     Route::post('/site/storemass', 'Admin\SiteController@storemass')->name('site.storemass');
     Route::post('/site/export', 'Admin\SiteController@export')->name('site.export');
-    Route::resource('/site', 'Admin\SiteController');
+    //Route Vehicle
+    Route::get('/vehicle/read', 'Admin\VehicleController@read')->name('vehicle.read');
+    Route::get('/vehicle/select', 'Admin\VehicleController@select')->name('vehicle.select');
+    Route::resource('/vehicle', 'Admin\VehicleController');
 });
