@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\User;
 use App\Role;
 use App\Models\RoleUser;
+use App\Models\SiteUser;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\View;
@@ -66,6 +67,20 @@ class UserController extends Controller
             'is_active' => $request->is_active ? 1 : 0,
             'spv_id' => $request->spv_id ? $request->spv_id : null,
         ]);
+        
+        // create / update site user
+        if($request->site_id){
+            $site_user = SiteUser::where('user_id', $user->id)->first();
+            if($site_user){
+                $site_user->site_id = $request->site_id;
+                $site_user->save();
+            }else{
+                $create_site_user = SiteUser::create([
+                    'site_id' => $request->site_id,
+                    'user_id' => $user->id
+                ]);
+            }
+        }
 
         if (!$user) {
             return response()->json([
@@ -140,10 +155,12 @@ class UserController extends Controller
     public function edit($id)
     {
         $query = DB::table('users');
-        $query->select('users.*', 'roles.name as group_description', 'role_users.role_id', 'spv.name as spv_name');
+        $query->select('users.*', 'roles.name as group_description', 'role_users.role_id', 'spv.name as spv_name', 'sites.id as site_id', 'sites.name as site_name');
         $query->leftJoin('users as spv', 'spv.id', '=', 'users.spv_id');
         $query->leftJoin('role_users', 'role_users.user_id', '=', 'users.id');
         $query->leftJoin('roles', 'role_users.role_id', '=', 'roles.id');
+        $query->join('site_users', 'site_users.user_id', '=', 'users.id');
+        $query->join('sites', 'sites.id', '=', 'site_users.site_id');
         $query->where('users.id', '=', $id);
         $user = $query->get()->first();
 
@@ -186,6 +203,20 @@ class UserController extends Controller
             $user->password    = Hash::make($request->password);
         }
         $user->save();
+
+        // create / update site user
+        if($request->site_id){
+            $site_user = SiteUser::where('user_id', $user->id)->first();
+            if($site_user){
+                $site_user->site_id = $request->site_id;
+                $site_user->save();
+            }else{
+                $create_site_user = SiteUser::create([
+                    'site_id' => $request->site_id,
+                    'user_id' => $user->id
+                ]);
+            }
+        }
 
         if (!$user) {
             return response()->json([

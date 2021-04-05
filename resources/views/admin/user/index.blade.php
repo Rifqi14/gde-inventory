@@ -48,10 +48,10 @@ Registered User
                                 <thead>
                                     <tr>
                                         <th>No.</th>
-                                        <th>Group</th>
                                         <th>Username</th>
                                         <th>Full Name</th>
-                                        <th>Action</th>
+                                        <th>Group</th>
+                                        <th>#</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -131,7 +131,7 @@ Registered User
             filter: false,
             responsive: true,
             lengthChange: false,
-            order: [[ 1, "asc" ]],
+            order: [[ 3, "asc" ]],
             ajax: {
                 url: "{{route('user.read')}}",
                 type: "GET",
@@ -146,13 +146,12 @@ Registered User
             },
             columns: [
                 {"data": "no", "name": "no", width: 10, className: "text-center" , orderable:false},
-                {"data": "group_description", "name": "group_description", width: 120, orderable: true},
                 {
                     width: 120,
                     sortable: true,
                     render: function(data, type, full, meta) {
                         return `<a href="{{url('admin/user')}}/${full.id}/edit">
-                                    <div class="text-md text-info text-bold">
+                                    <div class="text-md text-info">
                                         ${full.username}
                                     </div>
                                 </a>`;
@@ -163,24 +162,34 @@ Registered User
                     orderable: true,
                     render: function(data, type, full, meta) {
                         return `<a href="{{url('admin/user')}}/${full.id}/edit">
-                                    <div class="text-md text-info text-bold">
+                                    <div class="text-md text-info">
                                         ${full.name}
                                     </div>
                                 </a>`;
                     }
                 },
+                {"data": "group_description", "name": "group_description", width: 120, orderable: true},
                 {
-                    width: 100,
+                    width: 15,
                     className: "text-center",
                     orderable: false,
                     render: function(data, type, full, meta) {
-                        // let check2 = $.inArray(group_code, watcher)
-                        return `<a href="javascript:;" onclick="edit(${full.id})" class="btn btn-warning btn-sm text-white ">
-                                    <span class="fas fa-pencil-alt" title="Edit"></span>
-                                </a>
-                                <a href="javascript:;" onclick="destroy(${full.id})" class="btn btn-danger btn-sm text-white ">
-                                    <span class="fas fa-trash" title="Delete"></span>
-                                </a>`;
+                        return `<div class="btn-group">
+                                <button type="button" class="btn btn-flat btn-sm dropdown-toggle" data-toggle="dropdown">
+                                    <i class="fas fa-bars"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="javascript:void(0);" onclick="detail(${full.id})">
+                                        <i class="far fa-eye"></i>View Data
+                                    </a>
+                                    <a class="dropdown-item" href="javascript:void(0);" onclick="edit(${full.id})">
+                                        <i class="far fa-edit"></i>Update Data
+                                    </a>
+                                    <a class="dropdown-item" href="javascript:void(0);" onclick="destroy(${full.id})">
+                                        <i class="fa fa-trash-alt"></i> Delete Data
+                                    </a>
+                                </div>
+                            </div>`;
                     }
                 }
             ]
