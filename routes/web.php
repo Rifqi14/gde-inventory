@@ -42,6 +42,16 @@ Route::group(['prefix' => 'admin'], function () {
     Route::resource('/role', 'Admin\RoleController');
     //Route Role Menu
     Route::post('/rolemenu/update', 'Admin\RoleMenuController@update')->name('rolemenu.update');
+    //Route Site
+    Route::get('/site/read', 'Admin\SiteController@read')->name('site.read');
+    Route::get('/site/select', 'Admin\SiteController@select')->name('site.select');
+    Route::get('/site/import', 'Admin\SiteController@import')->name('site.import');
+    Route::post('/site/sync', 'Admin\SiteController@sync')->name('site.sync');
+    Route::get('/site/restore/{id}', 'Admin\SiteController@restore')->name('site.restore');
+    Route::get('/site/delete/{id}', 'Admin\SiteController@delete')->name('site.delete');
+    Route::post('/site/preview', 'Admin\SiteController@preview')->name('site.preview');
+    Route::post('/site/storemass', 'Admin\SiteController@storemass')->name('site.storemass');
+    Route::post('/site/export', 'Admin\SiteController@export')->name('site.export');
     //Route Vehicle
     Route::get('/vehicle/read', 'Admin\VehicleController@read')->name('vehicle.read');
     Route::get('/vehicle/select', 'Admin\VehicleController@select')->name('vehicle.select');
@@ -50,8 +60,4 @@ Route::group(['prefix' => 'admin'], function () {
     Route::get('/workingshift/read', 'Admin\WorkingShiftController@read')->name('workingshift.read');
     Route::get('/workingshift/select', 'Admin\WorkingShiftController@select')->name('workingshift.select');
     Route::resource('/workingshift', 'Admin\WorkingShiftController');
-    //Route Site
-    Route::get('/site/read', 'Admin\SiteController@read')->name('site.read');
-    Route::get('/site/select', 'Admin\SiteController@select')->name('site.select');
-    Route::resource('/site', 'Admin\SiteController');
 });
