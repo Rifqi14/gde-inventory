@@ -1,7 +1,7 @@
 @extends('admin.layouts.app')
 
 @section('title')
-User Registration
+Edit User
 @endsection
 
 @section('stylesheets')
@@ -13,14 +13,14 @@ User Registration
 	<div class="col-sm-4">
 		<!-- <h5 class="m-0 ml-2 text-dark text-md breadcrumb">Grievance Redress &nbsp;<small class="font-uppercase"></small></h5> -->
 		<h1 id="title-branch" class="m-0 text-dark">
-			Registered User
+			Edit User
 		</h1>
 	</div>
 	<div class="col-sm-8">
 		<ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
 			<li class="breadcrumb-item">Preferences</li>
 			<li class="breadcrumb-item">User</li>
-			<li class="breadcrumb-item active">Create</li>
+			<li class="breadcrumb-item active">Edit</li>
 		</ol>
 	</div>
 </div>
@@ -74,6 +74,13 @@ User Registration
 							<div class="col-sm-6 controls">
 								<select type="text" class="select2 form-control" id="spv_id" name="spv_id"
 									data-placeholder="Tag the Supervisor"></select>
+							</div>
+						</div>
+                        <div class="form-group row">
+							<label class="col-md-2 col-xs-12 control-label" for="site_id">Site:</label>
+							<div class="col-sm-6 controls">
+								<select type="text" class="select2 form-control" id="site_id" name="site_id"
+									data-placeholder="Select Site"></select>
 							</div>
 						</div>
 						<div class="form-group row">
@@ -185,6 +192,38 @@ User Registration
 		});
         $("#spv_id").select2("trigger", "select", {
 			data: {id:'{{$user->spv_id}}', text:'{{$user->spv_name}}'}
+		});
+
+        $( "#site_id" ).select2({
+			ajax: {
+				url: "{{ route('site.select') }}",
+				type:'GET',
+				dataType: 'json',
+				data: function (params) {
+					return {
+						name:params.term,
+						page:params.page,
+						limit:30,
+					};
+				},
+				processResults: function (data,params) {
+				 var more = (params.page * 30) < data.total;
+				 var option = [];
+				 $.each(data.rows,function(index,item){
+					option.push({
+						id:item.id,  
+						text: item.name
+					});
+				 });
+				  return {
+					results: option, more: more,
+				  };
+				},
+			},
+			allowClear: true,
+		});
+        $("#site_id").select2("trigger", "select", {
+			data: {id:'{{$user->site_id}}', text:'{{$user->site_name}}'}
 		});
 
         $("#form").submit(function(e){

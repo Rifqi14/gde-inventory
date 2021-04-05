@@ -76,6 +76,13 @@ User Registration
 							</div>
 						</div>
 						<div class="form-group row">
+							<label class="col-md-2 col-xs-12 control-label" for="site_id">Site:</label>
+							<div class="col-sm-6 controls">
+								<select type="text" class="select2 form-control" id="site_id" name="site_id"
+									data-placeholder="Select Site"></select>
+							</div>
+						</div>
+						<div class="form-group row">
 							<label class="col-md-2 col-xs-12 control-label" for="password">Password:</label>
 							<div class="col-sm-6 controls">
 								<input type="password" class="form-control" id="password" name="password"
@@ -154,6 +161,35 @@ User Registration
 		$( "#spv_id" ).select2({
 			ajax: {
 				url: "{{ route('user.spv_read') }}",
+				type:'GET',
+				dataType: 'json',
+				data: function (params) {
+					return {
+						name:params.term,
+						page:params.page,
+						limit:30,
+					};
+				},
+				processResults: function (data,params) {
+				 var more = (params.page * 30) < data.total;
+				 var option = [];
+				 $.each(data.rows,function(index,item){
+					option.push({
+						id:item.id,  
+						text: item.name
+					});
+				 });
+				  return {
+					results: option, more: more,
+				  };
+				},
+			},
+			allowClear: true,
+		});
+
+        $( "#site_id" ).select2({
+			ajax: {
+				url: "{{ route('site.select') }}",
 				type:'GET',
 				dataType: 'json',
 				data: function (params) {
