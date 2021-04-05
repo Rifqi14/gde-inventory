@@ -46,6 +46,10 @@ Route::group(['prefix' => 'admin'], function () {
     Route::get('/vehicle/read', 'Admin\VehicleController@read')->name('vehicle.read');
     Route::get('/vehicle/select', 'Admin\VehicleController@select')->name('vehicle.select');
     Route::resource('/vehicle', 'Admin\VehicleController');
+    //Route Working Shift
+    Route::get('/workingshift/read', 'Admin\WorkingShiftController@read')->name('workingshift.read');
+    Route::get('/workingshift/select', 'Admin\WorkingShiftController@select')->name('workingshift.select');
+    Route::resource('/workingshift', 'Admin\WorkingShiftController');
     //Route Site
     Route::get('/site/read', 'Admin\SiteController@read')->name('site.read');
     Route::get('/site/select', 'Admin\SiteController@select')->name('site.select');
