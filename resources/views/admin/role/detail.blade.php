@@ -15,14 +15,14 @@
 <div class="row mb-3 mt-3">
     <div class="col-sm-4">
         <h1 id="title-branch" class="m-0 text-dark">
-            Update Role
+            View Role
         </h1>
     </div>
     <div class="col-sm-8">
         <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
             <li class="breadcrumb-item">Home</li>
             <li class="breadcrumb-item">Role</li>
-            <li class="breadcrumb-item">Update</li> 
+            <li class="breadcrumb-item">View</li> 
         </ol>
     </div>
 </div>
