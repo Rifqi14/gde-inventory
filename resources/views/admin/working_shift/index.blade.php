@@ -48,9 +48,8 @@ Working Shifts
                                 <thead>
                                     <tr>
                                         <th>No.</th>
+                                        <th>Shift Type</th>
                                         <th>Shift Name</th>
-                                        <th>Time In</th>
-                                        <th>Time Out</th>
                                         <th>Status</th>
                                         <th>Action</th>
                                     </tr>
@@ -128,7 +127,7 @@ Working Shifts
             filter: false,
             responsive: true,
             lengthChange: false,
-            order: [[ 1, "asc" ]],
+            order: [[ 2, "asc" ]],
             ajax: {
                 url: "{{route('workingshift.read')}}",
                 type: "GET",
@@ -141,11 +140,21 @@ Working Shifts
             },
             columns: [
                 {"data": "no", "name": "no", width: 10, className: "text-center" , orderable:false},
-                // {"data": "shift_name", "name": "shift_name", width: 100},
+                {
+                    width: 50,
+                    orderable: false,
+                    render: function(data, type, full, meta) {
+                        if (full.shift_type == 'shift') {
+                            return `Shift`;
+                        } else {
+                            return `Non Shift`;
+                        }
+                    }
+                },
                 {
                     "data": "shift_name", 
                     "name": "shift_name",
-                    width: 100,
+                    width: 150,
                     render: function(data, type, full, meta) {
                         return `<a href="{{url('admin/workingshift')}}/${full.id}">
                                     <div class="text-md text-info text-bold">
@@ -154,8 +163,6 @@ Working Shifts
                                 </a>`;
                     }
                 },
-                {"data": "time_in", "name": "time_in", width: 80, orderable: false, className: "text-center",},
-                {"data": "time_out", "name": "time_out", width: 80, orderable: false, className: "text-center",},
                 {
                     width: 50,
                     className: "text-center",
@@ -227,7 +234,7 @@ Working Shifts
                     _token: "{{ csrf_token() }}"
                 };
 				$.ajax({
-					url: `{{url('workingshift/user')}}/${id}`,
+					url: `{{url('admin/workingshift')}}/${id}`,
 					dataType: 'json', 
 					data:data,
 					type:'DELETE',
