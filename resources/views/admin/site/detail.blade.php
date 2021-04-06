@@ -21,7 +21,8 @@
 </div>
 @endsection
 
-@section('content')<section class="content" id="content">
+@section('content')
+<section class="content" id="content">
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-12">
@@ -47,7 +48,7 @@
                     </div>
                     <div class="card-footer">
                         <a href="{{route('site.index')}}" class="btn btn-sm btn-secondary color-palette btn-labeled legitRipple text-sm">
-                            <b><i class="fas fa-times"></i></b>
+                            <b><i class="fas fa-reply"></i></b>
                             Cancel
                         </a>
                     </div>
