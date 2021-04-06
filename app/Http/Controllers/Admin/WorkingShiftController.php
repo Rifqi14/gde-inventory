@@ -54,6 +54,7 @@ class WorkingShiftController extends Controller
         }
 
         $user = WorkingShift::create([
+            'shift_type' => $request->shift_type,
             'shift_name' => $request->shift_name,
             'time_in' => $request->time_in,
             'time_out' => $request->time_out,
@@ -133,6 +134,7 @@ class WorkingShiftController extends Controller
         }
 
         $user = WorkingShift::find($id);
+        $user->shift_type = $request->shift_type;
         $user->shift_name = $request->shift_name;
         $user->time_in = $request->time_in;
         $user->time_out = $request->time_out;

@@ -41,6 +41,15 @@ Create Working Shift
 							<h5 class="text-md text-dark text-bold">Working Shift Information</h5>
 						</span>
 						<div class="form-group row mt-4">
+							<label class="col-md-2 col-xs-12 control-label" for="shift_type">Shift Type:</label>
+							<div class="col-sm-6 controls">
+								<select name="shift_type" class="select2 form-control">
+									<option value="shift">Shift</option>
+									<option value="non_shift">Non Shift</option>
+								</select>
+							</div>
+						</div>
+						<div class="form-group row">
 							<label class="col-md-2 col-xs-12 control-label" for="shift_name">Shift Name:</label>
 							<div class="col-sm-6 controls">
 								<input type="text" class="form-control" name="shift_name" placeholder="Shift Name..." />
