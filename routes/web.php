@@ -60,4 +60,8 @@ Route::group(['prefix' => 'admin'], function () {
     Route::get('/workingshift/read', 'Admin\WorkingShiftController@read')->name('workingshift.read');
     Route::get('/workingshift/select', 'Admin\WorkingShiftController@select')->name('workingshift.select');
     Route::resource('/workingshift', 'Admin\WorkingShiftController');
+    //Route Budgetary
+    Route::get('/budgetary/read', 'Admin\BudgetController@read')->name('budgetary.read');
+    Route::get('/budgetary/select', 'Admin\BudgetController@select')->name('budgetary.select');
+    Route::resource('/budgetary', 'Admin\BudgetController');
 });
