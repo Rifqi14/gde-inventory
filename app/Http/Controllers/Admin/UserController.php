@@ -133,10 +133,12 @@ class UserController extends Controller
     public function show($id)
     {
         $query = DB::table('users');
-        $query->select('users.*', 'roles.name as group_description', 'role_users.role_id', 'spv.name as spv_name');
+        $query->select('users.*', 'roles.name as group_description', 'role_users.role_id', 'spv.name as spv_name', 'sites.id as site_id', 'sites.name as site_name');
         $query->leftJoin('users as spv', 'spv.id', '=', 'users.spv_id');
         $query->leftJoin('role_users', 'role_users.user_id', '=', 'users.id');
         $query->leftJoin('roles', 'role_users.role_id', '=', 'roles.id');
+        $query->join('site_users', 'site_users.user_id', '=', 'users.id');
+        $query->join('sites', 'sites.id', '=', 'site_users.site_id');
         $query->where('users.id', '=', $id);
         $user = $query->get()->first();
         if ($user) {
