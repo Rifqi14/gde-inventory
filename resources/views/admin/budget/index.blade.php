@@ -70,18 +70,19 @@ Budgetary Data
                             <div class="card-header p-0" style="background-color: #f4f6f9; border: none;">
                                 <ul class="nav nav-tabs tabs-engineering" id="tabs-mom" role="tablist">
                                     <li class="nav-item">
-                                        <a class="nav-link active" id="budget-tab-dieng" data-toggle="pill"
-                                            href="#tab-dieng" role="tab" aria-controls="tab-dieng" aria-selected="true"
-                                            onClick="changeTab('dieng')">Dieng</a>
+                                        <a class="nav-link {{($type=='dieng')?'active':''}}" id="budget-tab-dieng"
+                                            data-toggle="pill" href="#tab-dieng" role="tab" aria-controls="tab-dieng"
+                                            aria-selected="true" onClick="changeTab('dieng')">Dieng</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" id="budget-tab-patuha" data-toggle="pill" href="#tab-patuha"
-                                            role="tab" aria-controls="tab-patuha"
+                                        <a class="nav-link {{($type=='patuha')?'active':''}}" id="budget-tab-patuha"
+                                            data-toggle="pill" href="#tab-patuha" role="tab" aria-controls="tab-patuha"
                                             onClick="changeTab('patuha')">Patuha</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" id="budget-tab-ho" data-toggle="pill" href="#tab-ho"
-                                            role="tab" aria-controls="tab-ho" onClick="changeTab('ho')">Head Office</a>
+                                        <a class="nav-link {{($type=='ho')?'active':''}}" id="budget-tab-ho"
+                                            data-toggle="pill" href="#tab-ho" role="tab" aria-controls="tab-ho"
+                                            onClick="changeTab('ho')">Head Office</a>
                                     </li>
                                 </ul>
                             </div>
@@ -90,7 +91,7 @@ Budgetary Data
                             <div class="tab-content" id="engineering-tab-tabContent">
                                 <div class="tab-pane fade show active" id="tab-mechanical" role="tabpanel"
                                     aria-labelledby="engineering-tab-mechanical">
-                                    <input name="type" type="hidden" value="dieng">
+                                    <input name="type" type="hidden" value="{{$type}}">
                                     <table class="table table-striped ajaxTable" style="width: 100%" id="user-table">
                                         <thead>
                                             <tr>
@@ -168,8 +169,8 @@ Budgetary Data
 
 @section('scripts')
 <script type="text/javascript">
+    let unit = $('input[name=type]').val()
     $(function() {
-        let unit = $('input[name=type]').val()
         stackChart(unit)
         $('.select2').select2();
 		dataTable = $('#user-table').DataTable({
@@ -213,7 +214,7 @@ Budgetary Data
                     width: 100,
                     sortable: false,
                     render: function (data, type, full, meta) {
-                        return `<a href="{{url('admin/budgetary')}}/${full.id}">
+                        return `<a href="{{url('admin/budgetary/show')}}/${full.id}">
                                     <div class="text-md text-info text-bold">
                                         ${full.name}
                                     </div>
@@ -266,7 +267,6 @@ Budgetary Data
                     className:"text-center", 
                     sortable: false,
                     render: function( data, type, full, meta ) {
-                        let check2 = $.inArray(group_code, watcher)
                         return `<div class="btn-group">
                                     <button type="button" class="btn btn-flat btn-sm dropdown-toggle" data-toggle="dropdown">
                                         <i class="fas fa-bars"></i>
@@ -294,11 +294,7 @@ Budgetary Data
 
     function edit(id)
 	{
-		window.location.href = `{{url('admin/budgetary')}}/${id}/edit`;
-	}
-	function detail(id)
-	{
-		window.location.href = `{{url('admin/budgetary')}}/${id}`;
+		window.location.href = `{{url('admin/budgetary/edit')}}/${id}`;
 	}
 
     function changeTab(type){
@@ -422,13 +418,14 @@ Budgetary Data
                     _token: "{{ csrf_token() }}"
                 };
 				$.ajax({
-					url: `{{url('admin/budgetary')}}/${id}`,
+					url: `{{url('admin/budgetary/delete')}}/${id}`,
 					dataType: 'json', 
 					data:data,
-					type:'DELETE',
+					type:'GET',
 					success:function(response){
 						if(response.status){
                             dataTable.ajax.reload(null, false);
+                            stackChart(unit)
 						}
 						else{
 							Swal.fire(
