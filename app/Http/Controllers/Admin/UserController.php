@@ -15,6 +15,11 @@ use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
+    function __construct()
+    {
+        View::share('menu_active', url('admin/' . 'user'));
+        $this->middleware('accessmenu', ['except' => ['select']]);
+    }
     /**
      * Display a listing of the resource.
      *

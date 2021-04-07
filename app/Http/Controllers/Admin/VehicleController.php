@@ -12,6 +12,10 @@ use Illuminate\Support\Facades\Validator;
 
 class VehicleController extends Controller
 {
+    function __construct(){
+        View::share('menu_active', url('admin/'.'vehicle'));
+        $this->middleware('accessmenu', ['except' => ['select']]);
+    }
     /**
      * Display a listing of the resource.
      *

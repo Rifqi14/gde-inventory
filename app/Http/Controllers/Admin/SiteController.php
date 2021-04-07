@@ -17,8 +17,8 @@ class SiteController extends Controller
 {
     function __construct()
     {
-        // View::share('menu_active', url('admin/' . 'site'));
-        // $this->middleware('accessmenu', ['except' => ['select', 'set']]);
+        View::share('menu_active', url('admin/' . 'site'));
+        $this->middleware('accessmenu', ['except' => ['select', 'set']]);
     }
 
     /**

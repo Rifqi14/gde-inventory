@@ -116,7 +116,7 @@
                 <nav class="mt-2">
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                         data-accordion="false">
-                        {{-- {!!buildMenuAdmin($menuaccess)!!} --}}
+                        {!!buildMenuAdmin($menuaccess)!!}
                     </ul>
                 </nav>
             </div>
@@ -181,6 +181,14 @@
     <script src='{{asset('assets/js/library.js')}}'></script>
     <script src='{{asset('assets/plugins/bootbox/bootbox.min.js')}}'></script>
     <script src='{{asset('assets/js/accounting.min.js')}}'></script>
+    <script>
+        $(function() {
+            $(".nav-sidebar").find("a[href='{{@$menu_active}}']").addClass("active");
+            $(".nav-sidebar").find("a[href='{{@$menu_active}}']").closest('.has-treeview').addClass("menu-open");
+            $(".nav-sidebar").find("a[href='{{@$menu_active}}']").parents('.has-treeview').addClass("menu-open");
+            $(".nav-sidebar").find("a[href='{{@$menu_active}}']").parents('.has-treeview').children('a').addClass("active");
+        });
+    </script>
     <script type="text/javascript">
         var csfrData = {};
             csfrData['ci_csrf_token'] = '';

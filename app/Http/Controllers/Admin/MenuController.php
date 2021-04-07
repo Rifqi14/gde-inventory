@@ -17,8 +17,13 @@ class MenuController extends Controller
 {
     public $sort;
     function __construct(){
-        // View::share('menu_active', url('admin/'.'menu'));
-        // $this->middleware('accessmenu', ['except' => 'select']);
+        View::share('menu_active', url('admin/'.'menu'));
+        $this->middleware('accessmenu', ['except' => ['select']]);
+    }
+
+    function json(){
+        $menu = Menu::all();
+        echo json_encode($menu);
     }
 
     function setSort($sort){

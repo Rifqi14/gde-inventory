@@ -1,5 +1,5 @@
 @extends('admin.layouts.app')
-
+@section('title', 'Dashboard')
 @section('stylesheets')
 <style>
     .card {
