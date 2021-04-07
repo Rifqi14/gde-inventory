@@ -68,6 +68,15 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/workingshift/read', 'Admin\WorkingShiftController@read')->name('workingshift.read');
         Route::get('/workingshift/select', 'Admin\WorkingShiftController@select')->name('workingshift.select');
         Route::resource('/workingshift', 'Admin\WorkingShiftController');
+        //Route Budgetary
+        Route::get('/budgetary/read', 'Admin\BudgetController@read')->name('budgetary.read');
+        Route::get('/budgetary/select', 'Admin\BudgetController@select')->name('budgetary.select');
+        Route::get('/budgetary/stack_chart', 'Admin\BudgetController@stack_chart')->name('budgetary.stack_chart');
+        Route::get('/budgetary/show/{id}', 'Admin\BudgetController@showing');
+        Route::get('/budgetary/edit/{id}', 'Admin\BudgetController@editing');
+        Route::get('/budgetary/delete/{id}', 'Admin\BudgetController@destroy')->name('budgetary.delete');
+        Route::get('/budgetary/{id}', 'Admin\BudgetController@index');
+        Route::resource('/budgetary', 'Admin\BudgetController');
     });
 });
 
