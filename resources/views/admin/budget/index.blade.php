@@ -72,12 +72,12 @@ Budgetary Data
                                     <li class="nav-item">
                                         <a class="nav-link active" id="budget-tab-dieng" data-toggle="pill"
                                             href="#tab-dieng" role="tab" aria-controls="tab-dieng" aria-selected="true"
-                                            onClick="changeTab('dieng2')">Dieng</a>
+                                            onClick="changeTab('dieng')">Dieng</a>
                                     </li>
                                     <li class="nav-item">
                                         <a class="nav-link" id="budget-tab-patuha" data-toggle="pill" href="#tab-patuha"
                                             role="tab" aria-controls="tab-patuha"
-                                            onClick="changeTab('patuha2')">Patuha</a>
+                                            onClick="changeTab('patuha')">Patuha</a>
                                     </li>
                                     <li class="nav-item">
                                         <a class="nav-link" id="budget-tab-ho" data-toggle="pill" href="#tab-ho"
@@ -137,19 +137,17 @@ Budgetary Data
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label class="control-label" for="police_number">Shift Name</label>
-                                    <input type="text" name="shift_name" class="form-control" placeholder="Shift Name">
+                                    <label class="control-label" for="police_number">Budget Name</label>
+                                    <input type="text" name="name" class="form-control" placeholder="Budget Name">
                                 </div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label class="control-label" for="status">Status</label>
-                                    <select name="status" id="status" class="select2 form-control">
-                                        <option value="active">Active</option>
-                                        <option value="non_active">Non Active</option>
-                                    </select>
+                                    <label class="control-label" for="police_number">Budget Description</label>
+                                    <input type="text" name="description" class="form-control"
+                                        placeholder="Budget Description">
                                 </div>
                             </div>
                         </div>
@@ -172,90 +170,120 @@ Budgetary Data
 <script type="text/javascript">
     $(function() {
         let unit = $('input[name=type]').val()
-        // stackChart(unit)
+        stackChart(unit)
         $('.select2').select2();
-		// dataTable = $('#user-table').DataTable({
-        //     processing: true,
-        //     language: {
-        //         processing: `<div class="p-2 text-center">
-        //                         <i class="fas fa-circle-notch fa-spin fa-fw"></i> Loading...
-        //                     </div>`
-        //     },
-        //     serverSide: true,
-        //     aaSorting: [],
-        //     filter: false,
-        //     responsive: true,
-        //     lengthChange: false,
-        //     order: [[ 2, "asc" ]],
-        //     ajax: {
-        //         url: "{{route('workingshift.read')}}",
-        //         type: "GET",
-        //         data:function(data){
-        //             var shift_name = $('#form-search').find('input[name=shift_name]').val();
-        //             var status = $('#form-search').find('#status').val();
-        //             data.shift_name = shift_name;
-        //             data.status = status;
-        //         }
-        //     },
-        //     columns: [
-        //         {"data": "no", "name": "no", width: 10, className: "text-center" , orderable:false},
-        //         {
-        //             width: 50,
-        //             orderable: false,
-        //             render: function(data, type, full, meta) {
-        //                 if (full.shift_type == 'shift') {
-        //                     return `Shift`;
-        //                 } else {
-        //                     return `Non Shift`;
-        //                 }
-        //             }
-        //         },
-        //         {
-        //             "data": "shift_name", 
-        //             "name": "shift_name",
-        //             width: 150,
-        //             render: function(data, type, full, meta) {
-        //                 return `<a href="{{url('admin/workingshift')}}/${full.id}">
-        //                             <div class="text-md text-info text-bold">
-        //                                 ${full.shift_name}
-        //                             </div>
-        //                         </a>`;
-        //             }
-        //         },
-        //         {
-        //             width: 50,
-        //             className: "text-center",
-        //             orderable: false,
-        //             render: function(data, type, full, meta) {
-        //                 if (full.status == 'active') {
-        //                     return `<span class="badge bg-success text-sm">Active</span>`;
-        //                 } else {
-        //                     return `<span class="badge bg-gray color-platte text-sm">Non Active</span>`;
-        //                 }
-        //             }
-        //         },
-        //         {
-        //             width: 50,
-        //             className: "text-center",
-        //             orderable: false,
-        //             render: function(data, type, full, meta) {
-        //                 return `<div class="btn-group">
-        //                             <button type="button" class="btn btn-flat btn-sm dropdown-toggle" data-toggle="dropdown">
-        //                                 <i class="fas fa-bars"></i>
-        //                             </button>
-        //                             <div class="dropdown-menu">
-        //                                 <a class="dropdown-item" href="javascript:void(0);" onclick="edit(${full.id})">
-        //                                     <i class="far fa-edit"></i>Update Data
-        //                                 </a>
-        //                                 <a class="dropdown-item " href="javascript:void(0);" onclick="destroy(${full.id})">
-        //                                     <i class="far fa-trash-alt"></i> Delete Data
-        //                                 </a>
-        //                             </div>
-        //                         </div>`;
-        //             }
-        //         }
-        //     ]
-        // });
+		dataTable = $('#user-table').DataTable({
+            processing: true,
+            language: {
+                processing: `<div class="p-2 text-center">
+                            <i class="fas fa-circle-notch fa-spin fa-fw"></i> Loading...
+                            </div>`
+            },
+            serverSide: true,
+            aaSorting: [],
+            filter: false,
+            responsive: true,
+            lengthChange: false, 
+            order: [[ 1, "asc" ]],
+            ajax: {
+                url: "{{route('budgetary.read')}}",
+                type: "GET",
+                data: function(data){
+                    var type = $('input[name=type]').val();
+                    var name = $('#form-search').find('input[name=name]').val();
+                    var desc = $('#form-search').find('input[name=description]').val();
+                    data.type = type
+                    data.name = name
+                    data.desc = desc
+                    if(type =='dieng'){
+                        var title = 'Dieng'
+                    } else if(type =='patuha'){
+                        var title = 'Patuha'
+                    } else {
+                        var title = 'Head Office'
+                    }
+                    $('.card-title').text(title)
+                }
+            },
+            columns: [
+                { "data": "no", "name": "no", width:10, className:"text-center" },
+                {  
+                    "data": "name", 
+                    "name": "name",
+                    width: 100,
+                    sortable: false,
+                    render: function (data, type, full, meta) {
+                        return `<a href="{{url('admin/budgetary')}}/${full.id}">
+                                    <div class="text-md text-info text-bold">
+                                        ${full.name}
+                                    </div>
+                                </a>`;
+                    }
+                },
+                { "data": "description", "name": "description", width:200, sortable:false },
+                {  
+                    width: 100,
+                    sortable: false,
+                    className:'text-right',
+                    render: function (data, type, full, meta) {
+                            if(full.currency == 'yen'){
+                                var curr = "¥ "
+                            } else if(full.currency == 'dollar'){
+                                var curr = "$ "
+                            } else if(full.currency == 'euro'){
+                                var curr = "€ "
+                            } else {
+                                var curr = "Rp "
+                            }
+
+                            return accounting.formatMoney(full.amount, curr, 2, ".", ",");
+                        }
+                    },
+                {  
+                    width: 100,
+                    sortable: false,
+                    className:'text-center',
+                    render: function (data, type, full, meta) {
+                        var type=''
+                        $.each(full.detail, function(index, item) {
+                            var ind = ind + 1
+                            if(item.type == 'kasinternal'){
+                                type += `<text class="small">Kas Internal ${item.weight}%</text>`
+                            } else if(item.type == 'budget'){
+                                type += `<text class="small">Budget ${item.weight}%</text>`
+                            } else {
+                                type += `<text class="small">${(item.type).toUpperCase()} ${item.weight}%</text>`
+                            }
+                            if(ind != (full.detail).length){
+                                type += `<br>`
+                            }
+                        });
+                        return type
+                    }
+                },
+                { 
+                    width:30, 
+                    className:"text-center", 
+                    sortable: false,
+                    render: function( data, type, full, meta ) {
+                        let check2 = $.inArray(group_code, watcher)
+                        return `<div class="btn-group">
+                                    <button type="button" class="btn btn-flat btn-sm dropdown-toggle" data-toggle="dropdown">
+                                        <i class="fas fa-bars"></i>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="javascript:void(0);" onclick="edit(${full.id})">
+                                            <i class="far fa-edit"></i>Update Data
+                                        </a>
+                                        <a class="dropdown-item " href="javascript:void(0);" onclick="destroy(${full.id})">
+                                            <i class="far fa-trash-alt"></i> Delete Data
+                                        </a>
+                                    </div>
+                                </div>`;
+                    }
+                }
+            ]
+        });
 		$('#form-search').submit(function(e) {
 			e.preventDefault();
 			dataTable.draw();
@@ -264,10 +292,113 @@ Budgetary Data
 
 	});
 
+    function edit(id)
+	{
+		window.location.href = `{{url('admin/budgetary')}}/${id}/edit`;
+	}
+	function detail(id)
+	{
+		window.location.href = `{{url('admin/budgetary')}}/${id}`;
+	}
+
     function changeTab(type){
         $('input[name="type"]').val(type);
-        // stackChart(type)
+        stackChart(type)
         dataTable.draw();
+    }
+
+    function stackChart(type){
+        $.ajax({
+        url: "{{route('budgetary.stack_chart')}}",
+        method: 'get',
+        dataType: 'json',
+        data: {
+            unit: type,
+        },
+        beforeSend:function() {
+            blockMessage('#stackChart', 'Get Data . . .', '#fff');
+        },
+        success:function(response) {
+            $('#stackChart').unblock();
+            Highcharts.setOptions({
+            lang: {
+                thousandsSep: '.'
+            }
+            });
+            var stackChart = Highcharts.chart('stackChart', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: false,
+                    xAxis: {
+                        categories: response.series.categories,
+                        labels: {
+                            rotation: -90
+                        }
+                    },
+                    yAxis: {
+                        type: 'logarithmic',
+                        title: {
+                            text: ''
+                        },
+                        stackLabels: {
+                            enabled: true,
+                            style: {
+                                fontWeight: 'bold',
+                                color: ( // theme
+                                    Highcharts.defaultOptions.title.style &&
+                                    Highcharts.defaultOptions.title.style.color
+                                ) || 'gray'
+                            }
+                        },
+                        labels: {
+                        formatter: function() {
+                            if(this.value%1e12 == 0){
+                            return this.value / 1e12 + 'T';
+                            } else if(this.value%1e9 == 0){
+                            return this.value / 1e9 + 'B';
+                            } else {
+                            return (this.value / 1e9).toFixed(2) + 'B';
+                            }
+                        }
+                        }
+                    },
+                    legend: {
+                        align: 'right',
+                        x: -30,
+                        verticalAlign: 'top',
+                        y: 10,
+                        floating: true,
+                        backgroundColor:
+                            Highcharts.defaultOptions.legend.backgroundColor || 'white',
+                        borderColor: '#CCC',
+                        borderWidth: 1,
+                        shadow: false
+                    },
+                    tooltip: {
+                        headerFormat: '<b>{point.x}</b><br/>',
+                        pointFormat: `{series.name}: Rp {point.y}<br/>Total: Rp {point.stackTotal:,.2f}`
+                    },
+                    plotOptions: {
+                        column: {
+                            stacking: 'normal',
+                            pointPadding: 0,
+                            groupPadding: 0,
+                            pointWidth : 40,
+                            padding:5,
+                            dataLabels: {
+                                enabled: false
+                            }
+                        }
+                    },
+                    credit:false,
+                    exporting:false,
+                    series: response.series.series
+            });
+            $('text').find('tspan.highcharts-text-outline').css('display', 'none')
+            $('text').find('tspan.highcharts-text-outline').next().css('display', 'none')
+        }
+        })
     }
 
 	function filter(){

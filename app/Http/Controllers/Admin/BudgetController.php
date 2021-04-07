@@ -213,14 +213,19 @@ class BudgetController extends Controller
         $query = $request->search['value'];
         $sort = $request->columns[$request->order[0]['column']]['data'];
         $dir = $request->order[0]['dir'];
-        $shift_name = strtoupper($request->shift_name);
-        $status = $request->status;
+        $name = strtoupper($request->name);
+        $desc = strtoupper($request->desc);
+        $type = strtoupper($request->type);
 
         //Count Data
-        $query = DB::table('working_shifts');
-        $query->whereRaw("upper(shift_name) like '%$shift_name%'");
-        if ($request->status) {
-            $query->where("status", $status);
+        $query = DB::table('budgets');
+        $query->select('budgets.*', 'role_users.role_id');
+        $query->join('role_users', 'budgets.created_user', '=', 'role_users.user_id');
+        $query->join('sites', 'budgets.site_id', '=', 'sites.id');
+        $query->whereRaw("upper(budgets.name) like '%$name%'");
+        $query->WhereRaw("upper(budgets.description) like '%$desc%'");
+        if ($type) {
+            $query->whereRaw("upper(sites.code) = '$type'");
         }
 
         $row = clone $query;
@@ -235,6 +240,7 @@ class BudgetController extends Controller
         $data = [];
         foreach ($users as $user) {
             $user->no = ++$start;
+            $user->detail = $this->detail($user->id);
             $data[] = $user;
         }
         return response()->json([
@@ -243,5 +249,86 @@ class BudgetController extends Controller
             'recordsFiltered' => $recordsTotal,
             'data' => $data
         ], 200);
+    }
+
+    function detail($budget_id)
+    {
+        $data = [];
+        $query = DB::table('budget_details');
+        $query->where('budget_id', $budget_id);
+        $read = $query->get();
+        foreach ($read as $value) {
+            $value->total = number_format($value->total, '2', '.', '');
+            $data[] = $value;
+        }
+
+        return $data;
+    }
+
+    function stack_chart(Request $request)
+    {
+        $types = ['adb', 'ctf', 'pmn', 'equity', 'unsigned'];
+        $query = DB::table('budgets');
+        $query->selectRaw("budgets.*, coalesce(expenses.actual_total, 0) as actual_total, coalesce(expenses.commit_total, 0) as commit_total");
+        $query->leftJoin('expenses', 'budgets.id', '=', 'expenses.budget_id');
+        $query->join('sites', 'budgets.site_id', '=', 'sites.id');
+        $query->whereRaw("sites.code = '$request->unit'");
+        $query->orderBy('budgets.name', 'asc');
+        $read = $query->get();
+        $cat = [];
+        $cet = [];
+        foreach ($read as $val) {
+            array_push($cat, $val->name);
+            $cet[$val->name] = $val->description;
+        }
+
+        $series = [];
+        foreach ($types as $type) {
+            $data = [];
+            foreach ($read as $val) {
+                $point = 0;
+                $detail = $this->detail_stack($val->id, $type);
+                foreach ($detail as $value) {
+                    $point = (int) $value->total;
+                }
+                $new = $point - ($val->actual_total + $val->commit_total);
+                array_push($data, $new);
+            }
+
+            if ($type == 'kasinternal') {
+                $name = 'Kas Internal';
+            } elseif ($type == 'budget') {
+                $name = 'Budget';
+            } else {
+                $name = strtoupper($type);
+            }
+            $series[] = [
+                'name' => $name,
+                'data' => $data
+            ];
+        }
+
+        $result['categories']     = $cat;
+        $result['cet']     = $cet;
+        $result['series'] = $series;
+        return response()->json([
+            'status' => true,
+            'series' => $result
+        ], 200);
+    }
+
+    function detail_stack($budget_id, $type)
+    {
+        $data = [];
+        $type = strtolower($type);
+        $query = DB::table('budget_details');
+        $query->where('budget_id', $budget_id);
+        $query->whereRaw("lower(type) = '$type'");
+        $read = $query->get();
+        foreach ($read as $value) {
+            $data[] = $value;
+        }
+
+        return $data;
     }
 }

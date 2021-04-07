@@ -63,5 +63,6 @@ Route::group(['prefix' => 'admin'], function () {
     //Route Budgetary
     Route::get('/budgetary/read', 'Admin\BudgetController@read')->name('budgetary.read');
     Route::get('/budgetary/select', 'Admin\BudgetController@select')->name('budgetary.select');
+    Route::get('/budgetary/stack_chart', 'Admin\BudgetController@stack_chart')->name('budgetary.stack_chart');
     Route::resource('/budgetary', 'Admin\BudgetController');
 });
