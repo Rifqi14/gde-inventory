@@ -10,6 +10,11 @@ use App\Models\MenuRole;
 
 class RoleMenuController extends Controller
 {
+    function __construct(){
+        // View::share('menu_active', url('admin/'.'role'));
+        $this->middleware('accessmenu', ['except' => ['select']]);
+    }
+    
     public function update(Request $request){
         $validator = Validator::make($request->all(), [
             'id' 	=> 'required',

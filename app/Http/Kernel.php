@@ -57,9 +57,16 @@ class Kernel extends HttpKernel
         'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
         'can' => \Illuminate\Auth\Middleware\Authorize::class,
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
+        'guest.admin' => \App\Http\Middleware\RedirectIfNotAdmin::class,
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        'page.site'    => \App\Http\Middleware\Custom\PageSite::class,
+        'page.admin'    => \App\Http\Middleware\Custom\PageAdmin::class,
+        'accessmenu' => \App\Http\Middleware\AccessMenu::class,
+        'accesssitemenu' => \App\Http\Middleware\AccessSiteMenu::class,
+        //Xss
+        'XssSanitization' => \App\Http\Middleware\XssSanitization::class,
     ];
 
     /**

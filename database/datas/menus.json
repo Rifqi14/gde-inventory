@@ -1,0 +1,38 @@
+[
+    {
+        "parent_name": "",
+        "menu_name": "Dashboard",
+        "menu_route": "dashboard",
+        "menu_icon": "fa-home"
+    },
+    {
+        "parent_name": "",
+        "menu_name": "Preferences",
+        "menu_route": "Preferences",
+        "menu_icon": "fa-sliders-h"
+    },
+    {
+        "parent_name": "Preferences",
+        "menu_name": "Site",
+        "menu_route": "site",
+        "menu_icon": "fa-map-marked-alt"
+    },
+    {
+        "parent_name": "Preferences",
+        "menu_name": "Menu",
+        "menu_route": "menu",
+        "menu_icon": "fa-ellipsis-v"
+    },
+    {
+        "parent_name": "Preferences",
+        "menu_name": "Role",
+        "menu_route": "role",
+        "menu_icon": "fa-users-cog"
+    },
+    {
+        "parent_name": "Preferences",
+        "menu_name": "User",
+        "menu_route": "user",
+        "menu_icon": "fa-portrait"
+    }
+]

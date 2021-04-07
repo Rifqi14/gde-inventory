@@ -12,6 +12,10 @@ use Illuminate\Support\Facades\Validator;
 
 class WorkingShiftController extends Controller
 {
+    function __construct(){
+        View::share('menu_active', url('admin/'.'workingshift'));
+        $this->middleware('accessmenu', ['except' => ['select']]);
+    }
     /**
      * Display a listing of the resource.
      *
