@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\Site;
 use App\Models\Budget;
 use App\Models\BudgetDetail;
 use Illuminate\Http\Request;
@@ -18,9 +19,10 @@ class BudgetController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        return view('admin.budget.index');
+        $type = ($request->unit) ? $request->unit : 'dieng';
+        return view('admin.budget.index', compact('type'));
     }
 
     /**
@@ -42,37 +44,65 @@ class BudgetController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'shift_name' => 'required',
-            'time_in' => 'required',
-            'time_out' => 'required',
+            'name' => 'required|unique:budgets',
+            'budget_description' => 'required',
+            'budget_amount' => 'required',
+            'currency' => 'required',
+            'site_id' => 'required',
         ]);
+
+        $site = Site::find($request->site_id);
 
         if ($validator->fails()) {
             return response()->json([
                 'status' => false,
+                'type'     => $site->code,
                 'message' => $validator->errors()->first()
             ], 200);
         }
 
-        $user = WorkingShift::create([
-            'shift_type' => $request->shift_type,
-            'shift_name' => $request->shift_name,
-            'time_in' => $request->time_in,
-            'time_out' => $request->time_out,
-            'status' => $request->status,
+
+        $user = Budget::create([
+            'name' => $request->name,
+            'description' => $request->budget_description,
+            'amount' => (float) str_replace(',', '.', str_replace('.', '', $request->budget_amount)),
+            'currency' => $request->currency,
+            'site_id' => $request->site_id,
+            'created_user' => 1,
         ]);
 
         if (!$user) {
             return response()->json([
                 'status' => false,
-                'message'     => 'Cant create shift'
+                'type'     => $site->code,
+                'message'     => 'Cant create budget'
             ], 200);
+        }
+
+        $type = $request->type;
+        $weight = $request->weight;
+        $total = $request->total;
+        for ($i = 0; $i < count($type); $i++) {
+            $budget = BudgetDetail::create([
+                'budget_id' => $user->id,
+                'type' => $type[$i],
+                'weight' => $weight[$i],
+                'total' => (float) str_replace(',', '.', str_replace('.', '', $total[$i])),
+            ]);
+            if (!$budget) {
+                return response()->json([
+                    'status' => false,
+                    'type'     => $site->code,
+                    'message'     => 'Cant create budget'
+                ], 200);
+            }
         }
 
         return response()->json([
             'status'     => true,
             'message'     => 'Created success',
-            'results'     => route('workingshift.index'),
+            'type'     => $site->code,
+            'results'     => route('budgetary.index'),
         ], 200);
     }
 
@@ -82,13 +112,16 @@ class BudgetController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function showing($id)
     {
-        $query = DB::table('working_shifts');
-        $query->where('id', '=', $id);
-        $user = $query->get()->first();
+        $budget = Budget::with('detail')->find($id);
+        $site = Site::find($budget->site_id);
+        $budget->origin_amount = $budget->amount;
+        $budget->amount = number_format($budget->amount, '2', '.', '');
+        $budget->site_name = $site->name;
+        $user = $budget;
         if ($user) {
-            return view('admin.working_shift.detail', compact('user'));
+            return view('admin.budget.detail', compact('user'));
         } else {
             abort(404);
         }
@@ -100,13 +133,16 @@ class BudgetController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function editing($id)
     {
-        $query = DB::table('working_shifts');
-        $query->where('id', '=', $id);
-        $user = $query->get()->first();
+        $budget = Budget::with('detail')->find($id);
+        $site = Site::find($budget->site_id);
+        $budget->origin_amount = $budget->amount;
+        $budget->amount = number_format($budget->amount, '2', '.', '');
+        $budget->site_name = $site->name;
+        $user = $budget;
         if ($user) {
-            return view('admin.working_shift.edit', compact('user'));
+            return view('admin.budget.edit', compact('user'));
         } else {
             abort(404);
         }
@@ -122,36 +158,66 @@ class BudgetController extends Controller
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'shift_name' => 'required',
-            'time_in' => 'required',
-            'time_out' => 'required',
+            'name' => 'required|unique:budgets,name,' . $id,
+            'budget_description' => 'required',
+            'budget_amount' => 'required',
+            'currency' => 'required',
+            'site_id' => 'required',
         ]);
+
+        $site = Site::find($request->site_id);
 
         if ($validator->fails()) {
             return response()->json([
                 'status'     => false,
+                'type'     => $site->code,
                 'message'     => $validator->errors()->first()
             ], 200);
         }
 
-        $user = WorkingShift::find($id);
-        $user->shift_type = $request->shift_type;
-        $user->shift_name = $request->shift_name;
-        $user->time_in = $request->time_in;
-        $user->time_out = $request->time_out;
-        $user->status = $request->status;
+        $user = Budget::find($id);
+        $user->name = $request->name;
+        $user->description = $request->budget_description;
+        $user->amount = (float) str_replace(',', '.', str_replace('.', '', $request->budget_amount));
+        $user->currency = $request->currency;
+        $user->site_id = $request->site_id;
+        $user->updated_user = 1;
         $user->save();
 
         if (!$user) {
             return response()->json([
                 'status' => false,
-                'message'     => "Cant update shift"
+                'type'     => $site->code,
+                'message'     => "Cant update budget"
             ], 200);
+        }
+
+        $type = $request->type;
+        $weight = $request->weight;
+        $total = $request->total;
+        $del = BudgetDetail::where('budget_id', $id);
+        if ($del->delete()) {
+            for ($i = 0; $i < count($type); $i++) {
+                $budget = BudgetDetail::create([
+                    'budget_id' => $user->id,
+                    'type' => $type[$i],
+                    'weight' => $weight[$i],
+                    'total' => (float) str_replace(',', '.', str_replace('.', '', $total[$i])),
+                ]);
+                if (!$budget) {
+                    return response()->json([
+                        'status' => false,
+                        'type'     => $site->code,
+                        'message'     => 'Cant create budget'
+                    ], 200);
+                }
+            }
         }
 
         return response()->json([
             'status'     => true,
-            'results'     => route('workingshift.index'),
+            'type'     => $site->code,
+            'results'     => route('budgetary.index'),
         ], 200);
     }
 
@@ -164,7 +230,7 @@ class BudgetController extends Controller
     public function destroy($id)
     {
         try {
-            $user = WorkingShift::find($id);
+            $user = Budget::find($id);
             $user->delete();
         } catch (\Illuminate\Database\QueryException $e) {
             return response()->json([

@@ -25,13 +25,13 @@ Route::group(['prefix' => 'admin'], function () {
     Route::get('/login', 'Auth\AdminLoginController@login')->name('admin.login.post');
     Route::get('/logout', 'Auth\AdminLoginController@logout')->name('admin.logout');
 
-    Route::group(['middleware' => ['auth:admin','page.admin']], function () {
+    Route::group(['middleware' => ['auth:admin', 'page.admin']], function () {
         Route::get('/dashboard', 'Admin\DashboardController@index')->name('dashboard.index');
         //Route User
         Route::get('/user/read', 'Admin\UserController@read')->name('user.read');
         Route::get('/user/select', 'Admin\UserController@select')->name('user.select');
         Route::get('/user/spv-read', 'Admin\UserController@supervisor_read')->name('user.spv_read');
-        Route::resource('/user', 'Admin\UserController'); 
+        Route::resource('/user', 'Admin\UserController');
         //Route Role
         Route::get('/role/read', 'Admin\RoleController@read')->name('role.read');
         Route::get('/role/select', 'Admin\RoleController@select')->name('role.select');
@@ -75,11 +75,8 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/budgetary/show/{id}', 'Admin\BudgetController@showing');
         Route::get('/budgetary/edit/{id}', 'Admin\BudgetController@editing');
         Route::get('/budgetary/delete/{id}', 'Admin\BudgetController@destroy')->name('budgetary.delete');
-        Route::get('/budgetary/{id}', 'Admin\BudgetController@index');
         Route::resource('/budgetary', 'Admin\BudgetController');
         //Route Contract
         Route::resource('/contract', 'Admin\ContractController');
     });
 });
-
-Route::get('/home', 'HomeController@index')->name('home');
