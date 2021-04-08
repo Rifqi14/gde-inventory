@@ -77,6 +77,8 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/budgetary/delete/{id}', 'Admin\BudgetController@destroy')->name('budgetary.delete');
         Route::get('/budgetary/{id}', 'Admin\BudgetController@index');
         Route::resource('/budgetary', 'Admin\BudgetController');
+        //Route Contract
+        Route::resource('/contract', 'Admin\ContractController');
     });
 });
 
