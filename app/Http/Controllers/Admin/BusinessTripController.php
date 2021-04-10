@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Site;
 use App\Models\Budget;
 use App\Models\BudgetDetail;
+use App\Models\BusinessTrip;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\View;
@@ -12,10 +13,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
-class BudgetController extends Controller
+class BusinessTripController extends Controller
 {
     function __construct(){
-        View::share('menu_active', url('admin/'.'budgetary'));
+        View::share('menu_active', url('admin/'.'business-trip'));
         $this->middleware('accessmenu', ['except' => ['select']]);
     }
     /**
@@ -26,7 +27,7 @@ class BudgetController extends Controller
     public function index(Request $request)
     {
         $type = ($request->unit) ? $request->unit : 'dieng';
-        return view('admin.budget.index', compact('type'));
+        return view('admin.business_trip.index', compact('type'));
     }
 
     /**
@@ -36,7 +37,7 @@ class BudgetController extends Controller
      */
     public function create()
     {
-        return view('admin.budget.create');
+        return view('admin.business_trip.create');
     }
 
     /**
@@ -116,7 +117,7 @@ class BudgetController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function showing($id)
+    public function show($id)
     {
         $budget = Budget::with('detail')->find($id);
         $site = Site::find($budget->site_id);
@@ -125,7 +126,7 @@ class BudgetController extends Controller
         $budget->site_name = $site->name;
         $user = $budget;
         if ($user) {
-            return view('admin.budget.detail', compact('user'));
+            return view('admin.business_trip.detail', compact('user'));
         } else {
             abort(404);
         }
@@ -137,7 +138,7 @@ class BudgetController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function editing($id)
+    public function edit($id)
     {
         $budget = Budget::with('detail')->find($id);
         $site = Site::find($budget->site_id);
@@ -146,7 +147,7 @@ class BudgetController extends Controller
         $budget->site_name = $site->name;
         $user = $budget;
         if ($user) {
-            return view('admin.budget.edit', compact('user'));
+            return view('admin.business_trip.edit', compact('user'));
         } else {
             abort(404);
         }
@@ -321,84 +322,4 @@ class BudgetController extends Controller
         ], 200);
     }
 
-    function detail($budget_id)
-    {
-        $data = [];
-        $query = DB::table('budget_details');
-        $query->where('budget_id', $budget_id);
-        $read = $query->get();
-        foreach ($read as $value) {
-            $value->total = number_format($value->total, '2', '.', '');
-            $data[] = $value;
-        }
-
-        return $data;
-    }
-
-    function stack_chart(Request $request)
-    {
-        $types = ['adb', 'ctf', 'pmn', 'equity', 'unsigned'];
-        $query = DB::table('budgets');
-        $query->selectRaw("budgets.*, coalesce(expenses.actual_total, 0) as actual_total, coalesce(expenses.commit_total, 0) as commit_total");
-        $query->leftJoin('expenses', 'budgets.id', '=', 'expenses.budget_id');
-        $query->join('sites', 'budgets.site_id', '=', 'sites.id');
-        $query->whereRaw("sites.code = '$request->unit'");
-        $query->orderBy('budgets.name', 'asc');
-        $read = $query->get();
-        $cat = [];
-        $cet = [];
-        foreach ($read as $val) {
-            array_push($cat, $val->name);
-            $cet[$val->name] = $val->description;
-        }
-
-        $series = [];
-        foreach ($types as $type) {
-            $data = [];
-            foreach ($read as $val) {
-                $point = 0;
-                $detail = $this->detail_stack($val->id, $type);
-                foreach ($detail as $value) {
-                    $point = (int) $value->total;
-                }
-                $new = $point - ($val->actual_total + $val->commit_total);
-                array_push($data, $new);
-            }
-
-            if ($type == 'kasinternal') {
-                $name = 'Kas Internal';
-            } elseif ($type == 'budget') {
-                $name = 'Budget';
-            } else {
-                $name = strtoupper($type);
-            }
-            $series[] = [
-                'name' => $name,
-                'data' => $data
-            ];
-        }
-
-        $result['categories']     = $cat;
-        $result['cet']     = $cet;
-        $result['series'] = $series;
-        return response()->json([
-            'status' => true,
-            'series' => $result
-        ], 200);
-    }
-
-    function detail_stack($budget_id, $type)
-    {
-        $data = [];
-        $type = strtolower($type);
-        $query = DB::table('budget_details');
-        $query->where('budget_id', $budget_id);
-        $query->whereRaw("lower(type) = '$type'");
-        $read = $query->get();
-        foreach ($read as $value) {
-            $data[] = $value;
-        }
-
-        return $data;
-    }
 }
