@@ -24,10 +24,9 @@ class BusinessTripController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index()
     {
-        $type = ($request->unit) ? $request->unit : 'dieng';
-        return view('admin.business_trip.index', compact('type'));
+        return view('admin.business_trip.index',);
     }
 
     /**
