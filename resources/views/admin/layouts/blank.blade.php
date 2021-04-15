@@ -36,6 +36,9 @@
         <link href='https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css' rel='stylesheet' media='screen'>
         <link href='https://cdn.datatables.net/rowgroup/1.1.1/css/rowGroup.bootstrap4.min.css' rel='stylesheet' media='screen'>
         <link href='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css' rel='stylesheet' media='screen'>
+        <link href='https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css' rel='stylesheet' media='screen'>
+        <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700' rel='stylesheet' media='screen'>
+        <link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css' rel='stylesheet' media='screen'>
         <link href='{{asset('assets/css/custom.css')}}' rel='stylesheet' media='screen'>
 		@yield('stylesheets')
     </head>
