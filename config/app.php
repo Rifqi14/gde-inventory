@@ -229,4 +229,6 @@ return [
 
     ],
 
+    'watcher' => ['TOP-MGT','ADB-CNS','GDE-COR','EPC-CO1','EPC-CO2','EPC-CO3','EPC-CO4','EPC-CO5']
+
 ];
