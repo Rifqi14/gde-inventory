@@ -79,7 +79,13 @@ Route::group(['prefix' => 'admin'], function () {
         //Route Contract
         Route::get('/contract/read', 'Admin\ContractController@read')->name('contract.read');
         Route::resource('/contract', 'Admin\ContractController');
-
+        //Route Purchasing
+        Route::get('/purchasing/read', 'Admin\PurchasingController@read')->name('purchasing.read');
+        Route::get('/purchasing/select', 'Admin\PurchasingController@select')->name('purchasing.select');
+        Route::post('/purchasing/getgdeperiod', 'Admin\PurchasingController@getgdeperiod')->name('purchasing.getgdeperiod');
+        Route::get('/purchasing/getadb', 'Admin\PurchasingController@getadb')->name('purchasing.getadb');
+        Route::post('/purchasing/getperiod', 'Admin\PurchasingController@getperiod')->name('purchasing.getperiod');
+        Route::resource('/purchasing', 'Admin\PurchasingController');
         //Route Business Trip
         Route::get('/business-trip/read', 'Admin\BusinessTripController@read')->name('bt.read');
         Route::get('/business-trip/select', 'Admin\BusinessTripController@select')->name('bt.select');
