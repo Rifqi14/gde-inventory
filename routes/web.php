@@ -88,11 +88,19 @@ Route::group(['prefix' => 'admin'], function () {
         Route::post('/purchasing/addnotes', 'Admin\PurchasingController@addnotes')->name('purchasing.addnotes');
         Route::get('/purchasing/test', 'Admin\PurchasingController@test');
         Route::resource('/purchasing', 'Admin\PurchasingController');
+        // Route Warehouse
+        Route::get('/warehouse/read', 'Admin\WarehouseController@read')->name('warehouse.read');
+        Route::resource('/warehouse', 'Admin\WarehouseController');
+        // Route Province
+        Route::get('/province/select', 'Admin\ProvinceController@select')->name('province.select');
+        // Route Region
+        Route::get('/region/select', 'Admin\RegionController@select')->name('region.select');
+        // Route District
+        Route::get('/district/select', 'Admin\DistrictController@select')->name('district.select');
         //Route Business Trip
         Route::get('/businesstrip/read', 'Admin\BusinessTripController@read')->name('bt.read');
         Route::get('/businesstrip/select', 'Admin\BusinessTripController@select')->name('bt.select');
         Route::resource('/businesstrip', 'Admin\BusinessTripController');
-
         // Route Product Category
         Route::get('/productcategory/read','Admin\ProductCategoryController@read')->name('productcategory.read');        
         Route::get('/productcategory/parentcategories','Admin\ProductCategoryController@parentcategories')->name('productcategory.parentcategories');        
