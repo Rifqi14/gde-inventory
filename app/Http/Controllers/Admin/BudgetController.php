@@ -255,8 +255,8 @@ class BudgetController extends Controller
         $name = strtoupper($request->name);
 
         //Count Data
-        $query = DB::table('working_shifts');
-        $query->whereRaw("upper(shift_name) like '%$name%'");
+        $query = DB::table('budgets');
+        $query->whereRaw("upper(name) like '%$name%'");
 
         $row = clone $query;
         $recordsTotal = $row->count();

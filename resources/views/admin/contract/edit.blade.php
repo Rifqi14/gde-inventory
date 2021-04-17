@@ -531,8 +531,8 @@
         
             $("#procurement").select2({
                 ajax: {
-                    url: 'https://pmugde.com/admin/procurement/contract/action/getpurchasing',
-                    type:'POST',
+                    url: '{{ route("purchasing.select") }}',
+                    type:'get',
                     dataType: 'json',
                     data: function (params) {
                         return {
