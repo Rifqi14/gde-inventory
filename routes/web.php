@@ -91,5 +91,11 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/productcategory/edit/{id}', 'Admin\ProductCategoryController@edit');                
         Route::get('/productcategory/delete/{id}','Admin\ProductCategoryController@destroy')->name('productcategory.delete');
         Route::resource('/productcategory','Admin\ProductCategoryController');
+
+        // Route UOM Category
+        Route::get('/uomcategory/read','Admin\UomCategoryController@read')->name('uomcategory.read');        
+        Route::get('/uomcategory/delete/{id}','Admin\UomCategoryController@destroy');
+        Route::get('/uomcategory/edit/{id}','Admin\UomCategoryController@edit');
+        Route::resource('/uomcategory','Admin\UomCategoryController');
     });
 });
