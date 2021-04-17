@@ -251,7 +251,7 @@ class ContractController extends Controller
         if (isset($attach->filename)) {
             $path = 'assets/procurement/contract';
 			if (!file_exists($path)) {
-				mkdir($src, 0777, true);
+				mkdir($path, 0777, true);
             }
             $attach->move($path, $request->number.'.'.$attach->getClientOriginalExtension());
             $filename = $path.$request->number.'.'.$attach->getClientOriginalExtension();
@@ -520,7 +520,7 @@ class ContractController extends Controller
         if (isset($attach->filename)) {
             $path = 'assets/procurement/contract';
 			if (!file_exists($path)) {
-				mkdir($src, 0777, true);
+				mkdir($path, 0777, true);
             }
             $attach->move($path, $request->number.'.'.$attach->getClientOriginalExtension());
             $filename = $path.$request->number.'.'.$attach->getClientOriginalExtension();
@@ -530,7 +530,7 @@ class ContractController extends Controller
         $contract = contract::find($id);
         $update = $contract->update($data);
 
-        if($contract){
+        if($update){
             $delete_item = ContractJvmember::where('contract_id',$id)->delete();
             if($request->jv){
 				$jvm = $request->jv_member;

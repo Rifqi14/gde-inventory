@@ -62,6 +62,13 @@
 
 @section('scripts')
 <script>
+    function edit(id) {
+    document.location = '{{route('purchasing.index')}}/' + id + '/edit';
+    }
+    function view(id) {
+        document.location = '{{route('purchasing.index')}}/' + id;
+    }
+
     dataTable = $('.datatable').DataTable( {
         processing: true,
         language: {
@@ -150,6 +157,103 @@
             { data: "created_ats", width:50 },
             { data: "id", width:30 },
         ]
+    });
+
+    $(document).on('click', '.delete', function () {
+        var id = $(this).data('id');
+        bootbox.confirm({
+            buttons: {
+                confirm: {
+                    label: '<i class="fa fa-check"></i>',
+                    className: 'btn-primary btn-sm'
+                },
+                cancel: {
+                    label: '<i class="fa fa-undo"></i>',
+                    className: 'btn-default btn-sm'
+                },
+            },
+            title: 'Delete data?',
+            message: 'Are you sure want to delete this site?',
+            callback: function (result) {
+                if (result) {
+                    var data = {
+                        _token: "{{ csrf_token() }}"
+                    };
+                    $.ajax({
+                        url: `{{route('purchasing.index')}}/${id}`,
+                        dataType: 'json',
+                        data: data,
+                        type: 'DELETE',
+                        beforeSend: function () {
+                            blockMessage('#content', 'Loading', '#fff');
+                        }
+                    }).done(function (response) {
+                        $('#content').unblock();
+                        if (response.status) {
+                            toastr.options = {
+                                "closeButton": false,
+                                "debug": false,
+                                "newestOnTop": false,
+                                "progressBar": false,
+                                "positionClass": "toast-top-right",
+                                "preventDuplicates": false,
+                                "onclick": null,
+                                "showDuration": "300",
+                                "hideDuration": "1000",
+                                "timeOut": "5000",
+                                "extendedTimeOut": "1000",
+                                "showEasing": "swing",
+                                "hideEasing": "linear",
+                                "showMethod": "fadeIn",
+                                "hideMethod": "fadeOut"
+                            }
+                            toastr.success(response.message);
+                            dataTable.ajax.reload(null, false);
+                        }else {
+                            toastr.options = {
+                                "closeButton": false,
+                                "debug": false,
+                                "newestOnTop": false,
+                                "progressBar": false,
+                                "positionClass": "toast-top-right",
+                                "preventDuplicates": false,
+                                "onclick": null,
+                                "showDuration": "300",
+                                "hideDuration": "1000",
+                                "timeOut": "5000",
+                                "extendedTimeOut": "1000",
+                                "showEasing": "swing",
+                                "hideEasing": "linear",
+                                "showMethod": "fadeIn",
+                                "hideMethod": "fadeOut"
+                            }
+                            toastr.warning(response.message);
+                        }
+                    }).fail(function (response) {
+                        var response = response.responseJSON;
+                        $('#content').unblock();
+                        toastr.options = {
+                            "closeButton": false,
+                            "debug": false,
+                            "newestOnTop": false,
+                            "progressBar": false,
+                            "positionClass": "toast-top-right",
+                            "preventDuplicates": false,
+                            "onclick": null,
+                            "showDuration": "300",
+                            "hideDuration": "1000",
+                            "timeOut": "5000",
+                            "extendedTimeOut": "1000",
+                            "showEasing": "swing",
+                            "hideEasing": "linear",
+                            "showMethod": "fadeIn",
+                            "hideMethod": "fadeOut"
+                        }
+                        toastr.warning(response.message);
+                    })
+                }
+            }
+        });
     });
 </script>
 @endsection

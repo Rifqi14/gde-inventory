@@ -18,13 +18,14 @@ use App\Models\Role;
 use App\Models\RoleUser;
 use App\Models\AdbSchedule;
 use App\Models\Contract;
+use App\Models\Budget;
 
 class PurchasingController extends Controller
 {
     function __construct()
     {
         View::share('menu_active', url('admin/' . 'purchasing'));
-        $this->middleware('accessmenu', ['except' => ['select']]);
+        $this->middleware('accessmenu', ['except' => ['select','test']]);
     }
 
     public function index(){
@@ -95,7 +96,7 @@ class PurchasingController extends Controller
         $data = [];
         foreach ($purchasings as $purchasing) {
             $purchasing->no = ++$start;
-            $purchasing->created_ats = date('d/m/Y', strtotime('2021-04-16 06:29:23'));
+            $purchasing->created_ats = date('d/m/Y', strtotime($purchasing->created_at));
 			if($purchasing->est_currency == 'yen'){
 				$cur = '¥';
 			} else if($purchasing->est_currency == 'dollar'){
@@ -153,8 +154,7 @@ class PurchasingController extends Controller
     }
 
     public function getperiod(Request $request){
-        $array  = $this->input->post();
-		$read =  $this->procurement_m->getperiod($array);
+        $array  = $request;
 
         $type = $request->type;
 		$date = $request->date;
@@ -163,8 +163,8 @@ class PurchasingController extends Controller
 		$date = date('Y-m-d', strtotime($date));
 
         $adb_schedule = AdbSchedule::select('*');
-        $adb_schedule->where('upper(type)', strtoupper($type));
-        $adb_schedule->orderBy('id', 'asc');
+        $adb_schedule->whereRaw("upper(adb_schedules.type) = '".strtoupper($type)."'");
+        $adb_schedule->orderBy('adb_schedules.id', 'asc');
         $adb = $adb_schedule->get();
 
 		$data = [];
@@ -224,7 +224,7 @@ class PurchasingController extends Controller
         if (isset($tor->filename)) {
             $path = 'assets/procurement/purchasing';
 			if (!file_exists($path)) {
-				mkdir($src, 0777, true);
+				mkdir($path, 0777, true);
             }
             $tor->move($path, $number.'.'.$tor->getClientOriginalExtension());
             $filename = $path.$number.'.'.$tor->getClientOriginalExtension();
@@ -321,5 +321,307 @@ class PurchasingController extends Controller
                 'message'  => "Can't insert data purchasing"
             ], 400);
         }
+    }
+
+    public function edit(Request $request,$id)
+    {
+        $roles = Role::all();
+        $userid = Auth::guard('admin')->user()->id;
+        $purchasing = Purchasing::find($id)->with('puser')->first();
+        $users = [];
+        foreach($purchasing->puser as $user){
+            array_push($users, $user->group_id);
+        }
+        $purchasing->puser = $users;
+        $purchasing->step = $this->getschedule($purchasing->id);
+        $purchasing->budget = $this->getbudget($purchasing->id);
+        $budgets = Budget::orderBy('site_id','asc')->orderBy('name','asc')->get();
+        // dd($purchasing->step);
+        if ($purchasing) {
+            return view('admin.purchasing.edit', compact('purchasing','roles','userid','budgets'));
+        } else {
+            abort(404);
+        }
+    }
+
+    public function getschedule($purchasing_id) {
+        // DB::enableQueryLog();
+        $purchasing_schedule = PurchasingSchedule::select('purchasing_schedules.*','adb_schedules.schedule_name');
+        $purchasing_schedule->leftJoin('adb_schedules','adb_schedules.id','=','purchasing_schedules.adb_id');
+        $purchasing_schedule->where('purchasing_schedules.purchasing_id', $purchasing_id);
+        $purchasing_schedule->orderBy('date', 'asc');
+        $read = $purchasing_schedule->get();
+        // dd(DB::getQueryLog());
+
+		$data = [];
+		$prev_delay = 0;
+		foreach ($read as $key => $value) {
+			$value->fulldate = date('d F Y', strtotime($value->date));
+			$value->notes = $this->getnotes($value->id);
+			$value->delay = 0;
+			if($value->status){
+				$delay = getDatesFromRange($value->date, $value->updated, 'Y-m-d', '1 days');
+				if(strtotime($value->updated)>strtotime($value->date)){
+					$value->delay = (count($delay)-1) - $prev_delay;
+					if($value->delay > 0){
+						$value->stat = "Actual Finish Date (".date('d/m/Y', strtotime($value->updated)).") - Delayed ".$value->delay." Days";
+					} else {
+						$value->stat = "Finished on Target";	
+					}
+				} else {
+					$value->stat = "Finished on Target";
+				}
+			}
+			$data[] = $value;
+			$prev_delay = $prev_delay + $value->delay;
+		}
+		return $data;
+	}
+
+    public function getnotes($schedule_id) {
+        $PurchasingScheduleNote = PurchasingScheduleNote::select('*');
+        $PurchasingScheduleNote->where('schedule_id', $schedule_id);
+        $read = $PurchasingScheduleNote->get();
+
+		$data = [];
+		foreach ($read as $key => $value) {
+			$value->date = date('d/m/Y', strtotime($value->date));
+			$data[] = $value;
+
+		}
+		return $data;
+	}
+
+    public function getbudget($purchasing_id) {
+        $purchasingbudget = PurchasingBudget::select('purchasing_budgets.*','budgets.name');
+        $purchasingbudget->leftJoin('budgets','budgets.id','=','purchasing_budgets.budget_id');
+        $purchasingbudget->where('purchasing_budgets.purchasing_id', $purchasing_id);
+        $read = $purchasingbudget->get();
+
+		$data = [];
+		foreach ($read as $key => $value) {
+			$data[] = $value;
+
+		}
+		return $data;
+	}
+
+    public function update(Request $request, $id)
+    {
+		$number = $request->number;
+		$subject = $request->subject;
+		$est_currency = $request->est_currency;
+		$est_value = $request->est_value;
+		$technical = $request->technical;
+		$financial = $request->financial;
+		$tor = $request->file('tor');
+		$content = $request;
+		$updated_user = Auth::guard('admin')->user()->id;
+		$table = 'purchasing';
+        
+        DB::beginTransaction();
+		$data = array(
+			'number'=>$number,
+			'subject'=>$subject,
+			'est_currency'=>$est_currency,
+			'est_value'=> (int) str_replace('.','',$est_value),
+			'technical'=>(int) $technical,
+			'financial'=>(int) $financial,
+			'updated_user' => $updated_user,
+		);
+
+        if (isset($tor->filename)) {
+            $path = 'assets/procurement/purchasing';
+			if (!file_exists($path)) {
+				mkdir($path, 0777, true);
+            }
+            $tor->move($path, $number.'.'.$tor->getClientOriginalExtension());
+            $filename = $path.$number.'.'.$tor->getClientOriginalExtension();
+			$data['tor'] = $filename;
+        }
+
+        $purchasing = Purchasing::find($id);
+        $update = $purchasing->update($data);
+        
+		if($update){
+            $delete_item = PurchasingUser::where('purchasing_id',$id)->delete();
+			$users = $request->user;
+            foreach ($users as $key => $user) {
+                $data = [
+                    'purchasing_id' => $id,
+                    'group_id' => $user,
+                ];
+                $ok = PurchasingUser::create($data);
+                if(!$ok){
+                    DB::rollback();
+                    return response()->json([
+                        'status' => false,
+                        'message'  => "Can't insert data purchasing user"
+                    ], 400);
+                }
+			}
+			
+            $delete_item = PurchasingBudget::where('purchasing_id',$id)->delete();
+			$budget_ids = $request->budget_id;
+            $budget_val = $request->budget_val;
+            foreach ($budget_ids as $key => $budget) {
+                $data = [
+                    'purchasing_id' => $id,
+                    'budget_id' => $budget,
+                    'value' => str_replace('.','',$budget_val[$key]),
+                ];
+                $ok = PurchasingBudget::create($data);
+                if(!$ok){
+                    DB::rollback();
+                    return response()->json([
+                        'status' => false,
+                        'message'  => "Can't insert data purchasing budget"
+                    ], 400);
+                }
+            }
+
+			DB::commit();
+            return response()->json([
+                'status' => true,
+                'message'  => "Data has been updated",
+                'id' => $id,
+                'results'=>url('admin/' . 'purchasing')
+            ], 200);
+		}else{
+			DB::rollback();
+            return response()->json([
+                'status' => false,
+                'message'  => "Can't update data purchasing"
+            ], 400);
+		}
+    }
+
+    public function show(Request $request,$id)
+    {
+        $roles = Role::all();
+        $userid = Auth::guard('admin')->user()->id;
+        $purchasing = Purchasing::find($id)->with('puser')->first();
+        $users = [];
+        foreach($purchasing->puser as $user){
+            array_push($users, $user->group_id);
+        }
+        $purchasing->puser = $users;
+        $purchasing->step = $this->getschedule($purchasing->id);
+        $purchasing->budget = $this->getbudget($purchasing->id);
+        $purchasing->total_step = count($this->getschedule($purchasing->id));
+        $purchasing->group = $this->getgroup($purchasing->id);
+        $budgets = Budget::orderBy('site_id','asc')->orderBy('name','asc')->get();
+        $role = Role::where('role_users.user_id', $userid)->join('role_users','roles.id','=','role_users.role_id')->first();
+        $group_code = $role->code;
+        // dd($purchasing->group);
+        if ($purchasing) {
+            return view('admin.purchasing.detail', compact('purchasing','roles','userid','budgets','group_code'));
+        } else {
+            abort(404);
+        }
+    }
+    
+    public function getgroup($purchasing_id) {
+        $purchasinguser = PurchasingUser::select('purchasing_users.*','roles.name');
+        $purchasinguser->leftJoin("roles","roles.id","=","purchasing_users.group_id");
+        $purchasinguser->where('purchasing_id', $purchasing_id);
+        $read = $purchasinguser->get();
+
+		$data = [];
+		foreach ($read as $key => $value) {
+			$data[] = $value;
+
+		}
+		return $data;
+	}
+
+    public function addnotes(Request $request){
+        $sch_id = $request->schedule_id;
+		$schedule_id = $sch_id;
+		$notes = $request->notes;
+		$notes_date = $request->notes_date;
+		$attach = $request->file('attach');
+		$table = 'purchasing_schedule_notes';
+
+        DB::beginTransaction();
+		$date = $notes_date;
+		$files = $attach;
+		foreach ($notes as $key => $note) {
+			$data = [
+				'schedule_id' => $schedule_id,
+				'notes' => $note,
+				'date' => $date[$key],
+			];
+
+            if (isset($files[$key]->filename)) {
+                $path = 'assets/procurement/purchasing/notes';
+                if (!file_exists($path)) {
+                    mkdir($path, 0777, true);
+                }
+                $files[$key]->move($path, $id_notes.'.'.$files->getClientOriginalExtension());
+                $filename = $path.$id_notes.'.'.$files->getClientOriginalExtension();
+                $data['file'] = $filename;
+            }
+
+            $ok = PurchasingScheduleNote::create($data);
+			if(!$ok){
+                DB::rollback();
+                return response()->json([
+                    'status' => false,
+                    'message'  => "Can't insert data notes"
+                ], 400);
+			}
+		}
+
+        $get = PurchasingSchedule::where('id',$schedule_id)->first();
+        $cek = PurchasingSchedule::where('purchasing_id', $get->purchasing_id)->where('date <', $get->date)->whereNull('status')->get();
+		if(count($cek) > 0){
+            DB::rollback();
+            return response()->json([
+                'status' => false,
+                'message'  => "Previous step must be proceed first !"
+            ], 400);
+		}
+
+		$data = array(
+			'status' => 'proceed'
+		);
+        $purchasing_schedule = PurchasingSchedule::find($schedule_id);
+        $update = $purchasing_schedule->update($data);
+		if(!$update){
+            DB::rollback();
+            return response()->json([
+                'status' => false,
+                'message'  => "Can't insert data notes"
+            ], 400);
+		}
+
+        DB::commit();
+        return response()->json([
+            'status' => true,
+            'message'  => "Data has been saved",
+            'id' => $get->purchasing_id,
+        ], 200);
+    }
+
+    public function destroy($id){
+        try {
+            $purchasing = Purchasing::find($id);
+            $purchasing->delete();
+        } catch (QueryException $th) {
+            return response()->json([
+                'status'    => false,
+                'message'   => 'Error delete data ' . $th->errorInfo[2]
+            ], 400);
+        }
+        return response()->json([
+            'status'    => true,
+            'message'   => 'Failed delete data'
+        ], 200);
+    }
+
+    public function test(){
+        $data = AdbSchedule::all();
+        echo json_encode($data);
     }
 }

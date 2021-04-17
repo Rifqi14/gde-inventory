@@ -1,0 +1,882 @@
+[
+    {
+        "id": 50,
+        "type": "works 2e",
+        "schedule_name": "ADB Approval of ePAF - RD (TBER)",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 54,
+        "type": "works 2e",
+        "schedule_name": "ADB Review of FBER - RD",
+        "period": "6",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 57,
+        "type": "works 2e",
+        "schedule_name": "Standstill Period",
+        "period": "3",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 58,
+        "type": "works 2e",
+        "schedule_name": "Contract Signing with the Successful Bidder",
+        "period": "28",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 59,
+        "type": "works 2e",
+        "schedule_name": "Submission of Signed Contract Agreement to ADB",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 63,
+        "type": "works and plant",
+        "schedule_name": "Consolidate Comments and Prepare NOB Letter",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 65,
+        "type": "works and plant",
+        "schedule_name": "Submission of Draft IFB to ADB",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 66,
+        "type": "works and plant",
+        "schedule_name": "ADB Review Clearance of Draft IFB",
+        "period": "2",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 67,
+        "type": "works and plant",
+        "schedule_name": "IFB Advertised in  ADB.org",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 68,
+        "type": "works and plant",
+        "schedule_name": "Bid Preparation",
+        "period": "42",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 70,
+        "type": "works and plant",
+        "schedule_name": "Submission of TBER to ADB",
+        "period": "60",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 71,
+        "type": "works and plant",
+        "schedule_name": "ADB Review of TBER - PC",
+        "period": "6",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 72,
+        "type": "works and plant",
+        "schedule_name": "ADB Approval of ePAF - PC",
+        "period": "4",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 73,
+        "type": "works and plant",
+        "schedule_name": "Issuance of ADB No-Objection of TBER",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 74,
+        "type": "works and plant",
+        "schedule_name": "Bid Opening of Financial Envelope (Envelope 2)",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 75,
+        "type": "works and plant",
+        "schedule_name": "Submission of FBER to ADB",
+        "period": "60",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 76,
+        "type": "works and plant",
+        "schedule_name": "ADB Review of FBER - RD",
+        "period": "6",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 78,
+        "type": "works and plant",
+        "schedule_name": "Issuance of ADB No-Objection of FBER",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 79,
+        "type": "works and plant",
+        "schedule_name": "Standstill Period",
+        "period": "3",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 81,
+        "type": "works and plant",
+        "schedule_name": "Submission of Signed Contract Agreement to ADB",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 82,
+        "type": "works and plant",
+        "schedule_name": "Preparation of PCSS",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 7,
+        "type": "goods",
+        "schedule_name": "IFB Advertised in  ADB.org",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 6,
+        "type": "goods",
+        "schedule_name": "ADB Review Clearance of Draft IFB",
+        "period": "2",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 29,
+        "type": "works 1e",
+        "schedule_name": "IFB Advertised in  ADB.org",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 8,
+        "type": "goods",
+        "schedule_name": "Bid Preparation",
+        "period": "42",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 9,
+        "type": "goods",
+        "schedule_name": "Bid Opening of Technical Envelope (Envelope 1)",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 10,
+        "type": "goods",
+        "schedule_name": "Submission of TBER to ADB",
+        "period": "60",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 11,
+        "type": "goods",
+        "schedule_name": "ADB Review of TBER - RD",
+        "period": "6",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 13,
+        "type": "goods",
+        "schedule_name": "Issuance of ADB No-Objection of TBER",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 15,
+        "type": "goods",
+        "schedule_name": "Submission of FBER to ADB",
+        "period": "60",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 16,
+        "type": "goods",
+        "schedule_name": "ADB Review of FBER - RD",
+        "period": "6",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 19,
+        "type": "goods",
+        "schedule_name": "Standstill Period",
+        "period": "3",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 14,
+        "type": "goods",
+        "schedule_name": "Bid Opening of Financial Envelope (Envelope 2)",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 4,
+        "type": "goods",
+        "schedule_name": "Issuance of ADB No-Objection of Bidding Documents",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 20,
+        "type": "goods",
+        "schedule_name": "Contract Signing with the Successful Bidder",
+        "period": "28",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 21,
+        "type": "goods",
+        "schedule_name": "Submission of Signed Contract Agreement to ADB",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 22,
+        "type": "goods",
+        "schedule_name": "Preparation of PCSS",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 25,
+        "type": "works 1e",
+        "schedule_name": "Consolidate Comments and Prepare NOB Letter",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 5,
+        "type": "goods",
+        "schedule_name": "Submission of Draft IFB to ADB",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 26,
+        "type": "works 1e",
+        "schedule_name": "Issuance of ADB No-Objection of Bidding Documents",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 27,
+        "type": "works 1e",
+        "schedule_name": "Submission of Draft IFB to ADB",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 41,
+        "type": "works 2e",
+        "schedule_name": "ADB Review Clearance of Draft IFB",
+        "period": "2",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 33,
+        "type": "works 1e",
+        "schedule_name": "ADB Review of BER - RD",
+        "period": "6",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 30,
+        "type": "works 1e",
+        "schedule_name": "Bid Preparation",
+        "period": "28",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 31,
+        "type": "works 1e",
+        "schedule_name": "Bid Opening",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 28,
+        "type": "works 1e",
+        "schedule_name": "ADB Review Clearance of Draft IFB",
+        "period": "2",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 32,
+        "type": "works 1e",
+        "schedule_name": "Submission of BER to ADB",
+        "period": "60",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 35,
+        "type": "works 1e",
+        "schedule_name": "Issuance of ADB No-Objection of BER",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 36,
+        "type": "works 1e",
+        "schedule_name": "Standstill Period",
+        "period": "3",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 38,
+        "type": "works 1e",
+        "schedule_name": "Submission of Signed Contract Agreement to ADB",
+        "period": "6",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 39,
+        "type": "works 1e",
+        "schedule_name": "Preparation of PCSS",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 42,
+        "type": "works 2e",
+        "schedule_name": "IFB Advertised in  ADB.org",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 43,
+        "type": "works 2e",
+        "schedule_name": "Submission of Draft Bidding Documents to ADB",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 44,
+        "type": "works 2e",
+        "schedule_name": "ADB Review Clearance of Bidding Documents - RD",
+        "period": "7",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 83,
+        "type": "pmc",
+        "schedule_name": "CSRN Posting",
+        "period": "0",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 85,
+        "type": "pmc",
+        "schedule_name": "Review and Approval of Submission 1",
+        "period": "14",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 46,
+        "type": "works 2e",
+        "schedule_name": "Bid Preparation",
+        "period": "42",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 47,
+        "type": "works 2e",
+        "schedule_name": "Bid Opening of Technical Envelope (Envelope 1)",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 48,
+        "type": "works 2e",
+        "schedule_name": "Submission of TBER to ADB",
+        "period": "60",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 49,
+        "type": "works 2e",
+        "schedule_name": "ADB Review of TBER - RD",
+        "period": "6",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 51,
+        "type": "works 2e",
+        "schedule_name": "Issuance of ADB No-Objection of TBER",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 86,
+        "type": "pmc",
+        "schedule_name": "Sending RFP, Reviewing Proposals, Evaluating Technical Proposal, and Preparation of Submission 2",
+        "period": "64",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 87,
+        "type": "pmc",
+        "schedule_name": "Review and Approval of Submission 2",
+        "period": "14",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 89,
+        "type": "pmc",
+        "schedule_name": "Review and Approval of Submission 3",
+        "period": "14",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 60,
+        "type": "works 2e",
+        "schedule_name": "Preparation of PCSS",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 62,
+        "type": "works and plant",
+        "schedule_name": "ADB Review Clearance of Bidding Documents - All Reviewers",
+        "period": "6",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 90,
+        "type": "pmc",
+        "schedule_name": "Contract Negotiation and Signing of Contract",
+        "period": "21",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 91,
+        "type": "pmc",
+        "schedule_name": "Copy of Contract Sent to ADB",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 92,
+        "type": "pilot plant",
+        "schedule_name": "Preparation of Submission 1",
+        "period": "0",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 93,
+        "type": "pilot plant",
+        "schedule_name": "Review and Approval of Submission 1",
+        "period": "21",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 95,
+        "type": "pilot plant",
+        "schedule_name": "Review and Approval of Submission 2",
+        "period": "7",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 96,
+        "type": "pilot plant",
+        "schedule_name": "Sending RFP, Reviewing Proposals, Evaluating Financial Proposal, and Preparation of Submission 3",
+        "period": "25",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 97,
+        "type": "pilot plant",
+        "schedule_name": "Review and Approval of Submission 3",
+        "period": "7",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 98,
+        "type": "pilot plant",
+        "schedule_name": "Contract Negotiation and Signing of Contract",
+        "period": "21",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 99,
+        "type": "pilot plant",
+        "schedule_name": "Copy of Contract Sent to ADB",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 100,
+        "type": "rig inspection",
+        "schedule_name": "Submission of RFQ to ADB",
+        "period": "0",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 101,
+        "type": "rig inspection",
+        "schedule_name": "ADB Review Clearance of RFQ - RD",
+        "period": "7",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 102,
+        "type": "rig inspection",
+        "schedule_name": "Issuance of ADB No-Objection of RFQ",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 103,
+        "type": "rig inspection",
+        "schedule_name": "Preparation of Quotation",
+        "period": "15",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 104,
+        "type": "rig inspection",
+        "schedule_name": "Submission of QER to ADB",
+        "period": "15",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 106,
+        "type": "rig inspection",
+        "schedule_name": "ADB Approval of ePAF - RD",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 107,
+        "type": "rig inspection",
+        "schedule_name": "Issuance of ADB No-Objection of QER",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 3,
+        "type": "goods",
+        "schedule_name": "Consolidate Comments and Prepare NOB Letter",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 53,
+        "type": "works 2e",
+        "schedule_name": "Submission of FBER to ADB",
+        "period": "60",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 55,
+        "type": "works 2e",
+        "schedule_name": "ADB Approval of ePAF - RD (FBER)",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 64,
+        "type": "works and plant",
+        "schedule_name": "Issuance of ADB No-Objection of Bidding Documents",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 69,
+        "type": "works and plant",
+        "schedule_name": "Bid Opening of Technical Envelope (Envelope 1)",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 77,
+        "type": "works and plant",
+        "schedule_name": "ADB Approval of ePAF - RD",
+        "period": "4",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 80,
+        "type": "works and plant",
+        "schedule_name": "Contract Signing with the Successful Bidder",
+        "period": "28",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 84,
+        "type": "pmc",
+        "schedule_name": "Shortlisting and Preparation of Submission 1",
+        "period": "44",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 88,
+        "type": "pmc",
+        "schedule_name": "Sending RFP, Reviewing Proposals, Evaluating Financial Proposal, and Preparation of Submission 3",
+        "period": "25",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 94,
+        "type": "pilot plant",
+        "schedule_name": "Sending RFP, Reviewing Proposals, Evaluating Technical Proposal, and Preparation of Submission 2",
+        "period": "64",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 105,
+        "type": "rig inspection",
+        "schedule_name": "ADB Review of QER - RD",
+        "period": "6",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 108,
+        "type": "rig inspection",
+        "schedule_name": "Contract Signing",
+        "period": "28",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 109,
+        "type": "rig inspection",
+        "schedule_name": "Submission of Signed Contract Agreement to ADB",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 110,
+        "type": "rig inspection",
+        "schedule_name": "Preparation of PCSS",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 1,
+        "type": "goods",
+        "schedule_name": "Submission of Draft Bidding Documents to ADB",
+        "period": "0",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 2,
+        "type": "goods",
+        "schedule_name": "ADB Review Clearance of Bidding Documents - All Reviewers",
+        "period": "6",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 12,
+        "type": "goods",
+        "schedule_name": "ADB Approval of ePAF - RD (TBER)",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 17,
+        "type": "goods",
+        "schedule_name": "ADB Approval of ePAF - RD (FBER)",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 18,
+        "type": "goods",
+        "schedule_name": "Issuance of ADB No-Objection of FBER",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 23,
+        "type": "works 1e",
+        "schedule_name": "Submission of Draft Bidding Documents to ADB",
+        "period": "0",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 24,
+        "type": "works 1e",
+        "schedule_name": "ADB Review Clearance of Bidding Documents - All Reviewers",
+        "period": "6",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 34,
+        "type": "works 1e",
+        "schedule_name": "ADB Approval of ePAF - RD",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 37,
+        "type": "works 1e",
+        "schedule_name": "Contract Signing with the Successful Bidder",
+        "period": "28",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 40,
+        "type": "works 2e",
+        "schedule_name": "Submission of Draft IFB to ADB",
+        "period": "0",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 45,
+        "type": "works 2e",
+        "schedule_name": "Issuance of ADB No-Objection of Bidding Documents",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 52,
+        "type": "works 2e",
+        "schedule_name": "Bid Opening of Financial Envelope (Envelope 2)",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 56,
+        "type": "works 2e",
+        "schedule_name": "Issuance of ADB No-Objection of FBER",
+        "period": "1",
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 61,
+        "type": "works and plant",
+        "schedule_name": "Submission of Draft Bidding Documents to ADB",
+        "period": "0",
+        "created_at": null,
+        "updated_at": null
+    }
+]

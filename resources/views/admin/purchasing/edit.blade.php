@@ -18,7 +18,7 @@
 <div class="row mb-3 mt-3">
     <div class="col-sm-4">
         <h1 id="title-branch" class="m-0 text-dark">
-            Create Purchasing
+            Edit Purchasing
         </h1>
     </div>
     <div class="col-sm-8">
@@ -26,7 +26,7 @@
             <li class="breadcrumb-item">Home</li>
             <li class="breadcrumb-item">Procurment</li>
             <li class="breadcrumb-item">Purchasing</li>
-            <li class="breadcrumb-item">Create</li> 
+            <li class="breadcrumb-item">Edit</li> 
         </ol>
     </div>
 </div>
@@ -35,8 +35,9 @@
 @section('content')
 <section class="content" id="content">
     <div class="container-fluid">
-        <form role="form" id="form" action="{{route('purchasing.store')}}">
+        <form role="form" id="form" action="{{route('purchasing.update',['id'=>$purchasing->id])}}" method="post" enctype="multipart/form-data">
             {{ csrf_field() }}
+            <input type="hidden" name="_method" value="put">
             <div class="row">
                 <div class="col-md-8">
                     <div class="card">
@@ -47,22 +48,17 @@
                             </span>
                             <div class="form-group mt-4">
                                 <label for="complainant">Number:</label>
-                                <input type="text" name="number" placeholder="Procurement Number..." class="form-control" autocomplete="false" required="true" />
+                                <input type="text" name="number" placeholder="Procurement Number..." class="form-control" autocomplete="false" required="true" value="{{ $purchasing->number }}"/>
                             </div>
                             <div class="form-group mt-4">
                                 <label for="complainant">Subject:</label>
-                                <input type="text" name="subject" class="form-control" placeholder="Procurement Subject...">
+                                <input type="text" name="subject" class="form-control" placeholder="Procurement Subject..." value="{{ $purchasing->subject }}">
                             </div>
                             <div class="form-group mt-3">
                                 <div class="row">
                                     <div class="col-4">
                                         <label>Rule:</label>
-                                        <select name="rule" id="" class="form-control" onchange="selectRule(this)" required>
-                                            <option value="">Select Rule</option>
-                                            @foreach(config('enums.rule') as $key => $rule)
-                                                <option value="{{ $key }}">{{ $rule }}</option>
-                                            @endforeach
-                                        </select>
+                                        <input type="text" class="form-control" value="{{ strtoupper($purchasing->rule) }}" readonly>
                                     </div>
                                     <div class="col-8">
                                         <label>Estimated Value:</label>
@@ -71,12 +67,12 @@
                                                 <select name="est_currency" class="form-control" required>
                                                     <option value="">Choose a Currency</option>
                                                     @foreach(config('enums.currency') as $key => $currency)
-                                                        <option value="{{ $key }}">{{ $currency }}</option>
+                                                        <option value="{{ $key }}" @if($purchasing->est_currency==$key) selected @endif>{{ $currency }}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
                                             <div class="col-9">
-                                                <input type="text" name="est_value" class="form-control input-price" placeholder="Estimated Value">
+                                                <input type="text" name="est_value" class="form-control input-price" placeholder="Estimated Value" value="{{ number_format($purchasing->est_value,'0',',','.') }}">
                                             </div>
                                         </div>
                                     </div>
@@ -87,7 +83,7 @@
                                 <div class="col-8">
                                 <select name="user[]" id="" class="form-control select2" multiple="multiple" data-placeholder="Tag User Group">
                                     @foreach($roles as $role)
-                                        <option value="{{ $role->id }}">{{ $role->name }}</option>
+                                        <option value="{{ $role->id }}" @if(in_array($role->id, $purchasing->puser)) selected @endif >{{ $role->name }}</option>
                                     @endforeach
                                 </select>
                                 </div>
@@ -99,7 +95,7 @@
                                         <label class="col-4 col-form-label">Technical:</label>
                                         <div class="col-8">
                                             <div class="input-group">
-                                                <input type="text" class="form-control input-price" name="technical" placeholder="Technical Portion..." autocomplete="off" required onkeyup="getPortion(this)" />
+                                                <input type="text" class="form-control input-price" name="technical" placeholder="Technical Portion..." autocomplete="off" required onkeyup="getPortion(this)" value="{{ $purchasing->technical }}"/>
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">%</span>
                                                 </div>
@@ -110,274 +106,50 @@
                                         <label class="col-4 col-form-label">Financial:</label>
                                         <div class="col-8">
                                             <div class="input-group">
-                                                <input type="text" class="form-control" name="financial" placeholder="Financial Portion..." autocomplete="off" required readonly />
+                                                <input type="text" class="form-control" name="financial" placeholder="Financial Portion..." autocomplete="off" required readonly value="{{ $purchasing->financial }}"/>
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">%</span>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div id="choose-adb" class="form-group row hidden">
-                                        <label class="col-4 col-form-label">ADB Guideline:</label>
+                                </div>
+                                <div class="col-12">
+                                    <div id="choose-adb" class="form-group row @if($purchasing->rule!='adb') hidden @endif">
+                                        <label class="col-4 col-form-label">Choose:</label>
                                         <div class="col-8">
-                                            <select name="choose_adb" id="choose_adb" class="form-control select2" onchange="chooseSchedule(this)">
+                                            <select name="choose_adb" id="choose_adb" class="form-control select2" onchange="chooseSchedule(this)" disabled>
                                                 <option value="">Tag ADB Guideline</option>
                                                 @foreach(config('enums.adb_guideline') as $key => $adb_guideline)
-                                                    <option value="{{ $key }}">{{ $adb_guideline }}</option>
+                                                    <option value="{{ $key }}" @if($purchasing->adb == $key) selected @endif >{{ $adb_guideline }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
                                     </div>
-                                    <div id="schedule-gde" class="form-group hidden">
-                    <label>Schedule:</label>
-                    <div class="row">
-                      <div class="col-6">
-                        <ul class="todo-list" data-widget="todo-list" id="input-list-checkbox">
-                          <li>
-                            <div class="icheck-success d-inline ml-2">
-                              <input type="checkbox" value="Advertisement" name="schedule_name_1" id="todoCheck0">
-                              <label for="todoCheck0"></label>
-                            </div>
-                            <span class="text">Advertisement</span>
-                            <div class="row-form">
-                              <div class="row mb-1">
-                                <div class="col-12">
-                                  <div class="input-group">
-                                    <div class="input-group-prepend">
-                                      <span class="input-group-text">
-                                        <i class="far fa-calendar-alt"></i>
-                                      </span>
-                                    </div>
-                                    <input type="text" class="form-control date datepicker2 text-right" placeholder="" name="gde_date_1">
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </li>
-                          <li>
-                            <div class="icheck-success d-inline ml-2">
-                              <input type="checkbox" value="Aanwijzing" name="schedule_name_2" id="todoCheck1">
-                              <label for="todoCheck1"></label>
-                            </div>
-                            <span class="text">Aanwijzing</span>
-                            <div class="row-form">
-                              <div class="row mb-1">
-                                <div class="col-12">
-                                  <div class="input-group">
-                                    <div class="input-group-prepend">
-                                      <span class="input-group-text">
-                                        <i class="far fa-calendar-alt"></i>
-                                      </span>
-                                    </div>
-                                    <input type="text" class="form-control date datepicker2 text-right" placeholder="" name="gde_date_2">
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </li>
-                          <li>
-                            <div class="icheck-success d-inline ml-2">
-                              <input type="checkbox" value="Site Visit" name="schedule_name_3" id="todoCheck2">
-                              <label for="todoCheck2"></label>
-                            </div>
-                            <span class="text">Site Visit</span>
-                            <div class="row-form">
-                              <div class="row mb-1">
-                                <div class="col-12">
-                                  <div class="input-group">
-                                    <div class="input-group-prepend">
-                                      <span class="input-group-text">
-                                        <i class="far fa-calendar-alt"></i>
-                                      </span>
-                                    </div>
-                                    <input type="text" class="form-control date datepicker2 text-right" placeholder="" name="gde_date_3">
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </li>
-                          <li>
-                            <div class="icheck-success d-inline ml-2">
-                              <input type="checkbox" value="Envelope Submission" name="schedule_name_4" id="todoCheck3">
-                              <label for="todoCheck3"></label>
-                            </div>
-                            <span class="text">Envelope Submission</span>
-                            <div class="row-form">
-                              <div class="row mb-1">
-                                <div class="col-12">
-                                  <div class="input-group">
-                                    <div class="input-group-prepend">
-                                      <span class="input-group-text">
-                                        <i class="far fa-calendar-alt"></i>
-                                      </span>
-                                    </div>
-                                    <input type="text" class="form-control date datepicker2 text-right" placeholder="" name="gde_date_4">
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </li>
-                          <li>
-                            <div class="icheck-success d-inline ml-2">
-                              <input type="checkbox" value="Technical Evaluation" name="schedule_name_5" id="todoCheck4">
-                              <label for="todoCheck4"></label>
-                            </div>
-                            <span class="text">Technical Evaluation</span>
-                            <div class="row-form">
-                              <div class="row mb-1">
-                                <div class="col-12">
-                                  <div class="input-group">
-                                    <div class="input-group-prepend">
-                                      <span class="input-group-text">
-                                        <i class="far fa-calendar-alt"></i>
-                                      </span>
-                                    </div>
-                                    <input type="text" class="form-control date datepicker2 text-right" placeholder="" name="gde_date_5">
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </li>
-                          <li>
-                            <div class="icheck-success d-inline ml-2">
-                              <input type="checkbox" value="Financial Evaluation" name="schedule_name_6" id="todoCheck5">
-                              <label for="todoCheck5"></label>
-                            </div>
-                            <span class="text">Financial Evaluation</span>
-                            <div class="row-form">
-                              <div class="row mb-1">
-                                <div class="col-12">
-                                  <div class="input-group">
-                                    <div class="input-group-prepend">
-                                      <span class="input-group-text">
-                                        <i class="far fa-calendar-alt"></i>
-                                      </span>
-                                    </div>
-                                    <input type="text" class="form-control date datepicker2 text-right" placeholder="" name="gde_date_6">
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </li>
-                        </ul>
-                      </div>
-                      <div class="col-6">
-                        <ul class="todo-list" data-widget="todo-list" id="input-list-checkbox">
-                          <li>
-                            <div class="icheck-success d-inline ml-2">
-                              <input type="checkbox" value="Clarification" name="schedule_name_7" id="todoCheck7">
-                              <label for="todoCheck7"></label>
-                            </div>
-                            <span class="text">Clarification</span>
-                            <div class="row-form">
-                              <div class="row mb-1">
-                                <div class="col-12">
-                                  <div class="input-group">
-                                    <div class="input-group-prepend">
-                                      <span class="input-group-text">
-                                        <i class="far fa-calendar-alt"></i>
-                                      </span>
-                                    </div>
-                                    <input type="text" class="form-control date datepicker2 text-right" placeholder="" name="gde_date_7">
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </li>
-                          <li>
-                            <div class="icheck-success d-inline ml-2">
-                              <input type="checkbox" value="Winner Announcement" name="schedule_name_8" id="todoCheck8">
-                              <label for="todoCheck8"></label>
-                            </div>
-                            <span class="text">Winner Announcement</span>
-                            <div class="row-form">
-                              <div class="row mb-1">
-                                <div class="col-12">
-                                  <div class="input-group">
-                                    <div class="input-group-prepend">
-                                      <span class="input-group-text">
-                                        <i class="far fa-calendar-alt"></i>
-                                      </span>
-                                    </div>
-                                    <input type="text" class="form-control date datepicker2 text-right" placeholder="" name="gde_date_8">
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </li>
-                          <li>
-                            <div class="icheck-success d-inline ml-2">
-                              <input type="checkbox" value="Contract Negotiation" name="schedule_name_9" id="todoCheck9">
-                              <label for="todoCheck9"></label>
-                            </div>
-                            <span class="text">Contract Negotiation</span>
-                            <div class="row-form">
-                              <div class="row mb-1">
-                                <div class="col-12">
-                                  <div class="input-group">
-                                    <div class="input-group-prepend">
-                                      <span class="input-group-text">
-                                        <i class="far fa-calendar-alt"></i>
-                                      </span>
-                                    </div>
-                                    <input type="text" class="form-control date datepicker2 text-right" placeholder="" name="gde_date_9">
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </li>
-                          <li>
-                            <div class="icheck-success d-inline ml-2">
-                              <input type="checkbox" value="Physical Check" name="schedule_name_10" id="todoCheck10">
-                              <label for="todoCheck10"></label>
-                            </div>
-                            <span class="text">Physical Check</span>
-                            <div class="row-form">
-                              <div class="row mb-1">
-                                <div class="col-12">
-                                  <div class="input-group">
-                                    <div class="input-group-prepend">
-                                      <span class="input-group-text">
-                                        <i class="far fa-calendar-alt"></i>
-                                      </span>
-                                    </div>
-                                    <input type="text" class="form-control date datepicker2 text-right" placeholder="" name="gde_date_10">
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </li>
-                          <li>
-                            <div class="icheck-success d-inline ml-2">
-                              <input type="checkbox" value="Contract Signing" name="schedule_name_11" id="todoCheck11">
-                              <label for="todoCheck11"></label>
-                            </div>
-                            <span class="text">Contract Signing</span>
-                            <div class="row-form">
-                              <div class="row mb-1">
-                                <div class="col-12">
-                                  <div class="input-group">
-                                    <div class="input-group-prepend">
-                                      <span class="input-group-text">
-                                        <i class="far fa-calendar-alt"></i>
-                                      </span>
-                                    </div>
-                                    <input type="text" class="form-control date datepicker2 text-right" placeholder="" name="gde_date_11">
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-                                    </div>
-                                    <div id="schedule-adb" class="form-group hidden">
+                                    <div id="schedule-adb" class="form-group">
                                         <label>Schedule:</label>
                                         <div class="row">
                                             <div class="col-12">
-                                                <ul class="todo-list first_data" data-widget="todo-list" id="input-list-checkbox">
-                                                
+                                                <ul class="todo-list" data-widget="todo-list" id="input-list-checkbox">
+                                                    @foreach($purchasing->step as $val)
+                                                        <li>
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <span class="text"><?php echo ($purchasing->rule == 'adb') ? $val->schedule_name:$val->schedule ?></span>
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    <div class="input-group mt-1">
+                                                                        <div class="input-group-prepend">
+                                                                            <span class="input-group-text">
+                                                                                <i class="far fa-calendar-alt"></i>
+                                                                            </span>
+                                                                        </div>
+                                                                        <input type="text" class="form-control date text-right" value="<?php echo date('d/m/Y', strtotime($val->date)) ?>" readonly >
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </li>
+                                                    @endforeach
                                                 </ul>
                                             </div>
                                         </div>
@@ -397,20 +169,32 @@
                             <div class="form-group mt-4">
                                 <label>Budget:</label>
                                 <div id="form-budget">
-                                    <div class="row item-budget">
-                                        <div class="col-md-6">
-                                            <select type="text" class="select2 form-control" id="budget" name="budget_id[]" data-placeholder="Tag Budget..." >
-                                            </select>
+                                    @php $num = 0; @endphp
+                                    @foreach ($purchasing->budget as $key => $bud)
+                                        @php $num++; @endphp
+                                        <div class="row item-budget @if($num>1) mt-1 @endif" @if($num>1) id="rbudget-{{ $num }}" @endif >
+                                            <div class="col-md-6">
+                                                <select type="text" class="select2 form-control" name="budget_id[]" data-placeholder="Tag Budget..." >
+                                                    @foreach($budgets as $budget)
+                                                        <option value="{{ $budget->id }}" @if($budget->id==$bud->budget_id) selected @endif >{{ $budget->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <input type="text" name="budget_val[]" class="form-control input-price" placeholder="Enter Budget Value" value="{{ number_format($bud->value,'0',',','.') }}">
+                                            </div>
+                                            <div class="col-md-2" @if($num!=count($purchasing->budget)) @if($num!=1) style="display:none;" @endif @endif >
+                                                @if($num == 1)
+                                                    <button id="add-budget" data-urutan="@if(count($purchasing->budget)>0){{count($purchasing->budget)}}@else 1 @endif" type="button" class="btn btn-success legitRipple text-sm">
+                                                        <b><i class="fas fa-plus"></i></b>
+                                                    </button>
+                                                @endif
+                                                @if($num > 1)
+                                                    <button type="button" class="btn btn-transparent text-md" onclick="removeBudget(this)" data-urutan="{{ $num }}"><i class="fas fa-trash text-maroon color-palette"></i></button>
+                                                @endif
+                                            </div>
                                         </div>
-                                        <div class="col-md-4">
-                                            <input type="text" name="budget_val[]" class="form-control input-price" placeholder="Enter Budget Value">
-                                        </div>
-                                        <div class="col-md-2">
-                                            <button id="add-budget" data-urutan="1" type="button" class="btn btn-success legitRipple text-sm">
-                                                <b><i class="fas fa-plus"></i></b>
-                                            </button>
-                                        </div>
-                                    </div>
+                                    @endforeach
                                 </div>
                             </div>
                             <div class="form-group">
@@ -425,7 +209,7 @@
                             <div class="form-group">
                                 <label>Procurement Duration Target:</label>
                                 <div class="input-group">
-                                    <input id="sum_days" type="text" class="form-control text-right" name="duration" placeholder="Enter Duration Target..." autocomplete="off" readonly />
+                                    <input id="sum_days" type="text" class="form-control text-right" name="duration" placeholder="Enter Duration Target..." autocomplete="off" readonly value="{{ $purchasing->duration }}"/>
                                     <div class="input-group-append">
                                         <span class="input-group-text">days</span>
                                     </div>
@@ -660,7 +444,7 @@
         
         $.ajax({
             url: "{{ route('purchasing.getgdeperiod') }}",
-            method: 'get',
+            method: 'post',
             dataType: 'json',
             data: {
                 date: date,
@@ -785,7 +569,7 @@
         let type = $('#choose_adb').val()
         $.ajax({
             url: "{{ route('purchasing.getperiod') }}",
-            method: 'get',
+            method: 'post',
             dataType: 'json',
             data: {
                 date: date,
