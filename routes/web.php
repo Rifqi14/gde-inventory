@@ -81,9 +81,9 @@ Route::group(['prefix' => 'admin'], function () {
         Route::resource('/contract', 'Admin\ContractController');
 
         //Route Business Trip
-        Route::get('/business-trip/read', 'Admin\BusinessTripController@read')->name('bt.read');
-        Route::get('/business-trip/select', 'Admin\BusinessTripController@select')->name('bt.select');
-        Route::resource('/business-trip', 'Admin\BusinessTripController');
+        Route::get('/businesstrip/read', 'Admin\BusinessTripController@read')->name('bt.read');
+        Route::get('/businesstrip/select', 'Admin\BusinessTripController@select')->name('bt.select');
+        Route::resource('/businesstrip', 'Admin\BusinessTripController');
 
         // Route Product Category
         Route::get('/productcategory/read','Admin\ProductCategoryController@read')->name('productcategory.read');        
