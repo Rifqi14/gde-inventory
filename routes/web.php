@@ -79,7 +79,15 @@ Route::group(['prefix' => 'admin'], function () {
         //Route Contract
         Route::get('/contract/read', 'Admin\ContractController@read')->name('contract.read');
         Route::resource('/contract', 'Admin\ContractController');
-
+        //Route Purchasing
+        Route::get('/purchasing/read', 'Admin\PurchasingController@read')->name('purchasing.read');
+        Route::get('/purchasing/select', 'Admin\PurchasingController@select')->name('purchasing.select');
+        Route::get('/purchasing/getgdeperiod', 'Admin\PurchasingController@getgdeperiod')->name('purchasing.getgdeperiod');
+        Route::get('/purchasing/getadb', 'Admin\PurchasingController@getadb')->name('purchasing.getadb');
+        Route::get('/purchasing/getperiod', 'Admin\PurchasingController@getperiod')->name('purchasing.getperiod');
+        Route::post('/purchasing/addnotes', 'Admin\PurchasingController@addnotes')->name('purchasing.addnotes');
+        Route::get('/purchasing/test', 'Admin\PurchasingController@test');
+        Route::resource('/purchasing', 'Admin\PurchasingController');
         //Route Business Trip
         Route::get('/businesstrip/read', 'Admin\BusinessTripController@read')->name('bt.read');
         Route::get('/businesstrip/select', 'Admin\BusinessTripController@select')->name('bt.select');
@@ -91,5 +99,11 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/productcategory/edit/{id}', 'Admin\ProductCategoryController@edit');                
         Route::get('/productcategory/delete/{id}','Admin\ProductCategoryController@destroy')->name('productcategory.delete');
         Route::resource('/productcategory','Admin\ProductCategoryController');
+
+        // Route UOM Category
+        Route::get('/uomcategory/read','Admin\UomCategoryController@read')->name('uomcategory.read');        
+        Route::get('/uomcategory/delete/{id}','Admin\UomCategoryController@destroy');
+        Route::get('/uomcategory/edit/{id}','Admin\UomCategoryController@edit');
+        Route::resource('/uomcategory','Admin\UomCategoryController');
     });
 });
