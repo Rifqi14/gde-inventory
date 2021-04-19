@@ -91,6 +91,13 @@ Route::group(['prefix' => 'admin'], function () {
         // Route Warehouse
         Route::get('/warehouse/read', 'Admin\WarehouseController@read')->name('warehouse.read');
         Route::resource('/warehouse', 'Admin\WarehouseController');
+        // Route Rack
+        Route::get('/rack/select', 'Admin\RackController@select')->name('rack.select');
+        Route::get('/rack/read', 'Admin\RackController@read')->name('rack.read');
+        Route::resource('/rack', 'Admin\RackController');
+        // Route Bin
+        Route::get('/bin/read', 'Admin\BinController@read')->name('bin.read');
+        Route::resource('/bin', 'Admin\BinController');
         // Route Province
         Route::get('/province/select', 'Admin\ProvinceController@select')->name('province.select');
         // Route Region

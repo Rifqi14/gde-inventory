@@ -216,7 +216,7 @@ class WarehouseController extends Controller
         }
         return response()->json([
             'status'    => true,
-            'message'   => 'Failed delete data'
+            'message'   => 'Success delete data'
         ], 200);
     }
 
