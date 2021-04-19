@@ -70,11 +70,11 @@ class WarehouseController extends Controller
 
     public function getBinTotal($warehouse_id){
         $rackwarehouses = RackWarehouse::where('warehouse_id',$warehouse_id)->get();
-        $rack = [];
+        $racks = [];
         foreach($rackwarehouses as $rack){
-            array_push($rack->id, $rack);
+            array_push($racks,$rack->id);
         }
-        $total = BinWarehouse::whereIn('rack_id',$rack)->count();
+        $total = BinWarehouse::whereIn('rack_id',$racks)->count();
         return $total;
     }
 
