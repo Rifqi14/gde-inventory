@@ -19,6 +19,8 @@ Route::get('admin/error', function () {
 });
 Auth::routes();
 
+Route::get('/test', 'Admin\TestController@test')->name('test');
+
 Route::get('/home', 'HomeController@index')->name('home');
 Route::group(['prefix' => 'admin'], function () {
     Route::get('/', 'Auth\AdminLoginController@showLoginForm')->name('admin.login');
@@ -104,6 +106,8 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/region/select', 'Admin\RegionController@select')->name('region.select');
         // Route District
         Route::get('/district/select', 'Admin\DistrictController@select')->name('district.select');
+        // Route Village
+        Route::get('/village/select', 'Admin\VillageController@select')->name('village.select');
         //Route Business Trip
         Route::get('/businesstrip/read', 'Admin\BusinessTripController@read')->name('bt.read');
         Route::get('/businesstrip/select', 'Admin\BusinessTripController@select')->name('bt.select');

@@ -1,104 +1,206 @@
 [
     {
-        "name": "Bali"
+        "id": 11,
+        "name": "ACEH",
+        "created_at": "2021-01-19 19:44:00",
+        "updated_at": "2021-01-19 19:44:00"
     },
     {
-        "name": "Bangka Belitung"
+        "id": 12,
+        "name": "SUMATERA UTARA",
+        "created_at": "2021-01-19 19:44:00",
+        "updated_at": "2021-01-19 19:44:00"
     },
     {
-        "name": "Banten"
+        "id": 13,
+        "name": "SUMATERA BARAT",
+        "created_at": "2021-01-19 19:44:00",
+        "updated_at": "2021-01-19 19:44:00"
     },
     {
-        "name": "Bengkulu"
+        "id": 14,
+        "name": "RIAU",
+        "created_at": "2021-01-19 19:44:00",
+        "updated_at": "2021-01-19 19:44:00"
     },
     {
-        "name": "DI Yogyakarta"
+        "id": 15,
+        "name": "JAMBI",
+        "created_at": "2021-01-19 19:44:00",
+        "updated_at": "2021-01-19 19:44:00"
     },
     {
-        "name": "DKI Jakarta"
+        "id": 16,
+        "name": "SUMATERA SELATAN",
+        "created_at": "2021-01-19 19:44:00",
+        "updated_at": "2021-01-19 19:44:00"
     },
     {
-        "name": "Gorontalo"
+        "id": 17,
+        "name": "BENGKULU",
+        "created_at": "2021-01-19 19:44:00",
+        "updated_at": "2021-01-19 19:44:00"
     },
     {
-        "name": "Jambi"
+        "id": 18,
+        "name": "LAMPUNG",
+        "created_at": "2021-01-19 19:44:00",
+        "updated_at": "2021-01-19 19:44:00"
     },
     {
-        "name": "Jawa Barat"
+        "id": 19,
+        "name": "KEPULAUAN BANGKA BELITUNG",
+        "created_at": "2021-01-19 19:44:00",
+        "updated_at": "2021-01-19 19:44:00"
     },
     {
-        "name": "Jawa Tengah"
+        "id": 21,
+        "name": "KEPULAUAN RIAU",
+        "created_at": "2021-01-19 19:44:00",
+        "updated_at": "2021-01-19 19:44:00"
     },
     {
-        "name": "Jawa Timur"
+        "id": 31,
+        "name": "DKI JAKARTA",
+        "created_at": "2021-01-19 19:44:00",
+        "updated_at": "2021-01-19 19:44:00"
     },
     {
-        "name": "Kalimantan Barat"
+        "id": 32,
+        "name": "JAWA BARAT",
+        "created_at": "2021-01-19 19:44:00",
+        "updated_at": "2021-01-19 19:44:00"
     },
     {
-        "name": "Kalimantan Selatan"
+        "id": 33,
+        "name": "JAWA TENGAH",
+        "created_at": "2021-01-19 19:44:00",
+        "updated_at": "2021-01-19 19:44:00"
     },
     {
-        "name": "Kalimantan Tengah"
+        "id": 34,
+        "name": "DI YOGYAKARTA",
+        "created_at": "2021-01-19 19:44:00",
+        "updated_at": "2021-01-19 19:44:00"
     },
     {
-        "name": "Kalimantan Timur"
+        "id": 35,
+        "name": "JAWA TIMUR",
+        "created_at": "2021-01-19 19:44:00",
+        "updated_at": "2021-01-19 19:44:00"
     },
     {
-        "name": "Kalimantan Utara"
+        "id": 36,
+        "name": "BANTEN",
+        "created_at": "2021-01-19 19:44:00",
+        "updated_at": "2021-01-19 19:44:00"
     },
     {
-        "name": "Kepulauan Riau"
+        "id": 51,
+        "name": "BALI",
+        "created_at": "2021-01-19 19:44:00",
+        "updated_at": "2021-01-19 19:44:00"
     },
     {
-        "name": "Lampung"
+        "id": 52,
+        "name": "NUSA TENGGARA BARAT",
+        "created_at": "2021-01-19 19:44:00",
+        "updated_at": "2021-01-19 19:44:00"
     },
     {
-        "name": "Maluku"
+        "id": 53,
+        "name": "NUSA TENGGARA TIMUR",
+        "created_at": "2021-01-19 19:44:00",
+        "updated_at": "2021-01-19 19:44:00"
     },
     {
-        "name": "Maluku Utara"
+        "id": 61,
+        "name": "KALIMANTAN BARAT",
+        "created_at": "2021-01-19 19:44:00",
+        "updated_at": "2021-01-19 19:44:00"
     },
     {
-        "name": "Nanggroe Aceh Darussalam (NAD)"
+        "id": 62,
+        "name": "KALIMANTAN TENGAH",
+        "created_at": "2021-01-19 19:44:00",
+        "updated_at": "2021-01-19 19:44:00"
     },
     {
-        "name": "Nusa Tenggara Barat (NTB)"
+        "id": 63,
+        "name": "KALIMANTAN SELATAN",
+        "created_at": "2021-01-19 19:44:00",
+        "updated_at": "2021-01-19 19:44:00"
     },
     {
-        "name": "Nusa Tenggara Timur (NTT)"
+        "id": 64,
+        "name": "KALIMANTAN TIMUR",
+        "created_at": "2021-01-19 19:44:00",
+        "updated_at": "2021-01-19 19:44:00"
     },
     {
-        "name": "Papua"
+        "id": 65,
+        "name": "KALIMANTAN UTARA",
+        "created_at": "2021-01-19 19:44:00",
+        "updated_at": "2021-01-19 19:44:00"
     },
     {
-        "name": "Papua Barat"
+        "id": 71,
+        "name": "SULAWESI UTARA",
+        "created_at": "2021-01-19 19:44:00",
+        "updated_at": "2021-01-19 19:44:00"
     },
     {
-        "name": "Riau"
+        "id": 72,
+        "name": "SULAWESI TENGAH",
+        "created_at": "2021-01-19 19:44:00",
+        "updated_at": "2021-01-19 19:44:00"
     },
     {
-        "name": "Sulawesi Barat"
+        "id": 73,
+        "name": "SULAWESI SELATAN",
+        "created_at": "2021-01-19 19:44:00",
+        "updated_at": "2021-01-19 19:44:00"
     },
     {
-        "name": "Sulawesi Selatan"
+        "id": 74,
+        "name": "SULAWESI TENGGARA",
+        "created_at": "2021-01-19 19:44:00",
+        "updated_at": "2021-01-19 19:44:00"
     },
     {
-        "name": "Sulawesi Tengah"
+        "id": 75,
+        "name": "GORONTALO",
+        "created_at": "2021-01-19 19:44:00",
+        "updated_at": "2021-01-19 19:44:00"
     },
     {
-        "name": "Sulawesi Tenggara"
+        "id": 76,
+        "name": "SULAWESI BARAT",
+        "created_at": "2021-01-19 19:44:00",
+        "updated_at": "2021-01-19 19:44:00"
     },
     {
-        "name": "Sulawesi Utara"
+        "id": 81,
+        "name": "MALUKU",
+        "created_at": "2021-01-19 19:44:00",
+        "updated_at": "2021-01-19 19:44:00"
     },
     {
-        "name": "Sumatera Barat"
+        "id": 82,
+        "name": "MALUKU UTARA",
+        "created_at": "2021-01-19 19:44:00",
+        "updated_at": "2021-01-19 19:44:00"
     },
     {
-        "name": "Sumatera Selatan"
+        "id": 91,
+        "name": "PAPUA BARAT",
+        "created_at": "2021-01-19 19:44:00",
+        "updated_at": "2021-01-19 19:44:00"
     },
     {
-        "name": "Sumatera Utara"
+        "id": 94,
+        "name": "PAPUA",
+        "created_at": "2021-01-19 19:44:00",
+        "updated_at": "2021-01-19 19:44:00"
     }
 ]

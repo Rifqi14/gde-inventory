@@ -105,7 +105,8 @@
                                     <div class="form-group row">
                                         <label class="col-md-12 col-xs-12 control-label" for="subdistrict_id">Sub Distric <b class="text-danger">*</b></label>
                                         <div class="col-sm-12 controls">
-                                            <input type="text" class="form-control" id="subdistrict_id" name="subdistrict_id" placeholder="Sub Distric" required="" aria-required="true">
+                                            <select data-placeholder="Choose Sub Distric" style="width: 100%;" required class="select2 form-control" id="village_id" name="subdistrict_id" data-placeholder="Select Sub Distric">
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -351,6 +352,35 @@
         $( "#district_id" ).select2({
             ajax: {
                 url: "{{ route('district.select') }}",
+                type:'GET',
+                dataType: 'json',
+                data: function (params) {
+                    return {
+                        name:params.term,
+                        page:params.page,
+                        limit:30,
+                    };
+                },
+                processResults: function (data,params) {
+                var more = (params.page * 30) < data.total;
+                var option = [];
+                $.each(data.rows,function(index,item){
+                    option.push({
+                        id:item.id,  
+                        text: item.name
+                    });
+                });
+                return {
+                    results: option, more: more,
+                };
+                },
+            },
+            allowClear: true,
+        });
+
+        $( "#village_id" ).select2({
+            ajax: {
+                url: "{{ route('village.select') }}",
                 type:'GET',
                 dataType: 'json',
                 data: function (params) {
