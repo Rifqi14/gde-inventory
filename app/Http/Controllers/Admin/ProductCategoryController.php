@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\ProductCategory;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 class ProductCategoryController extends Controller

@@ -1,17 +1,5 @@
 @extends('admin.layouts.app')
 @section('title','Product Category')
-@section('stylesheets')
-
-@endsection
-
-@section('button')
-<button type="button" id="add-product-category" class="btn btn-labeled text-sm btn-sm btn-success btn-flat legitRipple" onclick="windowLocation('{{route('productcategory.create')}}')">
-  <b><i class="fas fa-plus"></i></b> Create
-</button>
-<button type="button" id="filter-product-category" class="btn btn-labeled text-sm btn-sm btn-default btn-flat legitRipple" onclick="filter()">
-  <b><i class="fas fa-search"></i></b> Filter
-</button>
-@endsection
 
 @section('breadcrumb')
 <div class="row mb-3 mt-3">
@@ -35,18 +23,31 @@
     <div class="row">
       <div class="col-md-12">
         <div class="card">
-          <div class="card-header"></div>
-          <div class="card-body table-responsive p-0">
-            <table id="table-product-category" class="table table-striped datatable" width="100%">
-              <thead>
-                <tr>
-                  <th class="text-center" width="10%">No.</th>
-                  <th width="200">Nama</th>
-                  <th width="50">Dibuat</th>
-                  <th class="text-center" width="10%">Action</th>
-                </tr>
-              </thead>
-            </table>
+          <div class="card-header">
+            @if(in_array('read',$actionmenu))
+            <button type="button" id="filter-product-category" class="btn btn-labeled text-sm btn-sm btn-default btn-flat legitRipple float-right ml-1" onclick="filter()">
+              <b><i class="fas fa-search"></i></b> Search
+            </button>
+            @endif
+            @if(in_array('create',$actionmenu))
+            <button type="button" id="add-product-category" class="btn btn-labeled text-sm btn-sm btn-success btn-flat legitRipple float-right ml-1" onclick="windowLocation('{{route('productcategory.create')}}')">
+              <b><i class="fas fa-plus"></i></b> Create
+            </button>
+            @endif
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table id="table-product-category" class="table table-striped datatable" width="100%">
+                <thead>
+                  <tr>
+                    <th class="text-center" width="10%">No.</th>
+                    <th width="200">Nama</th>
+                    <th width="50">Dibuat</th>
+                    <th class="text-center" width="10%">Action</th>
+                  </tr>
+                </thead>
+              </table>
+            </div>
           </div>
         </div>
       </div>
@@ -72,7 +73,7 @@
                   <input type="text" name="name" id="category-name" class="form-control" placeholder="Category Name">
                 </div>
               </div>
-            </div>            
+            </div>
           </div>
         </form>
       </div>
@@ -87,6 +88,7 @@
 
 @section('scripts')
 <script>
+  var actionmenu = JSON.parse('{!! json_encode($actionmenu) !!}');
   toastr.options = {
     "closeButton": false,
     "debug": false,
@@ -123,8 +125,8 @@
         url: "{{route('productcategory.read')}}",
         type: "GET",
         data: function(data) {
-            var categoryName = $('#form-search').find('input[name=name]').val();
-            data.name = categoryName;
+          var categoryName = $('#form-search').find('input[name=name]').val();
+          data.name = categoryName;
         }
       },
       columnDefs: [{
@@ -137,19 +139,27 @@
         },
         {
           render: function(data, type, row) {
+            var button = '';
+            // update
+            if (actionmenu.indexOf('update') > 0) {
+              button += `<a class="dropdown-item" href="javascript:void(0);" onclick="edit(${row.id})">
+                                        <i class="far fa-edit"></i>Update Data
+                                    </a>`;
+            }
+            // delete
+            if (actionmenu.indexOf('delete') > 0) {
+              button += `<a class="dropdown-item" href="javascript:void(0);" onclick="destroy(${row.id})">
+                                        <i class="fa fa-trash-alt"></i> Delete Data
+                                    </a>`;
+            }
             return `<div class="btn-group">
-                        <button type="button" class="btn btn-flat btn-sm dropdown-toggle" data-toggle="dropdown">
-                            <i class="fas fa-bars"></i>
-                        </button>
-                        <div class="dropdown-menu">                            
-                            <a class="dropdown-item" href="javascript:void(0);" onclick="edit(${row.id})">
-                            <i class="far fa-edit"></i>Update Data
-                            </a>
-                            <a class="dropdown-item" href="javascript:void(0);" onclick="destroy(${row.id})">
-                            <i class="far fa-trash-alt"></i> Delete Data
-                            </a>
-                        </div>
-                        </div>`;
+                                <button type="button" class="btn btn-flat btn-sm dropdown-toggle" data-toggle="dropdown">
+                                    <i class="fas fa-bars"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    ${button}
+                                </div>
+                            </div>`;
           },
           targets: [3]
         }
@@ -167,10 +177,10 @@
     });
 
     $('#form-search').submit(function(e) {
-			e.preventDefault();
-			dataTable.draw();
-			$('#add-filter').modal('hide');
-		});
+      e.preventDefault();
+      dataTable.draw();
+      $('#add-filter').modal('hide');
+    });
 
   });
 
