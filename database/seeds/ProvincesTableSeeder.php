@@ -25,6 +25,7 @@ class ProvincesTableSeeder extends Seeder
         $provinces = json_decode(File::get(database_path('datas/provinces.json')));
         foreach ($provinces as $province) {
             Province::create([
+                'id'=> $province->id,
                 'name'=> $province->name
             ]);
         }

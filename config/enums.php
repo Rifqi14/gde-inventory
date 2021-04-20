@@ -20,4 +20,13 @@ return [
         'pilot plant'       => "Pilot Plant",
         'rig inspection'    => "Rig Inspection",
     ],
+    'warehouse_type' => [
+        'internal'          => "Internal",
+        'virtual'          => "Virtual",
+        'vondor'          => "Vendor"
+    ],
+    'warehouse_status' => [
+        'active'          => "Active",
+        'non active'          => "Non Active"
+    ],
 ];

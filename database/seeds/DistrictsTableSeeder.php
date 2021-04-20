@@ -25,6 +25,7 @@ class DistrictsTableSeeder extends Seeder
         $districts = json_decode(File::get(database_path('datas/districts.json')));
         foreach ($districts as $district) {
             District::create([
+                'id'=> $district->id,
                 'region_id'=> $district->region_id,
                 'name'=> $district->name
             ]);
