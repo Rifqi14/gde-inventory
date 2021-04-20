@@ -11,6 +11,8 @@
 |
 */
 
+use Illuminate\Support\Facades\Route;
+
 Route::get('/', function () {
     return redirect('/admin');
 });
@@ -105,5 +107,11 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/uomcategory/delete/{id}','Admin\UomCategoryController@destroy');
         Route::get('/uomcategory/edit/{id}','Admin\UomCategoryController@edit');
         Route::resource('/uomcategory','Admin\UomCategoryController');
+
+        // Master Working Calendar
+        Route::get('/calendar/read', 'Admin\CalendarController@read')->name('calendar.read');
+        Route::get('/calendar/select', 'Admin\CalendarController@select')->name('calendar.select');
+        Route::get('/calendar/{id}/show', 'Admin\CalendarController@show')->name('calendar.show');
+        Route::resource('/calendar', 'Admin\CalendarController');
     });
 });
