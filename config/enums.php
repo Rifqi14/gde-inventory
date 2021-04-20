@@ -29,4 +29,8 @@ return [
         'active'          => "Active",
         'non active'          => "Non Active"
     ],
+    'is_show' => [
+        'YES'   => "YES",
+        'NO'    => "NO"
+    ],
 ];
