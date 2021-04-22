@@ -132,5 +132,12 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/calendar/select', 'Admin\CalendarController@select')->name('calendar.select');
         Route::get('/calendar/{id}/show', 'Admin\CalendarController@show')->name('calendar.show');
         Route::resource('/calendar', 'Admin\CalendarController');
+
+        // Calendar Exception
+        Route::get('/calendarexception/read', 'Admin\CalendarExceptionController@read')->name('calendarexception.read');
+        Route::get('/calendarexception/select', 'Admin\CalendarExceptionController@select')->name('calendarexception.select');
+        Route::get('/calendarexception/{id}/calendar', 'Admin\CalendarExceptionController@calendar')->name('calendarexception.calendar');
+        Route::post('/calendarexception/addcalendar', 'Admin\CalendarExceptionController@addcalendar')->name('calendarexception.addcalendar');
+        Route::resource('/calendarexception', 'Admin\CalendarExceptionController');
     });
 });
