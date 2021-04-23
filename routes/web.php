@@ -11,6 +11,8 @@
 |
 */
 
+use Illuminate\Support\Facades\Route;
+
 Route::get('/', function () {
     return redirect('/admin');
 });
@@ -18,6 +20,8 @@ Route::get('admin/error', function () {
     return view('admin.error.index');
 });
 Auth::routes();
+
+Route::get('/test', 'Admin\TestController@test')->name('test');
 
 Route::get('/home', 'HomeController@index')->name('home');
 Route::group(['prefix' => 'admin'], function () {
@@ -63,11 +67,7 @@ Route::group(['prefix' => 'admin'], function () {
         //Route Vehicle
         Route::get('/vehicle/read', 'Admin\VehicleController@read')->name('vehicle.read');
         Route::get('/vehicle/select', 'Admin\VehicleController@select')->name('vehicle.select');
-        Route::resource('/vehicle', 'Admin\VehicleController');
-        // Route City/Disctrict
-        Route::get('/region/select','Admin\RegionController@select')->name('region.select');
-        // Route Provice 
-        Route::get('/province/select','Admin\ProvinceController@select')->name('province.select');
+        Route::resource('/vehicle', 'Admin\VehicleController');        
         //Route Working Shift
         Route::get('/workingshift/read', 'Admin\WorkingShiftController@read')->name('workingshift.read');
         Route::get('/workingshift/select', 'Admin\WorkingShiftController@select')->name('workingshift.select');
@@ -92,11 +92,28 @@ Route::group(['prefix' => 'admin'], function () {
         Route::post('/purchasing/addnotes', 'Admin\PurchasingController@addnotes')->name('purchasing.addnotes');
         Route::get('/purchasing/test', 'Admin\PurchasingController@test');
         Route::resource('/purchasing', 'Admin\PurchasingController');
+        // Route Warehouse
+        Route::get('/warehouse/read', 'Admin\WarehouseController@read')->name('warehouse.read');
+        Route::resource('/warehouse', 'Admin\WarehouseController');
+        // Route Rack
+        Route::get('/rack/select', 'Admin\RackController@select')->name('rack.select');
+        Route::get('/rack/read', 'Admin\RackController@read')->name('rack.read');
+        Route::resource('/rack', 'Admin\RackController');
+        // Route Bin
+        Route::get('/bin/read', 'Admin\BinController@read')->name('bin.read');
+        Route::resource('/bin', 'Admin\BinController');
+        // Route Province
+        Route::get('/province/select', 'Admin\ProvinceController@select')->name('province.select');
+        // Route Region
+        Route::get('/region/select', 'Admin\RegionController@select')->name('region.select');
+        // Route District
+        Route::get('/district/select', 'Admin\DistrictController@select')->name('district.select');
+        // Route Village
+        Route::get('/village/select', 'Admin\VillageController@select')->name('village.select');
         //Route Business Trip
         Route::get('/businesstrip/read', 'Admin\BusinessTripController@read')->name('bt.read');
         Route::get('/businesstrip/select', 'Admin\BusinessTripController@select')->name('bt.select');
         Route::resource('/businesstrip', 'Admin\BusinessTripController');
-
         // Route Product Category
         Route::get('/productcategory/read','Admin\ProductCategoryController@read')->name('productcategory.read');        
         Route::get('/productcategory/parentcategories','Admin\ProductCategoryController@parentcategories')->name('productcategory.parentcategories');        
@@ -116,5 +133,17 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/employee/detail/{id}','Admin\EmployeeController@detail');     
         Route::get('/employee/delete/{id}','Admin\EmployeeController@destroy');        
         Route::resource('/employee','Admin\EmployeeController');
+        // Master Working Calendar
+        Route::get('/calendar/read', 'Admin\CalendarController@read')->name('calendar.read');
+        Route::get('/calendar/select', 'Admin\CalendarController@select')->name('calendar.select');
+        Route::get('/calendar/{id}/show', 'Admin\CalendarController@show')->name('calendar.show');
+        Route::resource('/calendar', 'Admin\CalendarController');
+
+        // Calendar Exception
+        Route::get('/calendarexception/read', 'Admin\CalendarExceptionController@read')->name('calendarexception.read');
+        Route::get('/calendarexception/select', 'Admin\CalendarExceptionController@select')->name('calendarexception.select');
+        Route::get('/calendarexception/{id}/calendar', 'Admin\CalendarExceptionController@calendar')->name('calendarexception.calendar');
+        Route::post('/calendarexception/addcalendar', 'Admin\CalendarExceptionController@addcalendar')->name('calendarexception.addcalendar');
+        Route::resource('/calendarexception', 'Admin\CalendarExceptionController');
     });
 });

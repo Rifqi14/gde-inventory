@@ -15,9 +15,10 @@ class DatabaseSeeder extends Seeder
         $this->call(ProvincesTableSeeder::class);
         $this->call(RegionsTableSeeder::class);
         $this->call(DistrictsTableSeeder::class);
-        $this->call(SitesTableSeeder::class);
-        $this->call(MenusTableSeeder::class);
-        $this->call(RolesTableSeeder::class);
+        $this->call(VillagesTableSeeder::class);
+        // $this->call(SitesTableSeeder::class);
+        // $this->call(MenusTableSeeder::class);
+        // $this->call(RolesTableSeeder::class);
         $this->call(AdbScheduleSeeder::class);
     }
 }

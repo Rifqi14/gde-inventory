@@ -3,42 +3,50 @@
 namespace App\Http\Controllers\Admin;
 
 use Illuminate\Http\Request;
-use App\Models\Region;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\View;
+
+use App\Models\Region;
 
 class RegionController extends Controller
 {
+    function __construct()
+    {
+        View::share('menu_active', url('admin/' . 'region'));
+        $this->middleware('accessmenu', ['except' => ['select']]);
+    }
+
     public function select(Request $request)
     {
-        $start = $request->page?$request->page - 1:0;
-        $limit = $request->limit;
-        $city  = strtoupper($request->city);
+        $start = $request->page ? $request->page - 1 : 0;
+        $length = $request->limit;
+        $name = strtoupper($request->name);
         $province_id = $request->province_id;
 
-        $query = Region::with('province');
-        if ($city) {
-            $query->whereRaw("upper(name) like '%$city%'");
+        //Count Data
+        $query = Region::with('province');        
+        if ($name) {
+            $query->whereRaw("upper(name) like '%$name%'");
         }
         if ($province_id) {
             $query->where('province_id',$province_id);
         }
 
-        $rows  = clone $query;
-        $total = $rows->count();
+        $row = clone $query;
+        $recordsTotal = $row->count();
 
         $query->offset($start);
-        $query->limit($limit);
-
-        $district = $query->get();
+        $query->limit($length);
+        $regions = $query->get();
 
         $data = [];
-        foreach ($district as $key => $row) {
-            $data[] = $row;
+        foreach ($regions as $region) {
+            $region->no = ++$start;
+            $data[] = $region;
         }
-
         return response()->json([
-            'total' => $total,
-            'rows'  => $data
-        ],200);
+            'total' => $recordsTotal,
+            'rows' => $data
+        ], 200);
     }
 }

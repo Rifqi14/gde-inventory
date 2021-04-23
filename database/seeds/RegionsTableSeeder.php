@@ -25,6 +25,7 @@ class RegionsTableSeeder extends Seeder
         $regions = json_decode(File::get(database_path('datas/regions.json')));
         foreach ($regions as $region) {
             Region::create([
+                'id'=> $region->id,
                 'province_id'=> $region->province_id,
                 'name'=> $region->name,
                 'type'=> $region->type,
