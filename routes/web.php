@@ -64,6 +64,10 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/vehicle/read', 'Admin\VehicleController@read')->name('vehicle.read');
         Route::get('/vehicle/select', 'Admin\VehicleController@select')->name('vehicle.select');
         Route::resource('/vehicle', 'Admin\VehicleController');
+        // Route City/Disctrict
+        Route::get('/region/select','Admin\RegionController@select')->name('region.select');
+        // Route Provice 
+        Route::get('/province/select','Admin\ProvinceController@select')->name('province.select');
         //Route Working Shift
         Route::get('/workingshift/read', 'Admin\WorkingShiftController@read')->name('workingshift.read');
         Route::get('/workingshift/select', 'Admin\WorkingShiftController@select')->name('workingshift.select');
@@ -105,5 +109,12 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/uomcategory/delete/{id}','Admin\UomCategoryController@destroy');
         Route::get('/uomcategory/edit/{id}','Admin\UomCategoryController@edit');
         Route::resource('/uomcategory','Admin\UomCategoryController');
+
+        // Route Employee
+        Route::get('/employee/read','Admin\EmployeeController@read')->name('employee.read');  
+        Route::get('/employee/edit/{id}','Admin\EmployeeController@edit');        
+        Route::get('/employee/detail/{id}','Admin\EmployeeController@detail');     
+        Route::get('/employee/delete/{id}','Admin\EmployeeController@destroy');        
+        Route::resource('/employee','Admin\EmployeeController');
     });
 });
