@@ -317,7 +317,7 @@
                         province_id = province_id?province_id:'';                    
                     return {
                         province_id : province_id,
-                        city: params.term,
+                        name: params.term,
                         page: params.page,
                         limit: 30,
                     };
@@ -363,7 +363,7 @@
                 dataType: 'json',
                 data: function(params) {
                     return {                        
-                        province: params.term,
+                        name: params.term,
                         page: params.page,
                         limit: 30,
                     };
