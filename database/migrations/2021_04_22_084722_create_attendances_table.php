@@ -28,7 +28,7 @@ class CreateAttendancesTable extends Migration
             $table->timestamps();
 
             $table->foreign('employee_id')->references('id')->on('employees')->onUpdate('cascade')->onDelete('cascade');
-            $table->foreign('working_shift_id')->references('id')->on('working_shift')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreign('working_shift_id')->references('id')->on('working_shifts')->onUpdate('cascade')->onDelete('cascade');
         });
     }
 
