@@ -21,10 +21,16 @@ class RegionController extends Controller
         $start = $request->page ? $request->page - 1 : 0;
         $length = $request->limit;
         $name = strtoupper($request->name);
+        $province_id = $request->province_id;
 
         //Count Data
-        $query = Region::select('*');
-        $query->whereRaw("upper(name) like '%$name%'");
+        $query = Region::with('province');        
+        if ($name) {
+            $query->whereRaw("upper(name) like '%$name%'");
+        }
+        if ($province_id) {
+            $query->where('province_id',$province_id);
+        }
 
         $row = clone $query;
         $recordsTotal = $row->count();

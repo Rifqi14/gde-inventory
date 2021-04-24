@@ -11,6 +11,8 @@
 |
 */
 
+use Illuminate\Support\Facades\Route;
+
 Route::get('/', function () {
     return redirect('/admin');
 });
@@ -65,7 +67,7 @@ Route::group(['prefix' => 'admin'], function () {
         //Route Vehicle
         Route::get('/vehicle/read', 'Admin\VehicleController@read')->name('vehicle.read');
         Route::get('/vehicle/select', 'Admin\VehicleController@select')->name('vehicle.select');
-        Route::resource('/vehicle', 'Admin\VehicleController');
+        Route::resource('/vehicle', 'Admin\VehicleController');        
         //Route Working Shift
         Route::get('/workingshift/read', 'Admin\WorkingShiftController@read')->name('workingshift.read');
         Route::get('/workingshift/select', 'Admin\WorkingShiftController@select')->name('workingshift.select');
@@ -129,5 +131,24 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/uomcategory/delete/{id}','Admin\UomCategoryController@destroy');
         Route::get('/uomcategory/edit/{id}','Admin\UomCategoryController@edit');
         Route::resource('/uomcategory','Admin\UomCategoryController');
+
+        // Route Employee
+        Route::get('/employee/read','Admin\EmployeeController@read')->name('employee.read');  
+        Route::get('/employee/edit/{id}','Admin\EmployeeController@edit');        
+        Route::get('/employee/detail/{id}','Admin\EmployeeController@detail');     
+        Route::get('/employee/delete/{id}','Admin\EmployeeController@destroy');        
+        Route::resource('/employee','Admin\EmployeeController');
+        // Master Working Calendar
+        Route::get('/calendar/read', 'Admin\CalendarController@read')->name('calendar.read');
+        Route::get('/calendar/select', 'Admin\CalendarController@select')->name('calendar.select');
+        Route::get('/calendar/{id}/show', 'Admin\CalendarController@show')->name('calendar.show');
+        Route::resource('/calendar', 'Admin\CalendarController');
+
+        // Calendar Exception
+        Route::get('/calendarexception/read', 'Admin\CalendarExceptionController@read')->name('calendarexception.read');
+        Route::get('/calendarexception/select', 'Admin\CalendarExceptionController@select')->name('calendarexception.select');
+        Route::get('/calendarexception/{id}/calendar', 'Admin\CalendarExceptionController@calendar')->name('calendarexception.calendar');
+        Route::post('/calendarexception/addcalendar', 'Admin\CalendarExceptionController@addcalendar')->name('calendarexception.addcalendar');
+        Route::resource('/calendarexception', 'Admin\CalendarExceptionController');
     });
 });

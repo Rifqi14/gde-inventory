@@ -12,8 +12,9 @@ use Illuminate\Support\Facades\Validator;
 
 class WorkingShiftController extends Controller
 {
-    function __construct(){
-        View::share('menu_active', url('admin/'.'workingshift'));
+    function __construct()
+    {
+        View::share('menu_active', url('admin/' . 'workingshift'));
         $this->middleware('accessmenu', ['except' => ['select']]);
     }
     /**
@@ -183,13 +184,19 @@ class WorkingShiftController extends Controller
 
     public function select(Request $request)
     {
-        $start = $request->page ? $request->page - 1 : 0;
+        $start  = $request->page ? $request->page - 1 : 0;
         $length = $request->limit;
-        $name = strtoupper($request->name);
+        $name   = strtoupper($request->name);
+        $type   = $request->type;
 
         //Count Data
-        $query = DB::table('working_shifts');
-        $query->whereRaw("upper(shift_name) like '%$name%'");
+        $query = WorkingShift::query();
+        if ($name) {
+            $query->whereRaw("upper(shift_name) like '%$name%'");
+        }
+        if ($type) {
+            $query->where('shift_type',$type);
+        }
 
         $row = clone $query;
         $recordsTotal = $row->count();
