@@ -100,6 +100,9 @@ Route::group(['prefix' => 'admin'], function () {
         // Route Bin
         Route::get('/bin/read', 'Admin\BinController@read')->name('bin.read');
         Route::resource('/bin', 'Admin\BinController');
+        // Route Product
+        Route::get('/product/read', 'Admin\ProductController@read')->name('product.read');
+        Route::resource('/product','Admin\ProductController');
         // Route Province
         Route::get('/province/select', 'Admin\ProvinceController@select')->name('province.select');
         // Route Region
@@ -113,14 +116,16 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/businesstrip/select', 'Admin\BusinessTripController@select')->name('bt.select');
         Route::resource('/businesstrip', 'Admin\BusinessTripController');
         // Route Product Category
-        Route::get('/productcategory/read','Admin\ProductCategoryController@read')->name('productcategory.read');        
+        Route::get('/productcategory/read','Admin\ProductCategoryController@read')->name('productcategory.read');  
+        Route::get('/productcategory/select','Admin\ProductCategoryController@select')->name('productcategory.select');        
         Route::get('/productcategory/parentcategories','Admin\ProductCategoryController@parentcategories')->name('productcategory.parentcategories');        
         Route::get('/productcategory/edit/{id}', 'Admin\ProductCategoryController@edit');                
         Route::get('/productcategory/delete/{id}','Admin\ProductCategoryController@destroy')->name('productcategory.delete');
         Route::resource('/productcategory','Admin\ProductCategoryController');
 
         // Route UOM Category
-        Route::get('/uomcategory/read','Admin\UomCategoryController@read')->name('uomcategory.read');        
+        Route::get('/uomcategory/read','Admin\UomCategoryController@read')->name('uomcategory.read');
+        Route::get('/uomcategory/select','Admin\UomCategoryController@select')->name('uomcategory.select');        
         Route::get('/uomcategory/delete/{id}','Admin\UomCategoryController@destroy');
         Route::get('/uomcategory/edit/{id}','Admin\UomCategoryController@edit');
         Route::resource('/uomcategory','Admin\UomCategoryController');
