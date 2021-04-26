@@ -26,8 +26,12 @@
       <div class="col-12">
         <div class="card">
           <div class="card-header">
+            @if(in_array('read',$actionmenu))
             <a class="btn btn-labeled btn-sm text-sm btn-default btn-flat legitRipple  float-right ml-1" onclick="filter()"><b><i class="fas fa-search"></i></b> Search</a>
+            @endif
+            @if(in_array('create',$actionmenu))
             <a href="{{ route('calendar.create') }}" class="btn btn-labeled btn-sm text-sm btn-success btn-flat legitRipple  float-right ml-1"><b><i class="fas fa-plus"></i></b> Create</a>
+            @endif
           </div>
           <div class="card-body">
             <div class="table-responsive">
@@ -92,6 +96,7 @@
 
 @section('scripts')
 <script type="text/javascript">
+  var actionmenu = JSON.parse('{!! json_encode($actionmenu) !!}');
   $(function() {
     $('.select2').select2();
     dataTable   = $('#calendar-table').DataTable({
@@ -135,20 +140,28 @@
             className: "text-center",
             orderable: false,
             render: function(data, type, full, meta) {
+                var button = '';
+                if (actionmenu.indexOf('read') > 0) {
+                  button += `<a class="dropdown-item" href="javascript:void(0);" onclick="show(${full.id})">
+                                    <i class="far fa-eye"></i>View Data
+                                </a>`;
+                }
+                if (actionmenu.indexOf('update') > 0) {
+                  button += `<a class="dropdown-item" href="javascript:void(0);" onclick="edit(${full.id})">
+                                    <i class="far fa-edit"></i>Update Data
+                                </a>`;
+                }
+                if (actionmenu.indexOf('delete') > 0) {
+                  button += `<a class="dropdown-item " href="javascript:void(0);" onclick="destroy(${full.id})">
+                                    <i class="far fa-trash-alt"></i> Delete Data
+                                </a>`;
+                }
                 return `<div class="btn-group">
                             <button type="button" class="btn btn-flat btn-sm dropdown-toggle" data-toggle="dropdown">
                                 <i class="fas fa-bars"></i>
                             </button>
                             <div class="dropdown-menu">
-                                <a class="dropdown-item" href="javascript:void(0);" onclick="show(${full.id})">
-                                    <i class="far fa-eye"></i>View Data
-                                </a>
-                                <a class="dropdown-item" href="javascript:void(0);" onclick="edit(${full.id})">
-                                    <i class="far fa-edit"></i>Update Data
-                                </a>
-                                <a class="dropdown-item " href="javascript:void(0);" onclick="destroy(${full.id})">
-                                    <i class="far fa-trash-alt"></i> Delete Data
-                                </a>
+                              ${button}
                             </div>
                         </div>`;
             }

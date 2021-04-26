@@ -29,4 +29,8 @@ return [
         'active'          => "Active",
         'non active'          => "Non Active"
     ],
+    'machine_type'  => [
+        'CHECKIN'       => 'Check In',
+        'CHECKOUT'      => 'Check Out'
+    ],
 ];

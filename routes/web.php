@@ -145,5 +145,10 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/calendarexception/{id}/calendar', 'Admin\CalendarExceptionController@calendar')->name('calendarexception.calendar');
         Route::post('/calendarexception/addcalendar', 'Admin\CalendarExceptionController@addcalendar')->name('calendarexception.addcalendar');
         Route::resource('/calendarexception', 'Admin\CalendarExceptionController');
+
+        // Attendance Machine
+        Route::get('/attendancemachine/read', 'Admin\AttendanceMachineController@read')->name('attendancemachine.read');
+        Route::get('/attendancemachine/select', 'Admin\AttendanceMachineController@select')->name('attendancemachine.select');
+        Route::resource('/attendancemachine', 'Admin\AttendanceMachineController');
     });
 });
