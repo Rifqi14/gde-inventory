@@ -248,7 +248,7 @@ class ContractController extends Controller
 			}
         }
 
-        if (isset($attach->filename)) {
+        if ($request->hasFile('attach')) {
             $path = 'assets/procurement/contract';
 			if (!file_exists($path)) {
 				mkdir($path, 0777, true);
@@ -517,7 +517,7 @@ class ContractController extends Controller
 			}
         }
 
-        if (isset($attach->filename)) {
+        if ($request->hasFile('attach')) {
             $path = 'assets/procurement/contract';
 			if (!file_exists($path)) {
 				mkdir($path, 0777, true);
