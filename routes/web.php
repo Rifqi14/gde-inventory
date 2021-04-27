@@ -124,6 +124,9 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/productcategory/edit/{id}', 'Admin\ProductCategoryController@edit');                
         Route::get('/productcategory/delete/{id}','Admin\ProductCategoryController@destroy')->name('productcategory.delete');
         Route::resource('/productcategory','Admin\ProductCategoryController');
+        // Route Doc Category
+        Route::get('/documentcategory/read','Admin\DcCategoryController@read')->name('documentcategory.read');  
+        Route::resource('/documentcategory','Admin\DcCategoryController');
 
         // Route UOM Category
         Route::get('/uomcategory/read','Admin\UomCategoryController@read')->name('uomcategory.read');
