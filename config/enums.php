@@ -33,4 +33,8 @@ return [
         'YES'   => "YES",
         'NO'    => "NO"
     ],
+    'machine_type'  => [
+        'CHECKIN'       => 'Check In',
+        'CHECKOUT'      => 'Check Out'
+    ],
 ];
