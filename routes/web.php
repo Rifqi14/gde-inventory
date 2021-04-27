@@ -132,6 +132,11 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/uomcategory/edit/{id}','Admin\UomCategoryController@edit');
         Route::resource('/uomcategory','Admin\UomCategoryController');
 
+        // Route UOM
+        Route::get('/uom/read','Admin\UomController@read')->name('uom.read');
+        Route::get('/uom/select','Admin\UomController@select')->name('uom.select');
+        Route::resource('/uom','Admin\UomController');
+
         // Route Employee
         Route::get('/employee/read','Admin\EmployeeController@read')->name('employee.read');  
         Route::get('/employee/edit/{id}','Admin\EmployeeController@edit');        

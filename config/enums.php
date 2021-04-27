@@ -37,4 +37,9 @@ return [
         'CHECKIN'       => 'Check In',
         'CHECKOUT'      => 'Check Out'
     ],
+    'uom_type'      => [
+        'REFERENCE'     => 'Reference',
+        'BIGGERTHAN'    => 'Bigger Than',
+        'SMALLERTHAN'   => 'Smaller Than',
+    ]
 ];

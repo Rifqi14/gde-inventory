@@ -4,21 +4,21 @@ namespace App\Http\Controllers\Admin;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Models\AttendanceMachine;
 use App\Models\Menu;
+use App\Models\Uom;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
 
-class AttendanceMachineController extends Controller
+class UomController extends Controller
 {
     /**
      * Define default method when access this controller
      */
-    public function __construct() {
-        $menu   = Menu::where('menu_route', 'attendancemachine')->first();
+    function __construct() {
+        $menu   = Menu::GetByRoute('uom')->first();
         View::share('menu_name', $menu->menu_name);
-        View::share('menu_active', url('admin/attendancemachine'));
+        View::share('menu_active', url('admin/uom'));
         $this->middleware('accessmenu', ['except' => ['select']]);
     }
 
@@ -35,27 +35,31 @@ class AttendanceMachineController extends Controller
         $query      = $request->search['value'];
         $sort       = $request->columns[$request->order[0]['column']]['data'];
         $dir        = $request->order[0]['dir'];
-        $name       = strtoupper($request->machine_name);
+        $name       = $request->name;
+        $category   = $request->category;
         $type       = $request->type;
 
-        // Query Data
-        $queryData  = AttendanceMachine::GetByName($name);
+        $queryData  = Uom::with(['category'])->GetByName($name);
+        if ($category) {
+            $queryData->GetByCategory($category);
+        }
         if ($type) {
             $queryData->GetByType($type);
         }
 
-        $row    = clone $queryData;
+        $row        = clone $queryData;
         $recordsTotal   = $row->count();
 
-        $queryData->offset($start);
-        $queryData->limit($length);
         $queryData->orderBy($sort, $dir);
-        $machines   = $queryData->get();
+        $queryData->paginate($length);
+        $uoms       = $queryData->get();
 
-        $data   = [];
-        foreach ($machines as $key => $machine) {
-            $machine->no    = ++$start;
-            $data[]         = $machine;
+        $data       = [];
+        $type       = config('enums.uom_type');
+        foreach ($uoms as $key => $uom) {
+            $uom->no    = ++$start;
+            $uom->type  = $type[$uom->type];
+            $data[]     = $uom;
         }
         return response()->json([
             'draw'              => $request->draw,
@@ -78,19 +82,18 @@ class AttendanceMachineController extends Controller
         $name           = strtoupper($request->name);
 
         // Query
-        $query          = AttendanceMachine::GetByName($name);
+        $query          = Uom::GetByName($name);
 
         $row            = clone $query;
         $recordsTotal   = $row->count();
 
-        $query->offset($start);
-        $query->limit($length);
-        $machines       = $query->get();
+        $query->paginate($length);
+        $uoms       = $query->get();
 
         $data           = [];
-        foreach ($machines as $key => $machine) {
-            $machine->no    = ++$start;
-            $data[]         = $machine;
+        foreach ($uoms as $key => $uom) {
+            $uom->no    = ++$start;
+            $data[]     = $uom;
         }
         return response()->json([
             'total'     => $recordsTotal,
@@ -105,19 +108,19 @@ class AttendanceMachineController extends Controller
      */
     public function index()
     {
-        return view('admin.attendancemachine.index');
+        return view('admin.uom.index');
     }
 
     /**
      * Show the form for creating a new resource.
      *
-     * @param Request $request
+     * @param \Illuminate\Http\Request $name
      * @return \Illuminate\Http\Response
      */
     public function create(Request $request)
     {
         if (in_array('create', $request->actionmenu)) {
-            return view('admin.attendancemachine.create');
+            return view('admin.uom.create');
         } else {
             abort(403);
         }
@@ -131,9 +134,10 @@ class AttendanceMachineController extends Controller
      */
     public function store(Request $request)
     {
-        $validator  = Validator::make($request->all(), [
-            'machine_name'      => 'required',
-            'type'              => 'required',
+        $validator      = Validator::make($request->all(), [
+            'name'          => 'required',
+            'category'      => 'required',
+            'type'          => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -145,9 +149,11 @@ class AttendanceMachineController extends Controller
 
         DB::beginTransaction();
         try {
-            $machine    = AttendanceMachine::create([
-                'machine_name'      => $request->machine_name,
+            Uom::create([
+                'name'              => $request->name,
+                'uom_category_id'   => $request->category,
                 'type'              => $request->type,
+                'ratio'             => $request->ratio
             ]);
         } catch (\Illuminate\Database\QueryException $ex) {
             DB::rollBack();
@@ -159,7 +165,7 @@ class AttendanceMachineController extends Controller
         DB::commit();
         return response()->json([
             'status'    => true,
-            'results'   => route('attendancemachine.index'),
+            'results'   => route('uom.index'),
         ], 200);
     }
 
@@ -171,29 +177,28 @@ class AttendanceMachineController extends Controller
      */
     public function show($id)
     {
-        // 
+        //
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param Request $request
-     * @param int $id
+     * @param \Illuminate\Http\Request
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
     public function edit(Request $request, $id)
     {
         if (in_array('update', $request->actionmenu)) {
-            $machine    = AttendanceMachine::find($id);
-            if ($machine) {
-                return view('admin.attendancemachine.edit', compact('machine'));
+            $uom    = Uom::with(['category'])->find($id);
+            if ($uom) {
+                return view('admin.uom.edit', compact('uom'));
             } else {
                 abort(404);
             }
         } else {
             abort(403);
         }
-        
     }
 
     /**
@@ -205,8 +210,9 @@ class AttendanceMachineController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $validator  = Validator::make($request->all(), [
-            'machine_name'      => 'required',
+        $validator      = Validator::make($request->all(), [
+            'name'              => 'required',
+            'category'          => 'required',
             'type'              => 'required',
         ]);
 
@@ -216,13 +222,14 @@ class AttendanceMachineController extends Controller
                 'message'   => $validator->errors()->first()
             ], 400);
         }
-        
+
         DB::beginTransaction();
         try {
-            $machine    = AttendanceMachine::find($id);
-            $machine->machine_name  = $request->machine_name;
-            $machine->type          = $request->type;
-            $machine->save();
+            $uom    = Uom::find($id);
+            $uom->name              = $request->name;
+            $uom->uom_category_id   = $request->category;
+            $uom->type              = $request->type;
+            $uom->save();
         } catch (\Illuminate\Database\QueryException $ex) {
             DB::rollBack();
             return response()->json([
@@ -233,7 +240,7 @@ class AttendanceMachineController extends Controller
         DB::commit();
         return response()->json([
             'status'    => true,
-            'results'   => route('attendancemachine.index'),
+            'results'   => route('uom.index'),
         ], 200);
     }
 
@@ -246,9 +253,9 @@ class AttendanceMachineController extends Controller
     public function destroy($id)
     {
         try {
-            $machine    = AttendanceMachine::find($id);
-            $machine->delete();
-        } catch (\illuminate\Database\QueryException $ex) {
+            $uom    = Uom::find($id);
+            $uom->delete();
+        } catch (\Illuminate\Database\QueryException $ex) {
             return response()->json([
                 'status'    => false,
                 'message'   => "Error delete data {$ex->errorInfo[2]}",
