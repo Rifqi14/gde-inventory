@@ -33,6 +33,14 @@ return [
         'YES'   => "YES",
         'NO'    => "NO"
     ],
+    'dc_type' => [
+        'Engineering'   => "Engineering",
+        'Subsurface'    => "Subsurface",
+        'Safeguard'    => "Safeguard",
+        'General'    => "General",
+        'Letter'    => "Letter",
+        'Asset'    => "Asset"
+    ],
     'machine_type'  => [
         'CHECKIN'       => 'Check In',
         'CHECKOUT'      => 'Check Out'
