@@ -5,12 +5,14 @@
     #input-list-checkbox .form-control {
         height: calc(1.9rem + 7.5px);
     }
-    .wrapper-table table{
+
+    .wrapper-table table {
         border-left: 1px solid #ddd;
         border-right: 1px solid #ddd;
         border-bottom: 1px solid #ddd;
     }
-    .wrapper-table{
+
+    .wrapper-table {
         position: relative;
         padding: 5px;
         border: 1px solid #ddd;
@@ -30,7 +32,7 @@
         <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
             <li class="breadcrumb-item">Home</li>
             <li class="breadcrumb-item">Product</li>
-            <li class="breadcrumb-item">Edit</li> 
+            <li class="breadcrumb-item">Edit</li>
         </ol>
     </div>
 </div>
@@ -61,7 +63,7 @@
                             <div class="form-group row">
                                 <label class="col-md-2 col-xs-12 control-label mt-1" for="description">Product Description</label>
                                 <div class="col-sm-6 controls">
-                                    <textarea id="description" name="description" placeholder="Description..." class="form-control" rows="5">{{ $product->description }}</textarea>
+                                    <textarea id="description" name="description" placeholder="Description..." class="form-control summernote" rows="5">{{ $product->description }}</textarea>
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -88,7 +90,7 @@
                                 <label class="col-md-2 col-xs-12 control-label mt-1" for="image">Photo</label>
                                 <div class="col-sm-6 controls">
                                     <div class="input-group">
-                                        <div class="custom-file">   
+                                        <div class="custom-file">
                                             <input type="file" class="custom-file-input" name="image" accept="image/*" onchange="changePath(this)">
                                             <label class="custom-file-label" for="exampleInputFile">Attach Image</label>
                                         </div>
@@ -132,35 +134,35 @@
                                             </thead>
                                             <tbody>
                                                 @if(count($product->uoms) > 0)
-                                                    @foreach ($product->uoms as $uom)
-                                                    <tr data-id="{{ $uom->uom->id }}">
-                                                        <td width="200">
-                                                            <div class="mb-1"></div>
-                                                            <input type="hidden" name="uom_id[]" value="{{ $uom->uom->id }}">
-                                                            {{ $uom->uom->name }}
-                                                        </td>
-                                                        <td width="200">
-                                                            <input type="text" class="form-control" id="ratio1" name="ratio[]" placeholder="Ratio" aria-required="true" value="{{ $uom->ratio }}">
-                                                        </td>
-                                                        <td width="100" class="text-center">
-                                                            <div class="mb-2"></div>
-                                                            <div class="icheck-success d-inline ">
-                                                                <input type="checkbox" name="show[]" value="show" id="{{ $uom->uom->id }}" @if($uom->is_show == "show") checked="" @endif>
-                                                                <label for="{{ $uom->uom->id }}">&nbsp;</label>
-                                                            </div>
-                                                        </td>
-                                                        <td class="text-center">
-                                                            <div class="mb-1"></div>
-                                                            <button type="button" class="btn btn-transparent text-md" onclick="removeUom($(this))" data-uom="{{ $uom->uom->id }}">
-                                                                <i class="fas fa-trash text-maroon color-palette"></i>
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                    @endforeach
+                                                @foreach ($product->uoms as $uom)
+                                                <tr data-id="{{ $uom->uom->id }}">
+                                                    <td width="200">
+                                                        <div class="mb-1"></div>
+                                                        <input type="hidden" name="uom_id[]" value="{{ $uom->uom->id }}">
+                                                        {{ $uom->uom->name }}
+                                                    </td>
+                                                    <td width="200">
+                                                        <input type="text" class="form-control" id="ratio1" name="ratio[]" placeholder="Ratio" aria-required="true" value="{{ $uom->ratio }}">
+                                                    </td>
+                                                    <td width="100" class="text-center">
+                                                        <div class="mb-2"></div>
+                                                        <div class="icheck-success d-inline ">
+                                                            <input type="checkbox" name="show[]" value="show" id="{{ $uom->uom->id }}" @if($uom->is_show == "show") checked="" @endif>
+                                                            <label for="{{ $uom->uom->id }}">&nbsp;</label>
+                                                        </div>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <div class="mb-1"></div>
+                                                        <button type="button" class="btn btn-transparent text-md" onclick="removeUom($(this))" data-uom="{{ $uom->uom->id }}">
+                                                            <i class="fas fa-trash text-maroon color-palette"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                                @endforeach
                                                 @else
-                                                    <tr class="empty">
-                                                        <td colspan="4" class="text-center">UOM Not Available</td>
-                                                    </tr>
+                                                <tr class="empty">
+                                                    <td colspan="4" class="text-center">UOM Not Available</td>
+                                                </tr>
                                                 @endif
                                             </tbody>
                                         </table>
@@ -188,29 +190,29 @@
                                             </thead>
                                             <tbody>
                                                 @if(count($product->minmax) > 0)
-                                                    @foreach ($product->minmax as $site)
-                                                        <tr>
-                                                            <td width="100">
-                                                                <div class="mb-2"></div>
-                                                                <input type="hidden" name="minmax_site[]" value="{{ $site->site_id }}">
-                                                                <b>{{ $site->site->name }}</b>
-                                                            </td>
-                                                            <td width="100">
-                                                                <div class="form-group mb-0">
-                                                                    <input type="text" class="form-control" name="minimum[]" id="minimum{{ $site->site_id }}" placeholder="Minimum" aria-required="true" value="{{ $site->minimum }}">
-                                                                </div>
-                                                            </td>
-                                                            <td width="100">
-                                                                <div class="form-group mb-0">
-                                                                    <input type="text" class="form-control" name="maximum[]" id="maximum{{ $site->site_id }}" placeholder="Maximum" aria-required="true"  value="{{ $site->maximum }}">
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    @endforeach
+                                                @foreach ($product->minmax as $site)
+                                                <tr>
+                                                    <td width="100">
+                                                        <div class="mb-2"></div>
+                                                        <input type="hidden" name="minmax_site[]" value="{{ $site->site_id }}">
+                                                        <b>{{ $site->site->name }}</b>
+                                                    </td>
+                                                    <td width="100">
+                                                        <div class="form-group mb-0">
+                                                            <input type="text" class="form-control" name="minimum[]" id="minimum{{ $site->site_id }}" placeholder="Minimum" aria-required="true" value="{{ $site->minimum }}">
+                                                        </div>
+                                                    </td>
+                                                    <td width="100">
+                                                        <div class="form-group mb-0">
+                                                            <input type="text" class="form-control" name="maximum[]" id="maximum{{ $site->site_id }}" placeholder="Maximum" aria-required="true" value="{{ $site->maximum }}">
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                @endforeach
                                                 @else
-                                                    <tr class="empty">
-                                                        <td colspan="4" class="text-center">Site Not Available</td>
-                                                    </tr>
+                                                <tr class="empty">
+                                                    <td colspan="4" class="text-center">Site Not Available</td>
+                                                </tr>
                                                 @endif
                                             </tbody>
                                         </table>
@@ -243,6 +245,7 @@
     const addUom = () => {
         var uom_id = $("#uom").val();
         var uom = $("#uom").select2('data')[0].text;
+        var ratio = $("#uom").select2('data')[0].ratio;
         var html = `
         <tr data-id="${uom_id}">
             <td width="200">
@@ -251,7 +254,7 @@
                 ${uom}
             </td>
             <td width="200">
-                <input type="text" class="form-control" id="ratio${uom_id}" name="ratio[]" placeholder="Ratio" aria-required="true">
+                <input type="text" class="form-control" id="ratio${uom_id}" name="ratio[]" placeholder="Ratio" aria-required="true" value="${ratio}">
             </td>
             <td width="100" class="text-center">
                 <div class="mb-2"></div>
@@ -287,8 +290,25 @@
         }
     }
 
-    $(function(){
+    const summernote = () => {
+      $('.summernote').summernote({
+    	height:145,
+    	toolbar: [
+    		['style', ['style']],
+    		['font-style', ['bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'clear']],
+    		['font', ['fontname']],
+    		['font-size',['fontsize']],
+    		['font-color', ['color']],
+    		['para', ['ul', 'ol', 'paragraph']],
+    		['table', ['table']],
+    		['insert', ['link', 'picture', 'video', 'hr']],
+    		['misc', ['fullscreen', 'codeview', 'help']]
+    	]
+       });
+    }
 
+    $(function(){
+        summernote();
         $("#form").validate({
             rules: {
 				"minimum[]": {
@@ -431,7 +451,7 @@
 
         $( "#uom" ).select2({
             ajax: {
-                url: "{{ route('uomcategory.select') }}",
+                url: "{{ route('uom.select') }}",
                 type:'GET',
                 dataType: 'json',
                 data: function (params) {
@@ -449,7 +469,8 @@
                 $.each(data.rows,function(index,item){
                     option.push({
                         id:item.id,  
-                        text: item.name
+                        text: item.name,
+                        ratio: item.ratio
                     });
                 });
                 return {
