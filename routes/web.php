@@ -163,5 +163,8 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/attendancemachine/read', 'Admin\AttendanceMachineController@read')->name('attendancemachine.read');
         Route::get('/attendancemachine/select', 'Admin\AttendanceMachineController@select')->name('attendancemachine.select');
         Route::resource('/attendancemachine', 'Admin\AttendanceMachineController');
+
+        // Receipt Document
+        Route::resource('/contractreceipt', 'Admin\ContractReceiptController');
     });
 });

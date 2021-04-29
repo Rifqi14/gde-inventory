@@ -49,5 +49,10 @@ return [
         'REFERENCE'     => 'Reference',
         'BIGGERTHAN'    => 'Bigger Than',
         'SMALLERTHAN'   => 'Smaller Than',
-    ]
+    ],
+    'status_receipt'    => [
+        'WAITING'       => 'Waiting',
+        'INPROGRESS'    => 'In Progress',
+        'COMPLETED'     => 'Completed'
+    ],
 ];

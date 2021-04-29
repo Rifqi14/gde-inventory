@@ -4,9 +4,23 @@ namespace App\Http\Controllers\Admin;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Menu;
+use Illuminate\Support\Facades\View;
 
 class ContractReceiptController extends Controller
 {
+    /**
+     * Define default method when access this controller
+     */
+    public function __construct() {
+        $menu   = Menu::where('menu_route', 'contractreceipt')->first();
+        $parent = Menu::find($menu->parent_id);
+        View::share('parent_name', $parent->menu_name);
+        View::share('menu_name', $menu->menu_name);
+        View::share('menu_active', url('admin/contractreceipt'));
+        $this->middleware('accessmenu', ['except' => ['select']]);
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -14,17 +28,22 @@ class ContractReceiptController extends Controller
      */
     public function index()
     {
-        //
+        return view('admin.contractreceipt.index');
     }
 
     /**
      * Show the form for creating a new resource.
      *
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
+        if (in_array('create', $request->actionmenu)) {
+            return view('admin.contractreceipt.create');
+        } else {
+            abort(403);
+        }
     }
 
     /**
