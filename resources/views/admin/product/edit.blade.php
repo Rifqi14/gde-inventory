@@ -254,7 +254,7 @@
                 ${uom}
             </td>
             <td width="200">
-                <input type="text" class="form-control" id="ratio${uom_id}" name="ratio[]" placeholder="Ratio" aria-required="true" value="${ratio}">
+                <input type="text" class="form-control" id="ratio${uom_id}" name="ratio[]" placeholder="Ratio" aria-required="true" value="${(ratio)?ratio:0}">
             </td>
             <td width="100" class="text-center">
                 <div class="mb-2"></div>
@@ -451,7 +451,7 @@
 
         $( "#uom" ).select2({
             ajax: {
-                url: "{{ route('uom.select') }}",
+                url: "{{ route('uomcategory.select') }}",
                 type:'GET',
                 dataType: 'json',
                 data: function (params) {
