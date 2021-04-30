@@ -6,6 +6,7 @@ use App\User;
 use App\Models\Employee;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Menu;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
@@ -14,7 +15,12 @@ class EmployeeController extends Controller
 {
     public function __construct()
     {
+        $menu   = Menu::where('menu_route', 'employee')->first();
+        $parent = Menu::find($menu->parent_id);
+        View::share('parent_name', $parent->menu_name);
+        View::share('menu_name', $menu->menu_name);
         View::share('menu_active', url('admin' . 'employee'));
+        $this->middleware('accessmenu', ['except' => ['select']]);
     }
 
     public function index()
@@ -159,6 +165,7 @@ class EmployeeController extends Controller
         $salary        = str_replace('.', '', $request->salary);
         $as_user       = $request->user;
         $photo         = $request->file('photo');
+        $payroll       = $request->payroll;
 
         $employee = Employee::create([
             'name'             => $name,
@@ -179,6 +186,7 @@ class EmployeeController extends Controller
             'join_date'        => $joindate,
             'resign_date'      => $resigndate,
             'salary'           => $salary,
+            'payroll_type'     => $payroll,
         ]);
 
         $user = ['status' => false, 'message' => 'Employee without user account.'];
@@ -278,6 +286,7 @@ class EmployeeController extends Controller
         $as_user       = $request->user;
         $photo         = $request->file('photo');
         $has_photo     = $request->has_photo;
+        $payroll       = $request->payroll;
 
         $employee = Employee::find($id);
         $employee->name             = $name;
@@ -298,6 +307,7 @@ class EmployeeController extends Controller
         $employee->join_date        = $joindate;
         $employee->resign_date      = $resigndate;
         $employee->salary           = $salary;
+        $employee->payroll_type     = $payroll;
         $employee->save();
 
         if ($as_user) {
