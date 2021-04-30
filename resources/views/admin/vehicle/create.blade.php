@@ -33,8 +33,7 @@ Create Vehicle
 		<div class="row">
 			<div class="col-12">
 				<div class="card">
-					<form class="form-horizontal no-margin" action="{{route('vehicle.store')}}" id="form"
-						method="post" />
+					<form class="form-horizontal no-margin" action="{{route('vehicle.store')}}" id="form" method="post" />
 					{{ csrf_field() }}
 					<div class="card-body">
 						<span class="title">
@@ -44,22 +43,19 @@ Create Vehicle
 						<div class="form-group row mt-4">
 							<label class="col-md-2 col-xs-12 control-label" for="site_id">Unit:</label>
 							<div class="col-sm-6 controls">
-								<select type="text" class="select2 form-control" name="site_id"
-									data-placeholder="Unit"></select>
+								<select type="text" class="select2 form-control" id="site_id" name="site_id" data-placeholder="Unit"></select>
 							</div>
 						</div>
 						<div class="form-group row">
 							<label class="col-md-2 col-xs-12 control-label" for="police_number">Police Number:</label>
 							<div class="col-sm-6 controls">
-								<input type="text" class="form-control" name="police_number"
-									placeholder="Police Number..." />
+								<input type="text" class="form-control" name="police_number" placeholder="Police Number..." />
 							</div>
 						</div>
 						<div class="form-group row">
 							<label class="col-md-2 col-xs-12 control-label" for="vehicle_name">Vehicle Name:</label>
 							<div class="col-sm-6 controls">
-								<input type="text" class="form-control" name="vehicle_name"
-									placeholder="Vehicle Name..." />
+								<input type="text" class="form-control" name="vehicle_name" placeholder="Vehicle Name..." />
 							</div>
 						</div>
 						<div class="form-group row">
@@ -74,8 +70,7 @@ Create Vehicle
 						<div class="form-group row">
 							<label class="col-md-2 col-xs-12 control-label" for="remarks">Remarks:</label>
 							<div class="col-sm-6 controls">
-								<textarea class="form-control" name="remarks" rows="4" style="resize: none;"
-									placeholder="Remarks..."></textarea>
+								<textarea class="form-control" name="remarks" rows="4" style="resize: none;" placeholder="Remarks..."></textarea>
 							</div>
 						</div>
 					</div>
@@ -84,8 +79,7 @@ Create Vehicle
 							<b><i class="fas fa-save"></i></b>
 							Save
 						</button>
-						<a href="{{ route('vehicle.index') }}"
-							class="btn btn-sm btn-secondary color-palette btn-labeled legitRipple text-sm">
+						<a href="{{ route('vehicle.index') }}" class="btn btn-sm btn-secondary color-palette btn-labeled legitRipple text-sm">
 							<b><i class="fas fa-times"></i></b>
 							Cancel
 						</a>
@@ -109,7 +103,7 @@ Create Vehicle
 			}
 		});
 		$('.select2').select2();
-		$( "#unit_id" ).select2({
+		$( "#site_id" ).select2({
 			ajax: {
 				url: "{{ route('site.select') }}",
 				type:'GET',
