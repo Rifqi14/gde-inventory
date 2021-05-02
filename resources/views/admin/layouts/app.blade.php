@@ -26,30 +26,21 @@
     <meta name="msapplication-TileImage" content="{{asset('assets/img/ms-icon-144x144.png')}}">
     <meta name="theme-color" content="#ffffff">
     <link href='https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css' rel='stylesheet' media='screen'>
-    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700' rel='stylesheet'
-        media='screen'>
-    <link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css' rel='stylesheet'
-        media='screen'>
-    <link href='https://cdnjs.cloudflare.com/ajax/libs/icheck-bootstrap/3.0.1/icheck-bootstrap.min.css' rel='stylesheet'
-        media='screen'>
+    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700' rel='stylesheet' media='screen'>
+    <link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css' rel='stylesheet' media='screen'>
+    <link href='https://cdnjs.cloudflare.com/ajax/libs/icheck-bootstrap/3.0.1/icheck-bootstrap.min.css' rel='stylesheet' media='screen'>
     <link href='{{asset('assets/css/adminlte.min.css')}}' rel='stylesheet' media='screen'>
     <link href='{{asset('assets/plugins/toastr/toastr.min.css')}}' rel='stylesheet' media='screen'>
-    <link href='https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/8.11.8/sweetalert2.min.css' rel='stylesheet'
-        media='screen'>
-    <link href='{{asset('assets/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css')}}'
-        rel='stylesheet' media='screen'>
+    <link href='https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/8.11.8/sweetalert2.min.css' rel='stylesheet' media='screen'>
+    <link href='{{asset('assets/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css')}}' rel='stylesheet' media='screen'>
     <link href='{{asset('assets/plugins/select2/css/select2.min.css')}}' rel='stylesheet' media='screen'>
-    <link href='{{asset('assets/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css')}}' rel='stylesheet'
-        media='screen'>
-    <link href='{{asset('assets/plugins/overlayScrollbars/css/OverlayScrollbars.min.css')}}' rel='stylesheet'
-        media='screen'>
+    <link href='{{asset('assets/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css')}}' rel='stylesheet' media='screen'>
+    <link href='{{asset('assets/plugins/overlayScrollbars/css/OverlayScrollbars.min.css')}}' rel='stylesheet' media='screen'>
     <link href='{{asset('assets/plugins/daterangepicker/daterangepicker.css')}}' rel='stylesheet' media='screen'>
     <link href='{{asset('assets/plugins/summernote/summernote-bs4.css')}}' rel='stylesheet' media='screen'>
     <link href='https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css' rel='stylesheet' media='screen'>
-    <link href='https://cdn.datatables.net/rowgroup/1.1.1/css/rowGroup.bootstrap4.min.css' rel='stylesheet'
-        media='screen'>
-    <link href='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css'
-        rel='stylesheet' media='screen'>
+    <link href='https://cdn.datatables.net/rowgroup/1.1.1/css/rowGroup.bootstrap4.min.css' rel='stylesheet' media='screen'>
+    <link href='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css' rel='stylesheet' media='screen'>
     <link href='{{asset('assets/css/custom.css')}}' rel='stylesheet' media='screen'>
     @yield('stylesheets')
 </head>
@@ -78,7 +69,7 @@
             <!-- Right navbar links -->
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url('admin/login/logout') }}"><i class="fas fa-power-off"></i></a>
+                    <a class="nav-link" href="{{ url('admin/logout') }}"><i class="fas fa-power-off"></i></a>
                 </li>
             </ul>
         </nav>
@@ -89,8 +80,7 @@
             <a href="{{ url('') }}" class="brand-link">
                 <div class="row">
                     <div class="col-md-2">
-                        <img src="{{asset('assets/img/pmu.png')}}" alt="Project Management Unit Logo"
-                            class="brand-image img-circle elevation-1 ml-0 p-1" style="opacity: .8">
+                        <img src="{{asset('assets/img/pmu.png')}}" alt="Project Management Unit Logo" class="brand-image img-circle elevation-1 ml-0 p-1" style="opacity: .8">
                     </div>
                     <div class="col-md-10">
                         <div class="development mt-2">
@@ -105,8 +95,7 @@
                 <!-- Sidebar user panel (optional) -->
                 <div class="user-panel mt-3 pb-3 mb-3 d-flex">
                     <div class="image">
-                        <img src="{{asset('assets/img/dev.jpg')}}" class="img-circle elevation-1 img-pp"
-                            alt="Development Application">
+                        <img src="{{asset('assets/img/dev.jpg')}}" class="img-circle elevation-1 img-pp" alt="Development Application">
                     </div>
                     <div class="info">
                         <a href="#" class="d-block">Development Application</a>
@@ -114,8 +103,7 @@
                 </div>
                 <!-- Sidebar Menu -->
                 <nav class="mt-2">
-                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
-                        data-accordion="false">
+                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                         {!!buildMenuAdmin($menuaccess)!!}
                     </ul>
                 </nav>

@@ -143,17 +143,17 @@ class SiteController extends Controller
      */
     public function edit(Request $request,$id)
     {
-        // if(in_array('update',$request->actionmenu)){
+        if(in_array('update',$request->actionmenu)){
             // $site = Site::withTrashed()->find($id);
             $site = Site::find($id);
-            // if ($site) {
+            if ($site) {
                 return view('admin.site.edit', compact('site'));
-            // } else {
-                // abort(404);
-            // }
-        // }else{
-            // abort(403);
-        // }
+            } else {
+                abort(404);
+            }
+        }else{
+            abort(403);
+        }
     }
 
     /**
@@ -230,17 +230,17 @@ class SiteController extends Controller
 
     public function show(Request $request,$id)
     {
-        // if(in_array('read',$request->actionmenu)){
+        if(in_array('read',$request->actionmenu)){
             // $site = Site::withTrashed()->find($id);
             $site = Site::find($id);
-            // if ($site) {
+            if ($site) {
                 return view('admin.site.detail', compact('site'));
-            // } else {
-                // abort(404);
-            // }
-        // }else{
-            // abort(403);
-        // }
+            } else {
+                abort(404);
+            }
+        }else{
+            abort(403);
+        }
     }
     
     public function select(Request $request)

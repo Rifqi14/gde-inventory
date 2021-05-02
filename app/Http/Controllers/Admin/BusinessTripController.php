@@ -125,7 +125,7 @@ class BusinessTripController extends Controller
         $budget->site_name = $site->name;
         $user = $budget;
         if ($user) {
-            return view('admin.business_trip.detail', compact('user'));
+            return view('admin.businesstrip.detail', compact('user'));
         } else {
             abort(404);
         }
@@ -146,7 +146,7 @@ class BusinessTripController extends Controller
         $budget->site_name = $site->name;
         $user = $budget;
         if ($user) {
-            return view('admin.business_trip.edit', compact('user'));
+            return view('admin.businesstrip.edit', compact('user'));
         } else {
             abort(404);
         }

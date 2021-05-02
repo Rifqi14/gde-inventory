@@ -221,7 +221,7 @@ class PurchasingController extends Controller
 			'adb' => $choose_adb?$choose_adb:null,
 		);
 
-        if (isset($tor->filename)) {
+        if ($request->hasFile('tor')) {
             $path = 'assets/procurement/purchasing';
 			if (!file_exists($path)) {
 				mkdir($path, 0777, true);
@@ -430,7 +430,7 @@ class PurchasingController extends Controller
 			'updated_user' => $updated_user,
 		);
 
-        if (isset($tor->filename)) {
+        if ($request->hasFile('tor')) {
             $path = 'assets/procurement/purchasing';
 			if (!file_exists($path)) {
 				mkdir($path, 0777, true);
@@ -553,7 +553,7 @@ class PurchasingController extends Controller
 				'date' => $date[$key],
 			];
 
-            if (isset($files[$key]->filename)) {
+            if ($request->hasFile('attach')) {
                 $path = 'assets/procurement/purchasing/notes';
                 if (!file_exists($path)) {
                     mkdir($path, 0777, true);

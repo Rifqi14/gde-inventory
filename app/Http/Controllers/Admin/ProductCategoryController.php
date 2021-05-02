@@ -260,6 +260,67 @@ class ProductCategoryController extends Controller
             // $this->updateChildren($row->parent_id);
         }
     }
+
+    public function select(Request $request){
+        $start = $request->page ? $request->page - 1 : 0;
+        $length = $request->limit;
+        $name = strtoupper($request->name);
+
+        //Count Data
+        $query = ProductCategory::select('id','name','parent_id');
+        $query->whereRaw("upper(name) like '%$name%'");
+
+        $row = clone $query;
+        $recordsTotal = $row->count();
+
+        // $query->where("parent_id",0);
+        $query->offset($start);
+        $query->limit($length);
+        $categorys = $query->get();
+
+        $data = [];
+        foreach ($categorys as $category) {
+            if($category->parent_id != 0){
+                $category->name = $this->getParent($category->parent_id, $category->name);
+            }
+            $data[] = $category;
+        }
+        
+        usort($data, function($a, $b) {
+            return $a->name <=> $b->name;
+        });
+        
+        return response()->json([
+            'total' => $recordsTotal,
+            'rows' => $data
+        ], 200);
+    }
+
+    public function getChildren($parent_id, $parent_name, $data){
+        $categorys = ProductCategory::select('*')->where("parent_id",$parent_id)->get();
+
+        foreach ($categorys as $category) {
+            $category->no = "-";
+            $category->name = $parent_name.' &nbsp;&nbsp;<span style="font-size: 23px;position:relative;top: 2px;line-height: 0.1;">&rsaquo;</span>&nbsp;&nbsp;  '.$category->name;
+            $data[] = $category;
+            $data = $this->getChildren($category->id, $category->name, $data);
+        }
+
+        return $data;
+    }
+
+    public function getParent($id, $name){
+        $categorys = ProductCategory::select('*')->where("id",$id)->get();
+        
+        foreach ($categorys as $category) {
+            $name = $category->name.' &nbsp;&nbsp;<span style="font-size: 23px;position:relative;top: 2px;line-height: 0.1;">&rsaquo;</span>&nbsp;&nbsp;  '.$name;
+            if($category->parent_id != 0){
+                $name = $this->getParent($category->parent_id, $name);
+            }
+        }
+
+        return $name;
+    }
 }
 
 

@@ -1,17 +1,17 @@
 @extends('admin.layouts.app')
-@section('title','Employee')
+@section('title', $menu_name)
 
 @section('breadcrumb')
 <div class="row mb-3 mt-3">
     <div class="col-sm-4">
         <h1 id="title-branch" class="m-0 text-dark">
-            Employee
+            {{ $menu_name }}
         </h1>
     </div>
     <div class="col-sm-8">
         <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
-            <li class="breadcrumb-item">SDM</li>
-            <li class="breadcrumb-item">Employee</li>
+            <li class="breadcrumb-item">{{ $parent_name }}</li>
+            <li class="breadcrumb-item">{{ $menu_name }}</li>
             <li class="breadcrumb-item">Create</li>
         </ol>
     </div>
@@ -211,6 +211,14 @@
                                     <div class="form-group">
                                         <label class="control-label" for="user">User</label>
                                         <select class="form-control select2" name="user" id="user" data-placeholder="Yes/No">
+                                            <option value="1">Yes</option>
+                                            <option value="0">No</option>
+                                        </select>
+                                    </div>
+                                    <!-- Payroll -->
+                                    <div class="form-group">
+                                        <label class="control-label" for="payroll">Payroll</label>
+                                        <select class="form-control select2" name="payroll" id="payroll" data-placeholder="Yes/No">
                                             <option value="1">Yes</option>
                                             <option value="0">No</option>
                                         </select>

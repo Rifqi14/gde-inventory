@@ -29,4 +29,30 @@ return [
         'active'          => "Active",
         'non active'          => "Non Active"
     ],
+    'is_show' => [
+        'YES'   => "YES",
+        'NO'    => "NO"
+    ],
+    'dc_type' => [
+        'Engineering'   => "Engineering",
+        'Subsurface'    => "Subsurface",
+        'Safeguard'    => "Safeguard",
+        'General'    => "General",
+        'Letter'    => "Letter",
+        'Asset'    => "Asset"
+    ],
+    'machine_type'  => [
+        'CHECKIN'       => 'Check In',
+        'CHECKOUT'      => 'Check Out'
+    ],
+    'uom_type'      => [
+        'REFERENCE'     => 'Reference',
+        'BIGGERTHAN'    => 'Bigger Than',
+        'SMALLERTHAN'   => 'Smaller Than',
+    ],
+    'status_receipt'    => [
+        'WAITING'       => 'Waiting',
+        'INPROGRESS'    => 'In Progress',
+        'COMPLETED'     => 'Completed'
+    ],
 ];

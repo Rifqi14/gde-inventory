@@ -32,8 +32,7 @@ Edit Vehicle
 		<div class="row">
 			<div class="col-12">
 				<div class="card">
-					<form class="form-horizontal no-margin" action="{{route('vehicle.update', ['id' => $user->id])}}"
-						id="form" method="post" />
+					<form class="form-horizontal no-margin" action="{{route('vehicle.update', ['id' => $user->id])}}" id="form" method="post" />
 					{{ csrf_field() }}
 					@method('PUT')
 					<div class="card-body">
@@ -44,22 +43,19 @@ Edit Vehicle
 						<div class="form-group row mt-4">
 							<label class="col-md-2 col-xs-12 control-label" for="site_id">Unit:</label>
 							<div class="col-sm-6 controls">
-								<select type="text" class="select2 form-control" name="site_id"
-									data-placeholder="Unit"></select>
+								<select type="text" class="select2 form-control" id="site_id" name="site_id" data-placeholder="Unit"></select>
 							</div>
 						</div>
 						<div class="form-group row">
 							<label class="col-md-2 col-xs-12 control-label" for="police_number">Police Number:</label>
 							<div class="col-sm-6 controls">
-								<input type="text" class="form-control" name="police_number"
-									placeholder="Police Number..." value="{{$user->police_number}}" />
+								<input type="text" class="form-control" name="police_number" placeholder="Police Number..." value="{{$user->police_number}}" />
 							</div>
 						</div>
 						<div class="form-group row">
 							<label class="col-md-2 col-xs-12 control-label" for="vehicle_name">Vehicle Name:</label>
 							<div class="col-sm-6 controls">
-								<input type="text" class="form-control" name="vehicle_name"
-									placeholder="Vehicle Name..." value="{{$user->vehicle_name}}" />
+								<input type="text" class="form-control" name="vehicle_name" placeholder="Vehicle Name..." value="{{$user->vehicle_name}}" />
 							</div>
 						</div>
 						<div class="form-group row">
@@ -75,8 +71,7 @@ Edit Vehicle
 						<div class="form-group row">
 							<label class="col-md-2 col-xs-12 control-label" for="remarks">Remarks:</label>
 							<div class="col-sm-6 controls">
-								<textarea class="form-control" name="remarks" rows="4" style="resize: none;"
-									placeholder="Remarks...">{{$user->remarks}}</textarea>
+								<textarea class="form-control" name="remarks" rows="4" style="resize: none;" placeholder="Remarks...">{{$user->remarks}}</textarea>
 							</div>
 						</div>
 					</div>
@@ -85,8 +80,7 @@ Edit Vehicle
 							<b><i class="fas fa-save"></i></b>
 							Save
 						</button>
-						<a href="{{ route('vehicle.index') }}"
-							class="btn btn-sm btn-secondary color-palette btn-labeled legitRipple text-sm">
+						<a href="{{ route('vehicle.index') }}" class="btn btn-sm btn-secondary color-palette btn-labeled legitRipple text-sm">
 							<b><i class="fas fa-times"></i></b>
 							Cancel
 						</a>
@@ -110,7 +104,7 @@ Edit Vehicle
 			}
 		});
 		$('.select2').select2();
-		$( "#unit_id" ).select2({
+		$( "#site_id" ).select2({
 			ajax: {
 				url: "{{ route('site.select') }}",
 				type:'GET',
@@ -138,7 +132,7 @@ Edit Vehicle
 			},
 			allowClear: true,
 		});
-        $("#unit_id").select2("trigger", "select", {
+        $("#site_id").select2("trigger", "select", {
 			data: {id:'{{$user->site_id}}', text:'{{$user->site_name}}'}
 		});
 
@@ -154,7 +148,7 @@ Edit Vehicle
 						success:function(result){
 							$('#form').unblock();
 							 if(result.status){
-								document.location = "{{ route('vehicle.index') }}";
+								document.location = result.results;
 							}else{
 								toastr.options = {
 									"closeButton": false,

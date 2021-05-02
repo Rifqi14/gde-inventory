@@ -108,6 +108,9 @@ Route::group(['prefix' => 'admin'], function () {
         // Route Bin
         Route::get('/bin/read', 'Admin\BinController@read')->name('bin.read');
         Route::resource('/bin', 'Admin\BinController');
+        // Route Product
+        Route::get('/product/read', 'Admin\ProductController@read')->name('product.read');
+        Route::resource('/product','Admin\ProductController');
         // Route Province
         Route::get('/province/select', 'Admin\ProvinceController@select')->name('province.select');
         // Route Region
@@ -121,17 +124,27 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/businesstrip/select', 'Admin\BusinessTripController@select')->name('bt.select');
         Route::resource('/businesstrip', 'Admin\BusinessTripController');
         // Route Product Category
-        Route::get('/productcategory/read','Admin\ProductCategoryController@read')->name('productcategory.read');        
+        Route::get('/productcategory/read','Admin\ProductCategoryController@read')->name('productcategory.read');  
+        Route::get('/productcategory/select','Admin\ProductCategoryController@select')->name('productcategory.select');        
         Route::get('/productcategory/parentcategories','Admin\ProductCategoryController@parentcategories')->name('productcategory.parentcategories');        
         Route::get('/productcategory/edit/{id}', 'Admin\ProductCategoryController@edit');                
         Route::get('/productcategory/delete/{id}','Admin\ProductCategoryController@destroy')->name('productcategory.delete');
         Route::resource('/productcategory','Admin\ProductCategoryController');
+        // Route Doc Category
+        Route::get('/documentcategory/read','Admin\DcCategoryController@read')->name('documentcategory.read');  
+        Route::resource('/documentcategory','Admin\DcCategoryController');
 
         // Route UOM Category
-        Route::get('/uomcategory/read','Admin\UomCategoryController@read')->name('uomcategory.read');        
+        Route::get('/uomcategory/read','Admin\UomCategoryController@read')->name('uomcategory.read');
+        Route::get('/uomcategory/select','Admin\UomCategoryController@select')->name('uomcategory.select');        
         Route::get('/uomcategory/delete/{id}','Admin\UomCategoryController@destroy');
         Route::get('/uomcategory/edit/{id}','Admin\UomCategoryController@edit');
         Route::resource('/uomcategory','Admin\UomCategoryController');
+
+        // Route UOM
+        Route::get('/uom/read','Admin\UomController@read')->name('uom.read');
+        Route::get('/uom/select','Admin\UomController@select')->name('uom.select');
+        Route::resource('/uom','Admin\UomController');
 
         // Route Employee
         Route::get('/employee/read','Admin\EmployeeController@read')->name('employee.read');  
@@ -152,5 +165,13 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/calendarexception/{id}/calendar', 'Admin\CalendarExceptionController@calendar')->name('calendarexception.calendar');
         Route::post('/calendarexception/addcalendar', 'Admin\CalendarExceptionController@addcalendar')->name('calendarexception.addcalendar');
         Route::resource('/calendarexception', 'Admin\CalendarExceptionController');
+
+        // Attendance Machine
+        Route::get('/attendancemachine/read', 'Admin\AttendanceMachineController@read')->name('attendancemachine.read');
+        Route::get('/attendancemachine/select', 'Admin\AttendanceMachineController@select')->name('attendancemachine.select');
+        Route::resource('/attendancemachine', 'Admin\AttendanceMachineController');
+
+        // Receipt Document
+        Route::resource('/contractreceipt', 'Admin\ContractReceiptController');
     });
 });

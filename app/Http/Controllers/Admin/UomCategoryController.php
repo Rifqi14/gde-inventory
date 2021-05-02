@@ -183,4 +183,35 @@ class UomCategoryController extends Controller
             ], 400);
         }
     }
+
+    public function select(Request $request){
+        $start = $request->page ? $request->page - 1 : 0;
+        $length = $request->limit;
+        $name = strtoupper($request->name);
+        $selected = $request->selected;
+
+        //Count Data
+        $query = UomCategory::select('*');
+        $query->whereRaw("upper(name) like '%$name%'");
+        if($selected){
+            $query->whereNotIn('id', $selected);
+        }
+
+        $row = clone $query;
+        $recordsTotal = $row->count();
+
+        $query->offset($start);
+        $query->limit($length);
+        $uoms = $query->get();
+
+        $data = [];
+        foreach ($uoms as $uom) {
+            $uom->no = ++$start;
+            $data[] = $uom;
+        }
+        return response()->json([
+            'total' => $recordsTotal,
+            'rows' => $data
+        ], 200);
+    }
 }
