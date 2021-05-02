@@ -44,7 +44,7 @@ Create Vehicle
 						<div class="form-group row mt-4">
 							<label class="col-md-2 col-xs-12 control-label" for="site_id">Unit:</label>
 							<div class="col-sm-6 controls">
-								<select type="text" class="select2 form-control" name="site_id"
+								<select type="text" class="select2 form-control" name="site_id" id="unit_id"
 									data-placeholder="Unit"></select>
 							</div>
 						</div>

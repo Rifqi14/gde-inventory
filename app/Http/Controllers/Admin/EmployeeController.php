@@ -118,6 +118,37 @@ class EmployeeController extends Controller
         ], 200);
     }
 
+    public function select(Request $request)
+    {
+        $start = $request->page ? $request->page - 1 : 0;
+        $length = $request->limit;
+        $name = strtoupper($request->name);
+
+        $query = Employee::query();
+        if($name){
+            $query->whereRaw("upper(name) like '%$name%'");
+        }
+        $query->where('status',1);
+        $query->orderBy('id');
+
+        $rows = clone $query;
+        $total = $rows->count();
+
+        $query->offset($start);
+        $query->limit($length);
+        $employees = $query->get();
+
+        $data = [];
+        foreach($employees as $key => $row){
+            $data[] = $row;
+        }
+
+        return response()->json([
+            'total' => $total,
+            'rows'  => $data
+        ]);
+    }
+
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
