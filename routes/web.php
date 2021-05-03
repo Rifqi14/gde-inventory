@@ -166,5 +166,11 @@ Route::group(['prefix' => 'admin'], function () {
 
         // Receipt Document
         Route::resource('/contractreceipt', 'Admin\ContractReceiptController');
+
+        // Product Serial
+        Route::resource('/productserial', 'Admin\ProductSerialController');
+
+        // Goods Receipt
+        Route::resource('goodsreceipt', 'Admin\GoodsReceiptController');
     });
 });
