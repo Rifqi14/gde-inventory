@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Menu;
 use App\Models\RoleUser;
 use App\Models\SiteUser;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
@@ -380,10 +381,11 @@ class EmployeeController extends Controller
         $employee->payroll_type     = $payroll;
         $employee->save();
 
+        DB::beginTransaction();
         if ($as_user) {
-            $account = User::where('employee_id', $employee->id)->get();
+            $account = User::where('employee_id', $employee->id)->first();
             if (!$account) {
-                $create_account = User::create([
+                $account = User::create([
                     'employee_id' => $employee->id,
                     'name'        => $employee->name,
                     'email'       => $employee->email,
@@ -412,10 +414,27 @@ class EmployeeController extends Controller
                     $user = ['status' => false, 'message' => 'Failed to create user account.'];
                 }
             } else {
+                $account->name      = $employee->name;
+                $account->email     = $employee->email;
+                $account->username  = $employee->nid;
+                $account->spv_id    = $request->spv ? $request->spv : null;
+                $account->save();
+
+                if ($request->site) {
+                    $site_user  = SiteUser::where('user_id', $account->id)->first();
+                    if ($site_user) {
+                        $site_user->site_id     = $request->site;
+                        $site_user->save();
+                    } else {
+                        $create_site_user   = SiteUser::create([
+                            'site_id'   => $request->site,
+                            'user_id'   => $account->id,
+                        ]);
+                    }
+                }
                 $user = ['status' => true, 'message' => 'Employee already have an account.'];
             }
 
-            dd($account->id);
             $group_user = RoleUser::where('user_id', $account->id)->first();
             if ($group_user) {
                 $group_user->role_id    = $request->role;
@@ -486,6 +505,7 @@ class EmployeeController extends Controller
             ];
         }
 
+        DB::commit();
         return response()->json([
             'status' => $result['status']
         ], $result['point']);
