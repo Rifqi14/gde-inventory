@@ -24,6 +24,45 @@
     .bootstrap-switch-handle-off.bootstrap-switch-default{
     width: 100px !important;
     }
+    .html-viewer{
+        position: relative;
+        width: 100%;
+        height: 100%;
+        background: #e9ecef;
+        border: 5px solid #fff;
+        max-height: 300px;
+        min-height: 300px;
+        border-radius: .25rem;
+        box-shadow: 0px 0px 4px -2px rgb(0 0 0 / 50%);
+        padding: 10px;
+        overflow: auto;
+    }
+    .detail-item{
+        position: relative;
+    }
+    .detail-item i{
+        position: relative;
+        float: left;
+        margin-bottom: 20px;
+        margin-right: 7px;
+        top: 3px;
+    }
+    .detail-item label{
+        
+    }
+    .detail-item h6{
+        
+    }
+    .transparent-input{
+
+    }
+    span.tag{
+        color: #fff;
+        background-color: #424776 !important;
+        border-color: #676992 !important;
+        border-radius: 4px;
+        padding: 1px 5px;
+    }
 </style>
 @endsection
 
@@ -46,7 +85,7 @@
 @endsection
 
 @section('content')
-<section class="content" id="content">
+<section class="content">
     <div class="container-fluid">
         
             <div class="row">
@@ -56,294 +95,29 @@
                             <span class="title">
                                 <hr/>
                                 <h5 class="text-md text-dark text-bold">Contract Information</h5>
+                                <input type="hidden" name="id" value="{{ $contract->id }}">
                             </span>
-                            <div class="form-group mt-4">
-                                <label for="complainant">Number:</label>
-                                <input type="text" class="form-control" name="number" placeholder="Contract number..." required value="{{ $contract->number }}" disabled>
-                            </div>
-                            <div class="form-group">
-                                <label for="complainant">Title:</label>
-                                <input type="text" class="form-control" name="title" placeholder="Contract Title..." required value="{{ $contract->title }}" disabled>
-                            </div>
-                            <div class="form-group">
-                                <label for="id_number">Scope of Work:</label>
-                                <textarea class="form-control summernote" name="scope" rows="4" placeholder="Scope of Work and Deliverables">{!! $contract->scope_of_work !!}</textarea>
-                            </div>
-                            <div class="form-group">
-                                <label for="contra">Contractor:</label>
-                                <div class="row">
-                                    <div class="col-sm-10">
-                                        <input type="text" class="form-control" name="contractor" placeholder="Enter Contractor Name..." required value="{{ $contract->contractor }}" disabled>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group mt-4">
+                                        <label for="complainant">Number:</label>
+                                        <input type="text" class="form-control" value="{{ $contract->number }}" disabled>
                                     </div>
-                                    <div class="col-sm-2">
-                                        <div class="icheck-success d-inline ">
-                                            <input type="checkbox" name="jv" value="jv" id="jv" @if(count($contract->jvmember) > 0) checked @endif data-total="{{ count($contract->jvmember) }}" disabled>
-                                            <label for="jv">JV</label>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group mt-4">
+                                        <label for="complainant">Title:</label>
+                                        <input type="text" class="form-control" value="{{ $contract->title }}" disabled>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                        <label for="complainant">Scope of Work:</label>
+                                        <div class="html-viewer">
+                                            {!! $contract->scope_of_work !!}
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div id="jv-mber" @if(count($contract->jvmember) <= 0) style="display: none;" @endif>
-                                <div class="form-group">
-                                    <label for="complainant">JV Members:</label>
-                                    <div id="form-member">
-                                        @if(count($contract->jvmember) <= 0)
-                                            <div class="row item-member">
-                                                <div class="col-sm-10">
-                                                    <input type="text" class="form-control" name="jv_member[]" placeholder="Enter member ...." required disabled>
-                                                </div>
-                                                <div class="col-sm-2">
-                                                    @if($contract->status != 'publish')
-                                                    <button id="add-member" data-urutan="1" type="button" class="btn btn-success legitRipple text-sm">
-                                                    <b><i class="fas fa-plus"></i> Add</b>
-                                                    </button>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        @else
-                                            @php $num = 0; @endphp
-                                            @foreach ($contract->jvmember as $jvmember)
-                                                @php $num++; @endphp
-                                                <div class="row item-member @if($num>1) mt-1 @endif" @if($num>1) id="member-{{ $num }}" @endif>
-                                                    <div class="col-sm-10">
-                                                        <input type="text" class="form-control" name="jv_member[]" placeholder="Enter member ...." required value="{{ $jvmember->name }}" disabled>
-                                                    </div>
-                                                    <div class="col-sm-2" @if(count($contract->jvmember) != $num) @if($num != 1) style="display:none;" @endif @endif >
-                                                        @if($num == 1)
-                                                            @if($contract->status != 'publish')
-                                                            <button id="add-member" data-urutan="@if(count($contract->jvmember) > 0){{ count($contract->jvmember) }}@else 1 @endif" type="button" class="btn btn-success legitRipple text-sm">
-                                                                <b><i class="fas fa-plus"></i> Add</b>
-                                                            </button>
-                                                            @endif
-                                                        @endif
-                                                        @if($num > 1)
-                                                            @if($contract->status != 'publish')
-                                                            <button type="button" class="btn btn-transparent text-md" onclick="removeMember(this)" data-urutan="{{ $num }}">
-                                                                <i class="fas fa-trash text-maroon color-palette"></i>
-                                                            </button>
-                                                            @endif
-                                                        @endif
-                                                    </div>
-                                                </div>
-                                            @endforeach
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="complainant">Contract Value:</label>
-                                <div class="row">
-                                    <div class="col-sm-4">
-                                        <select type="text" class="select2 form-control" name="contract_currency" disabled>
-                                            <option value="">Choose a Currency</option>
-                                            <option value="rupiah" @if($contract->contract_currency == "rupiah") selected @endif >Rp</option>
-                                            <option value="dollar" @if($contract->contract_currency == "dollar") selected @endif>$</option>
-                                            <option value="yen" @if($contract->contract_currency == "yen") selected @endif>¥</option>
-                                            <option value="euro" @if($contract->contract_currency == "euro") selected @endif>€</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-sm-8">
-                                        <input type="text" class="form-control text-right input-price" id="contract_value" name="contract_value" placeholder="Contract Value..." required value="{{ number_format($contract->contract_value,'2',',','.') }}" disabled/>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="complainant">Contract PIC:</label>
-                                <input type="text" class="form-control" name="contract_pic" placeholder="Contract PIC..." required value="{{ $contract->contract_pic }}" disabled>
-                            </div>
-                            <div id="input-list-checkbox" class="form-group row">
-                                <div class="col-md-12 mb-1">
-                                    <div class="icheck-success d-inline">
-                                        <input type="checkbox" value="pb" name="pb" id="type0" @if(count($contract->pb) > 0) checked @endif disabled>
-                                        <label for="type0">Performance Bond:</label>
-                                    </div>
-                                    <div class="row-form mt-1">
-                                        <div class="row mb-1">
-                                            <label class="col-sm-4 control-label" for="issued">Issued by</label>
-                                            <div class="col-sm-8">
-                                                <input type="text" class="form-control " placeholder="Bond Issuer..." name="issued_pb" value="{{ @$contract->pb[0]->issued_by }}" disabled>
-                                            </div>
-                                        </div>
-                                        <div class="row mb-1">
-                                            <label class="col-sm-4 control-label" for="issued">Validity Period</label>
-                                            <div class="col-sm-8">
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control " placeholder="Bond Validity Period..." name="validity_pb" value="{{ @$contract->pb[0]->validity_period }}" disabled>
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text" id="">months</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-12 mb-1">
-                                    <div class="icheck-success d-inline">
-                                        <input type="checkbox" value="ab" name="ab" id="type1" @if(count($contract->ab) > 0) checked @endif disabled>
-                                        <label for="type1">Advance Bond:</label>
-                                    </div>
-                                    <div class="row-form mt-1">
-                                        <div class="row mb-1">
-                                            <label class="col-sm-4 control-label" for="issued">Issued by</label>
-                                            <div class="col-sm-8">
-                                                <input type="text" class="form-control " placeholder="Bond Issuer..." name="issued_ab" value="{{ @$contract->ab[0]->issued_by }}" disabled>
-                                            </div>
-                                        </div>
-                                        <div class="row mb-1">
-                                            <label class="col-sm-4 control-label" for="validity">Validity Period</label>
-                                            <div class="col-sm-8">
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control " placeholder="Bond Validity Period..." name="validity_ab" value="{{ @$contract->ab[0]->validity_period }}" disabled>
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text" id="">months</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row mb-1">
-                                            <label class="col-sm-4 control-label" for="value">Value</label>
-                                            <div class="col-sm-8">
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control " placeholder="Bond Value..." name="value_ab" value="{{ @$contract->ab[0]->value }}" disabled>
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text" id="">%</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-12 mb-1">
-                                    <div class="icheck-success d-inline">
-                                        <input type="checkbox" value="rb" name="rb" id="type2" @if(count($contract->rb) > 0) checked @endif disabled>
-                                        <label for="type2">Retention Bond:</label>
-                                    </div>
-                                    <div class="row-form mt-1">
-                                        <div class="row mb-1">
-                                            <label class="col-sm-4 control-label" for="issued">Issued by</label>
-                                            <div class="col-sm-8">
-                                                <input type="text" class="form-control " placeholder="Bond Issuer..." name="issued_rb" value="{{ @$contract->ab[0]->issued_by }}" disabled>
-                                            </div>
-                                        </div>
-                                        <div class="row mb-1">
-                                            <label class="col-sm-4 control-label" for="validity">Validity Period</label>
-                                            <div class="col-sm-8">
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control " placeholder="Bond Validity Period..." name="validity_rb" value="{{ @$contract->ab[0]->validity_period }}" disabled>
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text" id="">months</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row mb-1">
-                                            <label class="col-sm-4 control-label" for="value">Value</label>
-                                            <div class="col-sm-8">
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control " placeholder="Bond Value..." name="value_rb" value="{{ @$contract->ab[0]->value }}" disabled>
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text" id="">%</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-12 mb-1">
-                                    <div class="icheck-success d-inline">
-                                        <input type="checkbox" value="rm" name="rm" id="type3" @if(count($contract->rm) > 0) checked @endif disabled>
-                                        <label for="type3">Retention Money:</label>
-                                    </div>
-                                    <div class="row-form mt-1">
-                                        <div class="form-group">
-                                            <div class="row mb-1">
-                                                <label class="col-sm-4 control-label" for="issued">Value</label>
-                                                <div class="col-sm-4">
-                                                    <select type="text" class="select2 form-control" name="currency_rm">
-                                                        <option value="">Pick a Currency</option>
-                                                        <option value="rupiah" @if(@$contract->rm[0]->currency=='rupiah') selected @endif>Rp</option>
-                                                        <option value="dollar" @if(@$contract->rm[0]->currency=='dollar') selected @endif>$</option>
-                                                        <option value="yen" @if(@$contract->rm[0]->currency=='yen') selected @endif>¥</option>
-                                                        <option value="euro" @if(@$contract->rm[0]->currency=='euro') selected @endif>€</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-sm-4">
-                                                    <input type="text" class="form-control text-right input-price" name="value_rm" placeholder="Retention Value..." required value="{{ @$contract->rm[0]->value }}" disabled/>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-12 mb-1">
-                                    <div class="icheck-success d-inline">
-                                        <input type="checkbox" value="pen" name="pen" id="type4" @if(count($contract->pen) > 0) checked @endif disabled>
-                                        <label for="type4">Penalty:</label>
-                                    </div>
-                                    <div class="row-form mt-1">
-                                        <div class="row mb-1">
-                                            <label class="col-sm-4 control-label" for="validity">Late Period</label>
-                                            <div class="col-sm-8">
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control " placeholder="Late Period..." name="late_pen" value="{{ @$contract->pen[0]->late_period }}" disabled>
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text" id="">months</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row mb-1">
-                                            <label class="col-sm-4 control-label" for="value">Value</label>
-                                            <div class="col-sm-8">
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control " placeholder="Penalty Value" name="value_pen" value="{{ @$contract->pen[0]->value }}" disabled>
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text" id="">%</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-12 mb-1">
-                                    <div class="icheck-success d-inline">
-                                        <input type="checkbox" value="wb" name="wb" id="type5" @if(count($contract->wb) > 0) checked @endif disabled>
-                                        <label for="type5">Warranty Bond:</label>
-                                    </div>
-                                    <div class="row-form mt-1">
-                                        <div class="row mb-1">
-                                            <label class="col-sm-4 control-label" for="validity">Length</label>
-                                            <div class="col-sm-8">
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control " placeholder="Bond Length..." name="length_wb" value="{{ @$contract->wb[0]->length }}" disabled>
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text" id="">months</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row mb-1">
-                                            <label class="col-sm-4 control-label" for="value">Bond Value</label>
-                                            <div class="col-sm-8">
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control " placeholder="Bond Value..." name="value_wb" value="{{ @$contract->wb[0]->bond_value }}" disabled>
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text" id="">%</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row mb-1">
-                                            <label class="col-sm-4 control-label" for="issued">Issued by</label>
-                                            <div class="col-sm-8">
-                                                <input type="text" class="form-control " placeholder="Bond Issuer..." name="issued_wb" value="{{ @$contract->wb[0]->issued_by }}" disabled>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="description">Remarks:</label>
-                                <textarea class="form-control summernote1" name="remarks" rows="4" placeholder="Enter description of the complaint">{!! $contract->remarks !!}</textarea>
                             </div>
                         </div>
                     </div>
@@ -356,246 +130,93 @@
                                 <hr/>
                                 <h5 class="text-md text-dark text-bold">General Information</h5>
                             </span>
-                            <div class="form-group mt-4">
-                                <label for="number">Procurement Number:</label>
-                                <select class="select2" name="purchasing_id" id="procurement" data-placeholder="Tag Procurement Number" style="width: 100%;" required disabled></select>
+                            <div class="form-group mt-5 detail-item">
+                                <i class="fa fa-file-alt"></i> 
+                                <label for="complainant" class="mb-0">Procurement Number:</label>
+                                <h6>{{ $contract->purchasing->number }}</h6>
                             </div>
-                            <div class="form-group">
-                                <label for="number">Contract Signing Date:</label>
-                                <div class="input-group">
-                                    <div class="input-group-append">
-                                        <span class="input-group-text" id=""><i class="fa fa-calendar"></i></span>
-                                    </div>
-                                    <input type="text" class="form-control datepicker text-right" id="contract_signing_date" name="contract_signing_date" placeholder="Contract Signing Date" required value="{{ date("d/m/Y", strtotime($contract->contract_signing_date)) }}" disabled/>
-                                </div>
+                            <div class="form-group detail-item">
+                                <i class="fa fa-calendar"></i> 
+                                <label for="number" class="mb-0">Contract Signing Date:</label>
+                                <h6>{{ date("d/m/Y", strtotime($contract->contract_signing_date)) }}</h6>
                             </div>
-                            <div class="form-group">
-                                <label for="number">Contract Start Date:</label>
-                                <div class="input-group">
-                                    <div class="input-group-append">
-                                        <span class="input-group-text" id=""><i class="fa fa-calendar"></i></span>
-                                    </div>
-                                    <input type="text" class="form-control datepicker text-right" id="contract_start_date" name="contract_start_date" placeholder="Contract Start Date" required value="{{ date("d/m/Y", strtotime($contract->contract_start_date)) }}" disabled/>
-                                </div>
+                            <div class="form-group detail-item">
+                                <i class="fa fa-calendar"></i> 
+                                <label for="number" class="mb-0">Expiration Date:</label>
+                                <h6>{{ date("d/m/Y", strtotime($contract->expiration_date)) }}</h6>
                             </div>
-                            <div class="form-group">
-                                <label for="number">Work Start Date:</label>
-                                <div class="input-group">
-                                    <div class="input-group-append">
-                                        <span class="input-group-text" id=""><i class="fa fa-calendar"></i></span>
-                                    </div>
-                                    <input type="text" class="form-control datepicker text-right" id="work_start_date" name="work_start_date" placeholder="Work Start Date" required value="{{ date("d/m/Y", strtotime($contract->work_start_date)) }}" disabled/>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="number">Expiration Date:</label>
-                                <div class="input-group">
-                                    <div class="input-group-append">
-                                        <span class="input-group-text" id=""><i class="fa fa-calendar"></i></span>
-                                    </div>
-                                    <input type="text" class="form-control datepicker text-right" id="expiration_date" name="expiration_date" placeholder="Expiration Date" required value="{{ date("d/m/Y", strtotime($contract->expiration_date)) }}" disabled/>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="number">Work End Date:</label>
-                                <div class="input-group">
-                                    <div class="input-group-append">
-                                        <span class="input-group-text" id=""><i class="fa fa-calendar"></i></span>
-                                    </div>
-                                    <input type="text" class="form-control datepicker text-right" id="work_end_date" name="work_end_date" placeholder="Work End Date" required value="{{ date("d/m/Y", strtotime($contract->work_end_date)) }}" disabled/>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="number">Contract Owner:</label>
-                                <select class="select2" name="owner[]" id="owner" data-placeholder="Tag Contract Owner" style="width: 100%;" required multiple disabled>
+                            <div class="form-group detail-item">
+                                <i class="fa fa-user-tie"></i> 
+                                <label for="number" class="mb-0">Contract Owner:</label>
+                                <p>
                                     @foreach ($roles as $role)
-                                        <option value="{{ $role->id }}" @if(in_array($role->id, $contract->owner))) selected @endif>{{ $role->name }}</option>    
+                                        @if(in_array($role->id, $contract->owner))
+                                            <span class="tag">{{ $role->name }}</span>
+                                        @endif
                                     @endforeach
-                                </select>
+                                </p>
                             </div>
-                            <div class="form-group row">
-                                <div class="col-md-6 mb-1">
-                                    <div class="icheck-success d-inline">
-                                        <input type="checkbox" value="insurance" name="insurance" id="insurance" @if($contract->insurance) checked @endif disabled>
-                                        <label for="insurance"></label>
-                                    </div>
-                                    <span class="text">Insurance</span>
-                                </div>
-                                <div class="col-md-6 mb-1">
-                                    <div class="icheck-success d-inline">
-                                        <input type="checkbox" value="warning" name="warning" id="warning" @if($contract->warning_letter) checked @endif disabled>
-                                        <label for="warning"></label>
-                                    </div>
-                                    <span class="text">Warning Letter</span>
-                                </div>
+                            <div class="form-group detail-item">
+                                <i class="fa fa-map-marked-alt"></i> 
+                                <label for="number" class="mb-0">Unit:</label>
+                                <h6>{{$contract->site->name}}</h6>
                             </div>
-                            <div class="form-group">
-                                <label>Unit:</label>
-                                <select name="unit" data-placeholder="Choose Unit" style="width: 100%;" required class="select2 form-control" id="site_id" name="site_id"
-                                    data-placeholder="Select Site" disabled>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="attach">Attachment:</label>
-                                <a href="{{ url('/admin'.$contract->attachment) }}" download target="_blank" >
-                                    <div class="text-md text-info text-bold">
-                                        Download
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="form-group">
-                                <label>Status:</label><br/>
-                                <input type="checkbox" id="check-status" class="form-control" name="progress" data-bootstrap-switch data-off-color="default" data-on-color="success" data-on-text="Finished" data-off-text="In Progress" @if($contract->progress) checked @endif />
+                            <div class="form-group detail-item">
+                                <i class="fa fa-check-circle"></i> 
+                                <label for="number" class="mb-0">Status:</label>
+                                <h6>@if($contract->progress) Finished @else In Progress @endif</h6>
                             </div>
                         </div>
                     </div>
 
-                    @if(count($contract->adden) > 0)
+                    {{-- <div class="text-right mb-4">
+                        <a href="{{ url('admin/contract') }}" class="btn bg-maroon color-palette legitRipple text-sm" >
+                            <b><i class="fas fa-arrow-left"></i></b>
+                        </a>
+                    </div> --}}
+
+                </div>
+
+
+                <div class="col-md-12" id="content">
                     <div class="card">
                         <div class="card-body">
                             <span class="title">
                                 <hr/>
-                                <h5 class="text-md text-dark text-uppercase">Addendum</h5>
+                                <h5 class="text-md text-dark text-bold">Product</h5>
                             </span>
-                            <div class="form-group mt-4">
-                                <label for="number">Addendum:</label>
-                                {{ @$contract->adden[0]->times }}
-                            </div>
-                            <div class="form-group">
-                                <label for="attach">Attachment:</label>
-                                @foreach(@$contract->adden[0]->attach as $addtach)
-                                    <a href="{{ url('/admin'.$addtach->attachment) }}" download target="_blank" >
-                                        <div class="text-md text-info text-bold">
-                                            Download
-                                        </div>
-                                    </a>
-                                @endforeach
-                            </div>
-                            <div class="form-group">
-                                <label for="complainant">Value Added:</label>
-                                <?php 
-                                    if(@$contract->adden[0]->currency == 'yen'){
-                                        echo '¥ '.number_format(@$contract->adden[0]->value,'0',',','.');
-                                    } else if(@$contract->adden[0]->currency == 'euro'){
-                                        echo '€ '.number_format(@$contract->adden[0]->value,'0',',','.');
-                                    } else if(@$contract->adden[0]->currency == 'dollar'){
-                                        echo '$ '.number_format(@$contract->adden[0]->value,'0',',','.');
-                                    } else {
-                                        echo 'Rp '.number_format(@$contract->adden[0]->value,'0',',','.');
-                                    }
-                                ?>
-                            </div>
-                            <div class="form-group">
-                                <label for="number">Expiration Moved:</label>
-                                {{ date('d/m/Y', strtotime(@$contract->adden[0]->expiration_moved)) }}
-                            </div>
-                            <div class="form-group">
-                                <label for="number">Notes:</label>
-                                {{ @$contract->adden[0]->notes }}
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-
-                    <div class="text-right mb-4">
-                        @if($contract->status=='publish' and $contract->progress == 0)
-                            @if($group_code == 'PMU-PRC')
-                                <button type="button" onclick="addAddendum()" class="btn btn-success btn-labeled legitRipple text-sm">
-                                    <b><i class="fas fa-edit"></i></b>
-                                    Addendum
-                                </button>
-                            @endif
-                            <a href="{{ url('admin/contract') }}" class="btn bg-maroon color-palette legitRipple text-sm" >
-                                <b><i class="fas fa-arrow-left"></i></b>
-                            </a>
-                        @else
-                            <a href="{{ url('admin/contract') }}" class="btn bg-maroon btn-labeled color-palette legitRipple text-sm" >
-                                <b><i class="fas fa-arrow-left"></i></b>
-                                Back
-                            </a>
-                        @endif
-                    </div>
-
-                    <div id="form-addendum" style="display:none;">
-                        <form role="form" id="form-data" action="#">
-                            <div class="card">
-                                <div class="card-body">
-                                    <span class="title">
-                                        <hr/>
-                                        <h5 class="text-md text-dark text-uppercase">Addendum</h5>
-                                    </span>
-                                    <div class="form-group mt-4">
-                                        <label for="number">Addendum:</label>
-                                        <div class="input-group">
-                                            @php $times = count($contract->adden)+1; @endphp
-                                            <input type="text" class="form-control" name="times" placeholder="Addendum" readonly value="{{ $times }}" />
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text" id="">times</span>
-                                            </div>
-                                        </div>
+                            <div class="mt-5"></div>
+                            <form id="form" role="form" action="{{route('contract.product.store')}}" method="post">
+                                {{ csrf_field() }}
+                                <input type="hidden" name="contract_id" value="{{ $contract->id }}">
+                                <div class="form-group row">
+                                    <label class="col-sm-1 col-form-label">Product :</label>
+                                    <div class="col-sm-4">
+                                        <select data-placeholder="Choose Product" style="width: 100%;" required class="select2 form-control" id="product_id" name="product_id">
+                                        </select>
                                     </div>
-                                    <div class="form-group">
-                                        <label for="attach">Attachment:</label>
-                                        <div id="form-attach">
-                                            <div class="row item-attach">
-                                                <div class="col-sm-10">
-                                                    <div class="input-group">
-                                                        <div class="custom-file">   
-                                                            <input type="file" class="custom-file-input" name="attach[]" accept="image/*" onchange="changePath(this)">
-                                                            <label class="custom-file-label" for="exampleInputFile">Attach Contract Addendum</label>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-sm-2">
-                                                    <button id="add-attach" data-urutan="1" type="button" class="btn btn-success legitRipple text-sm">
-                                                        <b><i class="fas fa-plus"></i></b>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="complainant">Value Added:</label>
-                                        <div class="row">
-                                            <div class="col-sm-6">
-                                                <select type="text" class="select2 form-control" name="currency">
-                                                    <option value="">Pick a Currency</option>
-                                                    <option value="rupiah" >Rp</option>
-                                                    <option value="dollar" >$</option>
-                                                    <option value="yen" >¥</option>
-                                                    <option value="euro" >€</option>
-                                                </select>
-                                            </div>
-                                            <div class="col-sm-6">
-                                                <input type="text" class="form-control text-right input-price" name="value" placeholder="Additional Value" required />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="number">Expiration Moved:</label>
-                                        <div class="input-group">
-                                            <div class="input-group-append">
-                                                <span class="input-group-text" id=""><i class="fa fa-calendar"></i></span>
-                                            </div>
-                                            <input type="text" class="form-control datepicker text-right" id="expiration_moved" name="expiration_moved" placeholder="Expiration Moved" required value="" />
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="number">Notes:</label>
-                                        <textarea class="form-control" name="notes" rows="4"></textarea>
+                                    <div class="col-sm-4">
+                                        <button type="submit" id="add-uom" class="btn btn-labeled text-sm btn-sm btn-success btn-flat legitRipple">
+                                            <b><i class="fas fa-plus"></i></b> Add
+                                        </button>
                                     </div>
                                 </div>
-                            </div>
-                        </form>
-                        <div class="text-right mb-4">
-                            <button type="button" onclick="onSubmit('draft')" class="btn bg-olive color-palette btn-labeled legitRipple text-sm">
-                                <b><i class="fas fa-save"></i></b>
-                                Save
-                            </button>
-                            <button type="button" onclick="closeAddendum()" class="btn bg-red color-palette btn-labeled legitRipple text-sm" >
-                                <b><i class="fas fa-arrow-left"></i></b>
-                                Cancel
-                            </button>
+                            </form>
+                            <table class="table table-striped datatable" width="100%" id="table-product">
+                                <thead>
+                                    <tr>
+                                        <th>No.</th>
+                                        <th>Product</th>
+                                        <th>UOM</th>
+                                        <th>Qty Order</th>
+                                        <th>Qty Receive</th>
+                                        <th>#</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -605,99 +226,293 @@
 @endsection
 
 @section('scripts')
+    <script src="{{ asset('assets/js/jquery.inputmask.js') }}"></script>
     <script type="text/javascript">
-        var prog = @if($contract->status == 'publish') 'publish' @else null @endif;
-        var progval = @if($contract->progress) '1' @else null @endif;
-        var group_code = '{{ $group_code }}'
         $(function(){
-            $("input[data-bootstrap-switch]").each(function(){
-                $(this).bootstrapSwitch('state', $(this).prop('checked'));
-            });
-            summernote()
-            inputPrice()
-            $('.datepicker').daterangepicker({
-                singleDatePicker: true,
-                timePicker: false,
-                timePickerIncrement: 30,
-                locale: {
-                    format: 'DD/MM/YYYY'
-                }
-            });
-            $('.select2').select2();
-        
-            $("#input-list-checkbox input[type='checkbox']").change(function(){
-                let checked = $(this).is(":checked");
-                if(checked){
-                    $(this).parent().parent().children(".row-form").slideDown("fast");
-                    $(this).parent().parent().children(".row-form").find("input").attr('required', 'required');
-                }else{
-                    $(this).parent().parent().children(".row-form").slideUp("fast");
-                    $(this).parent().parent().children(".row-form").find("input").removeAttr('required');
-                }
-            });
-            $("#input-list-checkbox input[type='checkbox']").trigger('change');
-        
-            $("#jv").change(function(){
-                let checked = $(this).is(":checked");
-                if(checked){
-                    $('#jv-mber').slideDown("fast");
-                    $(this).parents('.form-group').find('label[for=contra]').text('JV Leader:')
-                    $(this).parents('.form-group').find('input[type=text]').attr('placeholder', 'Enter jv leader ....')
-                }else{
-                    $('#jv-mber').slideUp("fast");
-                    $(this).parents('.form-group').find('label[for=contra]').text('Contractor:')
-                    $(this).parents('.form-group').find('input[type=text]').attr('placeholder', 'Enter contractor ....')
-                }
-            });
-            $("#jv").trigger('change')
-        
-            $("#procurement").select2({
-                ajax: {
-                    url: 'https://pmugde.com/admin/procurement/contract/action/getpurchasing',
-                    type:'POST',
-                    dataType: 'json',
-                    data: function (params) {
-                        return {
-                            name:params.term,
-                            page:params.page,
-                            limit:30,
-                            notid:'{{ $userid }}',
-                        };
-                    },
-                    processResults: function (data,params) {
-                        var more = (params.page * 30) < data.total;
-                        var option = [];
-                        $.each(data.rows,function(index,item){
-                            option.push({
-                                id:item.id,  
-                                text: item.number
-                            });
-                        });
-                        return {
-                            results: option, more: more,
-                        };
-                    },
+            $(".number-only").inputmask("Regex", { regex: "[1-9]*" });
+            $(".select2").select2();
+            dataTable = $('.datatable').DataTable( {
+                processing: true,
+                language: {
+                    processing: `<div class="p-2 text-center">
+                <i class="fas fa-circle-notch fa-spin fa-fw"></i> Loading...
+                </div>`
                 },
-                allowClear: true,
-            });
-            // $("#procurement").select2("trigger", "select", {
-            //     data: {id:'1', text:'001'}
-            // });
-
-            if(prog){
-                $('#form-data').find('input, select').attr('disabled', "disabled")
-                $('.summernote').summernote('disable');
-                $('.summernote1').summernote('disable');
-                $('#check-status').removeAttr('disabled')
-            }
-
-            if(progval || group_code != 'PMU-PRC'){
-                $('#check-status').bootstrapSwitch('disabled', true);
-            }
-
-            $( "#site_id" ).select2({
+                serverSide: true,
+                filter: false,
+                responsive: true,
+                lengthChange: false,
+                order: [[ 1, "asc" ]],
                 ajax: {
-                    url: "{{ route('site.select') }}",
+                    url: "{{route('contract.product')}}",
+                    type: "GET",
+                    data:function(data){
+                        var id = $('input[name=id]').val();
+                        data.id = id;
+                    }
+                },
+                columnDefs:[
+                    {
+                        orderable: false,targets:[0,5]
+                    },
+                    { className: "text-right", targets: [3,4] },
+                    { className: "text-center", targets: [0,5] },
+                    {
+                        render: function ( data, type, row ) {
+                        return `<a href="javascript:void(0);" style="line-height: 1;">
+                        <div class="text-md text-info">
+                            ${row.product.name}
+                        </div>
+                        </a>
+                        <small>
+                            ${row.product.merek}
+                        </small>`;
+                        },targets: [1]
+                    },
+                    {
+                        render: function ( data, type, row ) {
+                            var opt = `<option value="">&nbsp;</option>`;
+                            for(var uom of row.product.uoms){   
+                                selected = "";
+                                if(row.uom_id == uom.uom_id){
+                                    selected = "selected";
+                                }
+                                opt += `<option value="${uom.uom_id}" ${selected} >${uom.uom.name}</option>`;
+                            }
+                            return `
+                            <select class="form-control select2uom" data-placeholder="Select UOM" data-id="${row.id}">
+                                ${opt}
+                            </select>
+                            `;
+                        },targets: [2]
+                    },
+                    {
+                        render: function ( data, type, row ) {
+                            return `
+                            <input class="form-control text-right number-only qty-product" value="${row.qty}" data-id="${row.id}">
+                            `;
+                        },targets: [3]
+                    },
+                    {
+                        render: function ( data, type, row ) {
+                            return `0`;
+                        },targets: [4]
+                    },
+                    {   
+                        width: "10%",
+                        render: function ( data, type, row ) {
+                        return `<div class="btn-group dropleft">
+                        <button type="button" class="btn btn-flat btn-sm dropdown-toggle" data-toggle="dropdown">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item delete" href="javascript:void(0);" data-id="${row.id}">
+                                <i class="fa fa-trash-alt"></i> Delete Data
+                            </a>
+                        </div>
+                        </div>`;
+                        },targets: [5]
+                    }
+                ],
+                columns: [
+                    { data: "no", width: 50 },
+                    { data: "product_id", width:150 },
+                    { data: "uom_id", width:150 },
+                    { data: "qty", width:100 },
+                    { data: "qty", width:100 },
+                    { data: "no" },
+                ],
+                drawCallback: function( settings ) {
+                    $(".select2uom").select2();
+                    $(".number-only").inputmask("Regex", { regex: "[0-9]*" });
+                    updatedatatable();
+                }
+            });
+
+            $("#form").validate({
+                errorElement: 'span',
+                errorClass: 'help-block',
+                focusInvalid: false,
+                highlight: function (e) {
+                    $(e).closest('.form-group').removeClass('has-success').addClass('has-error');
+                },
+                success: function (e) {
+                    $(e).closest('.form-group').removeClass('has-error').addClass('has-success');
+                    $(e).remove();
+                },
+                errorPlacement: function (error, element) {
+                    if(element.is(':file')) {
+                        error.insertAfter(element.parent().parent().parent());
+                    }else if(element.parent('.input-group').length) {
+                        error.insertAfter(element.parent());
+                    }else if (element.attr('type') == 'checkbox') {
+                        error.insertAfter(element.parent());
+                    }else{
+                        error.insertAfter(element);
+                    }
+                },
+                submitHandler: function() { 
+                    $.ajax({
+                        url:$('#form').attr('action'),
+                        method:'post',
+                        data: new FormData($('#form')[0]),
+                        processData: false,
+                        contentType: false,
+                        dataType: 'json', 
+                        beforeSend:function(){
+                            blockMessage('#content', 'Loading', '#fff');
+                        }
+                    }).done(function(response){
+                        $('#content').unblock();
+                        if(response.status){
+                            dataTable.draw();
+                        }else{	
+                            toastr.options = {
+                                "closeButton": false,
+                                "debug": false,
+                                "newestOnTop": false,
+                                "progressBar": false,
+                                "positionClass": "toast-top-right",
+                                "preventDuplicates": false,
+                                "onclick": null,
+                                "showDuration": "300",
+                                "hideDuration": "1000",
+                                "timeOut": "5000",
+                                "extendedTimeOut": "1000",
+                                "showEasing": "swing",
+                                "hideEasing": "linear",
+                                "showMethod": "fadeIn",
+                                "hideMethod": "fadeOut"
+                            }
+                            toastr.warning(response.message);
+                        }
+                        return;
+                    }).fail(function(response){
+                        $('#content').unblock();
+                        var response = response.responseJSON;
+                        toastr.options = {
+                            "closeButton": false,
+                            "debug": false,
+                            "newestOnTop": false,
+                            "progressBar": false,
+                            "positionClass": "toast-top-right",
+                            "preventDuplicates": false,
+                            "onclick": null,
+                            "showDuration": "300",
+                            "hideDuration": "1000",
+                            "timeOut": "5000",
+                            "extendedTimeOut": "1000",
+                            "showEasing": "swing",
+                            "hideEasing": "linear",
+                            "showMethod": "fadeIn",
+                            "hideMethod": "fadeOut"
+                        }
+                        toastr.warning(response.message);
+                    })	
+                }
+            });
+
+            $(document).on('click', '.delete', function () {
+                var id = $(this).data('id');
+                bootbox.confirm({
+                    buttons: {
+                        confirm: {
+                            label: '<i class="fa fa-check"></i>',
+                            className: 'btn-primary btn-sm'
+                        },
+                        cancel: {
+                            label: '<i class="fa fa-undo"></i>',
+                            className: 'btn-default btn-sm'
+                        },
+                    },
+                    title: 'Delete data?',
+                    message: 'Are you sure want to delete this product?',
+                    callback: function (result) {
+                        if (result) {
+                            var data = {
+                                _token: "{{ csrf_token() }}",
+                                id: id
+                            };
+                            $.ajax({
+                                url: `{{route('contract.product.delete')}}`,
+                                dataType: 'json',
+                                data: data,
+                                type: 'POST',
+                                beforeSend: function () {
+                                    blockMessage('#content', 'Loading', '#fff');
+                                }
+                            }).done(function (response) {
+                                $('#content').unblock();
+                                if (response.status) {
+                                    toastr.options = {
+                                        "closeButton": false,
+                                        "debug": false,
+                                        "newestOnTop": false,
+                                        "progressBar": false,
+                                        "positionClass": "toast-top-right",
+                                        "preventDuplicates": false,
+                                        "onclick": null,
+                                        "showDuration": "300",
+                                        "hideDuration": "1000",
+                                        "timeOut": "5000",
+                                        "extendedTimeOut": "1000",
+                                        "showEasing": "swing",
+                                        "hideEasing": "linear",
+                                        "showMethod": "fadeIn",
+                                        "hideMethod": "fadeOut"
+                                    }
+                                    toastr.success(response.message);
+                                    dataTable.ajax.reload(null, false);
+                                }else {
+                                    toastr.options = {
+                                        "closeButton": false,
+                                        "debug": false,
+                                        "newestOnTop": false,
+                                        "progressBar": false,
+                                        "positionClass": "toast-top-right",
+                                        "preventDuplicates": false,
+                                        "onclick": null,
+                                        "showDuration": "300",
+                                        "hideDuration": "1000",
+                                        "timeOut": "5000",
+                                        "extendedTimeOut": "1000",
+                                        "showEasing": "swing",
+                                        "hideEasing": "linear",
+                                        "showMethod": "fadeIn",
+                                        "hideMethod": "fadeOut"
+                                    }
+                                    toastr.warning(response.message);
+                                }
+                            }).fail(function (response) {
+                                var response = response.responseJSON;
+                                $('#content').unblock();
+                                toastr.options = {
+                                    "closeButton": false,
+                                    "debug": false,
+                                    "newestOnTop": false,
+                                    "progressBar": false,
+                                    "positionClass": "toast-top-right",
+                                    "preventDuplicates": false,
+                                    "onclick": null,
+                                    "showDuration": "300",
+                                    "hideDuration": "1000",
+                                    "timeOut": "5000",
+                                    "extendedTimeOut": "1000",
+                                    "showEasing": "swing",
+                                    "hideEasing": "linear",
+                                    "showMethod": "fadeIn",
+                                    "hideMethod": "fadeOut"
+                                }
+                                toastr.warning(response.message);
+                            })
+                        }
+                    }
+                });
+            });
+
+            $( "#product_id" ).select2({
+                ajax: {
+                    url: "{{ route('contract.selectproduct') }}",
                     type:'GET',
                     dataType: 'json',
                     data: function (params) {
@@ -713,7 +528,8 @@
                     $.each(data.rows,function(index,item){
                         option.push({
                             id:item.id,  
-                            text: item.name
+                            text: item.name,
+                            uoms: item.uoms,
                         });
                     });
                     return {
@@ -723,188 +539,140 @@
                 },
                 allowClear: true,
             });
-            $("#site_id").select2("trigger", "select", {
-                data: {id:'{{$contract->unit}}', text:'{{$contract->site->name}}'}
+
+        });
+
+        function addProduct(){
+
+        }
+
+        function updatedatatable(){
+            $("body .select2uom").on('select2:select',function(){
+                var data = {
+                    _token: "{{ csrf_token() }}",
+                    id: $(this).attr("data-id"),
+                    uom_id: $(this).select2('val')
+                };
+                $.ajax({
+                    url: "{{route('contract.product.update')}}",
+                    dataType: 'json', 
+                    data:data,
+                    type:'POST',
+                    beforeSend:function(){
+                        blockMessage('.datatable','Loading','#fff');
+                    }
+                }).done(function(response){
+                    if(response.status){
+                        $('.datatable').unblock();
+                        // dataTable.ajax.reload( null, false );
+                    }
+                    else{
+                        toastr.options = {
+                            "closeButton": false,
+                            "debug": false,
+                            "newestOnTop": false,
+                            "progressBar": false,
+                            "positionClass": "toast-top-right",
+                            "preventDuplicates": false,
+                            "onclick": null,
+                            "showDuration": "300",
+                            "hideDuration": "1000",
+                            "timeOut": "5000",
+                            "extendedTimeOut": "1000",
+                            "showEasing": "swing",
+                            "hideEasing": "linear",
+                            "showMethod": "fadeIn",
+                            "hideMethod": "fadeOut"
+                        }
+                        toastr.warning(response.message);
+                    }
+                }).fail(function(response){
+                    var response = response.responseJSON;
+                    $('.datatable').unblock();
+                    toastr.options = {
+                        "closeButton": false,
+                        "debug": false,
+                        "newestOnTop": false,
+                        "progressBar": false,
+                        "positionClass": "toast-top-right",
+                        "preventDuplicates": false,
+                        "onclick": null,
+                        "showDuration": "300",
+                        "hideDuration": "1000",
+                        "timeOut": "5000",
+                        "extendedTimeOut": "1000",
+                        "showEasing": "swing",
+                        "hideEasing": "linear",
+                        "showMethod": "fadeIn",
+                        "hideMethod": "fadeOut"
+                    }
+                    toastr.warning(response.message);
+                });
             });
-        
-        })
-        
-        $('#add-member').on('click', function(e) {
-            e.preventDefault();
-            var no = $(this).data('urutan') + 1,
-        	html = `<div class="row item-member mt-1" id="member-${no}">
-        				<div class="col-sm-10">
-        					<input type="text" class="form-control" name="jv_member[]" placeholder="Enter member ...." required>
-        				</div>
-        				<div class="col-sm-2">
-        					<button type="button" class="btn btn-transparent text-md" onclick="removeMember(this)" data-urutan=${no}><i class="fas fa-trash text-maroon color-palette"></i></button>
-        				</div>
-        			</div>`;
-        
-            if (no > 2) {
-                $('#member-'+(no-1)).find('.col-sm-2').hide();
-            }
-            $(this).data('urutan', no);
-            $('#form-member').append(html);
-        });
-        
-        let removeMember = (me) => {
-            var no = $('#add-member').data('urutan');
-            
-            if (no == $('.item-member').length) {
-                $('#member-'+(no-1)).find('.col-sm-2').show();
-                $('#add-member').data('urutan', (no-1));
-                $(me).parent().parent().remove();
-            }
-        }
-        
-        $('#check-status').on('switchChange.bootstrapSwitch', function (e, data) {
-            if ($(this).bootstrapSwitch('state') === true) {
-                Swal.fire({
-                    title: '<text style="font-size:24px;">Are you sure?<text>',
-                    html: '<b><text style="font-size:22px;">WARNING: This Process cannot be Undone</text></b>',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3d9970',
-                    cancelButtonColor: '#d81b60',
-                    confirmButtonText: "<b>I AM SURE</b>",
-                    cancelButtonText: "<b>CANCEL</b>",
-                }).then((result) => {
-                    if (!result.value) {
-                        $(this).bootstrapSwitch('state', !data, false);
+
+            $("body .qty-product").on("change",function(){
+                var data = {
+                    _token: "{{ csrf_token() }}",
+                    id: $(this).attr("data-id"),
+                    qty: $(this).val(),
+                };
+                $.ajax({
+                    url: "{{route('contract.product.update')}}",
+                    dataType: 'json', 
+                    data:data,
+                    type:'POST',
+                    beforeSend:function(){
+                        blockMessage('.datatable','Loading','#fff');
                     }
-                });
-            }
-        });
-
-        $('#check-status').on('switchChange.bootstrapSwitch', function (e, data) {
-            if ($(this).bootstrapSwitch('state') === true) {
-                Swal.fire({
-                    title: '<text style="font-size:24px;">Are you sure?<text>',
-                    html: '<b><text style="font-size:22px;">WARNING: This Process cannot be Undone</text></b>',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3d9970',
-                    cancelButtonColor: '#d81b60',
-                    confirmButtonText: "<b>I AM SURE</b>",
-                    cancelButtonText: "<b>CANCEL</b>",
-                }).then((result) => {
-                    if (!result.value) {
-                        $(this).bootstrapSwitch('state', !data, false);
-                    } else {
-                        $(this).bootstrapSwitch('disabled',true);
-                        $('#bench').html('<input type="hidden" value="1" name="progress" />')
-
-                        let data = $('#form-data')[0]
-                        let formData = new FormData(data)
-                        formData.append('status', 'publish')
-
-                        $.ajax({
-                            url: $('#form-data').attr('action'),
-                            method: 'post',
-                            data: formData,
-                            processData: false,
-                            contentType: false,
-                            dataType: 'json',
-                            beforeSend:function(){
-                                blockMessage('#bd', 'Please Wait . . . ', '#fff');
-                            }
-                        }).done(function(response) {
-                            $('#bd').unblock();
-                            window.location.href = './admin/contract';
-                            return;
-                        }).fail(function(response) {
-                            var response = response.responseJSON;
-                            $('#bd').unblock();
-                            window.location.href = './admin/contract';
-                            return;
-                        });
+                }).done(function(response){
+                    if(response.status){
+                        $('.datatable').unblock();
+                        // dataTable.ajax.reload( null, false );
                     }
+                    else{
+                        toastr.options = {
+                            "closeButton": false,
+                            "debug": false,
+                            "newestOnTop": false,
+                            "progressBar": false,
+                            "positionClass": "toast-top-right",
+                            "preventDuplicates": false,
+                            "onclick": null,
+                            "showDuration": "300",
+                            "hideDuration": "1000",
+                            "timeOut": "5000",
+                            "extendedTimeOut": "1000",
+                            "showEasing": "swing",
+                            "hideEasing": "linear",
+                            "showMethod": "fadeIn",
+                            "hideMethod": "fadeOut"
+                        }
+                        toastr.warning(response.message);
+                    }
+                }).fail(function(response){
+                    var response = response.responseJSON;
+                    $('.datatable').unblock();
+                    toastr.options = {
+                        "closeButton": false,
+                        "debug": false,
+                        "newestOnTop": false,
+                        "progressBar": false,
+                        "positionClass": "toast-top-right",
+                        "preventDuplicates": false,
+                        "onclick": null,
+                        "showDuration": "300",
+                        "hideDuration": "1000",
+                        "timeOut": "5000",
+                        "extendedTimeOut": "1000",
+                        "showEasing": "swing",
+                        "hideEasing": "linear",
+                        "showMethod": "fadeIn",
+                        "hideMethod": "fadeOut"
+                    }
+                    toastr.warning(response.message);
                 });
-            } else {
-                
-            }
-        });
-        
-        function onSubmit(status){
-          let data = $('#form-data')[0]
-          let formData = new FormData(data)
-          formData.append('status', status);
-          Swal.fire({
-            title: '<text style="font-size:24px;">Are you sure?<text>',
-            html: '<text style="font-size:21px;font-weight:bold;">WARNING: This Process cannot be Undone<text>',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3d9970',
-            cancelButtonColor: '#d81b60',
-            confirmButtonText: "<b>I AM SURE</b>",
-            cancelButtonText: "<b>CANCEL</b>",
-          }).then((result) => {
-            if (result.value) {
-              $.ajax({
-                url: $('#form-data').attr('action'),
-                method: 'post',
-                data: formData,
-                processData: false,
-                contentType: false,
-                dataType: 'json',
-                beforeSend:function(){
-                  blockMessage('#bd', 'Please Wait . . . ', '#fff');
-                }
-              }).done(function(response) {
-                console.log(response);
-                $('#bd').unblock();
-                window.location.href = './admin/contract';
-                return;
-              }).fail(function(response) {
-                var response = response.responseJSON;
-                console.log(response);
-                $('#bd').unblock();
-                window.location.href = './admin/contract';
-                return;
-              });
-            }
-          })
-        }
-        
-        function summernote(){
-          $('.summernote').summernote({
-        	height:225,
-        	toolbar: [
-        		['style', ['style']],
-        		['font-style', ['bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'clear']],
-        		['font', ['fontname']],
-        		['font-size',['fontsize']],
-        		['font-color', ['color']],
-        		['para', ['ul', 'ol', 'paragraph']],
-        		['table', ['table']],
-        		['insert', ['link', 'picture', 'video', 'hr']],
-        		['misc', ['fullscreen', 'codeview', 'help']]
-        	]
-           });
-        }
-        
-        function inputPrice(){
-            $(".input-price").priceFormat({
-                prefix: '',
-                centsSeparator: ',',
-                thousandsSeparator: '.',
-                centsLimit: 2,
-                clearOnEmpty: true
             });
         }
-        
-        function changePath(that) {
-            let filename = $(that).val()
-            $(that).next().html(filename)
-        }
 
-        function addAddendum(){
-            $('#form-addendum').slideDown("fast")
-        }
-        
-        function closeAddendum(){
-            $('#form-addendum').slideUp("fast")
-        }
     </script>
 @endsection

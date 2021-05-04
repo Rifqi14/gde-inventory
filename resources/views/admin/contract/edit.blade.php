@@ -447,6 +447,19 @@
                                 </div>
                             </div>
                             <div class="form-group">
+                                <label for="attach">Contract Type: {{ $contract->contract_type }}</label>
+                                <select name="contract_type" id="contract_type" class="select2 form-control" data-placeholder="Contract Type" required>
+                                    <option value="">&nbsp;</option>
+                                    @foreach(config('enums.contract_type') as $key => $type)
+                                        <option value="{{ $key }}" @if($contract->contract_type == $key) selected @endif >{{ $type }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="form-group" id="batch-form" style="display: none;">
+                                <label for="attach">Batch:</label>
+                                <input type="text" class="form-control" name="batch" placeholder="Batch" required>
+                            </div>
+                            <div class="form-group">
                                 <label>Status:</label><br/>
                                 <div id="bench">
 						
@@ -483,11 +496,13 @@
 @endsection
 
 @section('scripts')
+    <script src="{{ asset('assets/js/jquery.inputmask.js') }}"></script>
     <script type="text/javascript">
         var prog = @if($contract->status == 'publish') 'publish' @else null @endif;
         var progval = @if($contract->progress) '1' @else null @endif;
         var group_code = '{{ $group_code }}'
         $(function(){
+            $("input[name=batch]").inputmask("Regex", { regex: "[1-9]*" });
             $("input[data-bootstrap-switch]").each(function(){
                 $(this).bootstrapSwitch('state', $(this).prop('checked'));
             });
@@ -558,9 +573,9 @@
                 },
                 allowClear: true,
             });
-            // $("#procurement").select2("trigger", "select", {
-            //     data: {id:'1', text:'001'}
-            // });
+            $("#procurement").select2("trigger", "select", {
+                data: {id:'{{ $contract->purchasing_id }}', text:'{{ $contract->purchasing->number }}'}
+            });
 
             if(prog){
                 $('#form-data').find('input, select').attr('disabled', "disabled")
@@ -604,6 +619,16 @@
             $("#site_id").select2("trigger", "select", {
                 data: {id:'{{$contract->unit}}', text:'{{$contract->site->name}}'}
             });
+
+            $("#contract_type").on("change",function(){
+                if($(this).val() == "product"){
+                    $("#batch-form").show(); 
+                }else{
+                    $("#batch-form").hide(); 
+                }
+            });
+
+            $("#contract_type").trigger('change');
         
         })
         
