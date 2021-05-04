@@ -21,10 +21,14 @@ class DistrictController extends Controller
         $start = $request->page ? $request->page - 1 : 0;
         $length = $request->limit;
         $name = strtoupper($request->name);
+        $region_id = $request->region_id;
 
         //Count Data
         $query = District::select('*');
         $query->whereRaw("upper(name) like '%$name%'");
+        if ($region_id) {
+            $query->where('region_id',$region_id);
+        }
 
         $row = clone $query;
         $recordsTotal = $row->count();
