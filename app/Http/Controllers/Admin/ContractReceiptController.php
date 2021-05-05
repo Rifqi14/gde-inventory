@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Contract;
 use App\Models\Menu;
 use Illuminate\Support\Facades\View;
 
@@ -19,6 +20,33 @@ class ContractReceiptController extends Controller
         View::share('menu_name', $menu->menu_name);
         View::share('menu_active', url('admin/contractreceipt'));
         $this->middleware('accessmenu', ['except' => ['select']]);
+    }
+
+    public function selectcontract(Request $request)
+    {
+        $start          = $request->page ? $request->page - 1 : 0;
+        $length         = $request->limit;
+        $name           = strtoupper($request->name);
+
+        // Count Data
+        $query          = Contract::whereRaw("upper(title) like '%$name%'");
+
+        $row            = clone $query;
+        $recordsTotal   = $row->count();
+
+        $query->offset($start);
+        $query->limit($length);
+        $contracts      = $query->get();
+
+        $data           = [];
+        foreach ($contracts as $key => $contract) {
+            $contract->no   = ++$start;
+            $data[]         = $contract;
+        }
+        return response()->json([
+            'total'     => $recordsTotal,
+            'rows'      => $data
+        ], 200);
     }
 
     /**

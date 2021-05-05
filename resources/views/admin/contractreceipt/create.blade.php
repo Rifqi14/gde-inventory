@@ -232,6 +232,60 @@
   $(function(){
     summernote();
     $(".select2").select2();
+
+    $('#contract').select2({
+      ajax: {
+        url: "{{ route('contarctreceipt.selectcontract') }}",
+        type: "GET",
+        dataType: "json",
+        data: function (params) {
+          return {
+            name: params.term,
+            page: params.page,
+            limit: 30,
+          };
+        },
+        processResults: function (data, params) {
+          var more    = (params.page * 30) < data.total;
+          var option  = [];
+          $.each(data.rows, function(index, item){
+            option.push({
+              id:item.id,
+              text: item.title,
+            });
+          });
+          return { results: option, more: more };
+        },
+      },
+      allowClear: true,
+    });
+
+    $('#warehouse').select2({
+      ajax: {
+        url: "{{ route('warehouse.select') }}",
+        type: "GET",
+        dataType: "json",
+        data: function (params) {
+          return {
+            name: params.term,
+            page: params.page,
+            limit: 30,
+          };
+        },
+        processResults: function (data, params) {
+          var more    = (params.page * 30) < data.total;
+          var option  = [];
+          $.each(data.rows, function(index, item){
+            option.push({
+              id:item.id,
+              text: item.name,
+            });
+          });
+          return { results: option, more: more };
+        },
+      },
+      allowClear: true,
+    });
   });
 </script>
 @endsection
