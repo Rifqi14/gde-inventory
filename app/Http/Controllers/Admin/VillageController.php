@@ -21,10 +21,14 @@ class VillageController extends Controller
         $start = $request->page ? $request->page - 1 : 0;
         $length = $request->limit;
         $name = strtoupper($request->name);
+        $district_id = $request->district_id;
 
         //Count Data
         $query = Village::select('*');
         $query->whereRaw("upper(name) like '%$name%'");
+        if ($district_id) {
+            $query->where('district_id', $district_id);
+        }
 
         $row = clone $query;
         $recordsTotal = $row->count();

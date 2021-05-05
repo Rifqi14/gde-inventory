@@ -215,58 +215,101 @@
     }
 
     function edit(id) {
-        document.location = `{{url('admin/employee/edit')}}/${id}`;
+        document.location = `{{ route('employee.index') }}/${id}/edit`;
     }
 
     function destroy(id) {
-        if (!id) {
-            toastr.warning('Data not found.');
-            console.log({
-                errorMessage: 'Data not found because id is empty.'
-            });
-            return false;
-        }
-
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "Erased data cannot be reserved",
-            icon: 'error',
-            showCancelButton: true,
-            confirmButtonColor: '#3d9970',
-            cancelButtonColor: '#d81b60',
-            confirmButtonText: 'Yes, i am sure',
-            cancelButtonText: 'Cancel'
-        }).then((result) => {
-            if (result.value) {
-                var data = {
-                    _token: "{{ csrf_token() }}"
-                };
-                $.ajax({
-                    url: `{{url('admin/employee/delete')}}/${id}`,
-                    dataType: 'json',
-                    data: data,
-                    type: 'GET',
-                    success: function(response) {
-                        if (response.status) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Deleted',
-                                text: 'Data has been deleted.',
-                                showConfirmButton: false,
-                                timer: 1500
-                            }).then(function() {
-                                dataTable.row(id).remove().draw(false);
-                            });
-                        } else {
-                            Swal.fire(
-                                'Error!',
-                                'Failed to delete data.',
-                                'error'
-                            );
+        bootbox.confirm({
+            buttons: {
+                confirm: {
+                    label: '<i class="fa fa-check"></i>',
+                    className: 'btn-primary btn-sm'
+                },
+                cancel: {
+                    label: '<i class="fa fa-undo"></i>',
+                    className: 'btn-default btn-sm'
+                },
+            },
+            title: 'Delete data?',
+            message: 'Are you sure want to delete this data?',
+            callback: function (result) {
+                if (result) {
+                    var data = {
+                        _token: "{{ csrf_token() }}"
+                    };
+                    $.ajax({
+                        url: `{{route('employee.index')}}/${id}`,
+                        dataType: 'json',
+                        data: data,
+                        type: 'DELETE',
+                        beforeSend: function () {
+                            blockMessage('#content', 'Loading', '#fff');
                         }
-                    }
-                });
-
+                    }).done(function (response) {
+                        $('#content').unblock();
+                        if (response.status) {
+                            toastr.options = {
+                                "closeButton": false,
+                                "debug": false,
+                                "newestOnTop": false,
+                                "progressBar": false,
+                                "positionClass": "toast-top-right",
+                                "preventDuplicates": false,
+                                "onclick": null,
+                                "showDuration": "300",
+                                "hideDuration": "1000",
+                                "timeOut": "5000",
+                                "extendedTimeOut": "1000",
+                                "showEasing": "swing",
+                                "hideEasing": "linear",
+                                "showMethod": "fadeIn",
+                                "hideMethod": "fadeOut"
+                            }
+                            toastr.success(response.message);
+                            dataTable.ajax.reload(null, false);
+                        }else {
+                            toastr.options = {
+                                "closeButton": false,
+                                "debug": false,
+                                "newestOnTop": false,
+                                "progressBar": false,
+                                "positionClass": "toast-top-right",
+                                "preventDuplicates": false,
+                                "onclick": null,
+                                "showDuration": "300",
+                                "hideDuration": "1000",
+                                "timeOut": "5000",
+                                "extendedTimeOut": "1000",
+                                "showEasing": "swing",
+                                "hideEasing": "linear",
+                                "showMethod": "fadeIn",
+                                "hideMethod": "fadeOut"
+                            }
+                            toastr.warning(response.message);
+                        }
+                    }).fail(function (response) {
+                        var response = response.responseJSON;
+                        $('#content').unblock();
+                        toastr.options = {
+                            "closeButton": false,
+                            "debug": false,
+                            "newestOnTop": false,
+                            "progressBar": false,
+                            "positionClass": "toast-top-right",
+                            "preventDuplicates": false,
+                            "onclick": null,
+                            "showDuration": "300",
+                            "hideDuration": "1000",
+                            "timeOut": "5000",
+                            "extendedTimeOut": "1000",
+                            "showEasing": "swing",
+                            "hideEasing": "linear",
+                            "showMethod": "fadeIn",
+                            "hideMethod": "fadeOut"
+                        }
+                        toastr.warning(response.message);
+                    })
+                }
             }
         });
     }

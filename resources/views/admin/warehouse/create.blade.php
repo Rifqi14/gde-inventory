@@ -15,7 +15,7 @@
         <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
             <li class="breadcrumb-item">Home</li>
             <li class="breadcrumb-item">Warehouse</li>
-            <li class="breadcrumb-item">Create</li> 
+            <li class="breadcrumb-item">Create</li>
         </ol>
     </div>
 </div>
@@ -59,7 +59,7 @@
                                             <select name="type" id="type" class="form-control select2" required>
                                                 <option value="">Select Type</option>
                                                 @foreach(config('enums.warehouse_type') as $key => $type)
-                                                    <option value="{{ $key }}">{{ $type }}</option>
+                                                <option value="{{ $key }}">{{ $type }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -160,7 +160,7 @@
                                     <select name="status" id="status" class="form-control select2" required data-placeholder="Select Status">
                                         <option value=""></option>
                                         @foreach(config('enums.warehouse_status') as $key => $status)
-                                            <option value="{{ $key }}">{{ $status }}</option>
+                                        <option value="{{ $key }}">{{ $status }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -318,6 +318,19 @@
                 },
             },
             allowClear: true,
+        }).on('select2:close', function(e){
+            var data = $(this).find('option:selected').val();
+            var city = $('#region_id').select2('data');
+
+            if (city[0] && city[0].province_id != data) {
+                $('#region_id').val(null).trigger('change');
+                $('#district_id').val(null).trigger('change');
+                $('#village_id').val(null).trigger('change');
+            }
+        }).on('select2:clearing', function(){
+            $('#region_id').val(null).trigger('change');
+            $('#district_id').val(null).trigger('change');
+            $('#village_id').val(null).trigger('change');
         });
 
         $( "#region_id" ).select2({
@@ -326,7 +339,10 @@
                 type:'GET',
                 dataType: 'json',
                 data: function (params) {
+                    var province_id = $('#province_id').find('option:selected').val();
+                        province_id = province_id ? province_id : '';
                     return {
+                        province_id:province_id,
                         name:params.term,
                         page:params.page,
                         limit:30,
@@ -347,6 +363,17 @@
                 },
             },
             allowClear: true,
+        }).on('select2:close', function(e){
+            var data = $(this).find('option:selected').val();
+            var district = $('#district_id').select2('data');
+
+            if (district[0] && district[0].region_id != data) {
+                $('#district_id').val(null).trigger('change');
+                $('#village_id').val(null).trigger('change');
+            }
+        }).on('select2:clearing', function(){
+            $('#district_id').val(null).trigger('change');
+            $('#village_id').val(null).trigger('change');
         });
 
         $( "#district_id" ).select2({
@@ -355,7 +382,10 @@
                 type:'GET',
                 dataType: 'json',
                 data: function (params) {
+                    var region_id = $('#region_id').find('option:selected').val();
+                        region_id = region_id ? region_id : '';
                     return {
+                        region_id: region_id,
                         name:params.term,
                         page:params.page,
                         limit:30,
@@ -376,6 +406,15 @@
                 },
             },
             allowClear: true,
+        }).on('select2:close', function(e){
+            var data = $(this).find('option:selected').val();
+            var village = $('#village_id').select2('data');
+
+            if (village[0] && village[0].region_id != data) {
+                $('#village_id').val(null).trigger('change');
+            }
+        }).on('select2:clearing', function(){
+            $('#village_id').val(null).trigger('change');
         });
 
         $( "#village_id" ).select2({
@@ -384,7 +423,10 @@
                 type:'GET',
                 dataType: 'json',
                 data: function (params) {
+                    var district_id = $('#district_id').find('option:selected').val();
+                        district_id = district_id ? district_id : '';
                     return {
+                        district_id: district_id,
                         name:params.term,
                         page:params.page,
                         limit:30,

@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class BorrowerRequestVehicle extends Model
+class ContractDocumentReceiptDetail extends Model
 {
-    protected $guarded = [];
+    //
 }

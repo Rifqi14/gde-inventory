@@ -1,17 +1,17 @@
 @extends('admin.layouts.app')
-@section('title','Employee')
+@section('title', $menu_name)
 
 @section('breadcrumb')
 <div class="row mb-3 mt-3">
     <div class="col-sm-4">
         <h1 id="title-branch" class="m-0 text-dark">
-            Employee
+            {{ $menu_name }}
         </h1>
     </div>
     <div class="col-sm-8">
         <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
-            <li class="breadcrumb-item">SDM</li>
-            <li class="breadcrumb-item">Employee</li>
+            <li class="breadcrumb-item">{{ $parent_name }}</li>
+            <li class="breadcrumb-item">{{ $menu_name }}</li>
             <li class="breadcrumb-item">Edit</li>
         </ol>
     </div>
@@ -21,7 +21,7 @@
 @section('content')
 <section class="content">
     <div class="container-fluid">
-        <form class="form-horizontal no-margin" action="{{route('employee.update', ['id' => $data->id])}}" id="form" enctype="multipart/form-data"> 
+        <form class="form-horizontal no-margin" action="{{route('employee.update', ['id' => $data->id])}}" id="form" enctype="multipart/form-data">
             {{ csrf_field() }}
             @method('PUT')
             <div class="row">
@@ -64,8 +64,8 @@
                                             <div class="row">
                                                 <div class="col-md-12">
                                                     <div class="upload-preview-wrapper">
-                                                        <a class="remove" style="{{$data->photo?'display : block;':''}}"><i class="fa fa-trash"></i></a>                                            
-                                                        <img src="{{asset($data->photo?$data->photo:'assets/img/no-image.png')}}"/>
+                                                        <a class="remove" style="{{$data->photo?'display : block;':''}}"><i class="fa fa-trash"></i></a>
+                                                        <img src="{{asset($data->photo?$data->photo:'assets/img/no-image.png')}}" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -73,7 +73,7 @@
                                                 <div class="col-md-12">
                                                     <div class="upload-btn-wrapper">
                                                         <a class="btn btn-sm btn-default btn-block btn-upload-image"><i class="fa fa-image"></i> Upload a Picture</a>
-                                                        <input class="form-control" type="file" accept="image/*" value="{{$data->photo}}" name="photo" id="photo"/>
+                                                        <input class="form-control" type="file" accept="image/*" value="{{$data->photo}}" name="photo" id="photo" />
                                                         <input type="hidden" class="has-image" name="has_photo" value="{{$data->photo!=''?1:0}}">
                                                     </div>
                                                     <p class="text-sm text-muted">File must be no more than 2 MB</p>
@@ -212,9 +212,36 @@
                                     <!-- Is User -->
                                     <div class="form-group">
                                         <label class="control-label" for="user">User</label>
-                                        <select class="form-control select2" name="user" id="user" data-placeholder="Yes/No">
+                                        <select class="form-control select2" name="user" id="user" data-placeholder="Yes/No" onchange="roleUser(this)">
                                             <option value="1" {{$data->user?'selected':''}}>Yes</option>
                                             <option value="0" {{$data->user==null?'selected':''}}>No</option>
+                                        </select>
+                                    </div>
+                                    <div class="user-existed d-none">
+                                        <div class="form-group role-select">
+                                            <label class="control-label" for="role">Group</label>
+                                            <select class="form-control select2" name="role" id="role" data-placeholder="Choose Group">
+                                            </select>
+                                        </div>
+                                        <!-- Supervisor -->
+                                        <div class="form-group spv-select">
+                                            <label class="control-label" for="spv">Supervisor</label>
+                                            <select class="form-control select2" name="spv" id="spv" data-placeholder="Choose Supervisor">
+                                            </select>
+                                        </div>
+                                        <!-- Site -->
+                                        <div class="form-group site-select">
+                                            <label class="control-label" for="site">Site</label>
+                                            <select class="form-control select2" name="site" id="site" data-placeholder="Choose Site">
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <!-- Payroll -->
+                                    <div class="form-group">
+                                        <label class="control-label" for="payroll">Payroll</label>
+                                        <select class="form-control select2" name="payroll" id="payroll" data-placeholder="Yes/No">
+                                            <option value="1" @if ($data->payroll == '1') selected @endif>Yes</option>
+                                            <option value="0" @if ($data->payroll == '0') selected @endif>No</option>
                                         </select>
                                     </div>
                                 </div>
@@ -240,7 +267,16 @@
 
 @section('scripts')
 <script>
+    const roleUser = (a) => {
+        var value = a.value;
+        if (value == 1) {
+            $('.user-existed').removeClass('d-none');
+            return;
+        }
+        $('.user-existed').addClass('d-none');
+    }
     $(function() {
+        $('#user').trigger('change');
         $('.select2').select2({
             allowClear: true
         });
@@ -425,6 +461,123 @@
             },
             allowClear: true,
         });
+
+        $("#role").select2({
+            ajax: {
+                url: "{{route('role.select')}}",
+                type: 'GET',
+                dataType: 'json',
+                data: function(params) {
+                    return {
+                        name: params.term,
+                        page: params.page,
+                        limit: 30,
+                    };
+                },
+                processResults: function(data, params) {
+                    var more = (params.page * 30) < data.total;
+                    var option = [];
+                    $.each(data.rows, function(index, item) {
+                        option.push({
+                            id: item.id,
+                            text: item.name
+                        });
+                    });
+                    return {
+                        results: option,
+                        more: more,
+                    };
+                },
+            },
+            allowClear: true,
+        });
+
+        $("#site").select2({
+            ajax: {
+                url: "{{route('site.select')}}",
+                type: 'GET',
+                dataType: 'json',
+                data: function(params) {
+                    return {
+                        name: params.term,
+                        page: params.page,
+                        limit: 30,
+                    };
+                },
+                processResults: function(data, params) {
+                    var more = (params.page * 30) < data.total;
+                    var option = [];
+                    $.each(data.rows, function(index, item) {
+                        option.push({
+                            id: item.id,
+                            text: item.name
+                        });
+                    });
+                    return {
+                        results: option,
+                        more: more,
+                    };
+                },
+            },
+            allowClear: true,
+        });
+
+        $("#spv").select2({
+            ajax: {
+                url: "{{route('user.select')}}",
+                type: 'GET',
+                dataType: 'json',
+                data: function(params) {
+                    return {
+                        name: params.term,
+                        page: params.page,
+                        limit: 30,
+                    };
+                },
+                processResults: function(data, params) {
+                    var more = (params.page * 30) < data.total;
+                    var option = [];
+                    $.each(data.rows, function(index, item) {
+                        option.push({
+                            id: item.id,
+                            text: item.name
+                        });
+                    });
+                    return {
+                        results: option,
+                        more: more,
+                    };
+                },
+            },
+            allowClear: true,
+        });
+
+        @if ($data->user)
+            @if ($data->user->roles->count() > 0)
+            $('#role').select2('trigger', 'select', {
+                data: {
+                    id: {{ $data->user->roles->first()->id }},
+                    text: "{{ $data->user->roles->first()->name }}",
+                }
+            });
+            @endif
+            @if ($data->user->sites->count() > 0)    
+            $('#site').select2('trigger', 'select', {
+                data: {
+                    id: {{ $data->user->sites->first()->id }},
+                    text: "{{ $data->user->sites->first()->name }}",
+                }
+            });
+            @endif
+            @if ($data->user->spv)
+                $('#spv').select2('trigger', 'select', {
+                    data: {
+                        id: {{ $data->user->spv->id }},
+                        text: "{{ $data->user->spv->name }}",
+                    }
+                });
+            @endif
+        @endif
 
         @if($data->region)
         $('#city').select2('trigger', 'select', {

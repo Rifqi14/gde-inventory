@@ -67,7 +67,13 @@ Route::group(['prefix' => 'admin'], function () {
         //Route Vehicle
         Route::get('/vehicle/read', 'Admin\VehicleController@read')->name('vehicle.read');
         Route::get('/vehicle/select', 'Admin\VehicleController@select')->name('vehicle.select');
-        Route::resource('/vehicle', 'Admin\VehicleController');        
+        Route::resource('/vehicle', 'Admin\VehicleController');    
+        // Route Request Vehicle
+        Route::get('/requestvehicle/read','Admin\RequestVehicleController@read')->name('requestvehicle.read');
+        Route::get('/requestvehicle/delete/{id}','Admin\RequestVehicleController@delete');
+        Route::get('/requestvehicle/edit/{id}','Admin\RequestVehicleController@edit');
+        Route::get('/requestvehicle/daterequest','Admin\RequestVehicleController@daterequest')->name('requestvehicle.daterequest');
+        Route::resource('/requestvehicle','Admin\RequestVehicleController');
         //Route Working Shift
         Route::get('/workingshift/read', 'Admin\WorkingShiftController@read')->name('workingshift.read');
         Route::get('/workingshift/select', 'Admin\WorkingShiftController@select')->name('workingshift.select');
@@ -160,6 +166,7 @@ Route::group(['prefix' => 'admin'], function () {
 
         // Route Employee
         Route::get('/employee/read','Admin\EmployeeController@read')->name('employee.read');  
+        Route::get('/employee/select','Admin\EmployeeController@select')->name('employee.select');
         Route::get('/employee/edit/{id}','Admin\EmployeeController@edit');        
         Route::get('/employee/detail/{id}','Admin\EmployeeController@detail');     
         Route::get('/employee/delete/{id}','Admin\EmployeeController@destroy');        
@@ -181,5 +188,14 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/attendancemachine/read', 'Admin\AttendanceMachineController@read')->name('attendancemachine.read');
         Route::get('/attendancemachine/select', 'Admin\AttendanceMachineController@select')->name('attendancemachine.select');
         Route::resource('/attendancemachine', 'Admin\AttendanceMachineController');
+
+        // Receipt Document
+        Route::resource('/contractreceipt', 'Admin\ContractReceiptController');
+
+        // Product Serial
+        Route::resource('/productserial', 'Admin\ProductSerialController');
+
+        // Goods Receipt
+        Route::resource('goodsreceipt', 'Admin\GoodsReceiptController');
     });
 });
