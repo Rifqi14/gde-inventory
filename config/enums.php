@@ -41,6 +41,10 @@ return [
         'Letter'    => "Letter",
         'Asset'    => "Asset"
     ],
+    'contract_type' => [
+        'product'   => "Product",
+        'service'    => "Service"
+    ],
     'machine_type'  => [
         'CHECKIN'       => 'Check In',
         'CHECKOUT'      => 'Check Out'

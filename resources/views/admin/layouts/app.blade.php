@@ -142,7 +142,7 @@
     </div>
     {{-- Script --}}
     <script src='{{asset('assets/plugins/jquery/jquery.min.js')}}'></script>
-    <script src='{{asset('assets/plugins/jquery-validation/jquery.validate.min.js')}}'></script>
+    <script src='{{asset('assets/plugins/jquery-validation/jquery.validate.js')}}'></script>
     <script src='{{asset('assets/plugins/jquery-validation/additional-methods.min.js')}}'></script>
     <script src='{{asset('assets/plugins/toastr/toastr.min.js')}}'></script>
     <script src='{{asset('assets/js/sweetalert2.all.min.js')}}'></script>

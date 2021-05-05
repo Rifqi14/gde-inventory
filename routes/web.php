@@ -88,6 +88,24 @@ Route::group(['prefix' => 'admin'], function () {
         Route::resource('/budgetary', 'Admin\BudgetController');
         //Route Contract
         Route::get('/contract/read', 'Admin\ContractController@read')->name('contract.read');
+        Route::get('/contract/product', 'Admin\ContractController@product')->name('contract.product');
+        Route::get('/contract/selectproduct', 'Admin\ContractController@selectproduct')->name('contract.selectproduct');
+        Route::get('/contract/selectbatch', 'Admin\ContractController@selectbatch')->name('contract.selectbatch');
+        Route::post('/contract/storeproduct', 'Admin\ContractController@storeproduct')->name('contract.product.store');
+        Route::post('/contract/deleteproduct', 'Admin\ContractController@deleteproduct')->name('contract.product.delete');
+        Route::post('/contract/updateproduct', 'Admin\ContractController@updateproduct')->name('contract.product.update');
+        Route::get('/contract/product/show', 'Admin\ContractController@showproduct')->name('contract.product.show');
+        Route::get('/contract/product/read', 'Admin\ContractController@productread')->name('contract.product.read');
+        Route::get('/contract/batch/read', 'Admin\ContractController@batchread')->name('contract.batch.read');
+        Route::post('/contract/batch/add', 'Admin\ContractController@batchadd')->name('contract.batch.add');
+        Route::post('/contract/batch/delete', 'Admin\ContractController@batchdelete')->name('contract.batch.delete');
+        Route::get('/contract/batch/edit', 'Admin\ContractController@batchedit')->name('contract.batch.edit');
+        Route::get('/contract/batch/show', 'Admin\ContractController@batchshow')->name('contract.batch.show');
+        Route::post('/contract/batch/update', 'Admin\ContractController@batchupdate')->name('contract.batch.update');
+        Route::get('/contract/batch/product/read', 'Admin\ContractController@batchproductread')->name('contract.batch.product.read');
+        Route::post('/contract/batch/product/add', 'Admin\ContractController@batchproductadd')->name('contract.batch.product.add');
+        Route::post('/contract/batch/product/delete', 'Admin\ContractController@batchproductdelete')->name('contract.batch.product.delete');
+        Route::get('/contract/batch/{id}', 'Admin\ContractController@batch')->name('contract.batch');
         Route::resource('/contract', 'Admin\ContractController');
         //Route Purchasing
         Route::get('/purchasing/read', 'Admin\PurchasingController@read')->name('purchasing.read');

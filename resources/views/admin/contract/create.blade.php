@@ -416,6 +416,19 @@
                                 </div>
                             </div>
                             <div class="form-group">
+                                <label for="attach">Contract Type:</label>
+                                <select name="contract_type" id="contract_type" class="select2 form-control" data-placeholder="Contract Type" required>
+                                    <option value="">&nbsp;</option>
+                                    @foreach(config('enums.contract_type') as $key => $type)
+                                        <option value="{{ $key }}">{{ $type }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="form-group" id="batch-form" style="display: none;">
+                                <label for="attach">Batch:</label>
+                                <input type="text" class="form-control" name="batch" placeholder="Batch" required>
+                            </div>
+                            <div class="form-group">
                                 <label>Status:</label><br/>
                                 <input type="checkbox" id="check-status" class="form-control" name="progress" data-bootstrap-switch data-off-color="default" data-on-color="success" data-on-text="Finished" data-off-text="In Progress" disabled />
                             </div>
@@ -442,8 +455,10 @@
 @endsection
 
 @section('scripts')
+    <script src="{{ asset('assets/js/jquery.inputmask.js') }}"></script>
     <script type="text/javascript">
         $(function(){
+            $("input[name=batch]").inputmask("Regex", { regex: "[1-9]*" });
             $("input[data-bootstrap-switch]").each(function(){
                 $(this).bootstrapSwitch('state', $(this).prop('checked'));
             });
@@ -540,6 +555,14 @@
                     },
                 },
                 allowClear: true,
+            });
+
+            $("#contract_type").on("change",function(){
+                if($(this).val() == "product"){
+                    $("#batch-form").show(); 
+                }else{
+                    $("#batch-form").hide(); 
+                }
             });
         
         })

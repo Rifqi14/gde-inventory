@@ -15,6 +15,6 @@ class ProductUom extends Model
 
     public function uom()
     {
-        return $this->hasOne('App\Models\Uom', 'id', 'uom_id');
+        return $this->hasOne('App\Models\UomCategory', 'id', 'uom_id');
     }
 }
