@@ -100,6 +100,7 @@ Route::group(['prefix' => 'admin'], function () {
         Route::resource('/purchasing', 'Admin\PurchasingController');
         // Route Warehouse
         Route::get('/warehouse/read', 'Admin\WarehouseController@read')->name('warehouse.read');
+        Route::get('/warehouse/select', 'Admin\WarehouseController@select')->name('warehouse.select');
         Route::resource('/warehouse', 'Admin\WarehouseController');
         // Route Rack
         Route::get('/rack/select', 'Admin\RackController@select')->name('rack.select');
@@ -172,6 +173,7 @@ Route::group(['prefix' => 'admin'], function () {
         Route::resource('/attendancemachine', 'Admin\AttendanceMachineController');
 
         // Receipt Document
+        Route::get('/contractreceipt/selectcontract', 'Admin\ContractReceiptController@selectcontract')->name('contarctreceipt.selectcontract');
         Route::resource('/contractreceipt', 'Admin\ContractReceiptController');
 
         // Product Serial

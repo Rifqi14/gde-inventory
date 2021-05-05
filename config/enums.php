@@ -55,4 +55,9 @@ return [
         'INPROGRESS'    => 'In Progress',
         'COMPLETED'     => 'Completed'
     ],
+    'status_global'     => [
+        'draft'             => 'Draft',
+        'waitingapproval'   => 'Waiting Approval',
+        'approved'          => 'Approved',
+    ]
 ];

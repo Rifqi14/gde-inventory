@@ -72,6 +72,21 @@
                                 </div>
                             </div>
                             <div class="form-group row">
+                                <label class="col-md-2 col-xs-12 control-label mt-1" for="sku">SKU</label>
+                                <div class="col-sm-6 controls">
+                                    <input type="text" class="form-control" id="sku" name="sku" placeholder="SKU" aria-required="true">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-md-2 col-xs-12 control-label mt-1" for="is_serial">Has Serial Number</label>
+                                <div class="col-sm-6 controls">
+                                    <div class="icheck-primary">
+                                        <input type="checkbox" name="is_serial" id="is_serial">
+                                        <label for="is_serial"></label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
                                 <label class="col-md-2 col-xs-12 control-label mt-1" for="merek">Merek</label>
                                 <div class="col-sm-6 controls">
                                     <input type="text" class="form-control" id="merek" name="merek" placeholder="Merek" aria-required="true">
