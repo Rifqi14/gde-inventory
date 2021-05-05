@@ -927,6 +927,60 @@ class ContractController extends Controller
         }
     }
 
+    public function showproduct(Request $request)
+    {
+        $contractproduct = ContractProduct::where("id",$request->id)->with("product")->first();
+
+        if($contractproduct){
+            return response()->json([
+                'status'     => true,
+                'message'   => "Success",
+                'data' => $contractproduct,
+            ], 200);
+        }else{
+            return response()->json([
+                'status'    => false,
+                'message'   => "Batch Not Found",
+                'error'     => $contractproduct,
+            ], 400);
+        }
+    }
+
+    public function productread(Request $request)
+    {
+        $start = $request->start;
+        $length = $request->length;
+        $query = $request->search['value'];
+        $sort = $request->columns[$request->order[0]['column']]['data'];
+        $dir = $request->order[0]['dir'];
+        // $name = strtoupper($request->name);
+
+        //Count Data
+        $query = BatchContractProduct::select('*')->with("batch","contractproduct","contractproduct.product","contractproduct.uom");
+        $query->where('contract_product_id',$request->id);
+        // $query->whereRaw("upper(name) like '%$name%'");
+
+        $row = clone $query;
+        $recordsTotal = $row->count();
+
+        $query->offset($start);
+        $query->limit($length);
+        $query->orderBy("batch_contract_id", "asc");
+        $batchs = $query->get();
+
+        $data = [];
+        foreach ($batchs as $batch) {
+            $batch->number = ++$start;
+            $data[] = $batch;
+        }
+        return response()->json([
+            'draw' => $request->draw,
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsTotal,
+            'data' => $data
+        ], 200);
+    }
+
     public function deleteproduct(Request $request){
         try {
             $contractproduct = ContractProduct::find($request->id);
@@ -1223,6 +1277,22 @@ class ContractController extends Controller
         $batchcontract->end_batch = $end_batch[2]."-".$end_batch[1]."-".$end_batch[0];
 
         if($batchcontract->save()){
+
+            if($request->batch_contract_products_id){
+                foreach($request->batch_contract_products_id as $key => $row){
+                    $batchcontractproduct = BatchContractProduct::find($row);
+                    $batchcontractproduct->qty = $request->qty[$key];
+                    if(!$batchcontractproduct->save()){
+                        DB::rollback();
+                        return response()->json([
+                            'status'    => false,
+                            'message'   => "Failed update batch product.",
+                            'error'     => $batchcontractproduct,
+                        ], 400);            
+                    }
+                }
+            }
+
             DB::commit();
             return response()->json([
                 'status'     => true,
@@ -1264,6 +1334,7 @@ class ContractController extends Controller
         $data = [];
         foreach ($batchs as $batch) {
             $batch->number = ++$start;
+            $batch->contract_product_qty = $batch->contractproduct->qty;
             $batch->start_date = date("d F Y", strtotime($batch->start_batch));
             $batch->end_date = date("d F Y", strtotime($batch->end_batch));
             $data[] = $batch;
@@ -1298,12 +1369,21 @@ class ContractController extends Controller
         $data = [];
         foreach ($products as $product) {
             $product->no = ++$start;
-            $data[] = $product;
+            $product->available_qty = $this->getAvailableQty($product->id, $product->qty);
+            if($product->available_qty > 0){
+                $data[] = $product;
+            }
         }
         return response()->json([
             'total' => $recordsTotal,
             'rows' => $data
         ], 200);
+    }
+
+    public function getAvailableQty($contract_product_id, $qty){
+        $BatchContractProduct = BatchContractProduct::selectRaw("sum(qty) as qty")->where("contract_product_id",$contract_product_id)->first();
+        $qty = $qty - $BatchContractProduct->qty;
+        return $qty;
     }
 
     public function batchproductadd(Request $request)
@@ -1327,7 +1407,7 @@ class ContractController extends Controller
         $data = [
             'contract_product_id' => $request->contract_product,
             'batch_contract_id' => $request->batch_contract_id,
-            'qty' => $contractproduct->qty,
+            'qty' => $this->getAvailableQty($request->contract_product, $contractproduct->qty),
         ];
         $ok = BatchContractProduct::create($data);
 

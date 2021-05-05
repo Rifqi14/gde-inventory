@@ -135,22 +135,49 @@
                                 <hr/>
                                 <h5 class="text-md text-dark text-bold">General Information</h5>
                             </span>
-                            <div class="form-group mt-5 detail-item">
+                            <div class="row">
+                                <div class="mt-4"></div>
+                                <div class="col-sm-12">
+                                    <div class="form-group mt-4">
+                                        <label for="complainant">Procurement Number:</label>
+                                        <input type="text" class="form-control" value="{{ $contract->purchasing->number }}" disabled>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                        <label for="complainant">Contract Signing Date:</label>
+                                        <input type="text" class="form-control" value="{{ date("d/m/Y", strtotime($contract->contract_signing_date)) }}" disabled>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                        <label for="complainant">Expiration Date:</label>
+                                        <input type="text" class="form-control" value="{{ date("d/m/Y", strtotime($contract->expiration_date)) }}" disabled>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                        <label for="complainant">Status:</label>
+                                        <h6>@if($contract->progress) Finished @else In Progress @endif</h6>
+                                    </div>
+                                </div>
+                            </div>
+                            {{-- <div class="form-group mt-5 detail-item">
                                 <i class="fa fa-file-alt"></i> 
                                 <label for="complainant" class="mb-0">Procurement Number:</label>
                                 <h6>{{ $contract->purchasing->number }}</h6>
-                            </div>
-                            <div class="form-group detail-item">
+                            </div> --}}
+                            {{-- <div class="form-group detail-item">
                                 <i class="fa fa-calendar"></i> 
                                 <label for="number" class="mb-0">Contract Signing Date:</label>
                                 <h6>{{ date("d/m/Y", strtotime($contract->contract_signing_date)) }}</h6>
-                            </div>
-                            <div class="form-group detail-item">
+                            </div> --}}
+                            {{-- <div class="form-group detail-item">
                                 <i class="fa fa-calendar"></i> 
                                 <label for="number" class="mb-0">Expiration Date:</label>
                                 <h6>{{ date("d/m/Y", strtotime($contract->expiration_date)) }}</h6>
-                            </div>
-                            <div class="form-group detail-item">
+                            </div> --}}
+                            {{-- <div class="form-group detail-item">
                                 <i class="fa fa-user-tie"></i> 
                                 <label for="number" class="mb-0">Contract Owner:</label>
                                 <p>
@@ -160,17 +187,17 @@
                                         @endif
                                     @endforeach
                                 </p>
-                            </div>
-                            <div class="form-group detail-item">
+                            </div> --}}
+                            {{-- <div class="form-group detail-item">
                                 <i class="fa fa-map-marked-alt"></i> 
                                 <label for="number" class="mb-0">Unit:</label>
                                 <h6>{{$contract->site->name}}</h6>
-                            </div>
-                            <div class="form-group detail-item">
+                            </div> --}}
+                            {{-- <div class="form-group detail-item">
                                 <i class="fa fa-check-circle"></i> 
                                 <label for="number" class="mb-0">Status:</label>
                                 <h6>@if($contract->progress) Finished @else In Progress @endif</h6>
-                            </div>
+                            </div> --}}
                         </div>
                     </div>
 
@@ -408,6 +435,61 @@
     </div>
     <!-- /.modal-dialog -->
 </div>
+
+<div class="modal fade" id="product-detail">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-bold">Detail Product</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" name="contract_product_id" id="contract_product_id">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label" for="start_batch">Product Name</label>
+                            <input type="text" class="form-control"  placeholder="Batch" disabled name="product_name">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label" for="start_batch">Total Qty</label>
+                            <input type="text" class="form-control"  placeholder="Total QTY" disabled name="total_qty">
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-group row">
+                            <label class="control-label col-12" for="end_batch">Batch</label>
+                            <div class="col-12">
+                                <table class="table table-striped" width="100%" id="table-detail-product-contract">
+                                    <thead>
+                                        <tr>
+                                            <th>Batch</th>
+                                            <th>Qty</th>
+                                            <th>UOM</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-right mt-4">
+                    <button type="button" class="btn btn-labeled text-sm btn-sm btn-secondary btn-flat legitRipple" data-dismiss="modal">
+                        <b><i class="fas fa-times"></i></b>
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
 @endsection
 
 @section('scripts')
@@ -492,7 +574,7 @@
                             <i class="fas fa-bars"></i>
                         </button>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" href="javascript:void(0);" data-id="${row.id}">
+                            <a class="dropdown-item" href="javascript:void(0);" data-id="${row.id}" onclick="detailProduct(${row.id})">
                                 <i class="far fa-eye"></i> Detail
                             </a>
                         </div>
@@ -622,6 +704,18 @@
                         },
                         targets: [1]
                     },
+                    {
+                        width: "25%",
+                        render: function ( data, type, row ) {
+                            return `
+                                <div class="form-group">
+                                <input id="batch_contract_products_id${row.id}" name="batch_contract_products_id[]" type="hidden" value="${row.id}">
+                                <input id="qty${row.id}" name="qty[]" class="form-control" value="${row.qty}" type="number" min="0" max="${row.contract_product_qty}"/>
+                                </div>
+                            `;
+                        },
+                        targets: [2]
+                    },
                     {   
                         width: "10%",
                         render: function ( data, type, row ) {
@@ -684,6 +778,61 @@
                     { data: "id", width:100 },
                     { data: "id", width:250 },
                     { data: "qty", width:100 }
+                ],
+                drawCallback: function( settings ) {
+                    
+                }
+            });
+
+            tabledetailproductcontract = $('#table-detail-product-contract').DataTable( {
+                processing: true,
+                language: {
+                    processing: `<div class="p-2 text-center">
+                <i class="fas fa-circle-notch fa-spin fa-fw"></i> Loading...
+                </div>`
+                },
+                serverSide: true,
+                filter: false,
+                responsive: true,
+                lengthChange: false,
+                ajax: {
+                    url: "{{route('contract.product.read')}}",
+                    type: "GET",
+                    data:function(data){
+                        var id = $('#product-detail input[name=contract_product_id]').val()?$('#product-detail input[name=contract_product_id]').val():0;
+                        data.id = id;
+                    }
+                },
+                columnDefs:[
+                    {
+                        orderable: false,targets:[0,1,2,3]
+                    },
+                    { className: "text-right", targets: [1] },
+                    { className: "text-center", targets: [2,3] },
+                    {
+                        render: function ( data, type, row ) {
+                            return `${row.batch.no}`;
+                        },
+                        targets: [0]
+                    },
+                    {
+                        render: function ( data, type, row ) {
+                            return `${row.contractproduct.uom.name}`;
+                        },
+                        targets: [2]
+                    },
+                    {
+                        render: function ( data, type, row ) {
+                            return `<span class="badge bg-warning color-platte text-sm">Waiting</span>`;
+                        },
+                        targets: [3]
+                    }
+                ],
+                columns: [
+                    { data: "id", width:100 },
+                    { data: "qty", width:250 },
+                    { data: "id", width:100 },
+                    { data: "id", width:100 }
                 ],
                 drawCallback: function( settings ) {
                     
@@ -827,6 +976,7 @@
                             text: item.product.name,
                             uom: item.uom.name,
                             qty: item.qty,
+                            available_qty: item.available_qty,
                             merek: item.product.merek,
                         });
                     });
@@ -860,7 +1010,7 @@
                 return state.text;
             }
             var $state = $(`
-                <span>${state.text}</span><small class="float-right">${state.qty} ${state.uom}</small><br>
+                <span>${state.text}</span><small class="float-right">${state.available_qty} ${state.uom}</small><br>
                 <small>${state.merek}</small>
             `);
             return $state;
@@ -870,7 +1020,7 @@
             if (!state.id) {
                 return state.text;
             }
-            var $state = $(`<span>${state.text}</span> - <span>${state.qty} ${state.uom}</span>`);
+            var $state = $(`<span>${state.text}</span> - <span>${state.available_qty} ${state.uom}</span>`);
             return $state;
         };
 
@@ -1178,6 +1328,7 @@
             }).done(function(response){
                 if(response.status){
                     $('#table-product').unblock();
+                    $('#form-batch select[name=contract_product]').empty();
                     tableproduct.ajax.reload( null, false );
                 }
                 else{
@@ -1301,6 +1452,72 @@
                         });
                     }
                 }
+            });
+        }
+
+        function detailProduct(id){var data = {
+                _token: "{{ csrf_token() }}",
+                contract_id: $('input[name=id]').val(),
+                id: id,
+            };
+            $.ajax({
+                url: "{{route('contract.product.show')}}",
+                dataType: 'json', 
+                data:data,
+                type:'GET',
+                beforeSend:function(){
+                    blockMessage('.datatable','Loading','#fff');
+                }
+            }).done(function(response){
+                if(response.status){
+                    $('.datatable').unblock();
+                    $("#product-detail #contract_product_id").val(response.data.id);
+                    $("#product-detail input[name=product_name]").val(response.data.product.name);
+                    $("#product-detail input[name=total_qty]").val(response.data.qty);
+                    tabledetailproductcontract.draw();
+                    $("#product-detail").modal("show");
+                }
+                else{
+                    toastr.options = {
+                        "closeButton": false,
+                        "debug": false,
+                        "newestOnTop": false,
+                        "progressBar": false,
+                        "positionClass": "toast-top-right",
+                        "preventDuplicates": false,
+                        "onclick": null,
+                        "showDuration": "300",
+                        "hideDuration": "1000",
+                        "timeOut": "5000",
+                        "extendedTimeOut": "1000",
+                        "showEasing": "swing",
+                        "hideEasing": "linear",
+                        "showMethod": "fadeIn",
+                        "hideMethod": "fadeOut"
+                    }
+                    toastr.warning(response.message);
+                }
+            }).fail(function(response){
+                var response = response.responseJSON;
+                $('.datatable').unblock();
+                toastr.options = {
+                    "closeButton": false,
+                    "debug": false,
+                    "newestOnTop": false,
+                    "progressBar": false,
+                    "positionClass": "toast-top-right",
+                    "preventDuplicates": false,
+                    "onclick": null,
+                    "showDuration": "300",
+                    "hideDuration": "1000",
+                    "timeOut": "5000",
+                    "extendedTimeOut": "1000",
+                    "showEasing": "swing",
+                    "hideEasing": "linear",
+                    "showMethod": "fadeIn",
+                    "hideMethod": "fadeOut"
+                }
+                toastr.warning(response.message);
             });
         }
 

@@ -130,7 +130,34 @@
                                 <hr/>
                                 <h5 class="text-md text-dark text-bold">General Information</h5>
                             </span>
-                            <div class="form-group mt-5 detail-item">
+                            <div class="row">
+                                <div class="mt-4"></div>
+                                <div class="col-sm-12">
+                                    <div class="form-group mt-4">
+                                        <label for="complainant">Procurement Number:</label>
+                                        <input type="text" class="form-control" value="{{ $contract->purchasing->number }}" disabled>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                        <label for="complainant">Contract Signing Date:</label>
+                                        <input type="text" class="form-control" value="{{ date("d/m/Y", strtotime($contract->contract_signing_date)) }}" disabled>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                        <label for="complainant">Expiration Date:</label>
+                                        <input type="text" class="form-control" value="{{ date("d/m/Y", strtotime($contract->expiration_date)) }}" disabled>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                        <label for="complainant">Status:</label>
+                                        <h6>@if($contract->progress) Finished @else In Progress @endif</h6>
+                                    </div>
+                                </div>
+                            </div>
+                            {{-- <div class="form-group mt-5 detail-item">
                                 <i class="fa fa-file-alt"></i> 
                                 <label for="complainant" class="mb-0">Procurement Number:</label>
                                 <h6>{{ $contract->purchasing->number }}</h6>
@@ -165,7 +192,7 @@
                                 <i class="fa fa-check-circle"></i> 
                                 <label for="number" class="mb-0">Status:</label>
                                 <h6>@if($contract->progress) Finished @else In Progress @endif</h6>
-                            </div>
+                            </div> --}}
                         </div>
                     </div>
 
