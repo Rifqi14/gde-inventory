@@ -13,7 +13,8 @@ class RequestVehicleController extends Controller
 {
     public function __construct()
     {
-        View::share('menu_active', url('admin' . 'requestvehicle'));
+        View::share('menu_active', url('admin' . '/requestvehicle'));
+        $this->middleware('accessmenu', ['except' => ['select']]);
     }
 
     public function index()
@@ -28,7 +29,7 @@ class RequestVehicleController extends Controller
     }
 
     public function edit(Request $request,$id)
-    {        
+    {   
         if ($id) {
             $reqvehicle = RequestVehicle::with([
                 'borrowers' => function ($q)

@@ -54,9 +54,10 @@
                                         <div class="form-group col-6">
                                             <label class="control-label" for="status-request">Status</label>
                                             <select class="form-control select2" name="status" id="status-request" disabled>
-                                                <option value="1" selected>Waiting</option>
-                                                <option value="2">Approved</option>
-                                                <option value="3">Completed</option>
+                                                <option value="1" @if ($data->status == 1) selected @endif>Waiting</option>
+                                                <option value="2" @if ($data->status == 2) selected @endif>Approved</option>
+                                                <option value="3" @if ($data->status == 3) selected @endif>Completed</option>
+                                                <option value="4" @if ($data->status == 4) selected @endif>Rejected</option>
                                             </select>
                                         </div>
                                     </div>
@@ -75,10 +76,14 @@
                             </div>
                         </div>
                         <div class="card-footer text-right">
-                            @if($data->status == 1)
+                            @if($data->status == 1 && in_array('approval', $actionmenu))
                             <button type="submit" class="btn bg-olive color-palette btn-labeled legitRipple text-sm btn-sm" data-update="2">
                                 <b><i class="fas fa-save"></i></b>
                                 Approve
+                            </button>
+                            <button type="button" class="btn bg-red color-palette btn-labeled legitRipple text-sm btn-sm" data-update="4" onclick="rejectStatus(this)">
+                                <b><i class="fas fa-window-close"></i></b>
+                                Reject
                             </button>
                             @endif
                             @if($data->status == 2)
@@ -86,7 +91,7 @@
                                 <b><i class="fas fa-save"></i></b>
                                 Complete
                             </button>
-                            @endif                            
+                            @endif
                             <a href="{{ route('requestvehicle.index') }}" class="btn btn-sm btn-secondary color-palette btn-labeled legitRipple text-sm">
                                 <b><i class="fas fa-times"></i></b>
                                 Cancel
@@ -350,6 +355,54 @@
             }
         });
     });
+
+    function rejectStatus(a) {
+        var post      = new FormData($('#form')[0]),
+            date      = $('#form').find('input[name=date_borrowed]').data('daterangepicker'),
+            startDate = changeDateFormat(date.startDate.format('DD/MM/YYYY')),
+            endDate   = changeDateFormat(date.endDate.format('DD/MM/YYYY')),
+            borrowers = [],
+            status    = 4;
+
+        $.each($('#borrower').find('option:selected'), function(index, value) {
+            var employee_id = $(this).val();
+            borrowers.push({
+                employee_id: employee_id
+            });
+        });
+
+        post.append('status', status);
+        post.append('borrowers', JSON.stringify(borrowers));
+        post.append('startdate', startDate);
+        post.append('finishdate', endDate);
+
+        $.ajax({
+            url: $('#form').attr('action'),
+            method: 'post',
+            data: post,
+            processData: false,
+            contentType: false,
+            dataType: 'json',
+            beforeSend: function() {
+                blockMessage('body', 'Please Wait . . . ', '#fff');
+            }
+        }).done(function(response){
+            $('body').unblock();
+            if (response.status) {
+                toastr.success('Data has been saved.');
+                document.location   = `{{ route('requestvehicle.index') }}`;
+            } else {
+                toastr.warning(`${response.message}`);
+            }
+            return;
+        }).fail(function(response){
+            $('body').unblock();
+            var response    = response.responseJSON;
+                message     = response.message ? response.message : 'Failed to update data.';
+
+            toastr.warning(message);
+        })
+    }
 
     function changeDateFormat(date) {
         var newdate = '';

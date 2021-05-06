@@ -233,7 +233,7 @@ class EmployeeController extends Controller
             $account = User::create([
                 'name'        => $employee->name,
                 'email'       => $employee->email,
-                'username'    => $employee->nid,
+                'username'    => $request->username,
                 'password'    => Hash::make('123456'),
                 'employee_id' => $employee->id,
                 'is_active'   => 1,
@@ -389,7 +389,7 @@ class EmployeeController extends Controller
                     'employee_id' => $employee->id,
                     'name'        => $employee->name,
                     'email'       => $employee->email,
-                    'username'    => $employee->nid,
+                    'username'    => $request->username,
                     'password'    => Hash::make('123456'),
                     'is_active'   => 1,
                     'spv_id'      => $request->spv ? $request->spv : null,
@@ -416,7 +416,7 @@ class EmployeeController extends Controller
             } else {
                 $account->name      = $employee->name;
                 $account->email     = $employee->email;
-                $account->username  = $employee->nid;
+                $account->username  = $request->username;
                 $account->spv_id    = $request->spv ? $request->spv : null;
                 $account->save();
 

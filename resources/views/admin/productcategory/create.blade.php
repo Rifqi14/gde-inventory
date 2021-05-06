@@ -1,43 +1,43 @@
 @extends('admin.layouts.app')
-@section('title','Product Category')
+@section('title', $menu_name ? $menu_name : 'Product Category')
 @section('stylesheets')
 @endsection
 
 @section('breadcrumb')
 <div class="row mb-3 mt-3">
-    <div class="col-sm-4">
-        <h1 id="title-branch" class="m-0 text-dark">
-            Product Category
-        </h1>
-    </div>
-    <div class="col-sm-8">
-        <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
-            <li class="breadcrumb-item">Stock</li>
-            <li class="breadcrumb-item">Product Category</li>
-            <li class="breadcrumb-item">Create</li>
-        </ol>
-    </div>
+  <div class="col-sm-4">
+    <h1 id="title-branch" class="m-0 text-dark">
+      {{ $menu_name ? $menu_name : 'Product Category' }}
+    </h1>
+  </div>
+  <div class="col-sm-8">
+    <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
+      <li class="breadcrumb-item">{{ $parent_name ? $parent_name : 'Inventory' }}</li>
+      <li class="breadcrumb-item">{{ $menu_name ? $menu_name : 'Product Category' }}</li>
+      <li class="breadcrumb-item">Create</li>
+    </ol>
+  </div>
 </div>
 @endsection
 
 @section('content')
 <section class="content" id="content">
   <div class="container-fluid">
-   <div class="row">
-     <div class="col-md-12">
-       <div class="card">
-         <form class="form-horizontal no-margin" action="{{$url}}" id="form" method="post">            
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card">
+          <form class="form-horizontal no-margin" action="{{$url}}" id="form" method="post">
             <div class="card-body">
               <span class="title">
-								<hr>
-								<h5 class="text-md text-dark text-bold">Product Category Information</h5>
-							</span>
-              {{ csrf_field() }}            
+                <hr>
+                <h5 class="text-md text-dark text-bold">{{ @$menu_name }} Information</h5>
+              </span>
+              {{ csrf_field() }}
               <div class="form-group row mt-4">
                 <label class="col-md-2 col-xs-12 control-label" for="parent-category">Parent Category</label>
-                <div class="col-md-6 controls">                  
+                <div class="col-md-6 controls">
                   <select class="form-control select2" name="parent_category" id="parent-category" data-placeholder="Parent Category"></select>
-                </div>                                
+                </div>
               </div>
               <div class="form-grup row mt-4">
                 <label class="col-md-2 col-xs-12 control-label" for="category-name">Category Name</label>
@@ -48,18 +48,18 @@
               <div class="form-group row mt-4">
                 <label class="col-md-2 col-xs-12 control-label" for="description">Description</label>
                 <div class="col-md-6 controls">
-                  <textarea class="form-control" name="description" id="description" rows="5" placeholder="Description" required></textarea>
+                  <textarea class="form-control" name="description" id="description" rows="5" placeholder="Description"></textarea>
                 </div>
               </div>
             </div>
             <div class="card-footer text-right">
-                <button type="submit" class="btn bg-olive color-palette btn-labeled legitRipple text-sm btn-sm"><b><i class="fas fa-save"></i></b>Save</button>
-				        <a href="{{ route('productcategory.index') }}" class="btn btn-sm btn-secondary color-palette btn-labeled legitRipple text-sm"><b><i class="fas fa-times"></i></b>Cancel</a>
+              <button type="submit" class="btn bg-olive color-palette btn-labeled legitRipple text-sm btn-sm"><b><i class="fas fa-save"></i></b>Save</button>
+              <a href="{{ route('productcategory.index') }}" class="btn btn-sm btn-secondary color-palette btn-labeled legitRipple text-sm"><b><i class="fas fa-times"></i></b>Cancel</a>
             </div>
-         </form>                  
-       </div>
-     </div>
-   </div>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 @endsection
@@ -87,7 +87,7 @@
   $(function(){    
     $( "#parent-category" ).select2({
 			ajax: {
-				url: "{{route('productcategory.parentcategories')}}",
+				url: "{{route('productcategory.select')}}",
 				type:'GET',
 				dataType: 'json',
 				data: function (params) {
@@ -112,6 +112,7 @@
 				},
 			},
 			allowClear: true,
+      escapeMarkup: function (text) { return text; }
 		});
 
     $("#form").validate({

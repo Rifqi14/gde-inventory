@@ -47,8 +47,8 @@
                                 <div class="col-md-4">
                                     <!-- NID -->
                                     <div class="form-group">
-                                        <label class="control-label" for="nid">NID</label>
-                                        <input class="form-control" type="text" name="nid" id="nid" placeholder="NID">
+                                        <label class="control-label" for="nid">Employee ID</label>
+                                        <input class="form-control" type="text" name="nid" id="nid" placeholder="Employee ID">
                                     </div>
                                     <!-- Phone Number -->
                                     <div class="form-group">
@@ -217,6 +217,10 @@
                                     </div>
                                     <div class="user-existed d-none">
                                         <!-- Role -->
+                                        <div class="form-group">
+                                            <label class="control-label" for="username">Username</label>
+                                            <input class="form-control" type="text" name="username" id="username" placeholder="Username">
+                                        </div>
                                         <div class="form-group role-select">
                                             <label class="control-label" for="role">Group</label>
                                             <select class="form-control select2" name="role" id="role" data-placeholder="Choose Group">

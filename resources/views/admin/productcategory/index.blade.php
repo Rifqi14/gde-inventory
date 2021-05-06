@@ -1,17 +1,17 @@
 @extends('admin.layouts.app')
-@section('title','Product Category')
+@section('title', $menu_name ? $menu_name : 'Product Category')
 
 @section('breadcrumb')
 <div class="row mb-3 mt-3">
   <div class="col-sm-4">
     <h1 id="title-branch" class="m-0 text-dark">
-      Product Category
+      {{ $menu_name ? $menu_name : 'Product_category' }}
     </h1>
   </div>
   <div class="col-sm-8">
     <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
-      <li class="breadcrumb-item">Stock</li>
-      <li class="breadcrumb-item">Product Category</li>
+      <li class="breadcrumb-item">{{ $parent_name ? $parent_name : 'Inventory' }}</li>
+      <li class="breadcrumb-item">{{ $menu_name ? $menu_name : 'Product Category' }}</li>
     </ol>
   </div>
 </div>
@@ -58,7 +58,7 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Product Category Filter</h5>
+        <h5 class="modal-title">{{ @$menu_name }} Filter</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -168,7 +168,7 @@
           data: "no"
         },
         {
-          data: "name"
+          data: "path"
         },
         {
           data: "created_at"
@@ -193,7 +193,7 @@
       return false;
     }
 
-    window.location.href = `{{url('admin/productcategory/edit')}}/${id}`;
+    window.location.href = `{{url('admin/productcategory/${id}/edit')}}`;
   }
 
   function destroy(id) {
