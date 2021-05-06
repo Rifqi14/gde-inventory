@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddPayrollTypeToEmployeesTable extends Migration
+class AddBusinessTripNumberOnBusinessTripsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class AddPayrollTypeToEmployeesTable extends Migration
      */
     public function up()
     {
-        Schema::table('employees', function (Blueprint $table) {
-            $table->string('payroll_type')->nullable();
+        Schema::table('business_trips', function (Blueprint $table) {
+            $table->string('business_trip_number')->nullable();
         });
     }
 
@@ -25,8 +25,8 @@ class AddPayrollTypeToEmployeesTable extends Migration
      */
     public function down()
     {
-        Schema::table('employees', function (Blueprint $table) {
-            $table->dropColumn('payroll_type');
+        Schema::table('business_trips', function (Blueprint $table) {
+            $table->dropColumn('business_trip_number');
         });
     }
 }

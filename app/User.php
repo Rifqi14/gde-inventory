@@ -41,4 +41,9 @@ class User extends Authenticatable
     {
         return $this->belongsToMany('App\Models\Site', 'site_users', 'user_id', 'site_id');
     }
+
+    public function employees()
+    {
+        return $this->hasOne('App\Models\Employee','id','employee_id');
+    }
 }

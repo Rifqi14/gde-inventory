@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\Menu;
 use App\Models\Site;
 use App\Models\Budget;
 use App\Models\BudgetDetail;
@@ -10,13 +11,16 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 class BusinessTripController extends Controller
 {
     function __construct(){
-        View::share('menu_active', url('admin/'.'business-trip'));
+        $menu   = Menu::where('menu_route', 'businesstrip')->first();
+        $parent = Menu::find($menu->parent_id);
+        View::share('parent_name', $parent->menu_name);
+        View::share('menu_name', $menu->menu_name);
+        View::share('menu_active', url('admin/'.'businesstrip'));
         $this->middleware('accessmenu', ['except' => ['select']]);
     }
     /**
@@ -34,8 +38,8 @@ class BusinessTripController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
-    {
+    public function create(Request $request)
+    {        
         return view('admin.business_trip.create');
     }
 
@@ -278,45 +282,43 @@ class BusinessTripController extends Controller
 
     public function read(Request $request)
     {
-        $start = $request->start;
-        $length = $request->length;
-        $query = $request->search['value'];
-        $sort = $request->columns[$request->order[0]['column']]['data'];
-        $dir = $request->order[0]['dir'];
-        $name = strtoupper($request->name);
-        $desc = strtoupper($request->desc);
-        $type = strtoupper($request->type);
+        $draw    = $request->draw;
+        $start   = $request->start;
+        $length  = $request->length;
+        $query   = $request->search['value'];
+        $sort    = $request->columns[$request->order[0]['column']]['data'];
+        $dir     = $request->order[0]['dir'];
+        $status = $request->status;
 
         //Count Data
-        $query = DB::table('budgets');
-        $query->select('budgets.*', 'role_users.role_id');
-        $query->join('role_users', 'budgets.created_user', '=', 'role_users.user_id');
-        $query->join('sites', 'budgets.site_id', '=', 'sites.id');
-        $query->whereRaw("upper(budgets.name) like '%$name%'");
-        $query->WhereRaw("upper(budgets.description) like '%$desc%'");
-        if ($type) {
-            $query->whereRaw("upper(sites.code) = '$type'");
+        $query = BusinessTrip::query();    
+        $query->selectRaw("business_trips.*");
+        if($status){
+            $query->where('business_trips.status',$status);
+        }else{
+            $query->where('business_trips.status','<>',3);
         }
 
-        $row = clone $query;
-        $recordsTotal = $row->count();
+        $rows  = clone $query;
+        $total = $rows->count();
 
         //Select Pagination
         $query->offset($start);
         $query->limit($length);
         $query->orderBy($sort, $dir);
-        $users = $query->get();
+        $businesstrips = $query->get();
 
         $data = [];
-        foreach ($users as $user) {
-            $user->no = ++$start;
-            $user->detail = $this->detail($user->id);
-            $data[] = $user;
+        foreach ($businesstrips as $key => $row) {
+            $row->no = ++$start;                      
+            $row->actvity = 0;
+            $row->budget = '1.000';
+            $data[] = $row;
         }
         return response()->json([
-            'draw' => $request->draw,
-            'recordsTotal' => $recordsTotal,
-            'recordsFiltered' => $recordsTotal,
+            'draw' => $draw,
+            'recordsTotal' => $total,
+            'recordsFiltered' => $total,
             'data' => $data
         ], 200);
     }

@@ -70,6 +70,7 @@ Route::group(['prefix' => 'admin'], function () {
         Route::resource('/vehicle', 'Admin\VehicleController');    
         // Route Request Vehicle
         Route::get('/requestvehicle/read','Admin\RequestVehicleController@read')->name('requestvehicle.read');
+        Route::get('/requestvehicle/select','Admin\RequestVehicleController@select')->name('requestvehicle.select');
         Route::get('/requestvehicle/delete/{id}','Admin\RequestVehicleController@delete');
         Route::get('/requestvehicle/edit/{id}','Admin\RequestVehicleController@edit');
         Route::get('/requestvehicle/daterequest','Admin\RequestVehicleController@daterequest')->name('requestvehicle.daterequest');
@@ -120,8 +121,8 @@ Route::group(['prefix' => 'admin'], function () {
         // Route Village
         Route::get('/village/select', 'Admin\VillageController@select')->name('village.select');
         //Route Business Trip
-        Route::get('/businesstrip/read', 'Admin\BusinessTripController@read')->name('bt.read');
-        Route::get('/businesstrip/select', 'Admin\BusinessTripController@select')->name('bt.select');
+        Route::get('/businesstrip/read', 'Admin\BusinessTripController@read')->name('businesstrip.read');
+        Route::get('/businesstrip/select', 'Admin\BusinessTripController@select')->name('businesstrip.select');
         Route::resource('/businesstrip', 'Admin\BusinessTripController');
         // Route Product Category
         Route::get('/productcategory/read','Admin\ProductCategoryController@read')->name('productcategory.read');  

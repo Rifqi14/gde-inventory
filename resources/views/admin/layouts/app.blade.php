@@ -98,7 +98,7 @@
                         <img src="{{asset('assets/img/dev.jpg')}}" class="img-circle elevation-1 img-pp" alt="Development Application">
                     </div>
                     <div class="info">
-                        <a href="#" class="d-block">Development Application</a>
+                        <a href="#" class="d-block">{{Auth::guard('admin')->user()->name}}</a>
                     </div>
                 </div>
                 <!-- Sidebar Menu -->
