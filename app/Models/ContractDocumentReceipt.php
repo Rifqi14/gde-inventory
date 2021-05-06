@@ -6,5 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class ContractDocumentReceipt extends Model
 {
-    //
+    protected $guarded = [];
+
+    public function detail()
+    {
+        return $this->hasMany('App\Models\ContractDocumentReceiptDetail', 'contract_document_receipt_id', 'id');
+    }
 }
