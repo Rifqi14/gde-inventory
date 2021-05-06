@@ -56,4 +56,9 @@ class Contract extends Model
     public function site(){
         return $this->hasOne('App\Models\Site', 'id', 'unit');
     }
+
+    public function purchasing()
+    {
+        return $this->hasOne('App\Models\Purchasing', 'id', 'purchasing_id');
+    }
 }

@@ -72,6 +72,21 @@
                                 </div>
                             </div>
                             <div class="form-group row">
+                                <label class="col-md-2 col-xs-12 control-label mt-1" for="sku">SKU</label>
+                                <div class="col-sm-6 controls">
+                                    <input type="text" class="form-control" id="sku" name="sku" placeholder="SKU" aria-required="true">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-md-2 col-xs-12 control-label mt-1" for="is_serial">Has Serial Number</label>
+                                <div class="col-sm-6 controls">
+                                    <div class="icheck-primary">
+                                        <input type="checkbox" name="is_serial" id="is_serial">
+                                        <label for="is_serial"></label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
                                 <label class="col-md-2 col-xs-12 control-label mt-1" for="merek">Merek</label>
                                 <div class="col-sm-6 controls">
                                     <input type="text" class="form-control" id="merek" name="merek" placeholder="Merek" aria-required="true">
@@ -224,7 +239,7 @@
                 ${uom}
             </td>
             <td width="200">
-                <input type="text" class="form-control" id="ratio${uom_id}" name="ratio[]" placeholder="Ratio" aria-required="true" value="${ratio}">
+                <input type="text" class="form-control" id="ratio${uom_id}" name="ratio[]" placeholder="Ratio" aria-required="true" value="${(ratio)?ratio:0}">
             </td>
             <td width="100" class="text-center">
                 <div class="mb-2"></div>
@@ -418,7 +433,7 @@
 
         $( "#uom" ).select2({
             ajax: {
-                url: "{{ route('uom.select') }}",
+                url: "{{ route('uomcategory.select') }}",
                 type:'GET',
                 dataType: 'json',
                 data: function (params) {

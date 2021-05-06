@@ -36,7 +36,7 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
-                        
+
                     </div>
                     <div class="card-body table-responsive p-0">
                         <table id="table-site" class="table table-striped datatable" width="100%">
@@ -64,7 +64,7 @@
             <div class="modal-header">
                 <h5 class="modal-title text-bold">Filter Warehouse</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
+                    <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
@@ -85,7 +85,7 @@
                                     <select name="type" id="type" class="form-control select2">
                                         <option value="">Select Type</option>
                                         @foreach(config('enums.warehouse_type') as $key => $type)
-                                            <option value="{{ $key }}">{{ $type }}</option>
+                                        <option value="{{ $key }}">{{ $type }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -156,7 +156,7 @@
                 },
                 {
                     render: function ( data, type, row ) {
-                        return row.rack_count+"/"+row.bin_count;
+                        return `${row.rack_count} Rack & ${row.bin_count} Bin`;
                     },targets: [3]
                 },
                 {

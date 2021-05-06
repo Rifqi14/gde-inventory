@@ -47,8 +47,8 @@
                                 <div class="col-md-4">
                                     <!-- NID -->
                                     <div class="form-group">
-                                        <label class="control-label" for="nid">NID</label>
-                                        <input class="form-control" type="text" name="nid" id="nid" placeholder="NID">
+                                        <label class="control-label" for="nid">Employee ID</label>
+                                        <input class="form-control" type="text" name="nid" id="nid" placeholder="Employee ID">
                                     </div>
                                     <!-- Phone Number -->
                                     <div class="form-group">
@@ -210,10 +210,34 @@
                                     <!-- Is User -->
                                     <div class="form-group">
                                         <label class="control-label" for="user">User</label>
-                                        <select class="form-control select2" name="user" id="user" data-placeholder="Yes/No">
+                                        <select class="form-control select2" name="user" id="user" data-placeholder="Yes/No" onchange="roleUser(this)">
                                             <option value="1">Yes</option>
                                             <option value="0">No</option>
                                         </select>
+                                    </div>
+                                    <div class="user-existed d-none">
+                                        <!-- Role -->
+                                        <div class="form-group">
+                                            <label class="control-label" for="username">Username</label>
+                                            <input class="form-control" type="text" name="username" id="username" placeholder="Username">
+                                        </div>
+                                        <div class="form-group role-select">
+                                            <label class="control-label" for="role">Group</label>
+                                            <select class="form-control select2" name="role" id="role" data-placeholder="Choose Group">
+                                            </select>
+                                        </div>
+                                        <!-- Supervisor -->
+                                        <div class="form-group spv-select">
+                                            <label class="control-label" for="spv">Supervisor</label>
+                                            <select class="form-control select2" name="spv" id="spv" data-placeholder="Choose Supervisor">
+                                            </select>
+                                        </div>
+                                        <!-- Site -->
+                                        <div class="form-group site-select">
+                                            <label class="control-label" for="site">Site</label>
+                                            <select class="form-control select2" name="site" id="site" data-placeholder="Choose Site">
+                                            </select>
+                                        </div>
                                     </div>
                                     <!-- Payroll -->
                                     <div class="form-group">
@@ -246,7 +270,16 @@
 
 @section('scripts')
 <script>
+    const roleUser = (a) => {
+        var value = a.value;
+        if (value == 1) {
+            $('.user-existed').removeClass('d-none');
+            return;
+        }
+        $('.user-existed').addClass('d-none');
+    }
     $(function() {
+        $('#user').trigger('change');
         $('.select2').select2({
             allowClear: true
         });
@@ -419,6 +452,96 @@
                         option.push({
                             id: item.id,
                             text: item.shift_name + ' | ' + item.time_in + ' - ' + item.time_out
+                        });
+                    });
+                    return {
+                        results: option,
+                        more: more,
+                    };
+                },
+            },
+            allowClear: true,
+        });
+
+        $("#role").select2({
+            ajax: {
+                url: "{{route('role.select')}}",
+                type: 'GET',
+                dataType: 'json',
+                data: function(params) {
+                    return {
+                        name: params.term,
+                        page: params.page,
+                        limit: 30,
+                    };
+                },
+                processResults: function(data, params) {
+                    var more = (params.page * 30) < data.total;
+                    var option = [];
+                    $.each(data.rows, function(index, item) {
+                        option.push({
+                            id: item.id,
+                            text: item.name
+                        });
+                    });
+                    return {
+                        results: option,
+                        more: more,
+                    };
+                },
+            },
+            allowClear: true,
+        });
+
+        $("#site").select2({
+            ajax: {
+                url: "{{route('site.select')}}",
+                type: 'GET',
+                dataType: 'json',
+                data: function(params) {
+                    return {
+                        name: params.term,
+                        page: params.page,
+                        limit: 30,
+                    };
+                },
+                processResults: function(data, params) {
+                    var more = (params.page * 30) < data.total;
+                    var option = [];
+                    $.each(data.rows, function(index, item) {
+                        option.push({
+                            id: item.id,
+                            text: item.name
+                        });
+                    });
+                    return {
+                        results: option,
+                        more: more,
+                    };
+                },
+            },
+            allowClear: true,
+        });
+
+        $("#spv").select2({
+            ajax: {
+                url: "{{route('user.select')}}",
+                type: 'GET',
+                dataType: 'json',
+                data: function(params) {
+                    return {
+                        name: params.term,
+                        page: params.page,
+                        limit: 30,
+                    };
+                },
+                processResults: function(data, params) {
+                    var more = (params.page * 30) < data.total;
+                    var option = [];
+                    $.each(data.rows, function(index, item) {
+                        option.push({
+                            id: item.id,
+                            text: item.name
                         });
                     });
                     return {

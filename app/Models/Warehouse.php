@@ -32,4 +32,9 @@ class Warehouse extends Model
     {
         return $this->hasOne('App\Models\District', 'id', 'district_id');
     }
+
+    public function village()
+    {
+        return $this->hasOne('App\Models\Village', 'id', 'subdistrict_id');
+    }
 }

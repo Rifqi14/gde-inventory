@@ -23,6 +23,34 @@ class WarehouseController extends Controller
         $this->middleware('accessmenu', ['except' => ['select']]);
     }
 
+    public function select(Request $request)
+    {
+        $start = $request->page ? $request->page - 1 : 0;
+        $length = $request->limit;
+        $name = strtoupper($request->name);
+
+        //Count Data
+        $query = Warehouse::select('*');
+        $query->whereRaw("upper(name) like '%$name%'");
+
+        $row = clone $query;
+        $recordsTotal = $row->count();
+
+        $query->offset($start);
+        $query->limit($length);
+        $warehouses = $query->get();
+
+        $data = [];
+        foreach ($warehouses as $warehouse) {
+            $warehouse->no = ++$start;
+            $data[] = $warehouse;
+        }
+        return response()->json([
+            'total' => $recordsTotal,
+            'rows' => $data
+        ], 200);
+    }
+
     public function read(Request $request)
     {
         $start = $request->start;
@@ -65,6 +93,33 @@ class WarehouseController extends Controller
             'recordsTotal' => $recordsTotal,
             'recordsFiltered' => $recordsTotal,
             'data' => $data
+        ], 200);
+    }
+
+    public function select(Request $request)
+    {
+        $start          = $request->page ? $request->page - 1 : 0;
+        $length         = $request->limit;
+        $name           = strtoupper($request->name);
+
+        // Query Data
+        $query          = Warehouse::name($name);
+
+        $row            = clone $query;
+        $recordsTotal   = $row->count();
+
+        $query->offset($start);
+        $query->limit($length);
+        $warehouses     = $query->get();
+
+        $data           = [];
+        foreach ($warehouses as $key => $warehouse) {
+            $warehouse->no  = ++$start;
+            $data[]         = $warehouse;
+        }
+        return response()->json([
+            'total'     => $recordsTotal,
+            'rows'      => $data,
         ], 200);
     }
 

@@ -22,6 +22,11 @@ use App\Models\ContractAddendum;
 use App\Models\ContractAddendumAttach;
 use App\Models\Role;
 use App\Models\RoleUser;
+use App\Models\BatchContract;
+use App\Models\BatchContractProduct;
+use App\Models\ContractProduct;
+use App\Models\Product;
+use App\Models\ProductUom;
 
 class ContractController extends Controller
 {
@@ -121,7 +126,7 @@ class ContractController extends Controller
 				$cur = 'Rp';
 			}
 			$value->contract_value = $cur.' '.number_format($value->contract_value,'2',',','.');
-
+            $value->date_created = date("d/m/Y", strtotime($value->created_at));
 			$data[] = $value;
         }
         return response()->json([
@@ -212,6 +217,8 @@ class ContractController extends Controller
 			'status' => $request->status,
             'unit' => $request->unit,
             'created_user' => $created_user,
+            'contract_type' => $request->contract_type,
+            'batch' => $request->batch,
         ];
 
         if($request->status == 'publish'){
@@ -394,6 +401,26 @@ class ContractController extends Controller
 				}
             }
 
+            if($request->contract_type){
+                if($request->contract_type == "product"){
+                    $total_batch = ($request->batch)?$request->batch:1;
+                    for($a=1;$a<=$total_batch;$a++){
+                        $data_batch = [
+                            'contract_id' => $contract->id,
+                            'no' => $a,
+                        ];
+                        $ok = BatchContract::create($data_batch);
+                        if (!$ok) {
+                            DB::rollback();
+                            return response()->json([
+                                'status' => false,
+                                'message'  => "Can't insert data Contract Batch"
+                            ], 400);
+                        }
+                    }
+                }
+            }
+
             DB::commit();
             return response()->json([
                 'status' => true,
@@ -411,7 +438,9 @@ class ContractController extends Controller
 
     public function edit($id){
         $roles = Role::all();
-        $contract = Contract::find($id)->with('jvmember','pb','ab','rb','rm','pen','wb','owner','adden','site')->first();
+        // DB::enableQueryLog();
+        $contract = Contract::with('jvmember','pb','ab','rb','rm','pen','wb','owner','adden','site','purchasing')->where('id',$id)->first();
+        // dd(DB::getQueryLog());
         $owner = [];
         foreach($contract->owner as $owners){
             array_push($owner, $owners->group_id);
@@ -436,7 +465,7 @@ class ContractController extends Controller
 		} else {
 			$range = $diff->days*-1;
         }
-
+        // dd($contract);
         if ($contract) {
             return view('admin.contract.edit', compact('contract','roles','userid','group_code','range'));
         } else {
@@ -481,6 +510,8 @@ class ContractController extends Controller
 			'status' => $request->status,
             'unit' => $request->unit,
             'created_user' => $created_user,
+            'contract_type' => $request->contract_type,
+            'batch' => $request->batch,
         ];
 
         if($request->status == 'publish'){
@@ -672,6 +703,27 @@ class ContractController extends Controller
 				}
             }
 
+            if($request->contract_type){
+                if($request->contract_type == "product"){
+                    $delete_item = BatchContract::where('contract_id',$id)->delete();
+                    $total_batch = ($request->batch)?$request->batch:1;
+                    for($a=1;$a<=$total_batch;$a++){
+                        $data_batch = [
+                            'contract_id' => $contract->id,
+                            'no' => $a,
+                        ];
+                        $ok = BatchContract::create($data_batch);
+                        if (!$ok) {
+                            DB::rollback();
+                            return response()->json([
+                                'status' => false,
+                                'message'  => "Can't insert data Contract Batch"
+                            ], 400);
+                        }
+                    }
+                }
+            }
+
             DB::commit();
             return response()->json([
                 'status' => true,
@@ -687,11 +739,28 @@ class ContractController extends Controller
 		}
     }
 
+    public function destroy($id)
+    {
+        try {
+            $contract = contract::find($id);
+            $contract->delete();
+        } catch (QueryException $th) {
+            return response()->json([
+                'status'    => false,
+                'message'   => 'Error delete data ' . $th->errorInfo[2]
+            ], 400);
+        }
+        return response()->json([
+            'status'    => true,
+            'message'   => 'Success delete data'
+        ], 200);
+    }
+
     public function show(Request $request,$id){
         $roles = Role::all();
-        $contract = Contract::find($id);
+        $contract = Contract::where('id',$id)->first();
         if($contract){
-            $contract->with('jvmember','pb','ab','rb','rm','pen','wb','owner','adden','site')->first();
+            $contract->with('jvmember','pb','ab','rb','rm','pen','wb','owner','adden','site','purchasing')->first();
             $owner = [];
             foreach($contract->owner as $owners){
                 array_push($owner, $owners->group_id);
@@ -717,7 +786,6 @@ class ContractController extends Controller
                 $range = $diff->days*-1;
             }
         }
-
         if ($contract) {
             return view('admin.contract.detail', compact('contract','roles','userid','group_code','range'));
         } else {
@@ -727,5 +795,651 @@ class ContractController extends Controller
 
     public function addendum(){
         
+    }
+
+    public function product(Request $request){
+        $start = $request->start;
+        $length = $request->length;
+        $query = $request->search['value'];
+        $sort = $request->columns[$request->order[0]['column']]['data'];
+        $dir = $request->order[0]['dir'];
+        // $name = strtoupper($request->name);
+
+        //Count Data
+        $query = ContractProduct::select('*')->with('product','uom','product.uoms','product.uoms.uom');
+        $query->where('contract_id',$request->id);
+        // $query->whereRaw("upper(name) like '%$name%'");
+
+        $row = clone $query;
+        $recordsTotal = $row->count();
+
+        $query->offset($start);
+        $query->limit($length);
+        $query->orderBy($sort, $dir);
+        $products = $query->get();
+
+        $data = [];
+        foreach ($products as $product) {
+            $product->no = ++$start;
+            $data[] = $product;
+        }
+        return response()->json([
+            'draw' => $request->draw,
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsTotal,
+            'data' => $data
+        ], 200);
+    }
+
+    public function selectproduct(Request $request)
+    {
+        $start = $request->page ? $request->page - 1 : 0;
+        $length = $request->limit;
+        $name = strtoupper($request->name);
+
+        //Count Data
+        $query = Product::select('*')->with('uoms','uoms.uom');
+        $query->whereRaw("upper(name) like '%$name%'");
+
+        $row = clone $query;
+        $recordsTotal = $row->count();
+
+        $query->offset($start);
+        $query->limit($length);
+        $products = $query->get();
+
+        $data = [];
+        foreach ($products as $product) {
+            $product->no = ++$start;
+            $data[] = $product;
+        }
+        return response()->json([
+            'total' => $recordsTotal,
+            'rows' => $data
+        ], 200);
+    }
+
+    public function storeproduct(Request $request){
+        $validator = Validator::make($request->all(), [
+            'contract_id'      => 'required',
+            'product_id'       => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status'     => false,
+                'message'     => $validator->errors()->first()
+            ], 400);
+        }
+
+        $productuom = ProductUom::where('product_id',$request->product_id)->first();
+
+        $contractproduct = ContractProduct::create([
+            'contract_id' => $request->contract_id,
+            'product_id' => $request->product_id,
+            'qty' => 0,
+            'uom_id' => $productuom->uom_id,
+        ]);
+
+        if (!$contractproduct) {
+            return response()->json([
+                'status'    => false,
+                'message'   => "failed Insert contract Product"
+            ], 400);
+        }
+
+        return response()->json([
+            'status'     => true,
+            'results'     => route('contract.index'),
+        ], 200);
+    }
+
+    public function updateproduct(Request $request){
+        $validator = Validator::make($request->all(), [
+            'id'       => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status'     => false,
+                'message'     => $validator->errors()->first()
+            ], 400);
+        }
+
+        $contractproduct = ContractProduct::find($request->id);
+        if($request->uom_id){
+            $contractproduct->uom_id = $request->uom_id;
+        }
+        if($request->qty){
+            $contractproduct->qty = $request->qty;
+        }
+
+        if($contractproduct->save()){
+            return response()->json([
+                'status'     => true,
+                'message'     => 'Success update contract Product',
+            ], 200);
+        }else{
+            return response()->json([
+                'status'    => false,
+                'message'   => "failed update contract Product"
+            ], 400);
+        }
+    }
+
+    public function showproduct(Request $request)
+    {
+        $contractproduct = ContractProduct::where("id",$request->id)->with("product")->first();
+
+        if($contractproduct){
+            return response()->json([
+                'status'     => true,
+                'message'   => "Success",
+                'data' => $contractproduct,
+            ], 200);
+        }else{
+            return response()->json([
+                'status'    => false,
+                'message'   => "Batch Not Found",
+                'error'     => $contractproduct,
+            ], 400);
+        }
+    }
+
+    public function productread(Request $request)
+    {
+        $start = $request->start;
+        $length = $request->length;
+        $query = $request->search['value'];
+        $sort = $request->columns[$request->order[0]['column']]['data'];
+        $dir = $request->order[0]['dir'];
+        // $name = strtoupper($request->name);
+
+        //Count Data
+        $query = BatchContractProduct::select('*')->with("batch","contractproduct","contractproduct.product","contractproduct.uom");
+        $query->where('contract_product_id',$request->id);
+        // $query->whereRaw("upper(name) like '%$name%'");
+
+        $row = clone $query;
+        $recordsTotal = $row->count();
+
+        $query->offset($start);
+        $query->limit($length);
+        $query->orderBy("batch_contract_id", "asc");
+        $batchs = $query->get();
+
+        $data = [];
+        foreach ($batchs as $batch) {
+            $batch->number = ++$start;
+            $data[] = $batch;
+        }
+        return response()->json([
+            'draw' => $request->draw,
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsTotal,
+            'data' => $data
+        ], 200);
+    }
+
+    public function deleteproduct(Request $request){
+        try {
+            $contractproduct = ContractProduct::find($request->id);
+            $contractproduct->delete();
+        } catch (QueryException $th) {
+            return response()->json([
+                'status'    => false,
+                'message'   => 'Error delete data ' . $th->errorInfo[2]
+            ], 400);
+        }
+        return response()->json([
+            'status'    => true,
+            'message'   => 'Success delete data'
+        ], 200);
+    }
+
+    public function batch(Request $request,$id){
+        $roles = Role::all();
+        $contract = Contract::where('id',$id)->first();
+        if($contract){
+            $contract->with('jvmember','pb','ab','rb','rm','pen','wb','owner','adden','site','purchasing')->first();
+            $owner = [];
+            foreach($contract->owner as $owners){
+                array_push($owner, $owners->group_id);
+            }
+            $contract->owner = $owner;
+            $userid = Auth::guard('admin')->user()->id;
+            $role = Role::where('role_users.user_id', $userid)->join('role_users','roles.id','=','role_users.role_id')->first();
+            $group_code = $role->code;
+
+            if(isset($contract->adden[0]->expiration_moved)){
+                $start_date = $contract->adden[0]->expiration_moved;
+            } else {
+                $start_date = $contract->expiration_date;
+            }
+            $finish_date = date('Y-m-d');
+            $date1 = new \DateTime($start_date);
+            $date2 = new \DateTime($finish_date);
+            $diff = $date1->diff($date2);
+            if(strtotime($start_date) >= strtotime($finish_date)){
+                $range = $diff->days;
+                
+            } else {
+                $range = $diff->days*-1;
+            }
+        }
+        if ($contract) {
+            return view('admin.contract.batch', compact('contract','roles','userid','group_code','range'));
+        } else {
+            abort(404);
+        }
+    }
+
+    public function batchread(Request $request)
+    {
+        $start = $request->start;
+        $length = $request->length;
+        $query = $request->search['value'];
+        $sort = $request->columns[$request->order[0]['column']]['data'];
+        $dir = $request->order[0]['dir'];
+        // $name = strtoupper($request->name);
+
+        //Count Data
+        $query = BatchContract::select('*')->withCount("batchproduct");
+        $query->where('contract_id',$request->id);
+        // $query->whereRaw("upper(name) like '%$name%'");
+
+        $row = clone $query;
+        $recordsTotal = $row->count();
+
+        $query->offset($start);
+        $query->limit($length);
+        $query->orderBy("no", "asc");
+        $batchs = $query->get();
+
+        $data = [];
+        foreach ($batchs as $batch) {
+            $batch->number = ++$start;
+            $batch->start_date = date("d F Y", strtotime($batch->start_batch));
+            $batch->end_date = date("d F Y", strtotime($batch->end_batch));
+            $batch->total_sku = $this->batchGetTotalSKU($batch->id);
+            $data[] = $batch;
+        }
+        return response()->json([
+            'draw' => $request->draw,
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsTotal,
+            'data' => $data
+        ], 200);
+    }
+
+    public function batchadd(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'contract_id'       => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status'     => false,
+                'message'     => $validator->errors()->first()
+            ], 400);
+        }
+
+        DB::beginTransaction();
+
+        $batchcontract = BatchContract::where("contract_id",$request->contract_id)->count();
+
+        $data_batch = [
+            'contract_id' => $request->contract_id,
+            'no' => $batchcontract+1,
+        ];
+        $ok = BatchContract::create($data_batch);
+
+        if($ok){
+            $contract = Contract::find($request->contract_id);
+            $contract->batch = $batchcontract+1;
+
+            if(!$contract->save()){
+                DB::rollback();
+                return response()->json([
+                    'status'    => false,
+                    'message'   => "Failed update contract",
+                    'error'     => $contract,
+                ], 400);
+            }
+
+            DB::commit();
+            return response()->json([
+                'status'     => true,
+                'message'   => "Success add batch"
+            ], 200);
+        }else{
+            DB::rollback();
+            return response()->json([
+                'status'    => false,
+                'message'   => "Failed add batch"
+            ], 400);
+        }
+
+    }
+
+    public function batchdelete(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'contract_id' => 'required',
+            'id' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status'     => false,
+                'message'     => $validator->errors()->first()
+            ], 400);
+        }
+
+        DB::beginTransaction();
+        
+        try {
+            $batch = BatchContract::find($request->id);
+            if($batch->delete()){
+                $totalbatch = BatchContract::where("contract_id",$request->contract_id)->count();
+
+                // update contract
+                $contract = Contract::find($request->contract_id);
+                $contract->batch = $totalbatch;
+
+                if(!$contract->save()){
+                    DB::rollback();
+                    return response()->json([
+                        'status'    => false,
+                        'message'   => "Failed update contract",
+                        'error'     => $contract,
+                    ], 400);
+                }
+
+                // reorder batch
+                $batchcontracts = BatchContract::where("contract_id",$request->contract_id)->orderBy("id","asc")->get();
+                $n = 0;
+                foreach($batchcontracts as $batchcontract){
+                    $n++;
+                    $batchcontract->no = $n;
+                    if(!$batchcontract->save()){
+                        DB::rollback();
+                        return response()->json([
+                            'status'    => false,
+                            'message'   => "Failed update contract",
+                            'error'     => $batchcontract,
+                        ], 400);
+                    }
+                }
+
+                DB::commit();
+                return response()->json([
+                    'status'     => true,
+                    'message'   => "Success update batch"
+                ], 200);
+            }
+        } catch (QueryException $th) {
+            DB::rollback();
+            return response()->json([
+                'status'    => false,
+                'message'   => 'Error delete data ' . $th->errorInfo[2]
+            ], 400);
+        }
+
+    }
+
+    public function batchedit(Request $request)
+    {
+        $batchcontract = BatchContract::where("id",$request->id)->first();
+        if($batchcontract->start_batch){
+            $batchcontract->start_batch = date("d/m/Y", strtotime($batchcontract->start_batch));
+        }
+        if($batchcontract->end_batch){
+            $batchcontract->end_batch = date("d/m/Y", strtotime($batchcontract->end_batch));
+        }
+        if($batchcontract){
+            return response()->json([
+                'status'     => true,
+                'message'   => "Success",
+                'data' => $batchcontract,
+            ], 200);
+        }else{
+            return response()->json([
+                'status'    => false,
+                'message'   => "Batch Not Found",
+                'error'     => $batchcontract,
+            ], 400);
+        }
+    }
+
+    public function batchshow(Request $request)
+    {
+        $batchcontract = BatchContract::where("id",$request->id)->withCount("batchproduct")->first();
+        if($batchcontract->start_batch){
+            $batchcontract->start_batch = date("d/m/Y", strtotime($batchcontract->start_batch));
+        }
+        if($batchcontract->end_batch){
+            $batchcontract->end_batch = date("d/m/Y", strtotime($batchcontract->end_batch));
+        }
+        $batchcontract->total_sku = $this->batchGetTotalSKU($batchcontract->id);
+        if($batchcontract){
+            return response()->json([
+                'status'     => true,
+                'message'   => "Success",
+                'data' => $batchcontract,
+            ], 200);
+        }else{
+            return response()->json([
+                'status'    => false,
+                'message'   => "Batch Not Found",
+                'error'     => $batchcontract,
+            ], 400);
+        }
+    }
+
+    public function batchGetTotalSKU($id){
+        // DB::enableQueryLog();
+        $products = BatchContractProduct::selectRaw("count(*) as total")->where("batch_contract_id",$id);
+        $products->join("contract_products","contract_products.id","=","batch_contract_products.contract_product_id");
+        $products->groupBy("contract_products.product_id");
+        $totals = $products->get();
+        $total = 0;
+        foreach($totals as $row){
+            $total++;
+        }
+        // dd(DB::getQueryLog());
+        // echo json_encode($totals);
+        // die();
+        return $total;
+    }
+
+    public function batchupdate(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'batch_id' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status'     => false,
+                'message'     => $validator->errors()->first()
+            ], 400);
+        }
+
+        DB::beginTransaction();
+
+        $start_batch = explode("/", $request->start_batch);
+        $end_batch = explode("/", $request->end_batch);
+
+        $batchcontract = BatchContract::find($request->batch_id);
+        $batchcontract->start_batch = $start_batch[2]."-".$start_batch[1]."-".$start_batch[0];
+        $batchcontract->end_batch = $end_batch[2]."-".$end_batch[1]."-".$end_batch[0];
+
+        if($batchcontract->save()){
+
+            if($request->batch_contract_products_id){
+                foreach($request->batch_contract_products_id as $key => $row){
+                    $batchcontractproduct = BatchContractProduct::find($row);
+                    $batchcontractproduct->qty = $request->qty[$key];
+                    if(!$batchcontractproduct->save()){
+                        DB::rollback();
+                        return response()->json([
+                            'status'    => false,
+                            'message'   => "Failed update batch product.",
+                            'error'     => $batchcontractproduct,
+                        ], 400);            
+                    }
+                }
+            }
+
+            DB::commit();
+            return response()->json([
+                'status'     => true,
+                'message'   => "Success update batch",
+                'data' => $batchcontract,
+            ], 200);
+        }else{
+            DB::rollback();
+            return response()->json([
+                'status'    => false,
+                'message'   => "Failed update batch",
+                'error'     => $batchcontract,
+            ], 400);
+        }
+    }
+
+    public function batchproductread(Request $request)
+    {
+        $start = $request->start;
+        $length = $request->length;
+        $query = $request->search['value'];
+        $sort = $request->columns[$request->order[0]['column']]['data'];
+        $dir = $request->order[0]['dir'];
+        // $name = strtoupper($request->name);
+
+        //Count Data
+        $query = BatchContractProduct::select('*')->with("contractproduct","contractproduct.product","contractproduct.uom");
+        $query->where('batch_contract_id',$request->id);
+        // $query->whereRaw("upper(name) like '%$name%'");
+
+        $row = clone $query;
+        $recordsTotal = $row->count();
+
+        $query->offset($start);
+        $query->limit($length);
+        $query->orderBy($sort, $dir);
+        $batchs = $query->get();
+
+        $data = [];
+        foreach ($batchs as $batch) {
+            $batch->number = ++$start;
+            $batch->contract_product_qty = $batch->contractproduct->qty;
+            $batch->start_date = date("d F Y", strtotime($batch->start_batch));
+            $batch->end_date = date("d F Y", strtotime($batch->end_batch));
+            $data[] = $batch;
+        }
+        return response()->json([
+            'draw' => $request->draw,
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsTotal,
+            'data' => $data
+        ], 200);
+    }
+
+    public function selectbatch(Request $request)
+    {
+        $start = $request->page ? $request->page - 1 : 0;
+        $length = $request->limit;
+        $name = strtoupper($request->name);
+
+        //Count Data
+        $query = ContractProduct::select('*');
+        $query->where("contract_id",$request->contract_id);
+        // $query->whereRaw("upper(products.name) like '%$name%'");
+        
+        $row = clone $query;
+        $recordsTotal = $row->count();
+        
+        $query->offset($start);
+        $query->limit($length);
+        $query->with('product','uom');
+        $products = $query->get();
+
+        $data = [];
+        foreach ($products as $product) {
+            $product->no = ++$start;
+            $product->available_qty = $this->getAvailableQty($product->id, $product->qty);
+            if($product->available_qty > 0){
+                $data[] = $product;
+            }
+        }
+        return response()->json([
+            'total' => $recordsTotal,
+            'rows' => $data
+        ], 200);
+    }
+
+    public function getAvailableQty($contract_product_id, $qty){
+        $BatchContractProduct = BatchContractProduct::selectRaw("sum(qty) as qty")->where("contract_product_id",$contract_product_id)->first();
+        $qty = $qty - $BatchContractProduct->qty;
+        return $qty;
+    }
+
+    public function batchproductadd(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'batch_contract_id'       => 'required',
+            'contract_product'       => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status'     => false,
+                'message'     => $validator->errors()->first()
+            ], 400);
+        }
+
+        DB::beginTransaction();
+
+        $contractproduct = ContractProduct::where("id",$request->contract_product)->first();
+
+        $data = [
+            'contract_product_id' => $request->contract_product,
+            'batch_contract_id' => $request->batch_contract_id,
+            'qty' => $this->getAvailableQty($request->contract_product, $contractproduct->qty),
+        ];
+        $ok = BatchContractProduct::create($data);
+
+        if($ok){
+            DB::commit();
+            return response()->json([
+                'status'     => true,
+                'message'   => "Success add product"
+            ], 200);
+        }else{
+            DB::rollback();
+            return response()->json([
+                'status'    => false,
+                'message'   => "Failed add product"
+            ], 400);
+        }
+    }
+
+    public function batchproductdelete(Request $request)
+    {
+        try {
+            $batchcontractproduct = BatchContractProduct::find($request->id);
+            $batchcontractproduct->delete();
+        } catch (QueryException $th) {
+            return response()->json([
+                'status'    => false,
+                'message'   => 'Error delete data ' . $th->errorInfo[2]
+            ], 400);
+        }
+        return response()->json([
+            'status'    => true,
+            'message'   => 'Success delete data'
+        ], 200);
     }
 }

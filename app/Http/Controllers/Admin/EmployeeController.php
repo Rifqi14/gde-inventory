@@ -7,6 +7,9 @@ use App\Models\Employee;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Menu;
+use App\Models\RoleUser;
+use App\Models\SiteUser;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
@@ -38,6 +41,9 @@ class EmployeeController extends Controller
     {
         $employee = Employee::with([
             'user',
+            'user.sites',
+            'user.roles',
+            'user.spv',
             'region' => function ($q) {
                 $q->selectRaw('regions.id,regions.name,regions.province_id');
             },
@@ -167,7 +173,8 @@ class EmployeeController extends Controller
             'province'       => 'required',
             'shift_type'     => 'required',
             'join_date'      => 'required',
-            'salary'         => 'required'
+            'salary'         => 'required',
+            'role'           => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -226,11 +233,25 @@ class EmployeeController extends Controller
             $account = User::create([
                 'name'        => $employee->name,
                 'email'       => $employee->email,
-                'username'    => $employee->nid,
+                'username'    => $request->username,
                 'password'    => Hash::make('123456'),
                 'employee_id' => $employee->id,
                 'is_active'   => 1,
+                'spv_id'      => $request->spv ? $request->spv : null,
             ]);
+
+            if ($request->site) {
+                $site_user  = SiteUser::where('user_id', $account->id)->first();
+                if ($site_user) {
+                    $site_user->site_id     = $request->site;
+                    $site_user->save();
+                } else {
+                    $create_site_user   = SiteUser::create([
+                        'site_id'   => $request->site,
+                        'user_id'   => $account->id,
+                    ]);
+                }
+            }
 
             if ($account) {
                 $user = ['status' => true, 'message' => 'User account has been created.'];
@@ -238,6 +259,25 @@ class EmployeeController extends Controller
                 $user = ['status' => false, 'message' => 'Failed to create user account.'];
             }
         }
+        
+        $group_user = RoleUser::where('user_id', $account->id)->first();
+        if ($group_user) {
+            $group_user->role_id    = $request->role;
+            $group_user->save();
+        } else {
+            try {
+                $group  = RoleUser::create([
+                    'role_id'       => $request->role,
+                    'user_id'       => $account->id,
+                ]);
+            } catch (\Illuminate\Database\QueryException $ex) {
+                return response()->json([
+                    'status'    => false,
+                    'message'   => "Cant create role user {$ex->errorInfo[2]}"
+                ], 400);
+            }
+        }
+        
 
         if ($employee) {
             if ($photo) {
@@ -341,17 +381,32 @@ class EmployeeController extends Controller
         $employee->payroll_type     = $payroll;
         $employee->save();
 
+        DB::beginTransaction();
         if ($as_user) {
-            $account = User::where('employee_id', $employee->id)->get()->count();
-            if ($account == 0) {
+            $account = User::where('employee_id', $employee->id)->first();
+            if (!$account) {
                 $account = User::create([
                     'employee_id' => $employee->id,
                     'name'        => $employee->name,
                     'email'       => $employee->email,
-                    'username'    => $employee->nid,
+                    'username'    => $request->username,
                     'password'    => Hash::make('123456'),
                     'is_active'   => 1,
+                    'spv_id'      => $request->spv ? $request->spv : null,
                 ]);
+
+                if ($request->site) {
+                    $site_user  = SiteUser::where('user_id', $account->id)->first();
+                    if ($site_user) {
+                        $site_user->site_id     = $request->site;
+                        $site_user->save();
+                    } else {
+                        $create_site_user   = SiteUser::create([
+                            'site_id'   => $request->site,
+                            'user_id'   => $account->id,
+                        ]);
+                    }
+                }
 
                 if ($account) {
                     $user = ['status' => true, 'message' => 'User account has been created.'];
@@ -359,7 +414,43 @@ class EmployeeController extends Controller
                     $user = ['status' => false, 'message' => 'Failed to create user account.'];
                 }
             } else {
+                $account->name      = $employee->name;
+                $account->email     = $employee->email;
+                $account->username  = $request->username;
+                $account->spv_id    = $request->spv ? $request->spv : null;
+                $account->save();
+
+                if ($request->site) {
+                    $site_user  = SiteUser::where('user_id', $account->id)->first();
+                    if ($site_user) {
+                        $site_user->site_id     = $request->site;
+                        $site_user->save();
+                    } else {
+                        $create_site_user   = SiteUser::create([
+                            'site_id'   => $request->site,
+                            'user_id'   => $account->id,
+                        ]);
+                    }
+                }
                 $user = ['status' => true, 'message' => 'Employee already have an account.'];
+            }
+
+            $group_user = RoleUser::where('user_id', $account->id)->first();
+            if ($group_user) {
+                $group_user->role_id    = $request->role;
+                $group_user->save();
+            } else {
+                try {
+                    $group  = RoleUser::create([
+                        'role_id'       => $request->role,
+                        'user_id'       => $account->id,
+                    ]);
+                } catch (\Illuminate\Database\QueryException $ex) {
+                    return response()->json([
+                        'status'    => false,
+                        'message'   => "Cant create role user {$ex->errorInfo[2]}"
+                    ], 400);
+                }
             }
         } else {
             $account = User::where('employee_id', $employee->id);
@@ -414,6 +505,7 @@ class EmployeeController extends Controller
             ];
         }
 
+        DB::commit();
         return response()->json([
             'status' => $result['status']
         ], $result['point']);
@@ -445,7 +537,8 @@ class EmployeeController extends Controller
             ], $result['point']);
         } catch (\Illuminate\Database\QueryException $e) {
             return response()->json([
-                'status' => false
+                'status' => false,
+                'message'=> "Error delete data {$e->errorInfo[2]}",
             ], 400);
         }
     }

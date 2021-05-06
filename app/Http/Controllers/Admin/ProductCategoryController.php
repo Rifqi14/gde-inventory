@@ -3,6 +3,7 @@ namespace App\Http\Controllers\Admin;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Menu;
 use App\Models\ProductCategory;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\DB;
@@ -12,7 +13,12 @@ class ProductCategoryController extends Controller
 {
     function __construct()
     {
+        $menu   = Menu::GetByRoute('productcategory')->first();
+        $parent = Menu::parent($menu->parent_id)->first();
+        View::share('parent_name', $parent->menu_name);
+        View::share('menu_name', $menu->menu_name);
         View::share('menu_active',url('admin/'.'productcategory'));
+        $this->middleware('accessmenu', ['except' => ['select']]);
     }
 
     public function index()
@@ -110,8 +116,7 @@ class ProductCategoryController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(),[
-            'name'        => 'required',
-            'description' => 'required'
+            'name'        => 'required'
         ]);
 
         if($validator->fails()){
@@ -132,8 +137,8 @@ class ProductCategoryController extends Controller
             'description' => $description
         ]);
 
-        $productcategory->path     = implode('->',$this->createPath($productcategory->id,[]));
-        $productcategory->children = $this->createChildren($productcategory->id,0);
+        $productcategory->path     = implode(' &nbsp;&nbsp;<span style="font-size: 23px;position:relative;top: 2px;line-height: 0.1;">&rsaquo;</span>&nbsp;&nbsp; ',$this->createPath($productcategory->id,[]));
+        $productcategory->children = count($this->createChildren($productcategory->id, []));
         $productcategory->save();   
 
         // $this->updateChildren($productcategory->id);
@@ -155,7 +160,6 @@ class ProductCategoryController extends Controller
     {
         $validator = Validator::make($request->all(),[
             'name'        => 'required',
-            'description' => 'required'
         ]);
 
         if($validator->fails()){
@@ -173,6 +177,11 @@ class ProductCategoryController extends Controller
         $productcategory->name        = $name;
         $productcategory->description = $description;
         $productcategory->save();
+        $productcategory->path        = implode(' &nbsp;&nbsp;<span style="font-size: 23px;position:relative;top: 2px;line-height: 0.1;">&rsaquo;</span>&nbsp;&nbsp; ', $this->createPath($id, []));
+        $productcategory->children    = count($this->createChildren($id, []));
+        $productcategory->save();
+        // $this->updatePath($id);
+        // $this->updateChildren($id);
 
         if ($productcategory) {
             $result['status']  = true;
@@ -222,7 +231,7 @@ class ProductCategoryController extends Controller
         array_unshift($path,$productcategory->name);
 
         if ($productcategory->parent_id) {
-            // return $this->createPath($productcategory->parent_id,$path);
+            return $this->createPath($productcategory->parent_id,$path);
         }
 
         return $path;
@@ -233,31 +242,29 @@ class ProductCategoryController extends Controller
         $productcategories = ProductCategory::where('id',$id)->get();
 
         foreach ($productcategories as $key => $row) {
-            $row->path = implode('->',$this->createPath($row->id,[]));
+            $row->path = implode(' &nbsp;&nbsp;<span style="font-size: 23px;position:relative;top: 2px;line-height: 0.1;">&rsaquo;</span>&nbsp;&nbsp; ',$this->createPath($row->id,[]));
             $row->save();
-            // $this->updatePath($row->id);
+            $this->updatePath($row->id);
         }
     }
 
     public function createChildren($id,$children)
     {
-        $productcategories = ProductCategory::where('id',$id)->get();
-
-        foreach ($productcategories as $key => $row) {
-            $children = $children + $productcategories->count();            
-            // return $this->createChildren($row->id,$children);
+        $productcategories = ProductCategory::find($id);
+        array_unshift($children, $productcategories->name);
+        if ($productcategories->parent_id) {
+            return $this->createChildren($productcategories->parent_id, $children);
         }
         return $children;
     }
 
     public function updateChildren($id)
     {
-        $productcategories = ProductCategory::where('id',$id)->get();
-
-        foreach ($productcategories as $key => $row) {
-            $row->children = $this->createChildren($row->id,0);
-            $row->save();
-            // $this->updateChildren($row->parent_id);
+        $productcategories = ProductCategory::where('parent_id',$id)->get();
+        foreach ($productcategories as $key => $productcategory) {
+            $productcategory->children  = count($this->createChildren($productcategory->id, []));
+            $productcategory->save();
+            $this->updateChildren($productcategory->id);
         }
     }
 

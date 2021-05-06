@@ -261,6 +261,8 @@
                             label = '<span class="badge bg-success text-sm">Approved</span>';
                         } else if (status == 3) {
                             label = '<span class="badge bg-info text-sm">Completed</span>';
+                        } else if (status == 4) {
+                            label = '<span class="badge bg-red text-sm">Rejected</span>';
                         }
 
                         return label;
@@ -340,7 +342,7 @@
             return false;
         }
 
-        window.location.href = `{{url('admin/requestvehicle/edit')}}/${id}`;
+        window.location.href = `{{url('admin/requestvehicle/${id}/edit')}}`;
     }
 
     function destroy(id) {
