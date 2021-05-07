@@ -577,7 +577,7 @@
                 },
                 allowClear: true,
             });
-            @if ($contract->purchasing_id)
+            @if ($contract->purchasing)
                 $("#procurement").select2("trigger", "select", {
                     data: {id:'{{ $contract->purchasing_id }}', text:'{{ $contract->purchasing->number }}'}
                 });
