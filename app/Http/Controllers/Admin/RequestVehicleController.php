@@ -156,6 +156,56 @@ class RequestVehicleController extends Controller
         ], 200);
     }
 
+    public function select(Request $request)
+    {
+        $start   = $request->page ? $request->page - 1 : 0;
+        $length  = $request->limit;
+        $search = strtoupper($request->search);   
+        $employeeid = $request->employee_id;
+        $data  = [];
+        $total = 0;
+
+        if($employeeid){
+            $query = RequestVehicle::query();
+            $query->selectRaw('
+                request_vehicles.id,
+                request_vehicles.start_request,
+                request_vehicles.finish_request,
+                request_vehicles.remarks,
+                vehicles.vehicle_name,
+                borrower_request_vehicles.employee_id,
+                employees.name as employee_name
+            ');
+            $query->leftJoin('vehicles','vehicles.id','=','request_vehicles.vehicle_id');
+            $query->join('borrower_request_vehicles',function($j) use ($employeeid){
+                $j->on('borrower_request_vehicles.request_vehicle_id','=','request_vehicles.id');            
+            }); 
+            $query->join('employees','employees.id','=','borrower_request_vehicles.employee_id');
+            $query->where([
+                ['borrower_request_vehicles.employee_id','=',$employeeid],
+                ['request_vehicles  .status','=',2]
+            ]);
+
+            $total = $query->count();
+
+            $query->offset($start);
+            $query->limit($length);
+            $reqvehicle = $query->get();
+            
+            foreach($reqvehicle as $key => $row){
+                $row->date_request = date('d/m/Y',strtotime($row->start_request)).' - '.date('d/m/Y',strtotime($row->finish_request));
+                $data[] = $row;
+            }
+        }       
+        
+        return response()->json([
+            'total' => $total,
+            'rows'  => $data
+        ]);
+
+
+    }
+
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
