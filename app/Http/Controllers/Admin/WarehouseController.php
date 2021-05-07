@@ -96,33 +96,6 @@ class WarehouseController extends Controller
         ], 200);
     }
 
-    public function select(Request $request)
-    {
-        $start          = $request->page ? $request->page - 1 : 0;
-        $length         = $request->limit;
-        $name           = strtoupper($request->name);
-
-        // Query Data
-        $query          = Warehouse::name($name);
-
-        $row            = clone $query;
-        $recordsTotal   = $row->count();
-
-        $query->offset($start);
-        $query->limit($length);
-        $warehouses     = $query->get();
-
-        $data           = [];
-        foreach ($warehouses as $key => $warehouse) {
-            $warehouse->no  = ++$start;
-            $data[]         = $warehouse;
-        }
-        return response()->json([
-            'total'     => $recordsTotal,
-            'rows'      => $data,
-        ], 200);
-    }
-
     public function getBinTotal($warehouse_id){
         $rackwarehouses = RackWarehouse::where('warehouse_id',$warehouse_id)->get();
         $racks = [];
