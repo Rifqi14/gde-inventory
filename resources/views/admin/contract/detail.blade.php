@@ -5,26 +5,33 @@
     #input-list-checkbox .form-control {
         height: calc(1.9rem + 7.5px);
     }
+
     .row-form {
-        padding-left:30px !important;
+        padding-left: 30px !important;
     }
+
     .other {
-    display: none;
-    padding-left:40px !important;
+        display: none;
+        padding-left: 40px !important;
     }
+
     #form-idm {
-    display: none;
+        display: none;
     }
-    .bootstrap-switch-handle-on.bootstrap-switch-success{
-    width: 100px !important;
+
+    .bootstrap-switch-handle-on.bootstrap-switch-success {
+        width: 100px !important;
     }
-    .bootstrap-switch-label{
-    width: 126px !important;
+
+    .bootstrap-switch-label {
+        width: 126px !important;
     }
-    .bootstrap-switch-handle-off.bootstrap-switch-default{
-    width: 100px !important;
+
+    .bootstrap-switch-handle-off.bootstrap-switch-default {
+        width: 100px !important;
     }
-    .html-viewer{
+
+    .html-viewer {
         position: relative;
         width: 100%;
         height: 100%;
@@ -37,26 +44,26 @@
         padding: 10px;
         overflow: auto;
     }
-    .detail-item{
+
+    .detail-item {
         position: relative;
     }
-    .detail-item i{
+
+    .detail-item i {
         position: relative;
         float: left;
         margin-bottom: 20px;
         margin-right: 7px;
         top: 3px;
     }
-    .detail-item label{
-        
-    }
-    .detail-item h6{
-        
-    }
-    .transparent-input{
 
-    }
-    span.tag{
+    .detail-item label {}
+
+    .detail-item h6 {}
+
+    .transparent-input {}
+
+    span.tag {
         color: #fff;
         background-color: #424776 !important;
         border-color: #676992 !important;
@@ -78,7 +85,7 @@
             <li class="breadcrumb-item">Home</li>
             <li class="breadcrumb-item">Procurment</li>
             <li class="breadcrumb-item">Contract</li>
-            <li class="breadcrumb-item">Detail</li> 
+            <li class="breadcrumb-item">Detail</li>
         </ol>
     </div>
 </div>
@@ -87,175 +94,175 @@
 @section('content')
 <section class="content">
     <div class="container-fluid">
-        
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="card">
-                        <div class="card-body">
-                            <span class="title">
-                                <hr/>
-                                <h5 class="text-md text-dark text-bold">Contract Information</h5>
-                                <input type="hidden" name="id" value="{{ $contract->id }}">
-                            </span>
-                            <div class="row">
-                                <div class="col-sm-6">
-                                    <div class="form-group mt-4">
-                                        <label for="complainant">Number:</label>
-                                        <input type="text" class="form-control" value="{{ $contract->number }}" disabled>
-                                    </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <span class="title">
+                            <hr />
+                            <h5 class="text-md text-dark text-bold">Contract Information</h5>
+                            <input type="hidden" name="id" value="{{ $contract->id }}">
+                        </span>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group mt-4">
+                                    <label for="complainant">Number:</label>
+                                    <input type="text" class="form-control" value="{{ $contract->number }}" disabled>
                                 </div>
-                                <div class="col-sm-6">
-                                    <div class="form-group mt-4">
-                                        <label for="complainant">Title:</label>
-                                        <input type="text" class="form-control" value="{{ $contract->title }}" disabled>
-                                    </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group mt-4">
+                                    <label for="complainant">Title:</label>
+                                    <input type="text" class="form-control" value="{{ $contract->title }}" disabled>
                                 </div>
-                                <div class="col-sm-12">
-                                    <div class="form-group">
-                                        <label for="complainant">Scope of Work:</label>
-                                        <div class="html-viewer">
-                                            {!! $contract->scope_of_work !!}
-                                        </div>
+                            </div>
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <label for="complainant">Scope of Work:</label>
+                                    <div class="html-viewer">
+                                        {!! $contract->scope_of_work !!}
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <!-- /.card -->
                 </div>
-                <div class="col-md-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <span class="title">
-                                <hr/>
-                                <h5 class="text-md text-dark text-bold">General Information</h5>
-                            </span>
-                            <div class="row">
-                                <div class="mt-4"></div>
-                                <div class="col-sm-12">
-                                    <div class="form-group mt-4">
-                                        <label for="complainant">Procurement Number:</label>
-                                        <input type="text" class="form-control" value="{{ $contract->purchasing->number }}" disabled>
-                                    </div>
-                                </div>
-                                <div class="col-sm-12">
-                                    <div class="form-group">
-                                        <label for="complainant">Contract Signing Date:</label>
-                                        <input type="text" class="form-control" value="{{ date("d/m/Y", strtotime($contract->contract_signing_date)) }}" disabled>
-                                    </div>
-                                </div>
-                                <div class="col-sm-12">
-                                    <div class="form-group">
-                                        <label for="complainant">Expiration Date:</label>
-                                        <input type="text" class="form-control" value="{{ date("d/m/Y", strtotime($contract->expiration_date)) }}" disabled>
-                                    </div>
-                                </div>
-                                <div class="col-sm-12">
-                                    <div class="form-group">
-                                        <label for="complainant">Status:</label>
-                                        <h6>@if($contract->progress) Finished @else In Progress @endif</h6>
-                                    </div>
+                <!-- /.card -->
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <span class="title">
+                            <hr />
+                            <h5 class="text-md text-dark text-bold">General Information</h5>
+                        </span>
+                        <div class="row">
+                            <div class="mt-4"></div>
+                            <div class="col-sm-12">
+                                <div class="form-group mt-4">
+                                    <label for="complainant">Procurement Number:</label>
+                                    <input type="text" class="form-control" value="{{ @$contract->purchasing->number }}" disabled>
                                 </div>
                             </div>
-                            {{-- <div class="form-group mt-5 detail-item">
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <label for="complainant">Contract Signing Date:</label>
+                                    <input type="text" class="form-control" value="{{ date("d/m/Y", strtotime($contract->contract_signing_date)) }}" disabled>
+                                </div>
+                            </div>
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <label for="complainant">Expiration Date:</label>
+                                    <input type="text" class="form-control" value="{{ date("d/m/Y", strtotime($contract->expiration_date)) }}" disabled>
+                                </div>
+                            </div>
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <label for="complainant">Status:</label>
+                                    <h6>@if($contract->progress) Finished @else In Progress @endif</h6>
+                                </div>
+                            </div>
+                        </div>
+                        {{-- <div class="form-group mt-5 detail-item">
                                 <i class="fa fa-file-alt"></i> 
                                 <label for="complainant" class="mb-0">Procurement Number:</label>
                                 <h6>{{ $contract->purchasing->number }}</h6>
-                            </div>
-                            <div class="form-group detail-item">
-                                <i class="fa fa-calendar"></i> 
-                                <label for="number" class="mb-0">Contract Signing Date:</label>
-                                <h6>{{ date("d/m/Y", strtotime($contract->contract_signing_date)) }}</h6>
-                            </div>
-                            <div class="form-group detail-item">
-                                <i class="fa fa-calendar"></i> 
-                                <label for="number" class="mb-0">Expiration Date:</label>
-                                <h6>{{ date("d/m/Y", strtotime($contract->expiration_date)) }}</h6>
-                            </div>
-                            <div class="form-group detail-item">
-                                <i class="fa fa-user-tie"></i> 
-                                <label for="number" class="mb-0">Contract Owner:</label>
-                                <p>
-                                    @foreach ($roles as $role)
-                                        @if(in_array($role->id, $contract->owner))
-                                            <span class="tag">{{ $role->name }}</span>
-                                        @endif
-                                    @endforeach
-                                </p>
-                            </div>
-                            <div class="form-group detail-item">
-                                <i class="fa fa-map-marked-alt"></i> 
-                                <label for="number" class="mb-0">Unit:</label>
-                                <h6>{{$contract->site->name}}</h6>
-                            </div>
-                            <div class="form-group detail-item">
-                                <i class="fa fa-check-circle"></i> 
-                                <label for="number" class="mb-0">Status:</label>
-                                <h6>@if($contract->progress) Finished @else In Progress @endif</h6>
-                            </div> --}}
-                        </div>
                     </div>
-
-                    {{-- <div class="text-right mb-4">
-                        <a href="{{ url('admin/contract') }}" class="btn bg-maroon color-palette legitRipple text-sm" >
-                            <b><i class="fas fa-arrow-left"></i></b>
-                        </a>
+                    <div class="form-group detail-item">
+                        <i class="fa fa-calendar"></i>
+                        <label for="number" class="mb-0">Contract Signing Date:</label>
+                        <h6>{{ date("d/m/Y", strtotime($contract->contract_signing_date)) }}</h6>
+                    </div>
+                    <div class="form-group detail-item">
+                        <i class="fa fa-calendar"></i>
+                        <label for="number" class="mb-0">Expiration Date:</label>
+                        <h6>{{ date("d/m/Y", strtotime($contract->expiration_date)) }}</h6>
+                    </div>
+                    <div class="form-group detail-item">
+                        <i class="fa fa-user-tie"></i>
+                        <label for="number" class="mb-0">Contract Owner:</label>
+                        <p>
+                            @foreach ($roles as $role)
+                            @if(in_array($role->id, $contract->owner))
+                            <span class="tag">{{ $role->name }}</span>
+                            @endif
+                            @endforeach
+                        </p>
+                    </div>
+                    <div class="form-group detail-item">
+                        <i class="fa fa-map-marked-alt"></i>
+                        <label for="number" class="mb-0">Unit:</label>
+                        <h6>{{$contract->site->name}}</h6>
+                    </div>
+                    <div class="form-group detail-item">
+                        <i class="fa fa-check-circle"></i>
+                        <label for="number" class="mb-0">Status:</label>
+                        <h6>@if($contract->progress) Finished @else In Progress @endif</h6>
                     </div> --}}
-
                 </div>
+            </div>
+
+            {{-- <div class="text-right mb-4">
+                        <a href="{{ url('admin/contract') }}" class="btn bg-maroon color-palette legitRipple text-sm" >
+            <b><i class="fas fa-arrow-left"></i></b>
+            </a>
+        </div> --}}
+
+    </div>
 
 
-                <div class="col-md-12" id="content">
-                    <div class="card">
-                        <div class="card-body">
-                            <span class="title">
-                                <hr/>
-                                <h5 class="text-md text-dark text-bold">Product</h5>
-                            </span>
-                            <div class="mt-5"></div>
-                            <form id="form" role="form" action="{{route('contract.product.store')}}" method="post">
-                                {{ csrf_field() }}
-                                <input type="hidden" name="contract_id" value="{{ $contract->id }}">
-                                <div class="form-group row">
-                                    <label class="col-sm-1 col-form-label">Product :</label>
-                                    <div class="col-sm-4">
-                                        <select data-placeholder="Choose Product" style="width: 100%;" required class="select2 form-control" id="product_id" name="product_id">
-                                        </select>
-                                    </div>
-                                    <div class="col-sm-4">
-                                        <button type="submit" id="add-uom" class="btn btn-labeled text-sm btn-sm btn-success btn-flat legitRipple">
-                                            <b><i class="fas fa-plus"></i></b> Add
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
-                            <table class="table table-striped datatable" width="100%" id="table-product">
-                                <thead>
-                                    <tr>
-                                        <th>No.</th>
-                                        <th>Product</th>
-                                        <th>UOM</th>
-                                        <th>Qty Order</th>
-                                        <th>Qty Receive</th>
-                                        <th>#</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    
-                                </tbody>
-                            </table>
+    <div class="col-md-12" id="content">
+        <div class="card">
+            <div class="card-body">
+                <span class="title">
+                    <hr />
+                    <h5 class="text-md text-dark text-bold">Product</h5>
+                </span>
+                <div class="mt-5"></div>
+                <form id="form" role="form" action="{{route('contract.product.store')}}" method="post">
+                    {{ csrf_field() }}
+                    <input type="hidden" name="contract_id" value="{{ $contract->id }}">
+                    <div class="form-group row">
+                        <label class="col-sm-1 col-form-label">Product :</label>
+                        <div class="col-sm-4">
+                            <select data-placeholder="Choose Product" style="width: 100%;" required class="select2 form-control" id="product_id" name="product_id">
+                            </select>
+                        </div>
+                        <div class="col-sm-4">
+                            <button type="submit" id="add-uom" class="btn btn-labeled text-sm btn-sm btn-success btn-flat legitRipple">
+                                <b><i class="fas fa-plus"></i></b> Add
+                            </button>
                         </div>
                     </div>
-                </div>
+                </form>
+                <table class="table table-striped datatable" width="100%" id="table-product">
+                    <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th>Product</th>
+                            <th>UOM</th>
+                            <th>Qty Order</th>
+                            <th>Qty Receive</th>
+                            <th>#</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                    </tbody>
+                </table>
+            </div>
         </div>
+    </div>
+    </div>
     </div>
 </section>
 @endsection
 
 @section('scripts')
-    <script src="{{ asset('assets/js/jquery.inputmask.js') }}"></script>
-    <script type="text/javascript">
-        $(function(){
+<script src="{{ asset('assets/js/jquery.inputmask.js') }}"></script>
+<script type="text/javascript">
+    $(function(){
             $(".number-only").inputmask("Regex", { regex: "[1-9]*" });
             $(".select2").select2();
             dataTable = $('.datatable').DataTable( {
@@ -701,5 +708,5 @@
             });
         }
 
-    </script>
+</script>
 @endsection
