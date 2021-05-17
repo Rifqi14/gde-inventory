@@ -207,6 +207,10 @@
                                         <label class="control-label" for="base-salary">Base Salary</label>
                                         <input class="form-control input-price text-right" type="text" name="salary" id="base-salary" value="0" maxlength="15">
                                     </div>
+                                    <div class="form-group">
+                                        <label class="control-label" for="position">Position</label>
+                                        <input class="form-control" type="text" name="position" id="position">
+                                    </div>
                                     <!-- Is User -->
                                     <div class="form-group">
                                         <label class="control-label" for="user">User</label>

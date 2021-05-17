@@ -174,7 +174,6 @@ class EmployeeController extends Controller
             'shift_type'     => 'required',
             'join_date'      => 'required',
             'salary'         => 'required',
-            'role'           => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -225,6 +224,7 @@ class EmployeeController extends Controller
             'resign_date'      => $resigndate,
             'salary'           => $salary,
             'payroll_type'     => $payroll,
+            'position'         => $request->position,
         ]);
 
         $user = ['status' => false, 'message' => 'Employee without user account.'];
@@ -258,25 +258,26 @@ class EmployeeController extends Controller
             } else {
                 $user = ['status' => false, 'message' => 'Failed to create user account.'];
             }
-        }
-        
-        $group_user = RoleUser::where('user_id', $account->id)->first();
-        if ($group_user) {
-            $group_user->role_id    = $request->role;
-            $group_user->save();
-        } else {
-            try {
-                $group  = RoleUser::create([
-                    'role_id'       => $request->role,
-                    'user_id'       => $account->id,
-                ]);
-            } catch (\Illuminate\Database\QueryException $ex) {
-                return response()->json([
-                    'status'    => false,
-                    'message'   => "Cant create role user {$ex->errorInfo[2]}"
-                ], 400);
+            
+            $group_user = RoleUser::where('user_id', $account->id)->first();
+            if ($group_user) {
+                $group_user->role_id    = $request->role;
+                $group_user->save();
+            } else {
+                try {
+                    $group  = RoleUser::create([
+                        'role_id'       => $request->role,
+                        'user_id'       => $account->id,
+                    ]);
+                } catch (\Illuminate\Database\QueryException $ex) {
+                    return response()->json([
+                        'status'    => false,
+                        'message'   => "Cant create role user {$ex->errorInfo[2]}"
+                    ], 400);
+                }
             }
         }
+        
         
 
         if ($employee) {
@@ -379,6 +380,7 @@ class EmployeeController extends Controller
         $employee->resign_date      = $resigndate;
         $employee->salary           = $salary;
         $employee->payroll_type     = $payroll;
+        $employee->position         = $request->position;
         $employee->save();
 
         DB::beginTransaction();
