@@ -2,26 +2,26 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\Menu;
-use App\Models\Site;
-use App\Models\Budget;
-use App\Models\BudgetDetail;
-use App\Models\BusinessTrip;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Menu;
+use App\Models\BusinessTrip;
+use App\Models\BusinessTripTransportation;
+use App\Models\BusinessTripLodging;
+use App\Models\BusinessTripVehicle;
+use App\Models\BusinessTripOther;
 use Illuminate\Support\Facades\View;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class BusinessTripController extends Controller
 {
     function __construct(){
-        $menu   = Menu::where('menu_route', 'businesstrip')->first();
-        $parent = Menu::find($menu->parent_id);
-        View::share('parent_name', $parent->menu_name);
-        View::share('menu_name', $menu->menu_name);
+        // $menu   = Menu::where('menu_route', 'businesstrip')->first();
+        // $parent = Menu::find($menu->parent_id);
+        // View::share('parent_name', $parent->menu_name);
+        // View::share('menu_name', $menu->menu_name);
         View::share('menu_active', url('admin/'.'businesstrip'));
-        $this->middleware('accessmenu', ['except' => ['select']]);
+        // $this->middleware('accessmenu', ['except' => ['select']]);
     }
     /**
      * Display a listing of the resource.
@@ -42,76 +42,45 @@ class BusinessTripController extends Controller
     {        
         return view('admin.business_trip.create');
     }
-
-    /**
-     * Store a newly created resource in storage.
+    
+     /**
+     * Show the form for editing the specified resource.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|unique:budgets',
-            'budget_description' => 'required',
-            'budget_amount' => 'required',
-            'currency' => 'required',
-            'site_id' => 'required',
+    public function edit(Request $request,$id)
+    {        
+        $businesstrip = BusinessTrip::with([
+            'departs',
+            'returns',
+            'vehicles' => function($q){
+                $q->selectRaw("
+                    business_trip_vehicles.*,                    
+                    TO_CHAR(request_vehicles.start_request,'DD/MM/YYYY') as start_request,
+                    TO_CHAR(request_vehicles.finish_request,'DD/MM/YYYY') as finish_request,
+                    vehicles.vehicle_name,
+                    request_vehicles.remarks
+                ");
+                $q->leftJoin('request_vehicles','request_vehicles.id','=','business_trip_vehicles.request_vehicle_id');
+                $q->leftJoin('vehicles','vehicles.id','=','request_vehicles.vehicle_id');
+            },
+            'lodgings',
+            'others'
         ]);
-
-        $site = Site::find($request->site_id);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'type'     => $site->code,
-                'message' => $validator->errors()->first()
-            ], 200);
+        $businesstrip->selectRaw("
+            business_trips.*,
+            users.name as issued_name
+        ");
+        $businesstrip->leftJoin('users','users.id','=','business_trips.issued_by');
+        $businesstrip = $businesstrip->find($id);       
+        
+        if ($businesstrip) {
+            $data = $businesstrip;
+            return view('admin.business_trip.edit', compact('data'));
+        } else {
+            abort(404);
         }
-
-
-        $user = Budget::create([
-            'name' => $request->name,
-            'description' => $request->budget_description,
-            'amount' => (float) str_replace(',', '.', str_replace('.', '', $request->budget_amount)),
-            'currency' => $request->currency,
-            'site_id' => $request->site_id,
-            'created_user' => 1,
-        ]);
-
-        if (!$user) {
-            return response()->json([
-                'status' => false,
-                'type'     => $site->code,
-                'message'     => 'Cant create budget'
-            ], 200);
-        }
-
-        $type = $request->type;
-        $weight = $request->weight;
-        $total = $request->total;
-        for ($i = 0; $i < count($type); $i++) {
-            $budget = BudgetDetail::create([
-                'budget_id' => $user->id,
-                'type' => $type[$i],
-                'weight' => $weight[$i],
-                'total' => (float) str_replace(',', '.', str_replace('.', '', $total[$i])),
-            ]);
-            if (!$budget) {
-                return response()->json([
-                    'status' => false,
-                    'type'     => $site->code,
-                    'message'     => 'Cant create budget'
-                ], 200);
-            }
-        }
-
-        return response()->json([
-            'status'     => true,
-            'message'     => 'Created success',
-            'type'     => $site->code,
-            'results'     => route('budgetary.index'),
-        ], 200);
     }
 
     /**
@@ -120,137 +89,20 @@ class BusinessTripController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
-    {
-        $budget = Budget::with('detail')->find($id);
-        $site = Site::find($budget->site_id);
-        $budget->origin_amount = $budget->amount;
-        $budget->amount = number_format($budget->amount, '2', '.', '');
-        $budget->site_name = $site->name;
-        $user = $budget;
-        if ($user) {
-            return view('admin.businesstrip.detail', compact('user'));
-        } else {
-            abort(404);
-        }
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        $budget = Budget::with('detail')->find($id);
-        $site = Site::find($budget->site_id);
-        $budget->origin_amount = $budget->amount;
-        $budget->amount = number_format($budget->amount, '2', '.', '');
-        $budget->site_name = $site->name;
-        $user = $budget;
-        if ($user) {
-            return view('admin.businesstrip.edit', compact('user'));
-        } else {
-            abort(404);
-        }
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|unique:budgets,name,' . $id,
-            'budget_description' => 'required',
-            'budget_amount' => 'required',
-            'currency' => 'required',
-            'site_id' => 'required',
-        ]);
-
-        $site = Site::find($request->site_id);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'status'     => false,
-                'type'     => $site->code,
-                'message'     => $validator->errors()->first()
-            ], 200);
-        }
-
-        $user = Budget::find($id);
-        $user->name = $request->name;
-        $user->description = $request->budget_description;
-        $user->amount = (float) str_replace(',', '.', str_replace('.', '', $request->budget_amount));
-        $user->currency = $request->currency;
-        $user->site_id = $request->site_id;
-        $user->updated_user = 1;
-        $user->save();
-
-        if (!$user) {
-            return response()->json([
-                'status' => false,
-                'type'     => $site->code,
-                'message'     => "Cant update budget"
-            ], 200);
-        }
-
-        $type = $request->type;
-        $weight = $request->weight;
-        $total = $request->total;
-        $del = BudgetDetail::where('budget_id', $id);
-        if ($del->delete()) {
-            for ($i = 0; $i < count($type); $i++) {
-                $budget = BudgetDetail::create([
-                    'budget_id' => $user->id,
-                    'type' => $type[$i],
-                    'weight' => $weight[$i],
-                    'total' => (float) str_replace(',', '.', str_replace('.', '', $total[$i])),
-                ]);
-                if (!$budget) {
-                    return response()->json([
-                        'status' => false,
-                        'type'     => $site->code,
-                        'message'     => 'Cant create budget'
-                    ], 200);
-                }
-            }
-        }
-
-        return response()->json([
-            'status'     => true,
-            'type'     => $site->code,
-            'results'     => route('budgetary.index'),
-        ], 200);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        try {
-            $user = Budget::find($id);
-            $user->delete();
-        } catch (\Illuminate\Database\QueryException $e) {
-            return response()->json([
-                'status'     => false,
-                'message'     => 'Error delete data'
-            ], 400);
-        }
-        return response()->json([
-            'status'     => true,
-            'message' => 'Success delete data'
-        ], 200);
-    }
+    // public function show($id)
+    // {
+    //     $budget = Budget::with('detail')->find($id);
+    //     $site = Site::find($budget->site_id);
+    //     $budget->origin_amount = $budget->amount;
+    //     $budget->amount = number_format($budget->amount, '2', '.', '');
+    //     $budget->site_name = $site->name;
+    //     $user = $budget;
+    //     if ($user) {
+    //         return view('admin.businesstrip.detail', compact('user'));
+    //     } else {
+    //         abort(404);
+    //     }
+    // }       
 
     public function select(Request $request)
     {
@@ -282,22 +134,49 @@ class BusinessTripController extends Controller
 
     public function read(Request $request)
     {
-        $draw    = $request->draw;
-        $start   = $request->start;
-        $length  = $request->length;
-        $query   = $request->search['value'];
-        $sort    = $request->columns[$request->order[0]['column']]['data'];
-        $dir     = $request->order[0]['dir'];
-        $status = $request->status;
+        $draw               = $request->draw;
+        $start              = $request->start;
+        $length             = $request->length;
+        $search             = $request->search['value'];
+        $sort               = $request->columns[$request->order[0]['column']]['data'];
+        $dir                = $request->order[0]['dir'];
+        $status             = $request->status;
+        $businessTripNumber = $request->businesstripnumber;
+        $startdate          = $request->startdate;
+        $enddate            = $request->enddate;
+        $rate               = str_replace('.','',$request->rate);
 
         //Count Data
         $query = BusinessTrip::query();    
-        $query->selectRaw("business_trips.*");
-        if($status){
-            $query->where('business_trips.status',$status);
-        }else{
-            $query->where('business_trips.status','<>',3);
+        $query->selectRaw("business_trips.*");        
+        if($businessTripNumber){
+            $query->whereRaw("upper(business_trip_number) like '%$businessTripNumber%'");
         }
+        $query->where(function($w) use($status,$startdate,$enddate){
+            $w->where([
+                ['departure_date','>=',$startdate],
+                ['departure_date','<=',$enddate]
+            ]);
+            if($status){
+                $w->where('status',$status);
+            }else{
+                $w->where('status','<>','approved');
+            }
+        });
+        $query->orWhere(function($w) use($status,$startdate,$enddate){
+            $w->where([
+                ['arrived_date','>=',$startdate],
+                ['arrived_date','<=',$enddate]
+            ]);
+            if($status){
+                $w->where('status',$status);
+            }else{
+                $w->where('status','<>','approved');
+            }
+        });
+        if($rate){
+            $query->where('rate',$rate);
+        }        
 
         $rows  = clone $query;
         $total = $rows->count();
@@ -311,8 +190,7 @@ class BusinessTripController extends Controller
         $data = [];
         foreach ($businesstrips as $key => $row) {
             $row->no = ++$start;                      
-            $row->actvity = 0;
-            $row->budget = '1.000';
+            $row->schedule = date('d/m/Y',strtotime($row->departure_date)).' - '.date('d/m/Y',strtotime($row->arrived_date));            
             $data[] = $row;
         }
         return response()->json([
@@ -321,6 +199,402 @@ class BusinessTripController extends Controller
             'recordsFiltered' => $total,
             'data' => $data
         ], 200);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {        
+        $validator = Validator::make($request->all(),[
+            'business_trip_number' => 'required|unique:business_trips,business_trip_number',
+            'departure_date'       => 'required',
+            'arrived_date'         => 'required',
+            'purpose'              => 'required',
+            'location'             => 'required',
+            'rate'                 => 'required',
+        ]);
+
+        if($validator->fails()){
+            return response()->json([
+                'status'    => false,
+                'message'   => $validator->errors()->first()
+            ],400);
+        }
+
+        $number      = $request->business_trip_number;
+        $issued_by   = $request->issued;
+        $status      = $request->status;
+        $purpose     = $request->purpose;
+        $location    = $request->location;
+        $departdate  = $request->departure_date;
+        $arriveddate = $request->arrived_date;
+        $rate        = str_replace('.','',$request->rate);
+
+        $query = BusinessTrip::create([
+            'business_trip_number' => $number,
+            'issued_by'            => $issued_by,
+            'departure_date'       => $departdate,
+            'arrived_date'         => $arriveddate,
+            'purpose'              => $purpose,
+            'location'             => $location,
+            'status'               => $status,
+            'rate'                 => $rate
+        ]);
+
+        if($query){
+            $now = date('Y-m-d H:i:s');
+            $business_id = $query->id; 
+            $departures  = $request->departure;
+            $returns     = $request->returning;
+            $vehicles    = $request->vehicle;
+            $lodgings    = $request->lodging;
+            $others      = $request->others;
+
+            if($departures || $returns){                                            
+                $transportation = [];
+                foreach (json_decode($departures) as $key => $row) {
+                    $transportation[] = [
+                        'business_trip_id'    => $business_id,
+                        'transportation_type' => 'depart',
+                        'type'                => $row->type,
+                        'description'         => $row->description,
+                        'price'               => str_replace('.','',$row->price),
+                        'created_at'          => $now,
+                        'updated_at'          => $now
+                    ];
+                }                               
+
+                foreach (json_decode($returns) as $key => $row) {
+                    $transportation[] = [
+                        'business_trip_id'    => $business_id,
+                        'transportation_type' => 'return',
+                        'type'                => $row->type,
+                        'description'         => $row->description,
+                        'price'               => str_replace('.','',$row->price),
+                        'created_at'          => $now,
+                        'updated_at'          => $now
+                    ];
+                }
+                $query = BusinessTripTransportation::insert($transportation);
+                if(!$query){
+                    return response()->json([
+                        'status'  => false,
+                        'message' => 'Failed to create detail transportation.'
+                    ],400);
+                }
+            }     
+            
+            if($vehicles){                
+                $vehicle = [];
+                foreach(json_decode($vehicles) as $key => $row){
+                    $vehicle[] = [
+                        'business_trip_id'   => $business_id,
+                        'request_vehicle_id' => $row->request_id,
+                        'description'        => '',
+                        'created_at'         => $now,
+                        'updated_at'         => $now
+                    ];
+                }
+
+                $query = BusinessTripVehicle::insert($vehicle);
+                if(!$query){
+                    if(!$query){
+                        return response()->json([
+                            'status'  => false,
+                            'message' => 'Failed to create detail request vehicle.'
+                        ],400);
+                    }
+                }
+            }
+
+            if($lodgings){
+                $lodging = [];
+                foreach (json_decode($lodgings) as $key => $row) {
+                    $lodging[] = [
+                        'business_trip_id' => $business_id,
+                        'place'            => $row->place,
+                        'price'            => intval(str_replace('.','',$row->price)),
+                        'night'            => intval($row->days),
+                        'created_at'       => $now,
+                        'updated_at'       => $now
+                    ];
+                }
+
+                $query = BusinessTripLodging::insert($lodging);
+                if(!$query){
+                    return response()->json([
+                        'status'  => false,
+                        'message' => 'Failed to cretae detail lodging.'
+                    ],400);
+                }
+            }
+
+            if($others){
+                $other  = [];
+                foreach (json_decode($others) as $key => $row) {
+                    $other[] = [
+                        'business_trip_id' => $business_id,
+                        'description'      => $row->description,
+                        'price'            => intval(str_replace('.','',$row->price)),
+                        'qty'              => $row->qty,
+                        'created_at'       => $now,
+                        'updated_at'       => $now
+                    ];
+                }
+
+                $query = BusinessTripOther::insert($other);
+                if(!$query){
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Failed to create others detail.'
+                    ],400);
+                }
+            }            
+
+            $result = [
+                'status'  => true,
+                'message' => 'Data has been saved.',
+                'point'   => 200
+            ];
+        }else{
+            $result = [
+                'status'  => false,
+                'message' => 'Failed to create data.',
+                'point'   => 400
+            ];
+        }
+
+        return response()->json([
+            'status'  => $result['status'],
+            'message' => $result['message']
+        ],$result['point']);
+    }        
+
+     /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(),[       
+            'business_trip_number' => 'required|unique:business_trips,business_trip_number,'.$id,
+            'departure_date'       => 'required',
+            'arrived_date'         => 'required',
+            'purpose'              => 'required',
+            'location'             => 'required',
+            'rate'                 => 'required',
+        ]);
+
+        if($validator->fails()){
+            return response()->json([
+                'status'    => false,
+                'message'   => $validator->errors()->first()
+            ],400);
+        }
+
+        $number      = $request->business_trip_number;
+        $issued_by   = $request->issued;
+        $status      = $request->status;
+        $purpose     = $request->purpose;
+        $location    = $request->location;
+        $departdate  = $request->departure_date;
+        $arriveddate = $request->arrived_date;
+        $rate        = str_replace('.','',$request->rate);
+
+        $query = BusinessTrip::find($id);
+        $query->issued_by      = $issued_by;
+        $query->departure_date = $departdate;
+        $query->arrived_date   = $arriveddate;
+        $query->purpose        = $purpose;
+        $query->location       = $location;
+        $query->rate           = $rate;
+        $query->status         = $status;
+        $query->update();
+
+        if($query){
+            $now         = date('Y-m-d H:i:s');
+            $business_id = $query->id; 
+            $departures  = $request->departure;
+            $vehicles    = $request->vehicle;
+            $returns     = $request->returning;
+            $lodgings    = $request->lodging;
+            $others      = $request->others;
+
+            if($departures || $returns){                
+                $cleared = BusinessTripTransportation::where('business_trip_id', $business_id);
+                $cleared->delete();                
+
+                $transportation = [];
+                foreach (json_decode($departures) as $key => $row) {
+                    $transportation[] = [
+                        'business_trip_id'    => $business_id,
+                        'transportation_type' => 'depart',
+                        'type'                => $row->type,
+                        'description'         => $row->description,
+                        'price'               => str_replace('.','',$row->price),
+                        'created_at'          => $now,
+                        'updated_at'          => $now
+                    ];
+                }                               
+
+                foreach (json_decode($returns) as $key => $row) {
+                    $transportation[] = [
+                        'business_trip_id'    => $business_id,
+                        'transportation_type' => 'return',
+                        'type'                => $row->type,
+                        'description'         => $row->description,
+                        'price'               => str_replace('.','',$row->price),
+                        'created_at'          => $now,
+                        'updated_at'          => $now
+                    ];
+                }
+
+                $query = BusinessTripTransportation::insert($transportation);
+                if(!$query){
+                    return response()->json([
+                        'status'  => false,
+                        'message' => 'Failed to create detail transportation.'
+                    ],400);
+                }
+            }   
+
+            if($vehicles){
+                $cleared = BusinessTripVehicle::where('business_trip_id', $business_id);
+                $cleared->delete(); 
+
+                $vehicle = [];
+                foreach(json_decode($vehicles) as $key => $row){
+                    $vehicle[] = [
+                        'business_trip_id'   => $business_id,
+                        'request_vehicle_id' => $row->request_id,
+                        'description'        => '',
+                        'created_at'         => $now,
+                        'updated_at'         => $now
+                    ];
+                }
+
+                $query = BusinessTripVehicle::insert($vehicle);
+                if(!$query){
+                    if(!$query){
+                        return response()->json([
+                            'status'  => false,
+                            'message' => 'Failed to create detail request vehicle.'
+                        ],400);
+                    }
+                }
+            }
+
+            if($lodgings){
+                $cleared = BusinessTripLodging::where('business_trip_id', $business_id);
+                $cleared->delete();                
+
+                $lodging = [];
+                foreach (json_decode($lodgings) as $key => $row) {
+                    $lodging[] = [
+                        'business_trip_id' => $business_id,
+                        'place'            => $row->place,
+                        'price'            => str_replace('.','',$row->price),
+                        'night'            => $row->days,
+                        'created_at'       => $now,
+                        'updated_at'       => $now
+                    ];
+                }
+
+                $query = BusinessTripLodging::insert($lodging);
+                if(!$query){
+                    return response()->json([
+                        'status'  => false,
+                        'message' => 'Failed to create detail lodging.'
+                    ],400);
+                }
+            }
+
+            if($others){
+                $cleared = BusinessTripOther::where('business_trip_id', $business_id);
+                $cleared->delete();
+
+                $other  = [];
+                foreach (json_decode($others) as $key => $row) {
+                    $other[] = [
+                        'business_trip_id' => $business_id,
+                        'description'      => $row->description,
+                        'price'            => str_replace('.','',$row->price),
+                        'qty'              => $row->qty,
+                        'created_at'       => $now,
+                        'updated_at'       => $now
+                    ];
+                }
+
+                $query = BusinessTripOther::insert($other);
+                if(!$query){
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Failed to create others detail.'
+                    ],400);
+                }
+            }
+
+            $result = [
+                'status'    => true,
+                'message'   => 'Data has been updated.',
+                'point'     => 200
+            ];
+        }else{
+            $result = [
+                'status'    => false,
+                'message'   => 'Failed to update data.',
+                'point'     => 400
+            ];
+        }
+
+        return response()->json([
+            'status'    => $result['status'],
+            'message'   => $result['message']
+        ],$result['point']);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        try {
+            $query = BusinessTrip::find($id);
+            $query->delete();
+
+            if ($query) {
+                $result = [
+                    'status'  => true,
+                    'message' => 'Data hase been removed.',
+                    'point'   => 200
+                ];
+            }else{
+                $result = [
+                    'status'  => false,
+                    'message' => 'Data hase been removed.',
+                    'point'   => 400
+                ];
+            }
+
+            return response()->json([
+                'status'  => $result['status'],
+                'message' => $result['message']
+            ],$result['point']);
+        } catch (\Illuminate\Database\QueryException $e) {
+            return response()->json([
+                'status' => false                
+            ], 400);
+        }
     }
 
 }
