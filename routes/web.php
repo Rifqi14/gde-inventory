@@ -204,6 +204,7 @@ Route::group(['prefix' => 'admin'], function () {
         Route::resource('/goodsreceipt', 'Admin\GoodsReceiptController');
 
         // Attendance
+        Route::get('/attendance/read', 'Admin\AttendanceController@read')->name('attendance.read');
         Route::resource('/attendance', 'Admin\AttendanceController');
     });
 });

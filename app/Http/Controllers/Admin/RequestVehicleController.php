@@ -183,7 +183,7 @@ class RequestVehicleController extends Controller
             $query->join('employees','employees.id','=','borrower_request_vehicles.employee_id');
             $query->where([
                 ['borrower_request_vehicles.employee_id','=',$employeeid],
-                ['request_vehicles  .status','=',2]
+                ['request_vehicles.status','=',2]
             ]);
 
             $total = $query->count();
