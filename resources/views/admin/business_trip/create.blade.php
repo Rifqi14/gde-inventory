@@ -30,7 +30,7 @@ Create Business Trips
 <!-- Main content -->
 <section class="content">
   <div class="container-fluid">
-    <form role="form" id="form-data" action="{{route('businesstrip.store')}}">
+    <form role="form" id="form" action="{{route('businesstrip.store')}}" method="post">
       {{ csrf_field() }}
       <div class="row">
         <div class="col-md-8">
@@ -40,6 +40,7 @@ Create Business Trips
                 <hr />
                 <h5 class="text-md text-dark text-uppercase">Transportation</h5>
               </span>
+              <!-- DEPART -->
               <div id="form-depart">
                 <div class="row mt-4 mb-0">
                   <div class="col-md-2">
@@ -53,10 +54,10 @@ Create Business Trips
                   </div>
                 </div>
                 <div class="row item-depart">
-                  <input type="hidden" class="depart" name="depart[]" data-trans-type="flight" data-description=""/>
+                  <input type="hidden" class="depart" name="depart[]" data-type="flight" data-description="" data-price="0" />
                   <div class="col-md-2">
-                    <div class="form-group">                      
-                      <select class="form-control select2" class="trans-type" id="trans-type" name="trans_type" data-placeholder="Depart">
+                    <div class="form-group">
+                      <select class="form-control select2 depart-type" id="depart-type" name="depart_type" data-placeholder="Depart">
                         <option value="flight" selected>Flight</option>
                         <option value="others">Others</option>
                       </select>
@@ -64,7 +65,7 @@ Create Business Trips
                   </div>
                   <div class="col-md-6">
                     <div class="form-group">
-                      <input type="text" name="trans_description" class="form-control" placeholder="Enter description" value="" />
+                      <input type="text" name="depart_description" class="form-control depart-description" id="depart-description" placeholder="Enter description" required />
                     </div>
                   </div>
                   <div class="col-md-3">
@@ -75,7 +76,7 @@ Create Business Trips
                             Rp.
                           </span>
                         </div>
-                        <input type="text" name="trans_price" class="form-control input-price text-right" placeholder="Enter price" value="0" maxlength="14">
+                        <input type="text" name="depart_price" class="form-control input-price text-right depart-price" id="depart-price" placeholder="Enter price" value="0" maxlength="14" required>
                       </div>
                     </div>
                   </div>
@@ -91,6 +92,7 @@ Create Business Trips
                   <b><i class="fas fa-plus"></i></b> Add
                 </button>
               </div>
+              <!-- RETURN -->
               <div id="form-return">
                 <div class="row mt-4 mb-0">
                   <div class="col-md-2">
@@ -104,10 +106,10 @@ Create Business Trips
                   </div>
                 </div>
                 <div class="row item-return">
+                  <input type="hidden" class="returning" name="returning[]" data-type="others" data-description="" data-price="0" />
                   <div class="col-md-2">
                     <div class="form-group">
-                      <input type="hidden" name="type[]" value="return" />
-                      <select class="form-control select2" name="type_transportation[]" data-placeholder="Return">
+                      <select class="form-control select2 returning-type" name="returning_type" id="returning-type" data-placeholder="Return">
                         <option value="flight">Flight</option>
                         <option value="others" selected>Others</option>
                       </select>
@@ -115,7 +117,7 @@ Create Business Trips
                   </div>
                   <div class="col-md-6">
                     <div class="form-group">
-                      <input type="text" name="trans_description[]" class="form-control" placeholder="Enter description" value="" />
+                      <input type="text" name="returning_description" class="form-control returning-description" id="returning-description" placeholder="Enter description" required />
                     </div>
                   </div>
                   <div class="col-md-3">
@@ -126,7 +128,7 @@ Create Business Trips
                             Rp.
                           </span>
                         </div>
-                        <input type="text" name="trans_price[]" class="form-control input-price text-right" placeholder="Enter price" value="0" maxlength="14">
+                        <input type="text" name="returning_price" class="form-control input-price text-right returning-price" id="returning-price" placeholder="Enter price" value="0" maxlength="14" required>
                       </div>
                     </div>
                   </div>
@@ -142,25 +144,17 @@ Create Business Trips
                   <b><i class="fas fa-plus"></i></b> Add
                 </button>
               </div>
+              <!-- REQUEST VEHICLE -->
+              <span class="title">
+                <hr />
+                <h5 class="text-md text-dark text-uppercase">Request Vehicle</h5>
+              </span>
               <div id="form-request-vehicle">
-                <div class="form-group row">
-                  <div class="col-md-6">
-                    <label for="request-vehicle">Request Vehicle</label>
-                    <select name="request_vehicle" id="request-vehicle" class="form-control select2" data-placeholder="Request Vehicle"></select>
-                  </div>
-                  <div class="col-md-6">
-                    <label for="date-request-vehicle">Date Request Vehicle</label>
-                    <div class="input-group">
-                      <div class="input-group-append">
-                        <span class="input-group-text" id=""><i class="fa fa-calendar"></i></span>
-                      </div>
-                      <input type="text" class="form-control" id="date-request-vehicle" name="date_request_vehicle" placeholder="Date Request Vehicle" readonly>
-                    </div>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <textarea class="form-control" name="remarks" id="remarks" rows="4" placeholder="Notes" readonly></textarea>
-                </div>
+              </div>
+              <div class="text-right">
+                <button type="button" id="add-return" data-urutan="1" class="btn btn-labeled labeled-sm btn-md text-xs btn-success btn-flat legitRipple" onclick="addVehicle()">
+                  <b><i class="fas fa-plus"></i></b> Add
+                </button>
               </div>
             </div>
           </div>
@@ -170,6 +164,7 @@ Create Business Trips
                 <hr />
                 <h5 class="text-md text-dark text-uppercase">Lodging</h5>
               </span>
+              <!-- LODGING -->
               <div id="form-lodging">
                 <div class="row mt-4 mb-0">
                   <div class="col-md-6">
@@ -183,9 +178,10 @@ Create Business Trips
                   </div>
                 </div>
                 <div class="row item-lodging">
+                  <input type="hidden" class="lodging" name="lodging[]" data-place="" data-price="0" data-days="1">
                   <div class="col-md-6">
                     <div class="form-group">
-                      <input type="text" name="place_lodging[]" class="form-control" placeholder="Enter where lodging" value="">
+                      <input type="text" class="form-control place-lodging" id="place-loging" name="place_lodging" placeholder="Enter where lodging" required>
                     </div>
                   </div>
                   <div class="col-md-3">
@@ -195,11 +191,11 @@ Create Business Trips
                           Rp.
                         </span>
                       </div>
-                      <input type="text" name="price_lodging[]" class="form-control input-price text-right" placeholder="Enter price" value="0" maxlength="14">
+                      <input type="text" class="form-control input-price text-right price-lodging" id="price-lodging" name="price_lodging" placeholder="Enter price" value="0" maxlength="14" required>
                     </div>
                   </div>
                   <div class="col-md-2">
-                    <input type="number" name="night_lodging[]" class="form-control text-right" placeholder="Enter qty" value="1">
+                    <input type="number" class="form-control text-right days-lodging" id="days-lodging" name="days_lodging" placeholder="Enter qty" value="1" required>
                   </div>
                   <div class="col-md-1">
                     <div class="form-group" style="margin-top: 2px;">
@@ -221,8 +217,9 @@ Create Business Trips
                 <hr />
                 <h5 class="text-md text-dark text-uppercase">Others</h5>
               </span>
+              <!-- OTHERS  -->
               <div id="form-others">
-                <div class="row mt-4">
+                <div class="row mt-4 mb-0">
                   <div class="col-md-6">
                     <div class="form-group">
                       <label>Description:</label>
@@ -235,33 +232,7 @@ Create Business Trips
                     <label>Qty:</label>
                   </div>
                 </div>
-                <div class="row mt-2 item-others">
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <input type="text" name="others_desc[]" class="form-control" placeholder="Enter description" value="">
-                    </div>
-                  </div>
-                  <div class="col-md-3">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span class="input-group-text">
-                          Rp.
-                        </span>
-                      </div>
-                      <input type="text" name="others_price[]" class="form-control input-price text-right" placeholder="Enter price" value="0" maxlength="14">
-                    </div>
-                  </div>
-                  <div class="col-md-2">
-                    <input type="number" name="others_qty[]" class="form-control text-right mr-2" placeholder="Enter qty" value="1">
-                  </div>
-                  <div class="col-md-1">
-                    <div class="form-group" style="margin-top: 2px;">
-                      <button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
-                    </div>
-                  </div>
-                </div>
               </div>
-
               <div class="text-right">
                 <button type="button" id="add-others" data-urutan="1" class="btn btn-labeled labeled-sm btn-md text-xs btn-success btn-flat legitRipple" onclick="addOthers()">
                   <b><i class="fas fa-plus"></i></b> Add
@@ -283,31 +254,44 @@ Create Business Trips
                 <input type="text" class="form-control" name="business_trip_number" id="business-trip-number" placeholder="Enter Business Trip Number" required>
               </div>
               <div class="form-group mt-4">
-                <label>Issued by:</label>                
+                <label>Issued by:</label>
                 <select class="form-control select2" name="issued" id="issued" data-placeholder=" -Select WBS- " style="width: 100%;" disabled>
                   @if(Auth::guard('admin')->user()->id)
-                    <option value="{{Auth::guard('admin')->user()->id}}" selected>{{Auth::guard('admin')->user()->name}}</option>
+                  <option value="{{Auth::guard('admin')->user()->id}}" selected>{{Auth::guard('admin')->user()->name}}</option>
                   @endif
                 </select>
               </div>
-              <div class="form-group">
-                <label>Schedule:</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">
-                      <i class="far fa-calendar-alt"></i>
-                    </span>
-                  </div>
-                  <input type="datepicker" class="form-control datepicker text-right" id="reservation" name="date">
-                </div>
-              </div>
+              <div class="form-group row">
+								<div class="col-md-6">
+									<label>Departure Date:</label>
+									<div class="input-group">
+										<div class="input-group-prepend">
+											<span class="input-group-text">
+												<i class="far fa-calendar-alt"></i>
+											</span>
+										</div>
+										<input type="datepicker" class="form-control datepicker text-right departure-date" id="departure-date" required>
+									</div>
+								</div>
+								<div class="col-md-6">
+									<label for="arrived-date">Arrived Date:</label>
+									<div class="input-group">
+										<div class="input-group-prepend">
+											<span class="input-group-text">
+												<i class="far fa-calendar-alt"></i>
+											</span>
+										</div>
+										<input type="datepicker" class="form-control datepicker text-right arrived-date" id="arrived-date" required>
+									</div>
+								</div>
+							</div>
               <div class="form-group">
                 <label>Purpose:</label>
-                <input type="text" class="form-control" name="description" placeholder="Enter purpose" value="">
+                <input type="text" class="form-control" id="purpose" name="purpose" placeholder="Enter purpose" required>
               </div>
               <div class="form-group">
                 <label>Location:</label>
-                <input type="text" class="form-control" name="location" placeholder="Enter location" value="">
+                <input type="text" class="form-control" id="location" name="location" placeholder="Enter location" required>
               </div>
               <div class="form-group">
                 <label>Rate:</label>
@@ -317,25 +301,37 @@ Create Business Trips
                       Rp.
                     </span>
                   </div>
-                  <input type="text" name="rate" class="form-control input-price text-right" placeholder="Enter rate" value="0" maxlength="14">
+                  <input type="text" class="form-control input-price text-right" id="rate" name="rate" placeholder="Enter rate" value="0" maxlength="14">
                 </div>
-              </div>
-              <div class="row">
+              </div>              
+              <div class="form-group row">
                 <div class="col-md-12">
                   <div class="form-group">
-                    <label>Approval Status:</label><br />
-                    <span class="badge bg-gray text-sm">Draft</span>
+                    <div class="row">
+                      <label class="col-12">Approval Status : </label>
+                      <input type="hidden" name="status" id="status">
+                    </div>
+                    <div class="row">
+                      <div class="col-2">Submit</div>
+                      <div class="col-1">:</div>
+                      <div class="col-7"><span class="badge badge-warning text-sm">Waiting</span></div>
+                    </div>
+                    <div class="row mt-2">
+                      <div class="col-2">Save</div>
+                      <div class="col-1">:</div>
+                      <div class="col-7"><span class="badge bg-gray text-sm">Draft</span></div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
           <div class="text-right">
-            <button type="button" onclick="onSubmit('publish')" class="btn btn-success btn-labeled legitRipple text-sm">
+            <button type="button" onclick="submitTest(`waiting`)" class="btn btn-success btn-labeled legitRipple text-sm">
               <b><i class="fas fa-check-circle"></i></b>
               Submit
             </button>
-            <button type="button" onclick="onSubmit('draft')" class="btn bg-olive color-palette btn-labeled legitRipple text-sm">
+            <button type="button" onclick="submitTest(`draft`)" class="btn bg-olive color-palette btn-labeled legitRipple text-sm">
               <b><i class="fas fa-save"></i></b>
               Save
             </button>
@@ -355,13 +351,12 @@ Create Business Trips
 @section('scripts')
 <script type="text/javascript">
   var employeeID = "{{Auth::guard('admin')->user()->employee_id}}",
-      userID     = "{{Auth::guard('admin')->user()->id}}",
-      username   = "{{Auth::guard('admin')->user()->name}}";  
-  
-  $(function() {    
+    userID = "{{Auth::guard('admin')->user()->id}}",
+    username = "{{Auth::guard('admin')->user()->name}}";
 
+  $(function() {
     initSelect2();
-    initInputPrice();        
+    initInputPrice();    
 
     $('.summernote').summernote({
       height: 145,
@@ -378,13 +373,6 @@ Create Business Trips
       ]
     });
 
-    $('textarea[id=remarks]').summernote({
-      height: 145,
-      toolbar: []
-    });
-
-    $('textarea[id=remarks]').summernote('disable');
-
     $('.datepicker').daterangepicker({
       singleDatePicker: true,
       timePicker: false,
@@ -394,44 +382,306 @@ Create Business Trips
       locale: {
         format: 'DD/MM/YYYY'
       },
-      startDate: moment(new Date())
     });
+
+    $('.departure-date').data('daterangepicker').setStartDate(moment(new Date()));
+    $('.arrived-date').data('daterangepicker').setStartDate(moment(new Date()).add(6,'days'));
+
+    // FORM DEPART METHOD
 
     $('#form-depart').on('click', '.remove', function() {
       if ($('.item-depart').length > 1) {
         $(this).parents('.item-depart').remove();
+        $('#form-depart').find('.item-depart').first().removeClass('mt-2');
       }
-    });    
+      sumRate();
+    });
+
+    $('#form-depart').on('change', '.depart-type', function() {
+      var type = $(this).val();
+      $(this).parents('.item-depart').find('input[class=depart]').attr('data-type', type);
+
+    });
+
+    $('#form-depart').on('keyup', '.depart-description', function() {
+      var description = $(this).val();
+      $(this).parents('.item-depart').find('input[class=depart]').attr('data-description', description);
+    });
+
+    $('#form-depart').on('keyup', '.depart-price', function() {
+      var price = $(this).val();
+      $(this).parents('.item-depart').find('input[class=depart]').attr('data-price', price);
+      sumRate();
+    });
+
+    // FORM RETURN METHOD
 
     $('#form-return').on('click', '.remove', function() {
       if ($('.item-return').length > 1) {
         $(this).parents('.item-return').remove();
+        $('#form-return').find('.item-return').first().removeClass('mt-2');
       }
+      sumRate();      
     });
+
+    $('#form-return').on('change', '.returning-type', function() {
+      var type = $(this).val();
+      $(this).parents('.item-return').find('input[class=returning]').attr('data-type', type);
+    });
+
+    $('#form-return').on('keyup', '.returning-description', function() {
+      var description = $(this).val();
+      $(this).parents('.item-return').find('input[class=returning]').attr('data-description', description);      
+    });
+
+    $('#form-return').on('keyup', '.returning-price', function() {
+      var price = $(this).val();
+      $(this).parents('.item-return').find('input[class=returning]').attr('data-price', price);
+      sumRate();
+    });
+
+    // FORM REQUEST VEHICLE METHOD
+    $('#form-request-vehicle').on('click', '.remove', function() {
+      $(this).parents('.item-request-vehicle').remove();      
+    });
+
+    // FORM LODGING METHOD
 
     $('#form-lodging').on('click', '.remove', function() {
       if ($('.item-lodging').length > 1) {
         $(this).parents('.item-lodging').remove();
+        $('#form-lodging').find('.item-lodging').first().removeClass('mt-2');
       }
+      sumRate();
     });
+
+    $('#form-lodging').on('keyup', '.place-lodging', function() {
+      var place = $(this).val();
+      $(this).parents('.item-lodging').find('input[class=lodging]').attr('data-place', place);
+    });
+
+    $('#form-lodging').on('keyup', '.price-lodging', function() {
+      var price = $(this).val();
+      $(this).parents('.item-lodging').find('input[class=lodging]').attr('data-price', price);
+      sumRate();
+    });
+
+    $('#form-lodging').on('keyup', '.days-lodging', function() {
+      var days = $(this).val();
+      $(this).parents('.item-lodging').find('input[class=lodging]').attr('data-days', days);
+      sumRate();
+    });
+
+    $('#form-lodging').on('change', '.days-lodging', function() {
+      var days = $(this).val();
+      $(this).parents('.item-lodging').find('input[class=lodging]').attr('data-days', days);
+      sumRate();
+    });
+
+    // FORM OTHERS METHOD
 
     $('#form-others').on('click', '.remove', function() {
-      if ($('.item-others').length > 1) {
-        $(this).parents('.item-others').remove();
-      }
-    });     
-
-    var transType = $('.trans-type').val();
-    console.log({transType : transType});
-
-  });
-
-  function initSelect2() {
-    $('.select2').select2({
-      allowClear: true
+      $(this).parents('.item-others').remove();
+      sumRate();
     });
 
-    $("#request-vehicle").select2({
+    $('#form-others').on('keyup', '.others-description', function() {
+      var description = $(this).val();
+      $(this).parents('.item-others').find('input[class=others-data]').attr('data-description', description);
+    });
+
+    $('#form-others').on('keyup', '.others-price', function() {
+      var price = $(this).val();
+      $(this).parents('.item-others').find('input[class=others-data]').attr('data-price', price);
+      sumRate();
+    });
+
+    $('#form-others').on('keyup', '.others-qty', function() {
+      var qty = $(this).val();
+      $(this).parents('.item-others').find('input[class=others-data]').attr('data-qty', qty);
+      sumRate();
+    });
+
+    $('#form-others').on('change', '.others-qty', function() {
+      var qty = $(this).val();
+      $(this).parents('.item-others').find('input[class=others-data]').attr('data-qty', qty);
+      sumRate();
+    });
+
+    $("#form").validate({
+      rules: {
+        business_trip_number: {
+          required: true
+        },
+        purpose: {
+          required: true
+        },
+        location: {
+          required: true
+        },
+        rate: {
+          required: true
+        },
+        depart_type: {
+          required: true
+        }
+      },
+      messages: {
+        business_trip_number: {
+          required: 'This field is required.'
+        },
+        purpose: {
+          required: 'This field is required.'
+        },
+        location: {
+          required: 'This field is required.'
+        },
+        rate: {
+          required: 'This field is required.'
+        }
+      },
+      errorElement: 'div',
+      errorPlacement: function(error, element) {
+        error.addClass('invalid-feedback');
+        element.closest('.form-group .controls').append(error);
+
+        if (element.is(':file')) {
+          error.insertAfter(element.parent().parent().parent());
+        } else
+        if (element.parent('.input-group').length) {
+          error.insertAfter(element.parent());
+        } else
+        if (element.attr('type') == 'checkbox') {
+          error.insertAfter(element.parent());
+        } else {
+          error.insertAfter(element);
+        }
+      },
+      highlight: function(element, errorClass, validClass) {
+        $(element).addClass('is-invalid');
+      },
+      unhighlight: function(element, errorClass, validClass) {
+        $(element).removeClass('is-invalid');
+      },
+      submitHandler: function() {
+        var data          = new FormData($('#form')[0]),          
+            departureDate = $('.departure-date').data('daterangepicker').startDate.format('DD/MM/YYYY'),
+            arrivedDate   = $('.arrived-date').data('daterangepicker').startDate.format('DD/MM/YYYY'),
+            departure     = [],
+            returning     = [],
+            vehicle       = [],
+            lodging       = [],
+            others        = [];
+
+        $.each($('#form-depart > .item-depart').find('input[class=depart]'), function(index, value) {
+          var type = $(this).attr('data-type'),
+            description = $(this).attr('data-description'),
+            price = $(this).attr('data-price');
+
+          departure.push({
+            type: type,
+            description: description,
+            price: price
+          });
+        });
+
+        $.each($('#form-return > .item-return').find('input[class=returning]'), function(index, value) {
+          var type = $(this).attr('data-type'),
+            description = $(this).attr('data-description'),
+            price = $(this).attr('data-price');
+
+          returning.push({
+            type: type,
+            description: description,
+            price: price
+          });
+        });
+
+        $.each($('#form-request-vehicle > .item-request-vehicle').find('input[class=vehicles]'), function (index, value) { 
+           var request_id = $(this).val();
+           vehicle.push({
+             request_id : request_id
+           });
+        });
+
+        $.each($('#form-lodging > .item-lodging').find('input[class=lodging]'), function(index, value) {
+          var place = $(this).attr('data-place'),
+            price = $(this).attr('data-price'),
+            days = $(this).attr('data-days');
+
+          lodging.push({
+            place: place,
+            price: price,
+            days: days
+          });
+        });
+
+        $.each($('#form-others > .item-others').find('input[class=others-data]'), function(index, value) {
+          var description = $(this).attr('data-description'),
+            price = $(this).attr('data-price'),
+            qty = $(this).attr('data-qty');
+
+          others.push({
+            description: description,
+            price: price,
+            qty: qty
+          });
+        });
+
+        data.append('issued',userID);
+        data.append('departure_date', changeDateFormat(departureDate));
+        data.append('arrived_date', changeDateFormat(arrivedDate));
+        data.append('departure', JSON.stringify(departure));
+        data.append('returning', JSON.stringify(returning));
+        data.append('vehicle', JSON.stringify(vehicle));
+        data.append('lodging', JSON.stringify(lodging));
+        data.append('others', JSON.stringify(others));
+
+        $.ajax({
+          url: $('#form').attr('action'),
+          method: 'post',
+          data: data,
+          processData: false,
+          contentType: false,
+          dataType: 'json',
+          beforeSend: function() {
+            blockMessage('body', 'Please Wait . . . ', '#fff');
+          }
+        }).done(function(response) {
+          $('body').unblock();
+          console.log({
+            response: response
+          });
+          if (response.status) {
+            toastr.success('Data has been saved.');
+            document.location = "{{route('businesstrip.index')}}";
+          } else {
+            toastr.warning(`${response.message}`);
+          }
+          return;
+        }).fail(function(response) {
+          $('body').unblock();
+          var response = response.responseJSON,
+            message = response.message ? response.message : 'Failed to insert data.';
+
+          toastr.warning(message);
+          console.log({
+            errorMessage: message
+          });
+        })
+      }
+    });
+
+  });  
+
+  function initSelect2() {    
+    $('.select2').select2({
+      allowClear: true
+    });    
+  }
+
+  function initRequestVehicle() {
+    $(".request-vehicle").select2({
       ajax: {
         url: "{{route('requestvehicle.select')}}",
         type: 'GET',
@@ -463,17 +713,22 @@ Create Business Trips
       },
       allowClear: true,
     }).on('select2:select', function(e) {
-      var data = e.params.data;
-      if (data.notes) {
-        $('textarea[id=remarks]').summernote('reset');
-        $('textarea[id=remarks]').summernote('pasteHTML', data.notes);
-      }
-      $('#date-request-vehicle').val(data.daterequest);
-    }).on('select2:clearing', function() {
-      $('textarea[id=remarks]').summernote('reset');
-      $('#date-request-vehicle').val('');
-    });
-    
+		var data = e.params.data;		
+			var element = $(this).parents('.item-request-vehicle');
+
+			element.find('.date-request-vehicle').val(data.daterequest);
+			element.find('input[class=vehicles]').val(data.id);
+			
+			if (data.notes) {				
+				element.find('.remarks').summernote('code', data.notes);				
+			}			
+		}).on('select2:clearing', function() {
+			var element = $(this).parents('.item-request-vehicle');
+
+			element.find('.remarks').summernote('reset');
+			element.find('.date-request-vehicle').val('');
+			element.find('input[class=vehicles]').val('');
+		});
   }
 
   function initInputPrice() {
@@ -486,12 +741,26 @@ Create Business Trips
     });
   }
 
+  function initRemarks() {
+    $('.remarks').summernote({
+      height: 100,
+      toolbar: [],            
+    });            
+    $('.remarks').next().find(".note-editable").attr("contenteditable", false);
+  }  
+
   function addDepart() {
-    var html = `<div class="row mt-2 item-depart">
+    var length = $('#form-depart').find('.item-depart').length,
+      mt = '';
+    if (length > 0) {
+      mt = 'mt-2'
+    }
+
+    var html = `<div class="row ${mt} item-depart">
+                  <input type="hidden" class="depart" name="depart[]" data-type="flight" data-description="" data-price="0"/>
                   <div class="col-md-2">
-                    <div class="form-group">                    
-                      <input type="hidden" name="type[]" value="depart" />
-                      <select class="form-control select2" name="type_transportation[]" data-placeholder="Depart">                        
+                    <div class="form-group">                                          
+                      <select class="form-control select2" name="depart_type" data-placeholder="Depart">                        
                         <option value="flight" selected>Flight</option>
                         <option value="others">Others</option>
                       </select>
@@ -499,7 +768,7 @@ Create Business Trips
                   </div>
                   <div class="col-md-6">
                     <div class="form-group">                      
-                      <input type="text" name="trans_description[]" class="form-control" placeholder="Enter description" value="" />
+                      <input type="text" name="depart_description" class="form-control depart-description" placeholder="Enter description" required/>
                     </div>
                   </div>
                   <div class="col-md-3">
@@ -510,7 +779,7 @@ Create Business Trips
                             Rp.
                           </span>
                         </div>
-                        <input type="text" name="trans_price[]" class="form-control input-price text-right" placeholder="Enter price" value="0" maxlenght="14">
+                        <input type="text" name="depart_price" class="form-control input-price text-right depart-price" placeholder="Enter price" value="0" maxlenght="14" required>
                       </div>
                     </div>
                   </div>
@@ -526,11 +795,16 @@ Create Business Trips
   }
 
   function addReturn() {
-    var html = `<div class="row mt-2 item-return">
+    var length = $('#form-return').find('.item-return').length,
+      mt = '';
+    if (length > 0) {
+      mt = 'mt-2'
+    }
+    var html = `<div class="row ${mt} item-return">
+                  <input type="hidden" class="returning" name="returning[]" data-type="others" data-description="" data-price="0"/>
                   <div class="col-md-2">
-                    <div class="form-group">                      
-                      <input type="hidden" name="type[]" value="return" />
-                      <select class="form-control select2" name="type_transportation[]" data-placeholder="Return">
+                    <div class="form-group">                                        
+                      <select class="form-control select2 returning-type" name="returning_type" data-placeholder="Return">
                         <option value="flight">Flight</option>
                         <option value="others" selected>Others</option>
                       </select>
@@ -538,7 +812,7 @@ Create Business Trips
                   </div>
                   <div class="col-md-6">
                     <div class="form-group">                      
-                      <input type="text" name="trans_description[]" class="form-control" placeholder="Enter description" value="" />
+                      <input type="text" class="form-control returning-description" name="returning_description" placeholder="Enter description" required/>
                     </div>
                   </div>
                   <div class="col-md-3">
@@ -549,7 +823,7 @@ Create Business Trips
                             Rp.
                           </span>
                         </div>
-                        <input type="text" name="trans_price[]" class="form-control input-price text-right" placeholder="Enter price" value="0" maxlength="14">
+                        <input type="text" class="form-control input-price text-right returning-price" name="returning_price" placeholder="Enter price" value="0" maxlength="14" required>
                       </div>
                     </div>
                   </div>
@@ -564,11 +838,62 @@ Create Business Trips
     initInputPrice();
   }
 
+  function addVehicle() {
+    var length = $('#form-request-vehicle').find('.item-request-vehicle').length,
+      mt = '';
+    if (length > 0) {
+      mt = 'mt-2'
+    }
+
+    var html = `<div class="row item-request-vehicle ${mt}">        
+                  <input type="hidden" class="vehicles" name="vehicles[]" value=""/>
+                  <div class="col-12">
+                    <div class="form-group row">
+                      <div class="col-md-5">
+                        <div class="row">
+                          <label for="request-vehicle">Request Vehicle</label>
+                          <select name="request_vehicle" class="form-control select2 request-vehicle" data-placeholder="Request Vehicle"></select>
+                        </div>
+                        <div class="row mt-2">
+                          <label for="date-request-vehicle">Date Request Vehicle</label>
+                          <div class="input-group">
+                            <div class="input-group-append">
+                              <span class="input-group-text" id=""><i class="fa fa-calendar"></i></span>
+                            </div>
+                            <input type="text" class="form-control date-request-vehicle" name="date_request_vehicle" placeholder="Date Request Vehicle" readonly>
+                          </div>
+                        </div>                                                
+                      </div>                      
+                      <div class="col-md-6">
+                        <label for="remarks">Notes</label>
+                        <textarea class="form-control remarks" name="remarks" rows="3" placeholder="Notes"></textarea>
+                      </div>
+                      <div class="col-md-1">
+                        <div class="form-group" style="margin-top: 30px;">
+                          <button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>`;
+
+    $('#form-request-vehicle').append(html);
+    initRequestVehicle();
+    initRemarks();        
+  }
+
   function addLodging() {
-    var html = `<div class="row mt-2 item-lodging">
+    var length = $('#form-lodging').find('.item-lodging').length,
+      mt = '';
+    if (length > 0) {
+      mt = 'mt-2'
+    }
+
+    var html = `<div class="row ${mt} item-lodging">
+                  <input type="hidden" class="lodging" name="lodging[]" data-place="" data-price="0" data-days="1">
                   <div class="col-md-6">
                     <div class="form-group">                      
-                      <input type="text" name="place_lodging[]" class="form-control" placeholder="Enter where lodging" value="">
+                    <input type="text" class="form-control place-lodging" id="place-loging" name="place_lodging" placeholder="Enter where lodging" required>
                     </div>
                   </div>
                   <div class="col-md-3">
@@ -578,11 +903,11 @@ Create Business Trips
                           Rp.
                         </span>
                       </div>
-                      <input type="text" name="price_lodging[]" class="form-control input-price text-right" placeholder="Enter price" value="0" maxlength="14">
+                      <input type="text" class="form-control input-price text-right price-lodging" id="price-lodging" name="price_lodging" placeholder="Enter price" value="0" maxlength="14" required>
                     </div>
                   </div>
                   <div class="col-md-2">
-                    <input type="number" name="night_lodging[]" class="form-control text-right" placeholder="Enter qty" value="1">
+                  <input type="number" class="form-control text-right days-lodging" id="days-lodging" name="days_lodging" placeholder="Enter qty" value="1">
                   </div>
                   <div class="col-md-1">
                     <div class="form-group" style="margin-top: 2px;">
@@ -595,24 +920,30 @@ Create Business Trips
   }
 
   function addOthers() {
-    var html = `<div class="row mt-2 item-others">
+    var length = $('#form-others').find('.item-others').length,
+      mt = '';
+    if (length > 0) {
+      mt = 'mt-2'
+    }
+    var html = `<div class="row ${mt} item-others">
+                  <input type="hidden" class="others-data" name="others_data[]" data-description="" data-price="0" data-qty="1">
                   <div class="col-md-6">
-                    <div class="form-group">                      
-                      <input type="text" name="others_desc[]" class="form-control" placeholder="Enter description" value="">
+                    <div class="form-group">
+                      <input type="text" class="form-control others-description" id="others-description" name="others_description" placeholder="Enter description" required>
                     </div>
                   </div>
-                  <div class="col-md-3">                    
+                  <div class="col-md-3">
                     <div class="input-group">
                       <div class="input-group-prepend">
                         <span class="input-group-text">
                           Rp.
                         </span>
                       </div>
-                      <input type="text" name="others_price[]" class="form-control input-price text-right" placeholder="Enter price" value="0" maxlength="14">
+                      <input type="text" class="form-control input-price text-right others-price" id="others-price" name="others_price" placeholder="Enter price" value="0" maxlength="14" required>
                     </div>
                   </div>
-                  <div class="col-md-2">                    
-                    <input type="number" name="others_qty[]" class="form-control text-right" placeholder="Enter qty" value="1">
+                  <div class="col-md-2">
+                    <input type="number" class="form-control text-right mr-2 others-qty" id="others-qty" name="others_qty" placeholder="Enter qty" value="1" required>
                   </div>
                   <div class="col-md-1">
                     <div class="form-group" style="margin-top: 2px;">
@@ -624,34 +955,70 @@ Create Business Trips
     initInputPrice();
   }
 
-  function submitTest() {
-    var departure = [],
-        returning = [],
-        lodging   = [],
-        others    = [],
-        hasNull   = false;
+  function sumRate() {
+		var rate 	  = 0,
+			departure = 0,
+			returning = 0,
+			lodging   = 0,
+			others 	  = 0;
 
-    $.each($('#form-depart').find('input[name^=depart]'), function (index, value) { 
-      var depart = $(this),
-          type   = $(this).attr('data-trans-type'),
-          desc   = $(this).attr('data-desc'),
-          price  = $(this).attr('price');
-      
-      departure.push({
-        type : type,
-        desc : desc,
-        price : price
-      });
+		$.each($('#form-depart > .item-depart').find('input[class=depart]'), function(index, value) {
+			var price = intCurrency($(this).attr('data-price'));
+			departure += price;
+		});
 
-    });
+		$.each($('#form-return > .item-return').find('input[class=returning]'), function(index, value) {
+			var price = intCurrency($(this).attr('data-price'));
+			returning += price;
+		});
 
-    console.log({
-      departure : departure,
-      returning : returning,
-      lodging : lodging,
-      others  : others,
-      hasNull : hasNull
-    });
+		$.each($('#form-lodging > .item-lodging').find('input[class=lodging]'), function(index, value) {
+			var price = intCurrency($(this).attr('data-price')),
+				days  = intCurrency($(this).attr('data-days')),
+				subs  = (price*days);	
+			lodging += subs;				
+		});
+
+		$.each($('#form-others > .item-others').find('input[class=others-data]'), function(index, value) {
+			var price = intCurrency($(this).attr('data-price')),
+				qty   = intCurrency($(this).attr('data-qty')),
+				subs  = (price*qty);
+			others += subs;
+		});
+
+		rate = departure + returning + lodging + others;		
+
+		$('input[name=rate]').val(rate);    
+		initInputPrice();
+	}
+
+  function submitTest(status) {
+    if (status) {
+      $('input[name=status]').val(status);
+    }
+    $("form").first().trigger("submit");
   }
+  
+
+  function changeDateFormat(date) {
+    var newdate = '';
+    if (date) {
+      var piece = date.split('/');
+      newdate = piece[2] + '-' + piece[1] + '-' + piece[0];
+    }
+
+    return newdate;
+  }
+  function intCurrency(value) {
+		var newCurrency = '';
+		if(value){
+			var currency = value.split('.');			
+			$.each(currency, function (index,value) { 
+				 newCurrency += value;
+			});
+		}
+		
+		return parseInt(newCurrency);
+	}	
 </script>
 @endsection

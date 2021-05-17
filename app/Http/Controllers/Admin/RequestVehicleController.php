@@ -158,12 +158,12 @@ class RequestVehicleController extends Controller
 
     public function select(Request $request)
     {
-        $start   = $request->page ? $request->page - 1 : 0;
-        $length  = $request->limit;
-        $search = strtoupper($request->search);   
+        $start      = $request->page ? $request->page - 1 : 0;
+        $length     = $request->limit;
+        $search     = strtoupper($request->search);   
         $employeeid = $request->employee_id;
-        $data  = [];
-        $total = 0;
+        $data       = [];
+        $total      = 0;
 
         if($employeeid){
             $query = RequestVehicle::query();
@@ -183,8 +183,11 @@ class RequestVehicleController extends Controller
             $query->join('employees','employees.id','=','borrower_request_vehicles.employee_id');
             $query->where([
                 ['borrower_request_vehicles.employee_id','=',$employeeid],
-                ['request_vehicles  .status','=',2]
+                ['request_vehicles.status','=',2]
             ]);
+            if($search){
+                $query->whereRaw("upper(vehicles.vehicle_name) like '%$search%'");
+            }
 
             $total = $query->count();
 
