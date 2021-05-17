@@ -54,11 +54,13 @@ Edit Business Trips
 									</div>
 								</div>								
 							</div>
+							@if($data->status != 'approved')
 							<div class="text-right">
 								<button type="button" id="add-depart" data-urutan="1" onclick="addDepart()" class="btn btn-labeled labeled-sm btn-md text-xs btn-success btn-flat legitRipple">
 									<b><i class="fas fa-plus"></i></b> Add
 								</button>
 							</div>
+							@endif
 							<!-- RETURN -->
 							<div id="form-return">
 								<div class="row mt-4 mb-0">
@@ -73,11 +75,13 @@ Edit Business Trips
 									</div>
 								</div>																								
 							</div>
+							@if($data->status != 'approved')
 							<div class="text-right">
 								<button type="button" data-urutan="1" class="btn btn-labeled labeled-sm btn-md text-xs btn-success btn-flat legitRipple" onclick="addReturn()">
 									<b><i class="fas fa-plus"></i></b> Add
 								</button>
 							</div>
+							@endif
 							<!-- REQUEST VEHICLE -->
 							<span class="title">
 								<hr />
@@ -85,11 +89,13 @@ Edit Business Trips
 							</span>
 							<div id="form-request-vehicle">
 							</div>
+							@if($data->status != 'approved')
 							<div class="text-right">
 								<button type="button" id="add-return" data-urutan="1" class="btn btn-labeled labeled-sm btn-md text-xs btn-success btn-flat legitRipple" onclick="addVehicle()">
 									<b><i class="fas fa-plus"></i></b> Add
 								</button>
 							</div>
+							@endif
 						</div>
 					</div>
 					<div class="card">
@@ -112,11 +118,13 @@ Edit Business Trips
 									</div>
 								</div>								
 							</div>
+							@if($data->status != 'approved')
 							<div class="text-right">
 								<button type="button" id="add-lodging" data-urutan="1" class="btn btn-labeled labeled-sm btn-md text-xs btn-success btn-flat legitRipple" onclick="addLodging()">
 									<b><i class="fas fa-plus"></i></b> Add
 								</button>
 							</div>
+							@endif
 						</div>
 					</div>
 					<div class="card">
@@ -141,11 +149,13 @@ Edit Business Trips
 									</div>
 								</div>
 							</div>
+							@if($data->status != 'approved')
 							<div class="text-right">
 								<button type="button" id="add-others" data-urutan="1" class="btn btn-labeled labeled-sm btn-md text-xs btn-success btn-flat legitRipple" onclick="addOthers()">
 									<b><i class="fas fa-plus"></i></b> Add
 								</button>
 							</div>
+							@endif
 						</div>
 					</div>
 					<!-- /.card -->
@@ -157,7 +167,7 @@ Edit Business Trips
 								<hr />
 								<h5 class="text-md text-dark text-uppercase">General Information</h5>
 							</span>
-							<div class="form-group">
+							<div class="form-group"> 
 								<label for="business-trip-number">Business Trip Number</label>
 								<input type="text" class="form-control" name="business_trip_number" id="business-trip-number" placeholder="Enter Business Trip Number" value="{{$data->business_trip_number}}" readonly>
 							</div>
@@ -178,7 +188,7 @@ Edit Business Trips
 												<i class="far fa-calendar-alt"></i>
 											</span>
 										</div>
-										<input type="datepicker" class="form-control datepicker text-right departure-date" id="departure-date" required>
+										<input type="datepicker" class="form-control datepicker text-right departure-date" id="departure-date" required {{$data->status=='approved'?'':'readonly'}}>
 									</div>
 								</div>
 								<div class="col-md-6">
@@ -189,7 +199,7 @@ Edit Business Trips
 												<i class="far fa-calendar-alt"></i>
 											</span>
 										</div>
-										<input type="datepicker" class="form-control datepicker text-right arrived-date" id="arrived-date" required>
+										<input type="datepicker" class="form-control datepicker text-right arrived-date" id="arrived-date" required {{$data->status=='approved'?'':'readonly'}}>
 									</div>
 								</div>
 							</div>
@@ -199,7 +209,7 @@ Edit Business Trips
 							</div>
 							<div class="form-group">
 								<label>Location:</label>
-								<input type="text" class="form-control" id="location" name="location" placeholder="Enter location" value="{{$data->location}}" required>
+								<input type="text" class="form-control" id="location" name="location" placeholder="Enter location" value="{{$data->location}}" required {{$data->status=='approved'?'':'readonly'}}>
 							</div>
 							<div class="form-group">
 								<label>Rate:</label>
@@ -209,7 +219,7 @@ Edit Business Trips
 											Rp.
 										</span>
 									</div>
-									<input type="text" class="form-control input-price text-right" id="rate" name="rate" placeholder="Enter rate" value="{{$data->rate?$data->rate:0}}" maxlength="14">
+									<input type="text" class="form-control input-price text-right" id="rate" name="rate" placeholder="Enter rate" value="{{$data->rate?$data->rate:0}}" maxlength="14" {{$data->status=='approved'?'':'readonly'}}>
 								</div>
 							</div>
 							<div class="form-group">
@@ -221,6 +231,9 @@ Edit Business Trips
 								@endif
 								@if($data->status == 'waiting')
 								<span class="badge bg-warning text-sm">Waiting</span>
+								@endif
+								@if($data->status == 'approved')
+								<span class="badge bg-info text-sm">Approved</span>
 								@endif
 							</div>
 						</div>
@@ -649,20 +662,30 @@ Edit Business Trips
 			returns  = @json($data->returns),
 			vehicles = @json($data->vehicles),
 			lodgings = @json($data->lodgings),
-			others   = @json($data->others); 			
+			others   = @json($data->others),
+			state  	 = '{{$data->status}}',
+			readonly = state=='approved'?'readonly':'',
+			disabled = state=='approved'?'disabled':''; 			
 
 		if(departs.length > 0){
-			var html = '';
+			var html     = '',				
+				remove   = `<div class="col-md-1">
+								<div class="form-group" style="margin-top: 2px;">                                            
+								<button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove"type="button"><i class="fas fa-trash"></i></button>
+								</div>
+							</div>`;
 			$.each(departs, function (index, value) { 
 				var type  = value.type,
 					desc  = value.description,
 					price = value.price?value.price:0,
-					mt    = index>0?'mt-2':'';
+					mt    = index>0?'mt-2':'',
+					remove = state=='approved'?'':remove;
+
 				html += `<div class="row ${mt} item-depart">
                   <input type="hidden" class="depart" name="depart[]" data-type="${type}" data-description="${desc}" data-price="${price}"/>
                   <div class="col-md-2">
                     <div class="form-group">                                          
-                      <select class="form-control select2 depart-type" name="depart_type" id="depart-type" data-placeholder="Depart">                        
+                      <select class="form-control select2 depart-type" name="depart_type" id="depart-type" data-placeholder="Depart" ${disabled}>                        
                         <option value="flight" ${type=='flight'?'selected':''}>Flight</option>
                         <option value="others" ${type=='others'?'selected':''}>Others</option>
                       </select>
@@ -670,7 +693,7 @@ Edit Business Trips
                   </div>
                   <div class="col-md-6">
                     <div class="form-group">                      
-                      <input type="text" name="depart_description" class="form-control depart-description" id="depart-description" placeholder="Enter description" value="${desc}" required/>
+                      <input type="text" name="depart_description" class="form-control depart-description" id="depart-description" placeholder="Enter description" value="${desc}" required ${readonly}/>
                     </div>
                   </div>
                   <div class="col-md-3">
@@ -681,15 +704,11 @@ Edit Business Trips
                             Rp.
                           </span>
                         </div>
-                        <input type="text" name="depart_price" class="form-control input-price text-right depart-price" id="depart-price" placeholder="Enter price" value="${price}" maxlenght="14" required>
+                        <input type="text" name="depart_price" class="form-control input-price text-right depart-price" id="depart-price" placeholder="Enter price" value="${price}" maxlenght="14" required ${readonly}>
                       </div>
                     </div>
-                  </div>
-                  <div class="col-md-1">
-                    <div class="form-group" style="margin-top: 2px;">                                            
-                    <button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove"type="button"><i class="fas fa-trash"></i></button>
-                    </div>
-                  </div>
+                  </div>                  
+				  ${remove}
                 </div>`;
 			});			
 			$('#form-depart').append(html);
@@ -699,17 +718,24 @@ Edit Business Trips
 		}		
 
 		if(returns.length > 0){
-			var html = '';
+			var html   = '',				
+				remove = `<div class="col-md-1">
+								<div class="form-group" style="margin-top: 2px;">
+								<button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
+								</div>
+							</div>`;
+
 			$.each(returns, function (index, value) { 
 				var type  = value.type,
 					desc  = value.description,
 					price = value.price?value.price:0,
-					mt    = index>0?'mt-2':'';
+					mt    = index>0?'mt-2':'',
+					remove = state=='approved'?'':remove;
 				html += `<div class="row ${mt} item-return">
                   <input type="hidden" class="returning" name="returning[]" data-type="${type}" data-description="${desc}" data-price="${price}"/>
                   <div class="col-md-2">
                     <div class="form-group">                                        
-                      <select class="form-control select2 returning-type" id=returning-type"" name="returning_type[]" data-placeholder="Return">
+                      <select class="form-control select2 returning-type" id=returning-type"" name="returning_type[]" data-placeholder="Return" ${disabled}>
                         <option value="flight" ${type=='flight'?'selected':''}>Flight</option>
                         <option value="others" ${type=='others'?'selected':''}>Others</option>
                       </select>
@@ -717,7 +743,7 @@ Edit Business Trips
                   </div>
                   <div class="col-md-6">
                     <div class="form-group">                      
-                      <input type="text" class="form-control returning-description" id="returning-description" name="returning_description[]" placeholder="Enter description" value="${desc}" required/>
+                      <input type="text" class="form-control returning-description" id="returning-description" name="returning_description[]" placeholder="Enter description" value="${desc}" required ${readonly}/>
                     </div>
                   </div>
                   <div class="col-md-3">
@@ -728,15 +754,11 @@ Edit Business Trips
                             Rp.
                           </span>
                         </div>
-                        <input type="text" class="form-control input-price text-right returning-price" id="returning-price" name="returning_price[]" placeholder="Enter price" maxlength="14" value="${price}" required>
+                        <input type="text" class="form-control input-price text-right returning-price" id="returning-price" name="returning_price[]" placeholder="Enter price" maxlength="14" value="${price}" required ${readonly}>
                       </div>
                     </div>
-                  </div>
-                  <div class="col-md-1">
-                    <div class="form-group" style="margin-top: 2px;">
-                      <button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
-                    </div>
-                  </div>
+                  </div>                  
+				  ${remove}
                 </div>`;
 			});
 			$('#form-return').append(html);
@@ -745,14 +767,19 @@ Edit Business Trips
 		}
 
 		if(vehicles.length > 0){			
-			var html = '';
-			console.log({vehicles : vehicles});
+			var html   = '',
+				remove = `<div class="col-md-1">
+							<div class="form-group" style="margin-top: 30px;">
+								<button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
+							</div>
+						  </div>`;			
 			$.each(vehicles, function (index, value) { 
 				var request_id 	  = value.request_vehicle_id,
 					vehicle       = value.vehicle_name,
 					description   = value.remarks,
 					startRequest  = value.start_request,
-					finishRequest = value.finish_request;								
+					finishRequest = value.finish_request,
+					remove 		  = state=='approved'?'':remove;								
 				
 				html += `<div class="row item-request-vehicle">        
                   <input type="hidden" class="vehicles" name="vehicles[]" value=""/>
@@ -761,7 +788,7 @@ Edit Business Trips
                       <div class="col-md-5">
                         <div class="row">
                           <label for="request-vehicle">Request Vehicle</label>
-                          <select name="request_vehicle" class="form-control select2 request-vehicle" data-placeholder="Request Vehicle" data-request-id="${request_id}" data-vehicle="${vehicle}" data-description="${description}" data-start-request="${startRequest}" data-finish-request="${finishRequest}"></select>
+                          <select name="request_vehicle" class="form-control select2 request-vehicle" data-placeholder="Request Vehicle" data-request-id="${request_id}" data-vehicle="${vehicle}" data-description="${description}" data-start-request="${startRequest}" data-finish-request="${finishRequest}" ${disabled}></select>
                         </div>
                         <div class="row mt-2">
                           <label for="date-request-vehicle">Date Request Vehicle</label>
@@ -777,11 +804,7 @@ Edit Business Trips
                         <label for="remarks">Notes</label>
                         <textarea class="form-control remarks" name="remarks" rows="3" placeholder="Notes" disabled></textarea>
                       </div>
-                      <div class="col-md-1">
-                        <div class="form-group" style="margin-top: 30px;">
-                          <button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
-                        </div>
-                      </div>
+                      ${remove}
                     </div>
                   </div>
                 </div>`;				
@@ -808,17 +831,24 @@ Edit Business Trips
 		}
 
 		if(lodgings.length > 0){
-			var html = '';
+			var html   = '',
+				remove = `<div class="col-md-1">
+							<div class="form-group" style="margin-top: 2px;">
+								<button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
+							</div>
+						  </div>`;
 			$.each(lodgings, function (index, value) { 
 				var place = value.place,
 					price = value.price?value.price:0,
 					days  = value.night?value.night:1,
-					mt    = index>0?'mt-2':'';
+					mt    = index>0?'mt-2':'',
+					remove = state=='approved'?'':remove;
+
 				html  += `<div class="row ${mt} item-lodging">
                   <input type="hidden" class="lodging" name="lodging[]" data-place="${place}" data-price="${price}" data-days="${days}">
                   <div class="col-md-6">
                     <div class="form-group">                      
-                    <input type="text" class="form-control place-lodging" id="place-loging" name="place_lodging" placeholder="Enter where lodging" value="${place}" required>
+                    <input type="text" class="form-control place-lodging" id="place-loging" name="place_lodging" placeholder="Enter where lodging" value="${place}" required ${readonly}>
                     </div>
                   </div>
                   <div class="col-md-3">
@@ -828,17 +858,13 @@ Edit Business Trips
                           Rp.
                         </span>
                       </div>
-                      <input type="text" class="form-control input-price text-right price-lodging" id="price-lodging" name="price_lodging" placeholder="Enter price" value="${price}" maxlength="14" required>
+                      <input type="text" class="form-control input-price text-right price-lodging" id="price-lodging" name="price_lodging" placeholder="Enter price" value="${price}" maxlength="14" required ${readonly}>
                     </div>
                   </div>
                   <div class="col-md-2">
-                  <input type="number" class="form-control text-right days-lodging" id="days-lodging" name="days_lodging" placeholder="Enter qty" value="${days}">
-                  </div>
-                  <div class="col-md-1">
-                    <div class="form-group" style="margin-top: 2px;">
-                      <button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
-                    </div>
-                  </div>
+                  <input type="number" class="form-control text-right days-lodging" id="days-lodging" name="days_lodging" placeholder="Enter qty" value="${days}" ${readonly}>
+                  </div>     
+				  ${remove}             
                 </div>`;				
 			});
 			$('#form-lodging').append(html);
@@ -847,17 +873,25 @@ Edit Business Trips
 		}
 
 		if(others.length > 0){
-			var html = '';
+			var html 	= '',
+				remove 	= `<div class="col-md-1">
+							<div class="form-group" style="margin-top: 2px;">
+								<button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
+							</div>
+						  </div>`;
+
 			$.each(others, function (index, value) { 
-				var desc  = value.description,
-					price = value.price?value.price:0,
-					qty   = value.qty?value.qty:1,
-					mt    = index>0?'mt-2':'';
+				var desc   = value.description,
+					price  = value.price?value.price:0,
+					qty    = value.qty?value.qty:1,
+					mt     = index>0?'mt-2':'',
+					remove = state=='approved'?'':remove;
+
 				 html += `<div class="row ${mt} item-others">
                   <input type="hidden" class="others-data" name="others_data[]" data-description="${desc}" data-price="${price}" data-qty="${qty}">
                   <div class="col-md-6">
                     <div class="form-group">
-                      <input type="text" class="form-control others-description" id="others-description" name="others_description" placeholder="Enter description" value="${desc}" required>
+                      <input type="text" class="form-control others-description" id="others-description" name="others_description" placeholder="Enter description" value="${desc}" required ${readonly}>
                     </div>
                   </div>
                   <div class="col-md-3">
@@ -867,17 +901,13 @@ Edit Business Trips
                           Rp.
                         </span>
                       </div>
-                      <input type="text" class="form-control input-price text-right others-price" id="others-price" name="others_price" placeholder="Enter price" value="${price}" maxlength="14" required>
+                      <input type="text" class="form-control input-price text-right others-price" id="others-price" name="others_price" placeholder="Enter price" value="${price}" maxlength="14" required ${readonly}>
                     </div>
                   </div>
                   <div class="col-md-2">
-                    <input type="number" class="form-control text-right mr-2 others-qty" id="others-qty" name="others_qty" placeholder="Enter qty" value="${qty}" required>
+                    <input type="number" class="form-control text-right mr-2 others-qty" id="others-qty" name="others_qty" placeholder="Enter qty" value="${qty}" required ${readonly}>
                   </div>
-                  <div class="col-md-1">
-                    <div class="form-group" style="margin-top: 2px;">
-                      <button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
-                    </div>
-                  </div>
+                  ${remove}
                 </div>`;
 			});
 			$('#form-others').append(html)
