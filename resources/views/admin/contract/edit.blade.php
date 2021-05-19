@@ -627,7 +627,7 @@
             });
 
             $("#contract_type").on("change",function(){
-                if($(this).val() == "product"){
+                if($(this).val() == "product" || $(this).val() == "product & service"){
                     $("#batch-form").show(); 
                 }else{
                     $("#batch-form").hide(); 

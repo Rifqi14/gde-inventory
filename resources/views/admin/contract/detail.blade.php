@@ -224,6 +224,13 @@
                     {{ csrf_field() }}
                     <input type="hidden" name="contract_id" value="{{ $contract->id }}">
                     <div class="form-group row">
+                        <label class="col-sm-1 col-form-label">Category Product :</label>
+                        <div class="col-sm-4">
+                            <select data-placeholder="Choose Category Product" style="width: 100%;" required class="select2 form-control" id="category_product_id" name="category_product_id">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
                         <label class="col-sm-1 col-form-label">Product :</label>
                         <div class="col-sm-4">
                             <select data-placeholder="Choose Product" style="width: 100%;" required class="select2 form-control" id="product_id" name="product_id">
@@ -551,6 +558,8 @@
                     dataType: 'json',
                     data: function (params) {
                         return {
+                            contract: `{{ $contract->id }}`,
+                            category: $('#category_product_id').find('option:selected').val(),
                             name:params.term,
                             page:params.page,
                             limit:30,
@@ -572,6 +581,38 @@
                     },
                 },
                 allowClear: true,
+            });
+            
+            $( "#category_product_id" ).select2({
+                ajax: {
+                    url: "{{ route('productcategory.select') }}",
+                    type:'GET',
+                    dataType: 'json',
+                    data: function (params) {
+                        return {
+                            name:params.term,
+                            page:params.page,
+                            limit:30,
+                        };
+                    },
+                    processResults: function (data,params) {
+                    var more = (params.page * 30) < data.total;
+                    var option = [];
+                    $.each(data.rows,function(index,item){
+                        option.push({
+                            id:item.id,  
+                            text: item.name,
+                        });
+                    });
+                    return {
+                        results: option, more: more,
+                    };
+                    },
+                },
+                allowClear: true,
+                escapeMarkup: function (text) { return text; }
+            }).on('select2:clearing',function(){
+                $('#product_id').val(null).trigger('change');
             });
 
         });

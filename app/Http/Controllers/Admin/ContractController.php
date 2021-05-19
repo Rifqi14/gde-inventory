@@ -836,9 +836,13 @@ class ContractController extends Controller
         $start = $request->page ? $request->page - 1 : 0;
         $length = $request->limit;
         $name = strtoupper($request->name);
+        $category = $request->category;
+        $alreadyExist = ContractProduct::where('contract_id', $request->contract)->pluck('product_id');
 
         //Count Data
         $query = Product::select('*')->with('uoms','uoms.uom');
+        $query->where('product_category_id', $category);
+        $query->whereNotIn('id', $alreadyExist);
         $query->whereRaw("upper(name) like '%$name%'");
 
         $row = clone $query;

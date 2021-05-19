@@ -5,24 +5,30 @@
     #input-list-checkbox .form-control {
         height: calc(1.9rem + 7.5px);
     }
+
     .row-form {
-        padding-left:30px !important;
+        padding-left: 30px !important;
     }
+
     .other {
-    display: none;
-    padding-left:40px !important;
+        display: none;
+        padding-left: 40px !important;
     }
+
     #form-idm {
-    display: none;
+        display: none;
     }
-    .bootstrap-switch-handle-on.bootstrap-switch-success{
-    width: 100px !important;
+
+    .bootstrap-switch-handle-on.bootstrap-switch-success {
+        width: 100px !important;
     }
-    .bootstrap-switch-label{
-    width: 126px !important;
+
+    .bootstrap-switch-label {
+        width: 126px !important;
     }
-    .bootstrap-switch-handle-off.bootstrap-switch-default{
-    width: 100px !important;
+
+    .bootstrap-switch-handle-off.bootstrap-switch-default {
+        width: 100px !important;
     }
 </style>
 @endsection
@@ -39,7 +45,7 @@
             <li class="breadcrumb-item">Home</li>
             <li class="breadcrumb-item">Procurment</li>
             <li class="breadcrumb-item">Contract</li>
-            <li class="breadcrumb-item">Create</li> 
+            <li class="breadcrumb-item">Create</li>
         </ol>
     </div>
 </div>
@@ -55,7 +61,7 @@
                     <div class="card">
                         <div class="card-body">
                             <span class="title">
-                                <hr/>
+                                <hr />
                                 <h5 class="text-md text-dark text-bold">Contract Information</h5>
                             </span>
                             <div class="form-group mt-4">
@@ -94,7 +100,7 @@
                                             </div>
                                             <div class="col-sm-2">
                                                 <button id="add-member" data-urutan="1" type="button" class="btn btn-success legitRipple text-sm">
-                                                <b><i class="fas fa-plus"></i> Add</b>
+                                                    <b><i class="fas fa-plus"></i> Add</b>
                                                 </button>
                                             </div>
                                         </div>
@@ -324,12 +330,12 @@
                     <div class="card">
                         <div class="card-body">
                             <span class="title">
-                                <hr/>
+                                <hr />
                                 <h5 class="text-md text-dark text-bold">General Information</h5>
                             </span>
                             <div class="form-group mt-4">
                                 <label for="number">Procurement Number:</label>
-                                <select class="select2" name="purchasing_id" id="procurement" data-placeholder="Tag Procurement Number" style="width: 100%;" required ></select>
+                                <select class="select2" name="purchasing_id" id="procurement" data-placeholder="Tag Procurement Number" style="width: 100%;" required></select>
                             </div>
                             <div class="form-group">
                                 <label for="number">Contract Signing Date:</label>
@@ -378,9 +384,9 @@
                             </div>
                             <div class="form-group">
                                 <label for="number">Contract Owner:</label>
-                                <select class="select2" name="owner[]" id="owner" data-placeholder="Tag Contract Owner" style="width: 100%;" required multiple >
+                                <select class="select2" name="owner[]" id="owner" data-placeholder="Tag Contract Owner" style="width: 100%;" required multiple>
                                     @foreach ($roles as $role)
-                                        <option value="{{ $role->id }}">{{ $role->name }}</option>    
+                                    <option value="{{ $role->id }}">{{ $role->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -402,14 +408,13 @@
                             </div>
                             <div class="form-group">
                                 <label>Unit:</label>
-                                <select name="unit" data-placeholder="Choose Unit" style="width: 100%;" required class="select2 form-control" id="site_id" name="site_id"
-                                    data-placeholder="Select Site">
+                                <select name="unit" data-placeholder="Choose Unit" style="width: 100%;" required class="select2 form-control" id="site_id" name="site_id" data-placeholder="Select Site">
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="attach">Attachment:</label>
                                 <div class="input-group">
-                                    <div class="custom-file">   
+                                    <div class="custom-file">
                                         <input type="file" class="custom-file-input" name="attach" accept="image/*" onchange="changePath(this)">
                                         <label class="custom-file-label" for="exampleInputFile">Attach Contract</label>
                                     </div>
@@ -420,7 +425,7 @@
                                 <select name="contract_type" id="contract_type" class="select2 form-control" data-placeholder="Contract Type" required>
                                     <option value="">&nbsp;</option>
                                     @foreach(config('enums.contract_type') as $key => $type)
-                                        <option value="{{ $key }}">{{ $type }}</option>
+                                    <option value="{{ $key }}">{{ $type }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -429,21 +434,21 @@
                                 <input type="text" class="form-control" name="batch" placeholder="Batch" required>
                             </div>
                             <div class="form-group">
-                                <label>Status:</label><br/>
+                                <label>Status:</label><br />
                                 <input type="checkbox" id="check-status" class="form-control" name="progress" data-bootstrap-switch data-off-color="default" data-on-color="success" data-on-text="Finished" data-off-text="In Progress" disabled />
                             </div>
                         </div>
                     </div>
                     <div class="text-right">
                         <button type="button" onclick="onSubmit('publish')" class="btn btn-success btn-labeled legitRipple text-sm">
-                        <b><i class="fas fa-check-circle"></i></b>
-                        Publish
+                            <b><i class="fas fa-check-circle"></i></b>
+                            Publish
                         </button>
                         <button type="button" onclick="onSubmit('draft')" class="btn bg-olive color-palette btn-labeled legitRipple text-sm">
-                        <b><i class="fas fa-save"></i></b>
-                        Save
+                            <b><i class="fas fa-save"></i></b>
+                            Save
                         </button>
-                        <a href="{{ route('contract.index') }}" class="btn bg-maroon color-palette legitRipple text-sm" >
+                        <a href="{{ route('contract.index') }}" class="btn bg-maroon color-palette legitRipple text-sm">
                             <b><i class="fas fa-arrow-left"></i></b>
                         </a>
                     </div>
@@ -455,9 +460,9 @@
 @endsection
 
 @section('scripts')
-    <script src="{{ asset('assets/js/jquery.inputmask.js') }}"></script>
-    <script type="text/javascript">
-        $(function(){
+<script src="{{ asset('assets/js/jquery.inputmask.js') }}"></script>
+<script type="text/javascript">
+    $(function(){
             $("input[name=batch]").inputmask("Regex", { regex: "[1-9]*" });
             $("input[data-bootstrap-switch]").each(function(){
                 $(this).bootstrapSwitch('state', $(this).prop('checked'));
@@ -558,7 +563,7 @@
             });
 
             $("#contract_type").on("change",function(){
-                if($(this).val() == "product"){
+                if($(this).val() == "product" || $(this).val() == "product & service"){
                     $("#batch-form").show(); 
                 }else{
                     $("#batch-form").hide(); 
@@ -687,5 +692,5 @@
             let filename = $(that).val()
             $(that).next().html(filename)
         }
-    </script>
+</script>
 @endsection
