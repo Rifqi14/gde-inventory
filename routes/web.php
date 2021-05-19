@@ -130,6 +130,7 @@ Route::group(['prefix' => 'admin'], function () {
         Route::resource('/bin', 'Admin\BinController');
         // Route Product
         Route::get('/product/read', 'Admin\ProductController@read')->name('product.read');
+        Route::get('/product/select','Admin\ProductController@select')->name('product.select');
         Route::resource('/product','Admin\ProductController');
         // Route Province
         Route::get('/province/select', 'Admin\ProvinceController@select')->name('province.select');
@@ -209,5 +210,9 @@ Route::group(['prefix' => 'admin'], function () {
         // Attendance
         Route::get('/attendance/read', 'Admin\AttendanceController@read')->name('attendance.read');
         Route::resource('/attendance', 'Admin\AttendanceController');
+
+        // Product Borrowing        
+        Route::get('/productborrowing/read','Admin\ProductBorrowingController@read')->name('productborrowing.read');
+        Route::resource('/productborrowing','Admin\ProductBorrowingController');
     });
 });

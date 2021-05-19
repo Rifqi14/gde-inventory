@@ -2,11 +2,18 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\ProductBorrowing;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\View;
 
 class ProductBorrowingController extends Controller
 {
+    function __construct()
+    {
+        View::share('menu_active', url('admin/'.'productborrowing'));
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -14,7 +21,7 @@ class ProductBorrowingController extends Controller
      */
     public function index()
     {
-        //
+        return view('admin.productborrowing.index');
     }
 
     /**
@@ -24,7 +31,7 @@ class ProductBorrowingController extends Controller
      */
     public function create()
     {
-        //
+        return view('admin.productborrowing.create');
     }
 
     /**
@@ -58,6 +65,40 @@ class ProductBorrowingController extends Controller
     public function edit($id)
     {
         //
+    }
+
+    public function read(Request $request)
+    {
+        $draw               = $request->draw;
+        $start              = $request->start;
+        $length             = $request->length;
+        $search             = $request->search['value'];
+        $sort               = $request->columns[$request->order[0]['column']]['data'];
+        $dir                = $request->order[0]['dir'];
+
+        $query = ProductBorrowing::query();
+        
+        $rows  = clone $query;
+        $total = $rows->count();
+
+        $query->offset($start);
+        $query->limit($length);
+        $query->orderBy($sort, $dir);
+
+        $queries = $query->get();
+
+        $data = [];
+        foreach ($queries as $key => $row) {
+            $row->no = ++$start;
+            $data[]  = $row;
+        }
+
+        return response()->json([
+            'draw'              => $draw,
+            'recordsTotal'      => $total,
+            'recordsFiltered'   => $total,
+            'data'              => $data
+        ],200);
     }
 
     /**

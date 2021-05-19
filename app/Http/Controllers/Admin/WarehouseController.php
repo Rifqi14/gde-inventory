@@ -28,10 +28,18 @@ class WarehouseController extends Controller
         $start = $request->page ? $request->page - 1 : 0;
         $length = $request->limit;
         $name = strtoupper($request->name);
+        $site_id = $request->site_id;
 
         //Count Data
-        $query = Warehouse::select('*');
-        $query->whereRaw("upper(name) like '%$name%'");
+        $query = Warehouse::selectRaw("
+            warehouses.*,
+            sites.name as site
+        ");
+        $query->leftJoin('sites','sites.id','=','warehouses.site_id');
+        $query->whereRaw("upper(warehouses.name) like '%$name%'");
+        if($site_id){
+            $query->where('site_id',$site_id);
+        }
 
         $row = clone $query;
         $recordsTotal = $row->count();

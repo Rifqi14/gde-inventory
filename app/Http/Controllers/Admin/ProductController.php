@@ -328,4 +328,42 @@ class ProductController extends Controller
             abort(403);
         }
     }
+
+    public function select(Request $request)
+    {
+        $start  = $request->page ? $request->page - 1 : 0;
+        $length = $request->limit;
+        $name   = strtoupper($request->name);
+
+        $query = Product::selectRaw("
+            products.*,            
+            uom_categories.name as uom
+        ");        
+        $query->leftJoin('product_uoms','product_uoms.product_id','=','products.id');
+        $query->leftJoin('uoms','uoms.id','=','product_uoms.uom_id');
+        $query->leftJoin('uom_categories','uom_categories.id','=','uoms.uom_category_id');
+        if($name){
+            $query->whereRaw("
+                upper(products.name) like '%$name%'
+            ");
+        }
+
+        $rows  = clone $query;
+        $total = $rows->count();
+
+        $query->offset($start);
+        $query->limit($length);
+        $queries = $query->get();
+
+        $data = [];
+        foreach ($queries as $key => $row) {
+            $row->qty_system = 10;            
+            $data[] = $row;
+        }
+
+        return response()->json([
+            'total' => $total,
+            'rows'  => $data
+        ],200);
+    }
 }
