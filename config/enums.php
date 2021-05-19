@@ -43,7 +43,8 @@ return [
     ],
     'contract_type' => [
         'product'   => "Product",
-        'service'    => "Service"
+        'service'    => "Service",
+        'product & service' => "Product & Service",
     ],
     'machine_type'  => [
         'CHECKIN'       => 'Check In',

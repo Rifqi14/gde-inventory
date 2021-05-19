@@ -25,6 +25,7 @@ use App\Models\RoleUser;
 use App\Models\BatchContract;
 use App\Models\BatchContractProduct;
 use App\Models\ContractProduct;
+use App\Models\ContractReceipt;
 use App\Models\Product;
 use App\Models\ProductUom;
 
@@ -1103,6 +1104,12 @@ class ContractController extends Controller
             $contract = Contract::find($request->contract_id);
             $contract->batch = $batchcontract+1;
 
+            $contractreceipt = ContractReceipt::where('contract_id', $request->contract_id)->first();
+            if ($contractreceipt) {
+                $contractreceipt->total_batch   = $batchcontract+1;
+                $contractreceipt->save();
+            }
+
             if(!$contract->save()){
                 DB::rollback();
                 return response()->json([
@@ -1151,6 +1158,13 @@ class ContractController extends Controller
                 // update contract
                 $contract = Contract::find($request->contract_id);
                 $contract->batch = $totalbatch;
+
+                // Update Contract Receipt
+                $contractreceipt    = ContractReceipt::where('contract_id', $request->contract_id)->first();
+                if ($contractreceipt) {
+                    $contractreceipt->total_batch   = $totalbatch;
+                    $contractreceipt->save();
+                }
 
                 if(!$contract->save()){
                     DB::rollback();

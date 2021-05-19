@@ -24,4 +24,16 @@ class Menu extends Model
     {
         return $query->where('menu_route', $route);
     }
+
+    /**
+     * Scope a query to only include parent_id
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @param integer $parent_id
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeParent($query, $parent_id)
+    {
+        return $query->where('id', $parent_id);
+    }
 }

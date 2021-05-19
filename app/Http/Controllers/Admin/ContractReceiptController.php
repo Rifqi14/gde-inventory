@@ -17,6 +17,7 @@ use App\Models\ContractReceipt;
 use App\Models\ContractDocumentReceipt;
 use App\Models\ContractDocumentReceiptDetail;
 use App\Models\BatchContract;
+use ZipArchive;
 
 class ContractReceiptController extends Controller
 {
@@ -202,7 +203,6 @@ class ContractReceiptController extends Controller
             'contract_id'         => 'required',
             'warehouse_id'        => 'required',
             'batch'               => 'required',
-            'status'              => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -222,7 +222,7 @@ class ContractReceiptController extends Controller
             'batch'             => $request->batch,
             'total_batch'       => $total_batch,
             'remarks'           => $request->remarks,
-            'status'            => $request->status,
+            'status'            => 'WAITING',
         ]);
         if ($contractreceipt) {
 
@@ -273,6 +273,12 @@ class ContractReceiptController extends Controller
                             'message'   => "failed Insert Contract Document Receipt"
                         ], 400);
                     }
+                }
+                $countDocument = ContractDocumentReceipt::where('contract_receipt_id', $contractreceipt->id)->count();
+                $countDetail = $this->getUploadedDocument($contractreceipt->id);
+                if ($countDocument == $countDetail) {
+                    $contractreceipt->status = 'INPROGRESS';
+                    $contractreceipt->save();
                 }
             }
 
@@ -362,7 +368,6 @@ class ContractReceiptController extends Controller
             'contract_id'         => 'required',
             'warehouse_id'        => 'required',
             'batch'               => 'required',
-            'status'              => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -382,7 +387,6 @@ class ContractReceiptController extends Controller
         $contractreceipt->batch        = $request->batch;
         $contractreceipt->total_batch  = $total_batch;
         $contractreceipt->remarks      = $request->remarks;
-        $contractreceipt->status       = $request->status;
 
         if ($contractreceipt->save()) {
 
@@ -496,6 +500,12 @@ class ContractReceiptController extends Controller
                         }
                     }
                 }
+                $countDocument = ContractDocumentReceipt::where('contract_receipt_id', $contractreceipt->id)->count();
+                $countDetail = $this->getUploadedDocument($contractreceipt->id);
+                if ($countDocument == $countDetail) {
+                    $contractreceipt->status = 'INPROGRESS';
+                    $contractreceipt->save();
+                }
             }
 
             DB::commit();
@@ -533,5 +543,27 @@ class ContractReceiptController extends Controller
             'status'    => true,
             'message'   => 'Success delete data'
         ], 200);
+    }
+
+    public function bulkdownload(Request $request)
+    {
+        $contractDocument = ContractDocumentReceipt::with('latestDetail')->where('contract_receipt_id', $request->id)->get();
+        $contract         = ContractReceipt::with('contract')->find($request->id);
+        $zip        = new ZipArchive();
+        $filename   = "Download-Document-{$contract->contract->number}-Batch{$contractDocument->first()->batch}.zip";
+        if ($zip->open($filename, ZipArchive::CREATE) === true) {
+            foreach ($contractDocument as $key => $value) {
+                $namefile = explode("/", $value->latestDetail()->first()->source);
+                $zip->addFile($value->latestDetail()->first()->source, end($namefile));
+            }
+            $zip->close();
+        }
+
+        response()->download($filename);
+        return response()->json([
+            'status'    => true,
+            'name'      => $filename,
+            'message'   => "Success Download Document",
+          ], 200);
     }
 }

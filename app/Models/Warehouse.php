@@ -37,4 +37,17 @@ class Warehouse extends Model
     {
         return $this->hasOne('App\Models\Village', 'id', 'subdistrict_id');
     }
+
+    /**
+     * Scope a query to only include name
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @param string $name
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeName($query, $name)
+    {
+        $name   = strtoupper($name);
+        return $query->whereRaw("upper(name) like '%$name%'");
+    }
 }

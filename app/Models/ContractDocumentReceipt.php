@@ -12,4 +12,9 @@ class ContractDocumentReceipt extends Model
     {
         return $this->hasMany('App\Models\ContractDocumentReceiptDetail', 'contract_document_receipt_id', 'id');
     }
+
+    public function latestDetail()
+    {
+        return $this->hasOne('App\Models\ContractDocumentReceiptDetail')->latest();
+    }
 }
