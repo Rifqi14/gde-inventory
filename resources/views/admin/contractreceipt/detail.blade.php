@@ -2,32 +2,35 @@
 @section('title', $menu_name)
 @section('stylesheets')
 <style>
-    #table-document tbody tr td:nth-child(3) .input-group{
-        margin-bottom: .25rem!important;
-    }
-    /* #table-document tbody tr td:nth-child(3) .input-group button{
+  #table-document tbody tr td:nth-child(3) .input-group {
+    margin-bottom: .25rem !important;
+  }
+
+  /* #table-document tbody tr td:nth-child(3) .input-group button{
         user-select: none;
         z-index: 0;
         opacity: 0;
         position: relative;
         cursor: default;
     } */
-    #table-document tbody tr td:nth-child(3) .input-group:last-child{
-        margin-bottom: 0px !important;
-    }
-    /* #table-document tbody tr td:nth-child(3) .input-group:last-child button{
+  #table-document tbody tr td:nth-child(3) .input-group:last-child {
+    margin-bottom: 0px !important;
+  }
+
+  /* #table-document tbody tr td:nth-child(3) .input-group:last-child button{
         user-select: initial;
         z-index: 1;
         opacity: 1;
         position: relative;
     } */
-    .custom-file-label {
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
-        padding-right: 70px;
-    }
-    /* .input-group.download{
+  .custom-file-label {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    padding-right: 70px;
+  }
+
+  /* .input-group.download{
         border-bottom: 1px dashed #ddd;
         padding: 5px 0px;
     }
@@ -35,19 +38,19 @@
         position: absolute;
         right: 13px;
     } */
-    .html-viewer{
-        position: relative;
-        width: 100%;
-        height: 100%;
-        background: #e9ecef;
-        border: 5px solid #fff;
-        max-height: 300px;
-        min-height: 300px;
-        border-radius: .25rem;
-        box-shadow: 0px 0px 4px -2px rgb(0 0 0 / 50%);
-        padding: 10px;
-        overflow: auto;
-    }
+  .html-viewer {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: #e9ecef;
+    border: 5px solid #fff;
+    max-height: 300px;
+    min-height: 300px;
+    border-radius: .25rem;
+    box-shadow: 0px 0px 4px -2px rgb(0 0 0 / 50%);
+    padding: 10px;
+    overflow: auto;
+  }
 </style>
 @endsection
 
@@ -89,7 +92,7 @@
                     <label for="contract_id" class="col-md-12 col-xs-12 control-label">Contract</label>
                     <div class="col-sm-12 controls">
                       <select name="contract_id" id="contract_id" class="form-control select2" required data-placeholder="Select Contract" disabled>
-                        
+
                       </select>
                     </div>
                   </div>
@@ -99,7 +102,7 @@
                     <label for="warehouse_id" class="col-md-12 col-xs-12 control-label">Warehouse</label>
                     <div class="col-sm-12 controls">
                       <select name="warehouse_id" id="warehouse_id" class="form-control select2" required data-placeholder="Select Warehouse" disabled>
-                        
+
                       </select>
                     </div>
                   </div>
@@ -145,9 +148,9 @@
               <div class="form-group row">
                 <label class="col-md-12 col-xs-12 control-label" for="remarks">Description</label>
                 <div class="col-sm-12 controls">
-                    <div class="html-viewer">
-                        {!! $contractreceipt->remarks !!}
-                    </div>
+                  <div class="html-viewer">
+                    {!! $contractreceipt->remarks !!}
+                  </div>
                 </div>
               </div>
               <div class="form-group row">
@@ -183,57 +186,61 @@
                   </tr>
                 </thead>
                 <tbody>
-                    @for ($i = 1; $i <= $contractreceipt->document_count; $i++)
-                        @php $available = false; @endphp
+                  @for ($i = 1; $i <= $contractreceipt->document_count; $i++)
+                    @php $available = false; @endphp
+                    @foreach ($contractreceipt->document[$i - 1]->detail as $key => $row)
+                    @if($row->source)
+                    @php $available = true; @endphp
+                    @endif
+                    @endforeach
+                    @if($available)
+                    <tr data-number="{{ $i }}">
+                      <td class="text-center">
+                        <div class="mb-1"></div>
+                        {{ $i }}
+                      </td>
+                      <td>
+                        {{ $contractreceipt->document[$i - 1]->document_name }}
+                      </td>
+                      <td>
+                        @php $n = 1; @endphp
                         @foreach ($contractreceipt->document[$i - 1]->detail as $key => $row)
-                            @if($row->source)
-                                @php $available = true; @endphp
-                            @endif
-                        @endforeach
-                        @if($available)
-                            <tr data-number="{{ $i }}">
-                                <td class="text-center">
-                                    <div class="mb-1"></div>
-                                    {{ $i }}
-                                </td>
-                                <td>
-                                    {{ $contractreceipt->document[$i - 1]->document_name }}
-                                </td>
-                                <td>
-                                    @php $n = 1; @endphp
-                                    @foreach ($contractreceipt->document[$i - 1]->detail as $key => $row)
-                                        @if($row->source)
-                                            <div class="input-group download">
-                                                <a href="{{ asset($row->source) }}" class="" dl-id="44" download="" target="_blank">
-                                                    <b><i class="fas fa-download"></i></b> Download - File {{ $n++ }}
-                                                </a>
-                                            </div>
-                                        @endif
-                                    @endforeach
-                                </td>
-                                <td class="text-center">
-                                    <div class="mb-1"></div>
-                                    @if($contractreceipt->document[$i - 1]->date_uploaded)
-                                        {{ date("d/m/Y", strtotime($contractreceipt->document[$i - 1]->date_uploaded)) }}
-                                    @else
-                                        -
-                                    @endif
-                                </td>
-                                <td class="text-center">
-                                    <input type="hidden" name="deleted_file_id[{{ $i }}]" value="[]">
-                                    {{-- <button type="button" class="btn btn-transparent text-md" onclick="removeDocument($(this))" data-document="{{ $i }}">
-                                        <i class="fas fa-trash text-maroon color-palette"></i>
-                                    </button> --}}
-                                    <div class="mb-1"></div>
-                                    #
-                                </td>
-                            </tr>
+                        @if($row->source)
+                        <div class="input-group download">
+                          <a href="{{ asset($row->source) }}" class="" dl-id="44" download="" target="_blank">
+                            <b><i class="fas fa-download"></i></b> Download - Rev {{ $n++ }}
+                          </a>
+                        </div>
                         @endif
+                        @endforeach
+                      </td>
+                      <td class="text-center">
+                        <div class="mb-1"></div>
+                        @if($contractreceipt->document[$i - 1]->date_uploaded)
+                        {{ date("d/m/Y", strtotime($contractreceipt->document[$i - 1]->date_uploaded)) }}
+                        @else
+                        -
+                        @endif
+                      </td>
+                      <td class="text-center">
+                        <input type="hidden" name="deleted_file_id[{{ $i }}]" value="[]">
+                        {{-- <button type="button" class="btn btn-transparent text-md" onclick="removeDocument($(this))" data-document="{{ $i }}">
+                        <i class="fas fa-trash text-maroon color-palette"></i>
+                        </button> --}}
+                        <div class="mb-1"></div>
+                        #
+                      </td>
+                    </tr>
+                    @endif
                     @endfor
                 </tbody>
               </table>
             </div>
             <div class="card-footer">
+              <a href="javascript:void(0)" class="btn btn-sm btn-success color-palette btn-labeled legitRipple text-sm" onclick="bulkDownload({{ $contractreceipt->id }})">
+                <b><i class="fas fa-download"></i></b>
+                Bulk Download
+              </a>
               <a href="{{route('contractreceipt.index')}}" class="btn btn-sm btn-secondary color-palette btn-labeled legitRipple text-sm">
                 <b><i class="fas fa-reply"></i></b>
                 Back
@@ -263,6 +270,91 @@
     		['insert', ['link', 'picture', 'video', 'hr']],
     		['misc', ['fullscreen', 'codeview', 'help']]
     	]
+    });
+  }
+
+  const bulkDownload = (id) => {
+    var data = {
+                  id: id,
+                  _token: "{{ csrf_token() }}",
+                };
+    $.ajax({
+        url: `{{route('contractreceipt.bulkdownload')}}`,
+        dataType: 'json',
+        data: data,
+        type: 'GET',
+        beforeSend: function () {
+            blockMessage('#content', 'Loading', '#fff');
+        }
+    }).done(function (response) {
+        $('#content').unblock();
+        if (response.status) {
+            toastr.options = {
+                "closeButton": false,
+                "debug": false,
+                "newestOnTop": false,
+                "progressBar": false,
+                "positionClass": "toast-top-right",
+                "preventDuplicates": false,
+                "onclick": null,
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "5000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            }
+            toastr.success(response.message);
+            let download = document.createElement("a");
+            download.href = response.name;
+            document.body.appendChild(download);
+            download.download = response.name;
+            download.click();
+            download.remove();
+            dataTable.ajax.reload(null, false);
+        }else {
+            toastr.options = {
+                "closeButton": false,
+                "debug": false,
+                "newestOnTop": false,
+                "progressBar": false,
+                "positionClass": "toast-top-right",
+                "preventDuplicates": false,
+                "onclick": null,
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "5000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            }
+            toastr.warning(response.message);
+        }
+    }).fail(function (response) {
+        var response = response.responseJSON;
+        $('#content').unblock();
+        toastr.options = {
+            "closeButton": false,
+            "debug": false,
+            "newestOnTop": false,
+            "progressBar": false,
+            "positionClass": "toast-top-right",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "5000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        }
+        toastr.warning(response.message);
     });
   }
 

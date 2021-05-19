@@ -2,39 +2,43 @@
 @section('title', $menu_name)
 @section('stylesheets')
 <style>
-    #table-document tbody tr td:nth-child(3) .input-group{
-        margin-bottom: .25rem!important;
-    }
-    /* #table-document tbody tr td:nth-child(3) .input-group button{
+  #table-document tbody tr td:nth-child(3) .input-group {
+    margin-bottom: .25rem !important;
+  }
+
+  /* #table-document tbody tr td:nth-child(3) .input-group button{
         user-select: none;
         z-index: 0;
         opacity: 0;
         position: relative;
         cursor: default;
     } */
-    #table-document tbody tr td:nth-child(3) .input-group:last-child{
-        margin-bottom: 0px !important;
-    }
-    /* #table-document tbody tr td:nth-child(3) .input-group:last-child button{
+  #table-document tbody tr td:nth-child(3) .input-group:last-child {
+    margin-bottom: 0px !important;
+  }
+
+  /* #table-document tbody tr td:nth-child(3) .input-group:last-child button{
         user-select: initial;
         z-index: 1;
         opacity: 1;
         position: relative;
     } */
-    .custom-file-label {
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
-        padding-right: 70px;
-    }
-    .input-group.download{
-        border-bottom: 1px dashed #ddd;
-        padding: 5px 0px;
-    }
-    .input-group.download button{
-        position: absolute;
-        right: 13px;
-    }
+  .custom-file-label {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    padding-right: 70px;
+  }
+
+  .input-group.download {
+    border-bottom: 1px dashed #ddd;
+    padding: 5px 0px;
+  }
+
+  .input-group.download button {
+    position: absolute;
+    right: 13px;
+  }
 </style>
 @endsection
 
@@ -76,7 +80,7 @@
                     <label for="contract_id" class="col-md-12 col-xs-12 control-label">Contract</label>
                     <div class="col-sm-12 controls">
                       <select name="contract_id" id="contract_id" class="form-control select2" required data-placeholder="Select Contract">
-                        
+
                       </select>
                     </div>
                   </div>
@@ -86,7 +90,7 @@
                     <label for="warehouse_id" class="col-md-12 col-xs-12 control-label">Warehouse</label>
                     <div class="col-sm-12 controls">
                       <select name="warehouse_id" id="warehouse_id" class="form-control select2" required data-placeholder="Select Warehouse">
-                        
+
                       </select>
                     </div>
                   </div>
@@ -137,17 +141,6 @@
                   </textarea>
                 </div>
               </div>
-              <div class="form-group row">
-                <label class="col-md-12 col-xs-12 control-label" for="status">Status <b class="text-danger">*</b></label>
-                <div class="col-sm-12 controls">
-                  <select name="status" id="status" class="form-control select2" required data-placeholder="Select Status">
-                    <option value=""></option>
-                    @foreach(config('enums.status_receipt') as $key => $status)
-                    <option value="{{ $key }}" @if($contractreceipt->status == $key) selected @endif>{{ $status }}</option>
-                    @endforeach
-                  </select>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -171,62 +164,62 @@
                   </tr>
                 </thead>
                 <tbody>
-                    @for ($i = 1; $i <= $contractreceipt->document_count; $i++)
-                        <tr data-number="{{ $i }}">
-                            <td class="text-center">
-                                <div class="mb-1"></div>
-                                {{ $i }}
-                            </td>
-                            <td>
-                                <input type="hidden" name="contract_document_receipts[]" value="{{ $i }}">
-                                <input type="hidden" name="contract_document_receipts_id[{{ $i }}]" value="{{ $contractreceipt->document[$i - 1]->id }}">
-                                <input type="text" class="form-control" id="document_name_{{ $i }}" name="document_name[{{ $i }}]" placeholder="Document Name" aria-required="true" value="{{ $contractreceipt->document[$i - 1]->document_name }}">              
-                            </td>
-                            <td>
-                                @php $n = 1; @endphp
-                                @foreach ($contractreceipt->document[$i - 1]->detail as $key => $row)
-                                    @if($row->source)
-                                        <div class="input-group download">
-                                            <a href="{{ asset($row->source) }}" class="" dl-id="44" download="" target="_blank">
-                                                <b><i class="fas fa-download"></i></b> Download - File {{ $n++ }}
-                                            </a>
-                                            <button type="button" class="btn btn-transparent text-md p-0 pl-2 float-right" onclick="removeFile($(this))" data-doc="{{ $i }}" data-id="{{ $row->id }}">
-                                                <i class="fas fa-trash text-maroon color-palette"></i>
-                                            </button>
-                                        </div>
-                                    @endif
-                                @endforeach
-                                <div class="input-group">
-                                    <div class="custom-file">
-                                        <input type="hidden" name="file_contract[{{ $i }}][]">
-                                        <input type="file" class="custom-file-input" name="file[{{ $i }}][]" onchange="changePath(this)">
-                                        <label class="custom-file-label" for="exampleInputFile">Attach Image</label>
-                                    </div>
-                                    <div class="input-group-append">
-                                        <span class="input-group-text" id=""><i class="fa fa-upload"></i></span>
-                                    </div>
-                                    <button type="button" class="btn btn-transparent text-md" onclick="addUpload($(this))" data-doc="{{ $i }}">
-                                        <i class="fas fa-plus text-green color-palette"></i>
-                                    </button>
-                                </div>
-                            </td>
-                            <td class="text-center">
-                                <div class="mb-1"></div>
-                                @if($contractreceipt->document[$i - 1]->date_uploaded)
-                                    {{ date("d/m/Y", strtotime($contractreceipt->document[$i - 1]->date_uploaded)) }}
-                                @else
-                                    -
-                                @endif
-                            </td>
-                            <td class="text-center">
-                                <input type="hidden" name="deleted_file_id[{{ $i }}]" value="[]">
-                                {{-- <button type="button" class="btn btn-transparent text-md" onclick="removeDocument($(this))" data-document="{{ $i }}">
-                                    <i class="fas fa-trash text-maroon color-palette"></i>
-                                </button> --}}
-                                <div class="mb-1"></div>
-                                #
-                            </td>
-                        </tr>
+                  @for ($i = 1; $i <= $contractreceipt->document_count; $i++)
+                    <tr data-number="{{ $i }}">
+                      <td class="text-center">
+                        <div class="mb-1"></div>
+                        {{ $i }}
+                      </td>
+                      <td>
+                        <input type="hidden" name="contract_document_receipts[]" value="{{ $i }}">
+                        <input type="hidden" name="contract_document_receipts_id[{{ $i }}]" value="{{ $contractreceipt->document[$i - 1]->id }}">
+                        <input type="text" class="form-control" id="document_name_{{ $i }}" name="document_name[{{ $i }}]" placeholder="Document Name" aria-required="true" value="{{ $contractreceipt->document[$i - 1]->document_name }}">
+                      </td>
+                      <td>
+                        @php $n = 1; @endphp
+                        @foreach ($contractreceipt->document[$i - 1]->detail as $key => $row)
+                        @if($row->source)
+                        <div class="input-group download">
+                          <a href="{{ asset($row->source) }}" class="" dl-id="44" download="" target="_blank">
+                            <b><i class="fas fa-download"></i></b> Download - Rev {{ $n++ }}
+                          </a>
+                          <button type="button" class="btn btn-transparent text-md p-0 pl-2 float-right" onclick="removeFile($(this))" data-doc="{{ $i }}" data-id="{{ $row->id }}">
+                            <i class="fas fa-trash text-maroon color-palette"></i>
+                          </button>
+                        </div>
+                        @endif
+                        @endforeach
+                        <div class="input-group">
+                          <div class="custom-file">
+                            <input type="hidden" name="file_contract[{{ $i }}][]">
+                            <input type="file" class="custom-file-input" name="file[{{ $i }}][]" onchange="changePath(this)">
+                            <label class="custom-file-label" for="exampleInputFile">Attach Image</label>
+                          </div>
+                          <div class="input-group-append">
+                            <span class="input-group-text" id=""><i class="fa fa-upload"></i></span>
+                          </div>
+                          <button type="button" class="btn btn-transparent text-md" onclick="addUpload($(this))" data-doc="{{ $i }}">
+                            <i class="fas fa-plus text-green color-palette"></i>
+                          </button>
+                        </div>
+                      </td>
+                      <td class="text-center">
+                        <div class="mb-1"></div>
+                        @if($contractreceipt->document[$i - 1]->date_uploaded)
+                        {{ date("d/m/Y", strtotime($contractreceipt->document[$i - 1]->date_uploaded)) }}
+                        @else
+                        -
+                        @endif
+                      </td>
+                      <td class="text-center">
+                        <input type="hidden" name="deleted_file_id[{{ $i }}]" value="[]">
+                        {{-- <button type="button" class="btn btn-transparent text-md" onclick="removeDocument($(this))" data-document="{{ $i }}">
+                        <i class="fas fa-trash text-maroon color-palette"></i>
+                        </button> --}}
+                        <div class="mb-1"></div>
+                        #
+                      </td>
+                    </tr>
                     @endfor
                 </tbody>
               </table>

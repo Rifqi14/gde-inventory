@@ -2,31 +2,33 @@
 @section('title', $menu_name)
 @section('stylesheets')
 <style>
-    #table-document tbody tr td:nth-child(3) .input-group{
-        margin-bottom: .25rem!important;
-    }
-    /* #table-document tbody tr td:nth-child(3) .input-group button{
+  #table-document tbody tr td:nth-child(3) .input-group {
+    margin-bottom: .25rem !important;
+  }
+
+  /* #table-document tbody tr td:nth-child(3) .input-group button{
         user-select: none;
         z-index: 0;
         opacity: 0;
         position: relative;
         cursor: default;
     } */
-    #table-document tbody tr td:nth-child(3) .input-group:last-child{
-        margin-bottom: 0px !important;
-    }
-    /* #table-document tbody tr td:nth-child(3) .input-group:last-child button{
+  #table-document tbody tr td:nth-child(3) .input-group:last-child {
+    margin-bottom: 0px !important;
+  }
+
+  /* #table-document tbody tr td:nth-child(3) .input-group:last-child button{
         user-select: initial;
         z-index: 1;
         opacity: 1;
         position: relative;
     } */
-    .custom-file-label {
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
-        padding-right: 70px;
-    }
+  .custom-file-label {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    padding-right: 70px;
+  }
 </style>
 @endsection
 
@@ -67,7 +69,7 @@
                     <label for="contract_id" class="col-md-12 col-xs-12 control-label">Contract</label>
                     <div class="col-sm-12 controls">
                       <select name="contract_id" id="contract_id" class="form-control select2" required data-placeholder="Select Contract">
-                        
+
                       </select>
                     </div>
                   </div>
@@ -77,7 +79,7 @@
                     <label for="warehouse_id" class="col-md-12 col-xs-12 control-label">Warehouse</label>
                     <div class="col-sm-12 controls">
                       <select name="warehouse_id" id="warehouse_id" class="form-control select2" required data-placeholder="Select Warehouse">
-                        
+
                       </select>
                     </div>
                   </div>
@@ -126,17 +128,6 @@
                   <textarea class="form-control summernote" name="remarks" id="remarks" rows="4" placeholder="Description..."></textarea>
                 </div>
               </div>
-              <div class="form-group row">
-                <label class="col-md-12 col-xs-12 control-label" for="status">Status <b class="text-danger">*</b></label>
-                <div class="col-sm-12 controls">
-                  <select name="status" id="status" class="form-control select2" required data-placeholder="Select Status">
-                    <option value=""></option>
-                    @foreach(config('enums.status_receipt') as $key => $status)
-                    <option value="{{ $key }}">{{ $status }}</option>
-                    @endforeach
-                  </select>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -160,43 +151,42 @@
                   </tr>
                 </thead>
                 <tbody>
-                    @for ($i = 1; $i <= 11; $i++)
-                        <tr data-number="{{ $i }}">
-                            <td class="text-center">
-                                <div class="mb-1"></div>
-                                {{ $i }}
-                            </td>
-                            <td>
-                                <input type="hidden" name="contract_document_receipts[]" value="{{ $i }}">
-                                <input type="text" class="form-control" id="document_name_{{ $i }}" name="document_name[{{ $i }}]" placeholder="Document Name" aria-required="true">
-                            </td>
-                            <td>
-                                <div class="input-group">
-                                    <div class="custom-file">
-                                        <input type="hidden" name="file_contract[{{ $i }}][]">
-                                        <input type="file" class="custom-file-input" name="file[{{ $i }}][]" onchange="changePath(this)">
-                                        <label class="custom-file-label" for="exampleInputFile">Attach Image</label>
-                                    </div>
-                                    <div class="input-group-append">
-                                        <span class="input-group-text" id=""><i class="fa fa-upload"></i></span>
-                                    </div>
-                                    <button type="button" class="btn btn-transparent text-md" onclick="addUpload($(this))" data-doc="{{ $i }}">
-                                        <i class="fas fa-plus text-green color-palette"></i>
-                                    </button>
-                                </div>
-                            </td>
-                            <td class="text-center">
-                                <div class="mb-1"></div>
-                                {{ date("d/m/Y") }}
-                            </td>
-                            <td class="text-center">
-                                {{-- <button type="button" class="btn btn-transparent text-md" onclick="removeDocument($(this))" data-document="{{ $i }}">
-                                    <i class="fas fa-trash text-maroon color-palette"></i>
-                                </button> --}}
-                                <div class="mb-1"></div>
-                                #
-                            </td>
-                        </tr>
+                  @for ($i = 1; $i <= 11; $i++) <tr data-number="{{ $i }}">
+                    <td class="text-center">
+                      <div class="mb-1"></div>
+                      {{ $i }}
+                    </td>
+                    <td>
+                      <input type="hidden" name="contract_document_receipts[]" value="{{ $i }}">
+                      <input type="text" class="form-control" id="document_name_{{ $i }}" name="document_name[{{ $i }}]" placeholder="Document Name" aria-required="true">
+                    </td>
+                    <td>
+                      <div class="input-group">
+                        <div class="custom-file">
+                          <input type="hidden" name="file_contract[{{ $i }}][]">
+                          <input type="file" class="custom-file-input" name="file[{{ $i }}][]" onchange="changePath(this)">
+                          <label class="custom-file-label" for="exampleInputFile">Attach Image</label>
+                        </div>
+                        <div class="input-group-append">
+                          <span class="input-group-text" id=""><i class="fa fa-upload"></i></span>
+                        </div>
+                        <button type="button" class="btn btn-transparent text-md" onclick="addUpload($(this))" data-doc="{{ $i }}">
+                          <i class="fas fa-plus text-green color-palette"></i>
+                        </button>
+                      </div>
+                    </td>
+                    <td class="text-center">
+                      <div class="mb-1"></div>
+                      {{ date("d/m/Y") }}
+                    </td>
+                    <td class="text-center">
+                      {{-- <button type="button" class="btn btn-transparent text-md" onclick="removeDocument($(this))" data-document="{{ $i }}">
+                      <i class="fas fa-trash text-maroon color-palette"></i>
+                      </button> --}}
+                      <div class="mb-1"></div>
+                      #
+                    </td>
+                    </tr>
                     @endfor
                 </tbody>
               </table>

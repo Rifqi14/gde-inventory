@@ -56,7 +56,7 @@
                 </tr>
               </thead>
               <tbody>
-                  
+
               </tbody>
             </table>
           </div>
@@ -158,7 +158,7 @@
                 { className: "text-center", targets: [0,5,6] },
                 {
                     render: function ( data, type, row ) {
-                        return `<b><a href="#">${row.contract.number}</a></b><br>${row.contract_date}`;
+                        return `<b><a href="{{route('contract.index')}}/${row.contract.id}">${row.contract.number}</a></b><br>${row.contract_date}`;
                     },targets: [1]
                 },
                 {
