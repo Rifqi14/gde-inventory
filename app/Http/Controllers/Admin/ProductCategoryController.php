@@ -13,8 +13,8 @@ class ProductCategoryController extends Controller
 {
     function __construct()
     {
-        $menu   = Menu::GetByRoute('productcategory')->first();
-        $parent = Menu::parent($menu->parent_id)->first();
+        $menu   = Menu::where('menu_route', 'productcategory')->first();
+        $parent = Menu::find($menu->parent_id);
         View::share('parent_name', $parent->menu_name);
         View::share('menu_name', $menu->menu_name);
         View::share('menu_active',url('admin/'.'productcategory'));
