@@ -407,6 +407,8 @@
                         $('#content').unblock();
                         if(response.status){
                             dataTable.draw();
+                            $('#product_id').val(null).trigger('change');
+                            $('#category_product_id').val(null).trigger('change');
                         }else{	
                             toastr.options = {
                                 "closeButton": false,
@@ -611,6 +613,13 @@
                 },
                 allowClear: true,
                 escapeMarkup: function (text) { return text; }
+            }).on('select2:close', function(e){
+                var data = $(this).find('option:selected').val();
+                var product = $('#product_id').select2('data');
+
+                if (product[0] && product[0].category_product_id != data) {
+                    $('#product_id').val(null).trigger('change');
+                }
             }).on('select2:clearing',function(){
                 $('#product_id').val(null).trigger('change');
             });
