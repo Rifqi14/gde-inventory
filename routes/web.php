@@ -210,5 +210,10 @@ Route::group(['prefix' => 'admin'], function () {
         // Attendance
         Route::get('/attendance/read', 'Admin\AttendanceController@read')->name('attendance.read');
         Route::resource('/attendance', 'Admin\AttendanceController');
+
+        // Product Consumable
+        Route::get('/consumable/read', 'Admin\ProductConsumableController@read')->name('consumable.read');
+        Route::get('/consumable/select', 'Admin\ProductConsumableController@select')->name('consumable.select');
+        Route::resource('/consumable', 'Admin\ProductConsumableController');
     });
 });
