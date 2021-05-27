@@ -388,7 +388,7 @@ Business Trips
               status = row.status;
 
             if (status == 'approved') {
-              badge = '<span class="badge bg-success text-sm">Approved</span>';
+              badge = '<span class="badge badge-info text-sm">Approved</span>';
             }
 
             return badge;
@@ -396,26 +396,15 @@ Business Trips
           targets: [4]
         },
         {
-          render: function(data, type, row) {
-            var button = '';
-            // update
-            if (actionmenu.indexOf('update') > 0) {
-              button += `<a class="dropdown-item" href="javascript:void(0);" onclick="edit(${row.id})">
-                                        <i class="far fa-edit"></i>Update Data
-                                    </a>`;
-            }
-            // delete
-            if (actionmenu.indexOf('delete') > 0) {
-              button += `<a class="dropdown-item" href="javascript:void(0);" onclick="destroy(${row.id},'table-bt-approved')">
-                                        <i class="fa fa-trash-alt"></i> Delete Data
-                                    </a>`;
-            }
+          render: function(data, type, row) {            
             return `<div class="btn-group">
                                 <button type="button" class="btn btn-flat btn-sm dropdown-toggle" data-toggle="dropdown">
                                     <i class="fas fa-bars"></i>
                                 </button>
                                 <div class="dropdown-menu">
-                                    ${button}
+                                  <a class="dropdown-item" href="javascript:void(0);" onclick="detail(${row.id},'table-bt-approved')">
+                                        <i class="fa fa-eye"></i> View Data
+                                    </a>
                                 </div>
                             </div>`;
           },
@@ -463,7 +452,7 @@ Business Trips
   }
 
   function detail(id) {
-    window.location.href = `{{url('admin/businesstrip/show')}}/${id}`;
+    document.location = `{{route('businesstrip.index')}}/${id}`;
   }
 
   function destroy(id, table) {
