@@ -213,7 +213,10 @@ Route::group(['prefix' => 'admin'], function () {
         Route::resource('/attendance', 'Admin\AttendanceController');
 
         // Product Borrowing        
-        Route::get('/productborrowing/read','Admin\ProductBorrowingController@read')->name('productborrowing.read');
+        Route::get('/productborrowing/read','Admin\ProductBorrowingController@read')->name('productborrowing.read');        
+        Route::get('/productborrowing/readarchived','Admin\ProductBorrowingController@readarchived')->name('productborrowing.readarchived');
+        Route::get('/productborrowing/archive/{id}','Admin\ProductBorrowingController@archive');
+        Route::get('/productborrowing/delete/{id}','Admin\ProductBorrowingController@destroy');                
         Route::resource('/productborrowing','Admin\ProductBorrowingController');
     });
 });

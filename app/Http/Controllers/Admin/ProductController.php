@@ -334,9 +334,11 @@ class ProductController extends Controller
         $start  = $request->page ? $request->page - 1 : 0;
         $length = $request->limit;
         $name   = strtoupper($request->name);
+        $product_category_id = $request->product_category_id;   
 
         $query = Product::selectRaw("
             products.*,            
+            product_uoms.uom_id,
             uom_categories.name as uom
         ");        
         $query->leftJoin('product_uoms','product_uoms.product_id','=','products.id');
@@ -346,6 +348,9 @@ class ProductController extends Controller
             $query->whereRaw("
                 upper(products.name) like '%$name%'
             ");
+        }
+        if($product_category_id){
+            $query->where('product_category_id',$product_category_id);
         }
 
         $rows  = clone $query;

@@ -1,5 +1,5 @@
 @extends('admin.layouts.app')
-@section('title','Create Product Borrowing')
+@section('title','Detail Product Borrowing')
 
 @section('breadcrumb')
 <div class="row mb-3 mt-3">
@@ -12,7 +12,7 @@
         <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
             <li class="breadcrumb-item">Inventory</li>
             <li class="breadcrumb-item">Product Borrowing</li>
-            <li class="breadcrumb-item active">Create</li>
+            <li class="breadcrumb-item active">Detail</li>
         </ol>
     </div>
 </div>
@@ -21,8 +21,8 @@
 @section('content')
 <section class="content">
     <div class="container-fluid">
-        <form class="form-horizontal no-margin" id="form" enctype="multipart/form-data" action="{{$url}}">
-            {{csrf_field()}}
+        <form class="form-horizontal no-margin" id="form" enctype="multipart/form-data">
+            {{csrf_field()}}            
             <div class="row">
                 <div class="col-md-8">
                     <div class="card">
@@ -36,12 +36,12 @@
                                     <!-- Borrowing Number -->
                                     <div class="form-group">
                                         <label for="borrowing-number" class="control-label">Borrowing Number</label>
-                                        <input type="text" class="form-control" name="borrowing_number" id="borrowing-number" placeholder="Enter Borrowing Number" required>
+                                        <input type="text" class="form-control" name="borrowing_number" id="borrowing-number" placeholder="Enter Borrowing Number" value="{{$data->borrowing_number}}" readonly>
                                     </div>
                                     <!-- Product Category -->
                                     <div class="form-group">
                                         <label for="product-category" class="control-label">Product Category</label>
-                                        <select name="product_category" id="product-category" class="form-control select2" data-placeholder="Choose Product Category" required>
+                                        <select name="product_category" id="product-category" class="form-control select2" data-placeholder="Choose Product Category" disabled>
                                         </select>
                                     </div>
                                     <!-- Borrowing Date -->
@@ -53,7 +53,7 @@
                                                     <i class="far fa-calendar-alt"></i>
                                                 </span>
                                             </div>
-                                            <input type="datepicker" class="form-control datepicker text-right" name="borrowing_date" id="borrowing-date" placeholder="Enter Borrowing Date" required>
+                                            <input type="datepicker" class="form-control datepicker text-right" name="borrowing_date" id="borrowing-date" placeholder="Enter Borrowing Date" readonly>
                                         </div>
                                     </div>
                                 </div>
@@ -61,28 +61,19 @@
                                     <!-- Site -->
                                     <div class="form-group">
                                         <label for="site" class="control-label">Site</label>
-                                        <select name="site" id="site" class="form-control select2" data-placeholder="Choose Site" required>
+                                        <select name="site" id="site" class="form-control select2" data-placeholder="Choose Site" disabled>
                                         </select>
                                     </div>
                                     <!-- Warehouse -->
                                     <div class="form-group">
                                         <label for="warehouse" class="control-label">Warehouse</label>
-                                        <select name="warehouse" id="warehouse" class="form-control select2" data-placeholder="Choose Warehouse" required>
+                                        <select name="warehouse" id="warehouse" class="form-control select2" data-placeholder="Choose Warehouse" disabled>
                                         </select>
                                     </div>
                                     <!-- Status -->
-                                    <div class="form-group">
-                                        <label for="status" class="control-label">Status</label>
-                                        <div class="row ml-1">
-                                            <div class="col-2">Submit</div>
-                                            <div class="col-1">:</div>
-                                            <div class="col-7"><span class="badge badge-warning text-sm">Waiting</span></div>
-                                        </div>
-                                        <div class="row mt-2 ml-1">
-                                            <div class="col-2">Save</div>
-                                            <div class="col-1">:</div>
-                                            <div class="col-7"><span class="badge bg-gray text-sm">Draft</span></div>
-                                        </div>
+                                    <div class="form-group" id="form-status">
+                                        <label for="status" class="control-label">Status</label>  
+                                        <br>                                        
                                     </div>
                                 </div>
                             </div>
@@ -101,7 +92,9 @@
                                 <label for="issued-by" class="control-label">Issued By</label>
                                 <select name="issued_by" id="issued-by" class="form-control select2" data-placeholder="Issued By" disabled>
                                     <option value=""></option>
-                                    @if(Auth::guard('admin')->user()->id)
+                                    @if($data->issued_by)
+                                    <option value="{{$data->issued_by}}" selected>{{$data->issued_name}}</option>                                    
+                                    @else if(Auth::guard('admin')->user()->id)
                                     <option value="{{Auth::guard('admin')->user()->id}}" selected>{{Auth::guard('admin')->user()->name}}</option>
                                     @endif
                                 </select>
@@ -109,9 +102,9 @@
                             <!-- Description -->
                             <div class="form-group">
                                 <label for="description" class="control-label">Description</label>
-                                <textarea name="description" id="description" cols="30" rows="5" class="form-control" placeholder="Enter Descripton"></textarea>
+                                <textarea name="description" id="description" cols="30" rows="5" class="form-control" placeholder="Enter Descripton" readonly>{{$data->description}}</textarea>
                             </div>
-                            <input type="hidden" name="status" id="status" value="draft">
+                            <input type="hidden" name="status" id="status" value="{{$data->status}}">
                         </div>
                     </div>
                 </div>
@@ -121,16 +114,7 @@
                             <span class="title">
                                 <hr>
                                 <h5 class="text-md text-dark text-uppercase">Products Information</h5>
-                            </span>
-                            <div class="form-group">
-                                <label for="product" class="control-label">Product</label>
-                                <select name="product" id="product" class="form-control select2" data-placeholder="Choose Product"></select>
-                            </div>
-                            <div class="form-group">
-                                <button type="button" onclick="addProduct()" class="btn btn-labeled labeled-sm btn-md btn-block text-xs btn-success btn-flat legitRipple">
-                                    <b><i class="fas fa-plus"></i></b> Add Product
-                                </button>
-                            </div>
+                            </span>                            
                             <!-- PRODUCTS -->
                             <div class="table-responsive">
                                 <table class="table table-striped" id="table-products" width="100%">
@@ -139,13 +123,12 @@
                                             <th width="200">Product Name</th>
                                             <th width="15" class="text-center">UOM</th>
                                             <th width="15" class="text-right">Qty System</th>
-                                            <th width="10" class="text-right">Qty Borrowing</th>
-                                            <th width="10" class="text-center">Action</th>
+                                            <th width="10" class="text-right">Qty Borrowing</th>                                            
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr class="no-available-data">
-                                            <td colspan="5" class="text-center">No available data.</td>
+                                            <td colspan="4" class="text-center">No available data.</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -170,46 +153,34 @@
                                 </li>
                             </ul>
                             <div class="tab-content" id="suppDocumentTabContent">
-                                <div class="tab-pane fade show active" id="document" role="tabpanel" aria-labelledby="document-tab">
-                                    <div class="form-group mt-3">
-                                        <button type="button" onclick="addDocument()" class="btn btn-labeled labeled-sm btn-md btn-block text-xs btn-success btn-flat legitRipple">
-                                            <b><i class="fas fa-plus"></i></b> Add Document
-                                        </button>
-                                    </div>
+                                <div class="tab-pane fade show active" id="document" role="tabpanel" aria-labelledby="document-tab">                                    
                                     <!-- TABLE DOCUMENT -->
                                     <table id="table-document" class="table table-striped datatable mt-3" width="100%">
                                         <thead>
                                             <tr>
-                                                <th width="45%">Document Name</th>
-                                                <th width="45%" class="text-center">File</th>
-                                                <th width="10%" class="text-center">Action</th>
+                                                <th width="50%">Document Name</th>
+                                                <th width="50%" class="text-center">File</th>                                                
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr class="no-available-data">
-                                                <td colspan="3" class="text-center">No available data.</td>
+                                                <td colspan="2" class="text-center">No available data.</td>
                                             </tr>                                            
                                         </tbody>
                                     </table>
                                 </div>
-                                <div class="tab-pane fade show" id="photo" role="tabpanel" aria-labelledby="photo-tab">
-                                    <div class="form-group mt-3">
-                                        <button type="button" onclick="addPhoto()" class="btn btn-labeled labeled-sm btn-md btn-block text-xs btn-success btn-flat legitRipple">
-                                            <b><i class="fas fa-plus"></i></b> Add Photo
-                                        </button>
-                                    </div>
+                                <div class="tab-pane fade show" id="photo" role="tabpanel" aria-labelledby="photo-tab">                                    
                                     <!-- TABLE PHOTO -->
                                     <table id="table-photo" class="table table-striped datatable mt-3" width="100%">
                                         <thead>
                                             <tr>
-                                                <th width="45%">Photo Name</th>
-                                                <th width="45%" class="text-center">File</th>
-                                                <th width="10%" class="text-center">Action</th>
+                                                <th width="50%">Photo Name</th>
+                                                <th width="50%" class="text-center">File</th>                                                
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr class="no-available-data">
-                                                <td colspan="3" class="text-center">No available data.</td>
+                                                <td colspan="2" class="text-center">No available data.</td>
                                             </tr>                                    
                                         </tbody>
                                     </table>
@@ -217,15 +188,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="card-footer text-right">
-                        <button type="button" onclick="onSubmit('waiting')" class="btn btn-success btn-labeled legitRipple text-sm">
-                            <b><i class="fas fa-check-circle"></i></b>
-                            Submit
-                        </button>
-                        <button type="button" onclick="onSubmit('draft')" class="btn bg-olive color-palette btn-labeled legitRipple text-sm">
-                            <b><i class="fas fa-save"></i></b>
-                            Save
-                        </button>
+                    <div class="card-footer text-right">                        
                         <a href="{{ route('productborrowing.index') }}" class="btn btn-sm btn-secondary color-palette btn-labeled legitRipple text-sm">
                             <b><i class="fas fa-times"></i></b>
                             Cancel
@@ -259,11 +222,41 @@
     };
 
     $(function() {
+        var dataBorrowing = @json($data),
+            siteID        = {{$data->site_id}},
+            categoryID    = {{$data->product_category_id}},
+            warehouseID   = {{$data->warehouse_id}}
+            borrowingDate = '{{$data->date_borrowing}}',
+            deletedAt     = '{{$data->deleted_at}}',
+            borrowingStatus = dataBorrowing.status,
+            borrowingStatus = deletedAt?'archived':borrowingStatus,
+            statusBadge     = '';
+        
+        switch (borrowingStatus) {
+            case 'draft':
+                statusBadge = 'bg-gray';
+                break;
+            case 'waiting' : 
+                statusBadge = 'badge-warning';
+                break;
+            case 'approved' : 
+                statusBadge = 'badge-info';
+                break;                
+            case 'archived' : 
+                statusBadge = 'bg-red';
+                break;
+            default:
+                statusBadge = '';
+        }
+
+        $('#form-status').append(`<span class="badge ${statusBadge} text-sm" style="text-transform: capitalize;">${borrowingStatus}</span>`);
+
         $('.select2').select2({
             allowClear: true
         });  
         
         initInputFile();
+        initDocuments();
 
         $('.datepicker').daterangepicker({
             singleDatePicker: true,
@@ -275,6 +268,10 @@
                 format: 'DD/MM/YYYY'
             },
         });
+
+        if(borrowingDate){
+           $('#borrowing-date').data('daterangepicker').setStartDate(borrowingDate);
+        }
 
         $('.summernote').summernote({
             height: 150,
@@ -327,7 +324,7 @@
                 },
             },
             allowClear: true,
-        });
+        });        
 
         $("#warehouse").select2({
             ajax: {
@@ -404,6 +401,33 @@
             },
             allowClear: true,
         });
+
+        if(siteID){
+            $('#site').select2('trigger','select',{
+                data : {
+                    id : siteID,
+                    text : '{{$data->site_name}}'
+                }
+            });
+        }
+
+        if(warehouseID){
+            $('#warehouse').select2('trigger','select',{
+                data : {
+                    id : warehouseID,
+                    text : '{{$data->warehouse_name}}'
+                }
+            })
+        }
+
+        if(categoryID){
+            $('#product-category').select2('trigger','select',{
+                data : {
+                    id : categoryID,
+                    text : '{{$data->category_name}}'
+                }
+            });
+        }
 
         $("#product").select2({
             ajax: {
@@ -540,6 +564,7 @@
                     issuedBy      = $('#form').find('#issued-by').select2('val'),
                     borrowingDate = $('#form').find('#borrowing-date').data('daterangepicker').startDate.format('YYYY-MM-DD'),
                     products      = [],
+                    documents     = [],
                     zeroValue     = false;
                 
                 $.each($('#table-products > tbody > .product-item'), function (index, value) { 
@@ -563,6 +588,20 @@
                         return false;
                     }
 
+                });                
+
+                $.each($('#table-document > tbody > .document-item').find('.doc-cell'), function (index, val) { 
+                     var input    = $(this).parents('.document-item').find('.document-name'),
+                         filename = input.val(),
+                         docID    = input.attr('data-id'),
+                         path     = $(this).attr('data-path');
+
+                    documents.push({
+                        id      : docID,
+                        docName : filename,
+                        type    : 'document',
+                        path    : path
+                    });
                 });
 
                 if(products.length == 0){
@@ -574,6 +613,7 @@
                 }
 
                 data.append('products',JSON.stringify(products));
+                data.append('documents',JSON.stringify(documents));
                 data.append('issuedby',issuedBy);
                 data.append('dateborrowing',borrowingDate);
 
@@ -610,8 +650,7 @@
                     });
                 })
             }
-        });
-
+        });                      
     });
 
     function initInputFile(){
@@ -619,7 +658,7 @@
           let fileName = $(this).val().split('\\').pop();
           $(this).next('.custom-file-label').addClass("selected").html(fileName);
         });
-    }
+    }    
 
     function addProduct() {
         var product = $('#product').select2('data');
@@ -648,7 +687,7 @@
                         <td class="text-center" width="15">${uom}</td>
                         <td class="text-right" width="15">${qtySystem}</td>
                         <td class="text-center" width="15">
-                            <input type="number" name="qty_request" class="form-control numberfield text-right qty-request" placeholder="0" required>
+                            <input type="number" name="qty_request" class="form-control numberfield text-right qty-request" placeholder="0" readonly>
                         </td>
                         <td class="text-center" width="15">
                             <button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
@@ -657,61 +696,155 @@
 
         table.append(html);
         $('#product').val(null).trigger('change');
-    }
+    }   
 
-    function addDocument() {
-        var noData = $('#table-document > tbody').find('.no-available-data');
+    function initDocuments() {
+       var  dataProducts  = @json($data->products),
+            dataFiles     = @json($data->files),
+            dataImages    = @json($data->images); 
+            
+        // Init Products
+        if(dataProducts.length > 0){
+            var html  = ``,        
+                table = $('#table-products > tbody');
 
-        if (noData.length == 1) {
-            noData.remove();
+            $.each(dataProducts, function (index, value) { 
+                 var id          = value.product_id,
+                     productName = value.product_name,
+                     categoryID  = value.product_category_id,
+                     uomID       = value.uom_id,
+                     uom         = value.uom_name,
+                     qtySystem   = value.qty_system,
+                     qtyRequest  = value.qty_requested;
+
+                 html += `<tr class="product-item">
+                            <input type="hidden" class="item-product" value="${id}" data-category-id="${categoryID}" data-uom-id="${uomID}" data-qty-system="${qtySystem}" data-qty-request="0">
+                            <td width="100">${productName}</td>
+                            <td class="text-center" width="15">${uom}</td>
+                            <td class="text-right" width="15">${qtySystem}</td>
+                            <td class="text-right" width="15">${qtyRequest}</td>                            
+                        </tr>`;            
+            });
+
+            table.find('.no-available-data').remove();
+            table.append(html);
+        }
+        
+        // Init Files
+        if(dataFiles.length > 0){
+            var html  = ``,
+                table = $('#table-document > tbody');
+            $.each(dataFiles, function (index, value) { 
+                var id          = value.id,
+                    borrowingID = value.product_borrowing_id,
+                    docName     = value.document_name,
+                    docFile     = value.file,
+                    path        = `{{asset('assets/productborrowing/${borrowingID}/document/${docFile}')}}`;
+
+                html += `<tr class="document-item">
+                            <td>${docName}</td>
+                            <td class="doc-cell">
+                                <div class="input-group download">
+                                    <a href="${path}" target="_blank">
+                                        <b><i class="fas fa-download"></i></b> Download File
+                                    </a>                                
+                                </div>
+                            </td>                            
+                        </tr>`;            
+            });            
+            
+            table.find('.no-available-data').remove();
+            table.append(html);            
         }
 
-        var html = `<tr class="document-item">
-                        <td>
-                            <input type="text" class="form-control document-name" name="document_name[]" placeholder="Enter document name" required>
-                        </td>
-                        <td>
-                            <div class="input-group">
-                                <div class="custom-file">   
-                                    <input type="file" class="custom-file-input" name="attachment[]" required>
+        // Init Images
+        if(dataImages.length > 0){
+            var html  = ``,
+                table = $('#table-photo > tbody');
+
+            $.each(dataImages, function (index, value) { 
+                var borrowingID = value.product_borrowing_id,
+                    imageName   = value.document_name,
+                    imageFile   = value.file,
+                    path        = `assets/productborrowing/${borrowingID}/image/${imageFile}`;
+
+                html += `<tr class="photo-item">
+                            <td>${imageName}</td>
+                            <td class="doc-cell">
+                                <div class="input-group download">
+                                    <a href="${path}" target="_blank">
+                                        <b><i class="fas fa-download"></i></b> Download File
+                                    </a>                                
+                                </div>
+                            </td>                            
+                        </tr>`;            
+            });            
+            
+            table.find('.no-available-data').remove();
+            table.append(html);            
+        }                
+    }    
+
+    const editFile = (that,table) => {        
+         var parent     = '',
+                element    = '';
+            if(table == 'document'){
+                parent  = 'document-item' ;
+                element = `<div class="input-group">
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" name="document[]" required>
                                     <label class="custom-file-label" for="exampleInputFile">Attach a file</label>
-                                </div>                                
-                            </div>
-                        </td>
-                        <td class="text-center">
-                            <button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>`;
-        $('#table-document > tbody').append(html);
-        initInputFile();
-    }
-
-    function addPhoto() {
-        var noData = $('#table-photo > tbody').find('.no-available-data');
-
-        if (noData.length == 1) {
-            noData.remove();
-        }
-
-        var html = `<tr class="photo-item">
-                        <td>
-                            <input type="text" class="form-control document-name" name="photo_name[]" placeholder="Enter photo name" required>
-                        </td>
-                        <td>
-                            <div class="input-group">
+                                </div> 
+                                <div class="input-group-prepend ml-1">
+                                    <button class="btn btn-md text-xs btn-warning btn-flat legitRipplet" onclick="undoEdit($(this))" data-table="document" type="button"><i class="fas fa-undo"></i></button>
+                                </div>                               
+                            </div>`;
+                                        
+            }else if(table == 'photo'){
+                parent  = 'photo-item';
+                element = `<div class="input-group">
                                 <div class="custom-file">
                                     <input type="file" class="custom-file-input" name="photo[]" required>
-                                    <label class="custom-file-label" for="exampleInputFile">Attach a file</label>
+                                    <label class="custom-file-label" for="exampleInputFile">Attach a file</label>                                
                                 </div>                                
-                            </div>
-                        </td>
-                        <td class="text-center">
-                            <button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>`;
-        $('#table-photo > tbody').append(html);
-        initInputFile();
+                                <div class="input-group-prepend ml-1">
+                                    <button class="btn btn-md text-xs btn-warning btn-flat legitRipplet" onclick="undoEdit($(this))" data-table="photo" type="button"><i class="fas fa-undo"></i></button>
+                                </div>
+                            </div>`;
+            }
+            var cell = that.parents(`.${parent}`).children('.doc-cell');                
+            cell.html(element);
     }
+
+    const undoEdit = (that) => {
+        var tableName  = that.attr('data-table'),
+            parent     = '',
+            path       = '';
+        
+        if(tableName == 'document'){
+            parent = 'document-item';                        
+            path = that.parents(`.${parent}`).attr('data-path');
+        }else{
+            parent = 'photo-item';
+            path = that.parents(`.${parent}`).attr('data-path');
+        }    
+        
+        var cell = that.parents(`.${parent}`).find('.doc-cell'),
+            path = cell.attr('data-path'),
+            element = `<div class="input-group download">
+                                    <a href="${path}" target="_blank">
+                                        <b><i class="fas fa-download"></i></b> Download File
+                                    </a>                                
+                                </div>`;
+        cell.html(element);        
+    }
+
+    function initPath() {
+        var docFiles = $('#table-document > tbody > .document-item').find('input[type=file]');
+        
+        docFiles.next().html(docFiles.val());
+
+    }        
 
     function onSubmit(status) {
         $('#form').find('input[name=status]').val(status);
