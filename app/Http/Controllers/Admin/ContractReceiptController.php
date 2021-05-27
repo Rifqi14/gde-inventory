@@ -508,6 +508,11 @@ class ContractReceiptController extends Controller
                 }
             }
 
+            if ($request->status == 'COMPLETED') {
+                $contractreceipt->status    = 'COMPLETED';
+                $contractreceipt->save();
+            }
+
             DB::commit();
             return response()->json([
                 'status'     => true,

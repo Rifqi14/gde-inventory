@@ -225,7 +225,12 @@
               </table>
             </div>
             <div class="card-footer">
-              <button type="submit" class="btn bg-olive color-palette btn-labeled legitRipple text-sm btn-sm">
+              <input type="hidden" name="status" value="{{ $contractreceipt->status }}">
+              <button type="button" class="btn bg-success color-palette btn-labeled legitRipple text-sm btn-sm" onclick="submitTest('COMPLETED')">
+                <b><i class="fas fa-check-circle"></i></b>
+                Approved
+              </button>
+              <button type="button" class="btn bg-olive color-palette btn-labeled legitRipple text-sm btn-sm" onclick="submitTest('CHECKSTATUS')">
                 <b><i class="fas fa-save"></i></b>
                 Save
               </button>
@@ -259,6 +264,13 @@
     		['misc', ['fullscreen', 'codeview', 'help']]
     	]
     });
+  }
+
+  const submitTest = (status) => {
+    if (status) {
+      $('input[name=status]').val(status);
+    }
+    $("form").first().trigger("submit");
   }
 
   const addDocument = () => {

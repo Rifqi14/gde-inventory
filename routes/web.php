@@ -218,5 +218,10 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/productborrowing/archive/{id}','Admin\ProductBorrowingController@archive');
         Route::get('/productborrowing/delete/{id}','Admin\ProductBorrowingController@destroy');                
         Route::resource('/productborrowing','Admin\ProductBorrowingController');
+        // Product Consumable
+        Route::get('/consumable/read', 'Admin\ProductConsumableController@read')->name('consumable.read');
+        Route::get('/consumable/select', 'Admin\ProductConsumableController@select')->name('consumable.select');
+        Route::resource('/consumable', 'Admin\ProductConsumableController');
+        
     });
 });
