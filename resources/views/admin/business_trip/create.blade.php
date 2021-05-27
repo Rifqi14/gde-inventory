@@ -144,6 +144,42 @@ Create Business Trips
                   <b><i class="fas fa-plus"></i></b> Add
                 </button>
               </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-body">
+              <span class="title">
+                <hr>
+                <h5 class="text-md text-dark text-uppercase">Location</h5>
+              </span>
+              <!-- LOCATION -->
+              <div id="form-location">
+                <div class="row mt-4 mb-0">
+                  <div class="col-md-10">
+                    <label>Location:</label>
+                  </div>                  
+                </div>
+                <div class="row item-location">
+                  <input type="hidden" class="location" value="">
+                  <div class="col-md-11">
+                    <input type="text" class="form-control input-location" name="location[]" placeholder="Enter location">
+                  </div>                  
+                  <div class="col-md-1">
+                    <div class="form-group" style="margin-top: 2px;">
+                      <button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
+                    </div>
+                  </div>
+                </div>
+              </div>              
+              <div class="text-right">
+                <button type="button" id="add-location" data-urutan="1" class="btn btn-labeled labeled-sm btn-md text-xs btn-success btn-flat legitRipple" onclick="addLocation()">
+                  <b><i class="fas fa-plus"></i></b> Add
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-body">
               <!-- REQUEST VEHICLE -->
               <span class="title">
                 <hr />
@@ -251,7 +287,7 @@ Create Business Trips
               </span>
               <div class="form-group">
                 <label for="business-trip-number">Business Trip Number</label>
-                <input type="text" class="form-control" name="business_trip_number" id="business-trip-number" placeholder="Enter Business Trip Number" required>
+                <input type="text" class="form-control" name="business_trip_number" id="business-trip-number" placeholder="Auto generate number" readonly>
               </div>
               <div class="form-group mt-4">
                 <label>Issued by:</label>
@@ -262,36 +298,32 @@ Create Business Trips
                 </select>
               </div>
               <div class="form-group row">
-								<div class="col-md-6">
-									<label>Departure Date:</label>
-									<div class="input-group">
-										<div class="input-group-prepend">
-											<span class="input-group-text">
-												<i class="far fa-calendar-alt"></i>
-											</span>
-										</div>
-										<input type="datepicker" class="form-control datepicker text-right departure-date" id="departure-date" required>
-									</div>
-								</div>
-								<div class="col-md-6">
-									<label for="arrived-date">Arrived Date:</label>
-									<div class="input-group">
-										<div class="input-group-prepend">
-											<span class="input-group-text">
-												<i class="far fa-calendar-alt"></i>
-											</span>
-										</div>
-										<input type="datepicker" class="form-control datepicker text-right arrived-date" id="arrived-date" required>
-									</div>
-								</div>
-							</div>
+                <div class="col-md-6">
+                  <label>Departure Date:</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">
+                        <i class="far fa-calendar-alt"></i>
+                      </span>
+                    </div>
+                    <input type="datepicker" class="form-control datepicker text-right departure-date" id="departure-date" required>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <label for="arrived-date">Arrived Date:</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">
+                        <i class="far fa-calendar-alt"></i>
+                      </span>
+                    </div>
+                    <input type="datepicker" class="form-control datepicker text-right arrived-date" id="arrived-date" required>
+                  </div>
+                </div>
+              </div>
               <div class="form-group">
                 <label>Purpose:</label>
                 <input type="text" class="form-control" id="purpose" name="purpose" placeholder="Enter purpose" required>
-              </div>
-              <div class="form-group">
-                <label>Location:</label>
-                <input type="text" class="form-control" id="location" name="location" placeholder="Enter location" required>
               </div>
               <div class="form-group">
                 <label>Rate:</label>
@@ -303,7 +335,7 @@ Create Business Trips
                   </div>
                   <input type="text" class="form-control input-price text-right" id="rate" name="rate" placeholder="Enter rate" value="0" maxlength="14">
                 </div>
-              </div>              
+              </div>
               <div class="form-group row">
                 <div class="col-md-12">
                   <div class="form-group">
@@ -356,7 +388,7 @@ Create Business Trips
 
   $(function() {
     initSelect2();
-    initInputPrice();    
+    initInputPrice();
 
     $('.summernote').summernote({
       height: 145,
@@ -385,7 +417,7 @@ Create Business Trips
     });
 
     $('.departure-date').data('daterangepicker').setStartDate(moment(new Date()));
-    $('.arrived-date').data('daterangepicker').setStartDate(moment(new Date()).add(6,'days'));
+    $('.arrived-date').data('daterangepicker').setStartDate(moment(new Date()).add(6, 'days'));
 
     // FORM DEPART METHOD
 
@@ -421,7 +453,7 @@ Create Business Trips
         $(this).parents('.item-return').remove();
         $('#form-return').find('.item-return').first().removeClass('mt-2');
       }
-      sumRate();      
+      sumRate();
     });
 
     $('#form-return').on('change', '.returning-type', function() {
@@ -431,7 +463,7 @@ Create Business Trips
 
     $('#form-return').on('keyup', '.returning-description', function() {
       var description = $(this).val();
-      $(this).parents('.item-return').find('input[class=returning]').attr('data-description', description);      
+      $(this).parents('.item-return').find('input[class=returning]').attr('data-description', description);
     });
 
     $('#form-return').on('keyup', '.returning-price', function() {
@@ -442,7 +474,25 @@ Create Business Trips
 
     // FORM REQUEST VEHICLE METHOD
     $('#form-request-vehicle').on('click', '.remove', function() {
-      $(this).parents('.item-request-vehicle').remove();      
+      $(this).parents('.item-request-vehicle').remove();
+    });
+
+    // FORM LOCATION METHOD 
+    $('#form-location').on('click','.remove', function(){
+      if ($('.item-location').length > 1) {
+        $(this).parents('.item-location').remove();
+        $('#form-location').find('.item-location').first().removeClass('mt-2');
+      }
+    });
+
+    $('#form-location').on('keyup', '.input-location', function() {
+      var location = $(this).val();
+      $(this).parents('.item-location').find('input[class=location]').val(location);
+    });
+
+    $('#form-location').on('change', '.input-location', function() {
+      var location = $(this).val();
+      $(this).parents('.item-location').find('input[class=location]').val(location);
     });
 
     // FORM LODGING METHOD
@@ -508,11 +558,10 @@ Create Business Trips
       sumRate();
     });
 
+
+    // SUBMIT ACTION
     $("#form").validate({
-      rules: {
-        business_trip_number: {
-          required: true
-        },
+      rules: {        
         purpose: {
           required: true
         },
@@ -526,10 +575,7 @@ Create Business Trips
           required: true
         }
       },
-      messages: {
-        business_trip_number: {
-          required: 'This field is required.'
-        },
+      messages: {        
         purpose: {
           required: 'This field is required.'
         },
@@ -564,14 +610,15 @@ Create Business Trips
         $(element).removeClass('is-invalid');
       },
       submitHandler: function() {
-        var data          = new FormData($('#form')[0]),          
-            departureDate = $('.departure-date').data('daterangepicker').startDate.format('DD/MM/YYYY'),
-            arrivedDate   = $('.arrived-date').data('daterangepicker').startDate.format('DD/MM/YYYY'),
-            departure     = [],
-            returning     = [],
-            vehicle       = [],
-            lodging       = [],
-            others        = [];
+        var data        = new FormData($('#form')[0]),
+          departureDate = $('.departure-date').data('daterangepicker').startDate.format('DD/MM/YYYY'),
+          arrivedDate   = $('.arrived-date').data('daterangepicker').startDate.format('DD/MM/YYYY'),
+          departure     = [],
+          returning     = [],
+          location      = [],
+          vehicle       = [],
+          lodging       = [],
+          others        = [];
 
         $.each($('#form-depart > .item-depart').find('input[class=depart]'), function(index, value) {
           var type = $(this).attr('data-type'),
@@ -597,11 +644,18 @@ Create Business Trips
           });
         });
 
-        $.each($('#form-request-vehicle > .item-request-vehicle').find('input[class=vehicles]'), function (index, value) { 
-           var request_id = $(this).val();
-           vehicle.push({
-             request_id : request_id
+        $.each($('#form-location > .item-location').find('input[class=location]'), function (index, value) { 
+           var locate = $(this).val();
+           location.push({              
+              location : locate
            });
+        });        
+
+        $.each($('#form-request-vehicle > .item-request-vehicle').find('input[class=vehicles]'), function(index, value) {
+          var request_id = $(this).val();
+          vehicle.push({
+            request_id: request_id
+          });
         });
 
         $.each($('#form-lodging > .item-lodging').find('input[class=lodging]'), function(index, value) {
@@ -628,11 +682,12 @@ Create Business Trips
           });
         });
 
-        data.append('issued',userID);
+        data.append('issued', userID);
         data.append('departure_date', changeDateFormat(departureDate));
         data.append('arrived_date', changeDateFormat(arrivedDate));
         data.append('departure', JSON.stringify(departure));
         data.append('returning', JSON.stringify(returning));
+        data.append('location', JSON.stringify(location));
         data.append('vehicle', JSON.stringify(vehicle));
         data.append('lodging', JSON.stringify(lodging));
         data.append('others', JSON.stringify(others));
@@ -648,10 +703,7 @@ Create Business Trips
             blockMessage('body', 'Please Wait . . . ', '#fff');
           }
         }).done(function(response) {
-          $('body').unblock();
-          console.log({
-            response: response
-          });
+          $('body').unblock();         
           if (response.status) {
             toastr.success('Data has been saved.');
             document.location = "{{route('businesstrip.index')}}";
@@ -672,12 +724,12 @@ Create Business Trips
       }
     });
 
-  });  
+  });
 
-  function initSelect2() {    
+  function initSelect2() {
     $('.select2').select2({
       allowClear: true
-    });    
+    });
   }
 
   function initRequestVehicle() {
@@ -713,22 +765,22 @@ Create Business Trips
       },
       allowClear: true,
     }).on('select2:select', function(e) {
-		var data = e.params.data;		
-			var element = $(this).parents('.item-request-vehicle');
+      var data = e.params.data;
+      var element = $(this).parents('.item-request-vehicle');
 
-			element.find('.date-request-vehicle').val(data.daterequest);
-			element.find('input[class=vehicles]').val(data.id);
-			
-			if (data.notes) {				
-				element.find('.remarks').summernote('code', data.notes);				
-			}			
-		}).on('select2:clearing', function() {
-			var element = $(this).parents('.item-request-vehicle');
+      element.find('.date-request-vehicle').val(data.daterequest);
+      element.find('input[class=vehicles]').val(data.id);
 
-			element.find('.remarks').summernote('reset');
-			element.find('.date-request-vehicle').val('');
-			element.find('input[class=vehicles]').val('');
-		});
+      if (data.notes) {
+        element.find('.remarks').summernote('code', data.notes);
+      }
+    }).on('select2:clearing', function() {
+      var element = $(this).parents('.item-request-vehicle');
+
+      element.find('.remarks').summernote('reset');
+      element.find('.date-request-vehicle').val('');
+      element.find('input[class=vehicles]').val('');
+    });
   }
 
   function initInputPrice() {
@@ -744,10 +796,10 @@ Create Business Trips
   function initRemarks() {
     $('.remarks').summernote({
       height: 100,
-      toolbar: [],            
-    });            
+      toolbar: [],
+    });
     $('.remarks').next().find(".note-editable").attr("contenteditable", false);
-  }  
+  }
 
   function addDepart() {
     var length = $('#form-depart').find('.item-depart').length,
@@ -838,6 +890,27 @@ Create Business Trips
     initInputPrice();
   }
 
+  const addLocation = () => {
+    var length = $('#form-location').find('.item-location').length,
+      mt = '';
+    if (length > 0) {
+      mt = 'mt-2'
+    }
+
+    var html = `<div class="row item-location ${mt}">
+                  <input type="hidden" class="location" value="">
+                  <div class="col-md-11">
+                    <input type="text" class="form-control input-location" name="location[]" placeholder="Enter location">
+                  </div>                  
+                  <div class="col-md-1">
+                    <div class="form-group" style="margin-top: 2px;">
+                      <button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
+                    </div>
+                  </div>
+                </div>`;
+    $('#form-location').append(html);
+  }
+
   function addVehicle() {
     var length = $('#form-request-vehicle').find('.item-request-vehicle').length,
       mt = '';
@@ -879,7 +952,7 @@ Create Business Trips
 
     $('#form-request-vehicle').append(html);
     initRequestVehicle();
-    initRemarks();        
+    initRemarks();
   }
 
   function addLodging() {
@@ -956,41 +1029,41 @@ Create Business Trips
   }
 
   function sumRate() {
-		var rate 	  = 0,
-			departure = 0,
-			returning = 0,
-			lodging   = 0,
-			others 	  = 0;
+    var rate = 0,
+      departure = 0,
+      returning = 0,
+      lodging = 0,
+      others = 0;
 
-		$.each($('#form-depart > .item-depart').find('input[class=depart]'), function(index, value) {
-			var price = intCurrency($(this).attr('data-price'));
-			departure += price;
-		});
+    $.each($('#form-depart > .item-depart').find('input[class=depart]'), function(index, value) {
+      var price = intCurrency($(this).attr('data-price'));
+      departure += price;
+    });
 
-		$.each($('#form-return > .item-return').find('input[class=returning]'), function(index, value) {
-			var price = intCurrency($(this).attr('data-price'));
-			returning += price;
-		});
+    $.each($('#form-return > .item-return').find('input[class=returning]'), function(index, value) {
+      var price = intCurrency($(this).attr('data-price'));
+      returning += price;
+    });
 
-		$.each($('#form-lodging > .item-lodging').find('input[class=lodging]'), function(index, value) {
-			var price = intCurrency($(this).attr('data-price')),
-				days  = intCurrency($(this).attr('data-days')),
-				subs  = (price*days);	
-			lodging += subs;				
-		});
+    $.each($('#form-lodging > .item-lodging').find('input[class=lodging]'), function(index, value) {
+      var price = intCurrency($(this).attr('data-price')),
+        days = intCurrency($(this).attr('data-days')),
+        subs = (price * days);
+      lodging += subs;
+    });
 
-		$.each($('#form-others > .item-others').find('input[class=others-data]'), function(index, value) {
-			var price = intCurrency($(this).attr('data-price')),
-				qty   = intCurrency($(this).attr('data-qty')),
-				subs  = (price*qty);
-			others += subs;
-		});
+    $.each($('#form-others > .item-others').find('input[class=others-data]'), function(index, value) {
+      var price = intCurrency($(this).attr('data-price')),
+        qty = intCurrency($(this).attr('data-qty')),
+        subs = (price * qty);
+      others += subs;
+    });
 
-		rate = departure + returning + lodging + others;		
+    rate = departure + returning + lodging + others;
 
-		$('input[name=rate]').val(rate);    
-		initInputPrice();
-	}
+    $('input[name=rate]').val(rate);
+    initInputPrice();
+  }
 
   function submitTest(status) {
     if (status) {
@@ -998,7 +1071,7 @@ Create Business Trips
     }
     $("form").first().trigger("submit");
   }
-  
+
 
   function changeDateFormat(date) {
     var newdate = '';
@@ -1009,16 +1082,17 @@ Create Business Trips
 
     return newdate;
   }
+
   function intCurrency(value) {
-		var newCurrency = '';
-		if(value){
-			var currency = value.split('.');			
-			$.each(currency, function (index,value) { 
-				 newCurrency += value;
-			});
-		}
-		
-		return parseInt(newCurrency);
-	}	
+    var newCurrency = '';
+    if (value) {
+      var currency = value.split('.');
+      $.each(currency, function(index, value) {
+        newCurrency += value;
+      });
+    }
+
+    return parseInt(newCurrency);
+  }
 </script>
 @endsection

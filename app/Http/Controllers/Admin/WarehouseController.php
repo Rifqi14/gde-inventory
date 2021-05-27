@@ -31,10 +31,14 @@ class WarehouseController extends Controller
         $site_id = $request->site_id;
 
         //Count Data
-        $query = Warehouse::select('*');
-        $query->whereRaw("upper(name) like '%$name%'");
-        if ($site_id) {
-            $query->where('site_id', $site_id);
+        $query = Warehouse::selectRaw("
+            warehouses.*,
+            sites.name as site
+        ");
+        $query->leftJoin('sites','sites.id','=','warehouses.site_id');
+        $query->whereRaw("upper(warehouses.name) like '%$name%'");
+        if($site_id){
+            $query->where('site_id',$site_id);
         }
 
         $row = clone $query;

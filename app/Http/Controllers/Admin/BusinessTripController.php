@@ -12,6 +12,7 @@ use App\Models\BusinessTripVehicle;
 use App\Models\BusinessTripOther;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class BusinessTripController extends Controller
 {
@@ -89,20 +90,38 @@ class BusinessTripController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    // public function show($id)
-    // {
-    //     $budget = Budget::with('detail')->find($id);
-    //     $site = Site::find($budget->site_id);
-    //     $budget->origin_amount = $budget->amount;
-    //     $budget->amount = number_format($budget->amount, '2', '.', '');
-    //     $budget->site_name = $site->name;
-    //     $user = $budget;
-    //     if ($user) {
-    //         return view('admin.businesstrip.detail', compact('user'));
-    //     } else {
-    //         abort(404);
-    //     }
-    // }       
+    public function show($id)
+    {
+        $businesstrip = BusinessTrip::with([
+            'departs',
+            'returns',
+            'vehicles' => function($q){
+                $q->selectRaw("
+                    business_trip_vehicles.*,                    
+                    TO_CHAR(request_vehicles.start_request,'DD/MM/YYYY') as start_request,
+                    TO_CHAR(request_vehicles.finish_request,'DD/MM/YYYY') as finish_request,
+                    vehicles.vehicle_name,
+                    request_vehicles.remarks
+                ");
+                $q->leftJoin('request_vehicles','request_vehicles.id','=','business_trip_vehicles.request_vehicle_id');
+                $q->leftJoin('vehicles','vehicles.id','=','request_vehicles.vehicle_id');
+            },
+            'lodgings',
+            'others'
+        ]);
+        $businesstrip->selectRaw("
+            business_trips.*,
+            users.name as issued_name
+        ");
+        $businesstrip->leftJoin('users','users.id','=','business_trips.issued_by');
+        $businesstrip = $businesstrip->find($id);
+        if ($businesstrip) {
+            $data = $businesstrip;
+            return view('admin.business_trip.detail', compact('data'));
+        } else {
+            abort(404);
+        }
+    }       
 
     public function select(Request $request)
     {
@@ -209,8 +228,7 @@ class BusinessTripController extends Controller
      */
     public function store(Request $request)
     {        
-        $validator = Validator::make($request->all(),[
-            'business_trip_number' => 'required|unique:business_trips,business_trip_number',
+        $validator = Validator::make($request->all(),[            
             'departure_date'       => 'required',
             'arrived_date'         => 'required',
             'purpose'              => 'required',
@@ -225,7 +243,6 @@ class BusinessTripController extends Controller
             ],400);
         }
 
-        $number      = $request->business_trip_number;
         $issued_by   = $request->issued;
         $status      = $request->status;
         $purpose     = $request->purpose;
@@ -234,8 +251,7 @@ class BusinessTripController extends Controller
         $arriveddate = $request->arrived_date;
         $rate        = str_replace('.','',$request->rate);
 
-        $query = BusinessTrip::create([
-            'business_trip_number' => $number,
+        $query = BusinessTrip::create([            
             'issued_by'            => $issued_by,
             'departure_date'       => $departdate,
             'arrived_date'         => $arriveddate,
@@ -595,6 +611,6 @@ class BusinessTripController extends Controller
                 'status' => false                
             ], 400);
         }
-    }
+    }    
 
 }

@@ -130,6 +130,7 @@ Route::group(['prefix' => 'admin'], function () {
         Route::resource('/bin', 'Admin\BinController');
         // Route Product
         Route::get('/product/read', 'Admin\ProductController@read')->name('product.read');
+        Route::get('/product/select','Admin\ProductController@select')->name('product.select');
         Route::resource('/product','Admin\ProductController');
         // Route Province
         Route::get('/province/select', 'Admin\ProvinceController@select')->name('province.select');
@@ -211,9 +212,16 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/attendance/read', 'Admin\AttendanceController@read')->name('attendance.read');
         Route::resource('/attendance', 'Admin\AttendanceController');
 
+        // Product Borrowing        
+        Route::get('/productborrowing/read','Admin\ProductBorrowingController@read')->name('productborrowing.read');        
+        Route::get('/productborrowing/readarchived','Admin\ProductBorrowingController@readarchived')->name('productborrowing.readarchived');
+        Route::get('/productborrowing/archive/{id}','Admin\ProductBorrowingController@archive');
+        Route::get('/productborrowing/delete/{id}','Admin\ProductBorrowingController@destroy');                
+        Route::resource('/productborrowing','Admin\ProductBorrowingController');
         // Product Consumable
         Route::get('/consumable/read', 'Admin\ProductConsumableController@read')->name('consumable.read');
         Route::get('/consumable/select', 'Admin\ProductConsumableController@select')->name('consumable.select');
         Route::resource('/consumable', 'Admin\ProductConsumableController');
+        
     });
 });

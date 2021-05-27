@@ -81,7 +81,33 @@ Edit Business Trips
 									<b><i class="fas fa-plus"></i></b> Add
 								</button>
 							</div>
-							@endif
+							@endif							
+						</div>
+					</div>
+					<div class="card">
+						<div class="card-body">
+							<span class="title">
+								<hr>
+								<h5 class="text-md text-dark text-uppercase">Location</h5>
+							</span>
+							<div id="form-location">
+								<div class="row mt-4 mb-0">
+									<div class="col-md-10">
+										<label>Location:</label>
+									</div>                  
+								</div>
+							</div>
+							@if($data->status != 'approved')
+							<div class="text-right">
+								<button type="button" data-urutan="1" class="btn btn-labeled labeled-sm btn-md text-xs btn-success btn-flat legitRipple" onclick="addLocation()">
+									<b><i class="fas fa-plus"></i></b> Add
+								</button>
+							</div>
+							@endif	
+						</div>							
+					</div>
+					<div class="card">
+						<div class="card-body">		
 							<!-- REQUEST VEHICLE -->
 							<span class="title">
 								<hr />
@@ -95,7 +121,7 @@ Edit Business Trips
 									<b><i class="fas fa-plus"></i></b> Add
 								</button>
 							</div>
-							@endif
+							@endif					
 						</div>
 					</div>
 					<div class="card">
@@ -169,7 +195,7 @@ Edit Business Trips
 							</span>
 							<div class="form-group"> 
 								<label for="business-trip-number">Business Trip Number</label>
-								<input type="text" class="form-control" name="business_trip_number" id="business-trip-number" placeholder="Enter Business Trip Number" value="{{$data->business_trip_number}}" readonly>
+								<input type="text" class="form-control" name="business_trip_number" id="business-trip-number" placeholder="Auto Generate Number" value="{{$data->business_trip_number}}" readonly>
 							</div>
 							<div class="form-group mt-4">
 								<label>Issued by:</label>
@@ -204,13 +230,9 @@ Edit Business Trips
 								</div>
 							</div>
 							<div class="form-group">
-								<label>Purpose:</label>
-								<input type="text" class="form-control" id="purpose" name="purpose" placeholder="Enter purpose" value="{{$data->purpose}}" required>
-							</div>
-							<div class="form-group">
-								<label>Location:</label>
-								<input type="text" class="form-control" id="location" name="location" placeholder="Enter location" value="{{$data->location}}" required {{$data->status=='approved'?'':'readonly'}}>
-							</div>
+								<label for="purpose" class="control-label">Purpose</label>
+								<input type="text" class="form-control" name="purpose" id="purpose" value="{{$data->purpose}}">
+							</div>							
 							<div class="form-group">
 								<label>Rate:</label>
 								<div class="input-group">
@@ -366,6 +388,19 @@ Edit Business Trips
 			sumRate();
 		});
 
+		// FORM LOCATION METHOD 
+		$('#form-location').on('click','.remove', function(){
+			if ($('.item-location').length > 1) {
+				$(this).parents('.item-location').remove();
+				$('#form-location').find('.item-location').first().removeClass('mt-2');
+			}
+		});
+
+		$('#form-location').on('keyup', '.input-location', function() {
+			var location = $(this).val();
+			$(this).parents('.item-location').find('input[class=location]').val(location);
+		});
+
 		// FORM REQUEST VEHICLE METHOD
 		$('#form-request-vehicle').on('click', '.remove', function() {
 			$(this).parents('.item-request-vehicle').remove();      
@@ -495,6 +530,7 @@ Edit Business Trips
 					arrivedDate   = $('.arrived-date').data('daterangepicker').startDate.format('DD/MM/YYYY'),
 					departure 	  = [],
 					returning 	  = [],
+					location 	  = [],
 					vehicle 	  = [],
 					lodging 	  = [],
 					others 		  = [];
@@ -522,6 +558,13 @@ Edit Business Trips
 						price: price
 					});
 				});
+
+				$.each($('#form-location > .item-location').find('input[class=location]'), function (index, value) { 
+					var locate = $(this).val();
+					location.push({              
+						location : locate
+					});
+				});       
 
 				$.each($('#form-request-vehicle').find('input[class=vehicles]'), function (index, value) { 
 					 var request_id = $(this).val();
@@ -558,6 +601,7 @@ Edit Business Trips
 				data.append('departure_date', changeDateFormat(departureDate));
 				data.append('arrived_date', changeDateFormat(arrivedDate));
 				data.append('departure', JSON.stringify(departure));
+				data.append('location', JSON.stringify(location));
 				data.append('vehicle', JSON.stringify(vehicle));	
 				data.append('returning', JSON.stringify(returning));
 				data.append('lodging', JSON.stringify(lodging));
@@ -660,6 +704,7 @@ Edit Business Trips
 	function initData() {
 		var departs  = @json($data->departs),
 			returns  = @json($data->returns),
+			locations = @json($data->location),
 			vehicles = @json($data->vehicles),
 			lodgings = @json($data->lodgings),
 			others   = @json($data->others),
@@ -678,8 +723,7 @@ Edit Business Trips
 				var type  = value.type,
 					desc  = value.description,
 					price = value.price?value.price:0,
-					mt    = index>0?'mt-2':'',
-					remove = state=='approved'?'':remove;
+					mt    = index>0?'mt-2':'';
 
 				html += `<div class="row ${mt} item-depart">
                   <input type="hidden" class="depart" name="depart[]" data-type="${type}" data-description="${desc}" data-price="${price}"/>
@@ -729,8 +773,7 @@ Edit Business Trips
 				var type  = value.type,
 					desc  = value.description,
 					price = value.price?value.price:0,
-					mt    = index>0?'mt-2':'',
-					remove = state=='approved'?'':remove;
+					mt    = index>0?'mt-2':'';
 				html += `<div class="row ${mt} item-return">
                   <input type="hidden" class="returning" name="returning[]" data-type="${type}" data-description="${desc}" data-price="${price}"/>
                   <div class="col-md-2">
@@ -766,6 +809,35 @@ Edit Business Trips
 			addReturn();
 		}
 
+		if(locations){
+			var html   = '',				
+				remove = `<div class="col-md-1">
+								<div class="form-group" style="margin-top: 2px;">
+								<button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
+								</div>
+							</div>`
+
+			$.each(JSON.parse(locations), function (index, value) { 
+				 var location = value.location;
+
+				 html += `<div class="row item-location">
+							<input type="hidden" class="location" value="${location}">
+							<div class="col-md-11">
+								<input type="text" class="form-control input-location" name="location[]" placeholder="Enter location" value="${location}">
+							</div>                  
+							<div class="col-md-1">
+								<div class="form-group" style="margin-top: 2px;">
+								<button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
+								</div>
+							</div>
+						</div>`;
+			});
+
+			$('#form-location').append(html);
+		}else{
+			addLocation();
+		}
+
 		if(vehicles.length > 0){			
 			var html   = '',
 				remove = `<div class="col-md-1">
@@ -778,8 +850,7 @@ Edit Business Trips
 					vehicle       = value.vehicle_name,
 					description   = value.remarks,
 					startRequest  = value.start_request,
-					finishRequest = value.finish_request,
-					remove 		  = state=='approved'?'':remove;								
+					finishRequest = value.finish_request;								
 				
 				html += `<div class="row item-request-vehicle">        
                   <input type="hidden" class="vehicles" name="vehicles[]" value=""/>
@@ -841,8 +912,7 @@ Edit Business Trips
 				var place = value.place,
 					price = value.price?value.price:0,
 					days  = value.night?value.night:1,
-					mt    = index>0?'mt-2':'',
-					remove = state=='approved'?'':remove;
+					mt    = index>0?'mt-2':'';
 
 				html  += `<div class="row ${mt} item-lodging">
                   <input type="hidden" class="lodging" name="lodging[]" data-place="${place}" data-price="${price}" data-days="${days}">
@@ -884,8 +954,7 @@ Edit Business Trips
 				var desc   = value.description,
 					price  = value.price?value.price:0,
 					qty    = value.qty?value.qty:1,
-					mt     = index>0?'mt-2':'',
-					remove = state=='approved'?'':remove;
+					mt     = index>0?'mt-2':'';
 
 				 html += `<div class="row ${mt} item-others">
                   <input type="hidden" class="others-data" name="others_data[]" data-description="${desc}" data-price="${price}" data-qty="${qty}">
@@ -1008,6 +1077,27 @@ Edit Business Trips
 		$('#form-return').append(html);
 		initSelect2();
 		initInputPrice();
+	}
+
+	const addLocation = () => {
+		var length = $('#form-location').find('.item-location').length,
+		mt = '';
+		if (length > 0) {
+		mt = 'mt-2'
+		}
+
+		var html = `<div class="row item-location ${mt}">
+					<input type="hidden" class="location" value="">
+					<div class="col-md-11">
+						<input type="text" class="form-control input-location" name="location[]" placeholder="Enter location">
+					</div>                  
+					<div class="col-md-1">
+						<div class="form-group" style="margin-top: 2px;">
+						<button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
+						</div>
+					</div>
+					</div>`;
+		$('#form-location').append(html);
 	}
 
 	function addVehicle() {

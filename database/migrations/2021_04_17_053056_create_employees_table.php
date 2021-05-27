@@ -23,17 +23,13 @@ class CreateEmployeesTable extends Migration
             $table->string('npwp', 30)->nullable();
             $table->string('address')->nullable();
             $table->unsignedBigInteger('region_id')->nullable();
-            $table->unsignedBigInteger('province_id')->nullable();
-            $table->string('account_bank')->nullable();
-            $table->string('account_number')->nullable();
-            $table->string('account_name')->nullable();
+            $table->unsignedBigInteger('province_id')->nullable();            
             $table->string('shift_type');
             $table->unsignedBigInteger('working_shift_id')->nullable();
             $table->date('join_date')->nullable();
             $table->date('resign_date')->nullable();
             $table->string('photo')->nullable();
-            $table->integer('salary')->nullable();
-            $table->integer('status')->nullable();
+            $table->integer('salary')->nullable();            
             $table->timestamps();
 
             $table->foreign('region_id')->references('id')->on('regions')->onUpdate('cascade')->onDelete('cascade');
