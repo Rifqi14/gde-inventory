@@ -102,6 +102,8 @@ class ProductController extends Controller
             'description'            => $request->description,
             'product_category_id'    => $request->product_category_id,
             'merek'                  => $request->merek,
+            'sku'                    => $request->sku,
+            'is_serial'              => $request->is_serial ? '1' : '0',
         ];
 
         $attach = $request->file('image');
@@ -224,6 +226,8 @@ class ProductController extends Controller
         $product->description = $request->description;
         $product->product_category_id = $request->product_category_id;
         $product->merek = $request->merek;
+        $product->sku   = $request->sku;
+        $product->is_serial = $request->is_serial ? '1' : '0';
 
         $attach = $request->file('image');
         if ($request->hasFile('image')) {
