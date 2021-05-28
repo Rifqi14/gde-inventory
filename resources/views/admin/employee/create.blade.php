@@ -204,6 +204,10 @@
                                     </div>
                                     <!-- Salary -->
                                     <div class="form-group">
+                                        <label class="control-label" for="rate-business-trip">Rate Business Trip</label>
+                                        <input class="form-control input-price text-right" type="text" name="rate_business_trip" id="rate-business-trip" value="0" maxlength="15">
+                                    </div>
+                                    <div class="form-group">
                                         <label class="control-label" for="base-salary">Base Salary</label>
                                         <input class="form-control input-price text-right" type="text" name="salary" id="base-salary" value="0" maxlength="15">
                                     </div>
@@ -698,7 +702,7 @@
                     console.log({
                         errorMessage: message
                     });
-                })
+                });
             }
         });
     });
