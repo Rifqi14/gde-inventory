@@ -234,6 +234,7 @@ class BusinessTripController extends Controller
             'purpose'              => 'required',
             'location'             => 'required',
             'rate'                 => 'required',
+            'total_cost'           => 'required'
         ]);
 
         if($validator->fails()){
@@ -250,6 +251,7 @@ class BusinessTripController extends Controller
         $departdate  = $request->departure_date;
         $arriveddate = $request->arrived_date;
         $rate        = str_replace('.','',$request->rate);
+        $total_cost  = str_replace('.','',$request->total_cost);
 
         $query = BusinessTrip::create([            
             'issued_by'            => $issued_by,
@@ -258,7 +260,8 @@ class BusinessTripController extends Controller
             'purpose'              => $purpose,
             'location'             => $location,
             'status'               => $status,
-            'rate'                 => $rate
+            'rate'                 => $rate,
+            'total_cost'           => $total_cost
         ]);
 
         if($query){
@@ -406,6 +409,7 @@ class BusinessTripController extends Controller
             'purpose'              => 'required',
             'location'             => 'required',
             'rate'                 => 'required',
+            'total_cost'           => 'required'
         ]);
 
         if($validator->fails()){
@@ -423,6 +427,7 @@ class BusinessTripController extends Controller
         $departdate  = $request->departure_date;
         $arriveddate = $request->arrived_date;
         $rate        = str_replace('.','',$request->rate);
+        $total_cost  = str_replace('.','',$request->total_cost);
 
         $query = BusinessTrip::find($id);
         $query->issued_by      = $issued_by;
@@ -432,6 +437,7 @@ class BusinessTripController extends Controller
         $query->location       = $location;
         $query->rate           = $rate;
         $query->status         = $status;
+        $query->total_cost     = $total_cost;
         $query->update();
 
         if($query){

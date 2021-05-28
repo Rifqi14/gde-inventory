@@ -53,7 +53,7 @@ Business Trips
                   <th width="5%">No.</th>
                   <th width="20%">Business Trip Number</th>
                   <th width="20%" class="text-center">Schedule</th>
-                  <th width="20%" class="text-right">Rate</th>
+                  <th width="20%" class="text-right">Total Cost</th>
                   <th width="15%" class="text-center">Status</th>
                   <th width="10%" class="text-center">Action</th>
                 </tr>
@@ -85,7 +85,7 @@ Business Trips
                   <th width="5%">No.</th>
                   <th width="20%">Business Trip Number</th>
                   <th width="20%" class="text-center">Schedule</th>
-                  <th width="20%" class="text-right">Rate</th>
+                  <th width="20%" class="text-right">Total Cost</th>
                   <th width="15%" class="text-center">Status</th>
                   <th width="10%" class="text-center">Action</th>
                 </tr>
@@ -271,7 +271,7 @@ Business Trips
         {
           render: function(data, type, row) {
             if (row.rate) {
-              return accounting.formatMoney(row.rate, " ", 0, ".", "");
+              return accounting.formatMoney(row.total_cost, " ", 0, ".", "");
             } else {
               return 0;
             }
@@ -330,7 +330,7 @@ Business Trips
           data: "schedule"
         },
         {
-          data: "rate"
+          data: "total_cost"
         }, {
           data: "status"
         }
@@ -388,7 +388,7 @@ Business Trips
         },
         {
           render: function(data, type, row) {
-            return accounting.formatMoney(row.rate, "", 0, ".", ",");
+            return accounting.formatMoney(row.total_cost, "", 0, ".", ",");
           },
           targets: [3]
         },
@@ -409,10 +409,12 @@ Business Trips
           render: function(data, type, row) {      
           var button = `<a class="dropdown-item" href="javascript:void(0);" onclick="detail(${row.id},'table-bt-approved')">
                           <i class="fa fa-eye"></i> View Data
-                        </a>
-                        <a class="dropdown-item" href="javascript:void(0);" onclick="">
-                          <i class="fa fa-print"></i> Print Data
                         </a>`;      
+            if(actionmenu.indexOf('print') > 0){
+              button += `<a class="dropdown-item" href="javascript:void(0);" onclick="">
+                          <i class="fa fa-print"></i> Print Data
+                        </a>`;
+            }            
             return `<div class="btn-group">
                                 <button type="button" class="btn btn-flat btn-sm dropdown-toggle" data-toggle="dropdown">
                                     <i class="fas fa-bars"></i>

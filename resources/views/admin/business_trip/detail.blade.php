@@ -245,6 +245,15 @@ Detail Business Trips
 								</div>
 							</div>
 							<div class="form-group">
+								<label for="total-cost">Total Cost:</label>
+								<div class="input-group">
+									<div class="input-group-prepend">
+										<span class="input-group-text">Rp.</span>
+									</div>
+									<input type="text" class="form-control input-price text-right" id="total-cost" name="total_cost" placeholder="Automatically calculated" value="{{$data->total_cost?$data->total_cost:0}}" readonly>
+								</div>
+							</div>
+							<div class="form-group">
 								<label>Approval Status : </label>
 								<br>
 								<input type="hidden" name="status" id="status" value="{{$data->status}}">
