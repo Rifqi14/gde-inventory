@@ -163,7 +163,7 @@ class BusinessTripController extends Controller
         $businessTripNumber = $request->businesstripnumber;
         $startdate          = $request->startdate;
         $enddate            = $request->enddate;
-        $rate               = str_replace('.','',$request->rate);
+        $total_cost         = str_replace('.','',$request->total_cost);
 
         //Count Data
         $query = BusinessTrip::query();    
@@ -171,31 +171,35 @@ class BusinessTripController extends Controller
         if($businessTripNumber){
             $query->whereRaw("upper(business_trip_number) like '%$businessTripNumber%'");
         }
-        $query->where(function($w) use($status,$startdate,$enddate){
+        $query->where(function($w) use($status,$startdate,$enddate,$total_cost){
             $w->where([
                 ['departure_date','>=',$startdate],
                 ['departure_date','<=',$enddate]
             ]);
+            if($total_cost){
+                $w->where('total_cost',$total_cost);
+            }        
             if($status){
                 $w->where('status',$status);
             }else{
                 $w->where('status','<>','approved');
-            }
+            }            
         });
-        $query->orWhere(function($w) use($status,$startdate,$enddate){
+        $query->orWhere(function($w) use($status,$startdate,$enddate,$total_cost){
             $w->where([
                 ['arrived_date','>=',$startdate],
                 ['arrived_date','<=',$enddate]
             ]);
+            if($total_cost){
+                $w->where('total_cost',$total_cost);
+            }  
             if($status){
                 $w->where('status',$status);
             }else{
                 $w->where('status','<>','approved');
-            }
+            }               
         });
-        if($rate){
-            $query->where('rate',$rate);
-        }        
+        
 
         $rows  = clone $query;
         $total = $rows->count();
