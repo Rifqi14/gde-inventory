@@ -367,10 +367,10 @@ Create Business Trips
               <b><i class="fas fa-save"></i></b>
               Save
             </button>
-            <button type="button" class="btn bg-gray btn-labeled legitRipple text-sm">
-              <b><i class="fas fa-print"></i></b>
-              Print
-            </button>
+            <a href="{{ route('businesstrip.index') }}" class="btn btn-secondary color-palette btn-labeled legitRipple text-sm">
+              <b><i class="fas fa-times"></i></b>
+              Cancel
+            </a>
           </div>
         </div>
       </div>

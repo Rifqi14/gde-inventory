@@ -264,6 +264,11 @@ Business Trips
           targets: [3]
         },
         {
+          render : function(data, type, row){
+              return `<b>${row.business_trip_number}</b>`;
+          }, targets : [1]
+        },
+        {
           render: function(data, type, row) {
             if (row.rate) {
               return accounting.formatMoney(row.rate, " ", 0, ".", "");
@@ -377,6 +382,11 @@ Business Trips
           targets: [3]
         },
         {
+          render : function(data, type, row){
+              return `<b>${row.business_trip_number}</b>`;
+          }, targets : [1]
+        },
+        {
           render: function(data, type, row) {
             return accounting.formatMoney(row.rate, "", 0, ".", ",");
           },
@@ -396,15 +406,19 @@ Business Trips
           targets: [4]
         },
         {
-          render: function(data, type, row) {            
+          render: function(data, type, row) {      
+          var button = `<a class="dropdown-item" href="javascript:void(0);" onclick="detail(${row.id},'table-bt-approved')">
+                          <i class="fa fa-eye"></i> View Data
+                        </a>
+                        <a class="dropdown-item" href="javascript:void(0);" onclick="">
+                          <i class="fa fa-print"></i> Print Data
+                        </a>`;      
             return `<div class="btn-group">
                                 <button type="button" class="btn btn-flat btn-sm dropdown-toggle" data-toggle="dropdown">
                                     <i class="fas fa-bars"></i>
                                 </button>
                                 <div class="dropdown-menu">
-                                  <a class="dropdown-item" href="javascript:void(0);" onclick="detail(${row.id},'table-bt-approved')">
-                                        <i class="fa fa-eye"></i> View Data
-                                    </a>
+                                  ${button}
                                 </div>
                             </div>`;
           },
