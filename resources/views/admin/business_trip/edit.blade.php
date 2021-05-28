@@ -214,7 +214,7 @@ Edit Business Trips
 												<i class="far fa-calendar-alt"></i>
 											</span>
 										</div>
-										<input type="datepicker" class="form-control datepicker text-right departure-date" id="departure-date" required {{$data->status=='approved'?'':'readonly'}}>
+										<input type="datepicker" class="form-control datepicker text-right departure-date" id="departure-date" required>
 									</div>
 								</div>
 								<div class="col-md-6">
@@ -225,7 +225,7 @@ Edit Business Trips
 												<i class="far fa-calendar-alt"></i>
 											</span>
 										</div>
-										<input type="datepicker" class="form-control datepicker text-right arrived-date" id="arrived-date" required {{$data->status=='approved'?'':'readonly'}}>
+										<input type="datepicker" class="form-control datepicker text-right arrived-date" id="arrived-date" required>
 									</div>
 								</div>
 							</div>
@@ -241,7 +241,7 @@ Edit Business Trips
 											Rp.
 										</span>
 									</div>
-									<input type="text" class="form-control input-price text-right" id="rate" name="rate" placeholder="Enter rate" value="{{$data->rate?$data->rate:0}}" maxlength="14" {{$data->status=='approved'?'':'readonly'}}>
+									<input type="text" class="form-control input-price text-right" id="rate" name="rate" placeholder="Enter rate" value="{{$data->rate?$data->rate:0}}" maxlength="14">
 								</div>
 							</div>
 							<div class="form-group">
@@ -271,10 +271,10 @@ Edit Business Trips
 							Submit
 						</button>
 						@endif
-						<button type="button" class="btn bg-gray btn-labeled legitRipple text-sm">
-							<b><i class="fas fa-print"></i></b>
-							Print
-						</button>
+						<a href="{{ route('businesstrip.index') }}" class="btn btn-secondary color-palette btn-labeled legitRipple text-sm">
+                            <b><i class="fas fa-times"></i></b>
+                            Cancel
+                        </a>
 					</div>
 				</div>
 			</div>
