@@ -466,7 +466,7 @@
 
         $( "#uom" ).select2({
             ajax: {
-                url: "{{ route('uomcategory.select') }}",
+                url: "{{ route('uom.select') }}",
                 type:'GET',
                 dataType: 'json',
                 data: function (params) {

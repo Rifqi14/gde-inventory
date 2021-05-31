@@ -206,6 +206,10 @@
                                     </div>
                                     <!-- Salary -->
                                     <div class="form-group">
+                                        <label class="control-label" for="rate-business-trip">Rate Business Trip</label>
+                                        <input class="form-control input-price text-right" type="text" name="rate_business_trip" id="rate-business-trip" value="{{$data->rate_business_trip?$data->rate_business_trip:0}}" maxlength="15">
+                                    </div>
+                                    <div class="form-group">
                                         <label class="control-label" for="base-salary">Base Salary</label>
                                         <input class="form-control input-price text-right" type="text" name="salary" id="base-salary" value="{{$data->salary?$data->salary:0}}" maxlength="15">
                                     </div>
