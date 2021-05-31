@@ -212,6 +212,10 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/attendance/read', 'Admin\AttendanceController@read')->name('attendance.read');
         Route::resource('/attendance', 'Admin\AttendanceController');
 
+        // Attendance Log
+        Route::get('/attendancelog/read', 'Admin\AttendanceLogController@read')->name('attendancelog.read');
+        Route::resource('/attendancelog', 'Admin\AttendanceLogController');
+
         // Product Borrowing        
         Route::get('/productborrowing/read','Admin\ProductBorrowingController@read')->name('productborrowing.read');        
         Route::get('/productborrowing/readarchived','Admin\ProductBorrowingController@readarchived')->name('productborrowing.readarchived');
