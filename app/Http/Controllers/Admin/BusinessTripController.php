@@ -623,4 +623,93 @@ class BusinessTripController extends Controller
         }
     }    
 
+    public function rateprocess()
+    {           
+        $query = BusinessTrip::with([
+            'departs' => function($w){
+                $w->selectRaw(" 
+                    business_trip_id,
+                    price
+                ");
+            },
+            'returns'=> function($w){
+                $w->selectRaw(" 
+                    business_trip_id,
+                    price
+                ");
+            },            
+            'lodgings' => function($w){
+                $w->selectRaw(" 
+                    business_trip_id,
+                    price,
+                    night,
+                    (price * night) as subtotal
+                ");
+            },
+            'others' => function($w){
+                $w->selectRaw(" 
+                    business_trip_id,
+                    price,
+                    qty,
+                    (price * qty) as subtotal
+                ");
+            }
+        ]);
+        $query->selectRaw("
+            business_trips.id,                                     
+            business_trips.status,
+            business_trips.total_cost,
+            (case when employees.rate_business_trip is not null then employees.rate_business_trip else 0 end) as rate,
+            (DATE_PART('day', CURRENT_DATE::timestamp - departure_date::timestamp)::INTEGER) as date_part
+        ");
+        $query->leftJoin('users','users.id','=','business_trips.issued_by');
+        $query->leftJoin('employees','employees.id','=','users.employee_id');
+        $query->where('business_trips.status','<>','approved');
+        $businessTrips = $query->get();        
+        
+        $data = [];
+        foreach ($businessTrips as $key => $row) {                        
+            $datePart   = $row->date_part;            
+            $departs    = 0;
+            $returns    = 0;
+            $lodgings   = 0;
+            $others     = 0;
+            $rate       = $row->rate;
+            $onupdate   = false;
+
+            if($datePart >= 8 && $datePart <= 14){
+                $rate     = $rate * 80/100;
+                $onupdate = true;
+            }else if($datePart >= 15){
+                $rate     = $rate * 0;
+                $onupdate = true;
+            }            
+
+            foreach ($row->departs as $key => $depart) {
+                $departs = $departs + $depart->subtotal;
+            }
+
+            foreach ($row->returns as $key => $return) {
+                $returns = $returns + $return->subtotal;
+            }
+
+            foreach($row->lodgings as $key => $lodging){
+                $lodgings = $lodgings + $lodging->subtotal;
+            }
+
+            foreach($row->others as $key => $other){
+                $others = $others + $other->subtotal;
+            }
+
+            $total = $departs + $returns + $lodgings + $others + $rate;
+            
+            if($onupdate){
+                $query = BusinessTrip::find($row->id);
+                $query->rate       = $rate;
+                $query->total_cost = $total;
+                $query->save();
+            }
+        }
+    }
+
 }

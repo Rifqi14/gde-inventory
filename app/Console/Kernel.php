@@ -24,8 +24,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')
-        //          ->hourly();
+        $schedule->call('App\Http\Controllers\BusinessTripController@rateprocess')->timezone('Asia/Jakarta')->dailyAt('01:00');
     }
 
     /**

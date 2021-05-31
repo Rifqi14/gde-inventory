@@ -333,7 +333,7 @@ Create Business Trips
                       Rp.
                     </span>
                   </div>
-                  <input type="text" class="form-control input-price text-right" id="rate" name="rate" placeholder="Enter rate" value="0" maxlength="14">
+                  <input type="text" class="form-control input-price text-right" id="rate" name="rate" placeholder="Enter rate" value="0" maxlength="14" readonly>
                 </div>
               </div>
               <div class="form-group">
@@ -342,7 +342,7 @@ Create Business Trips
                   <div class="input-group-prepend">
                     <span class="input-group-text">Rp.</span>                    
                   </div>
-                  <input type="text" class="form-control input-price text-right" name="total_cost" id="total-cost" placeholder="Automatically calculated" value="0">
+                  <input type="text" class="form-control input-price text-right" name="total_cost" id="total-cost" placeholder="Automatically calculated" value="0" readonly>
                 </div>
               </div>
               <div class="form-group row">

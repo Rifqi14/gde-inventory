@@ -145,7 +145,7 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/businesstrip/select', 'Admin\BusinessTripController@select')->name('businesstrip.select');
         Route::get('/businesstrip/delete/{id}','Admin\BusinessTripController@destroy');        
         Route::get('/businesstrip/update/{id}','Admin\BusinessTripControlller@update');
-        Route::get('/businesstrip/edit/{id}','Admin\BusinessTripController@edit');        
+        Route::get('/businesstrip/edit/{id}','Admin\BusinessTripController@edit');                
         Route::resource('/businesstrip', 'Admin\BusinessTripController');
         // Route Product Category
         Route::get('/productcategory/read','Admin\ProductCategoryController@read')->name('productcategory.read');  
