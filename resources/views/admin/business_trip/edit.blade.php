@@ -241,7 +241,7 @@ Edit Business Trips
 											Rp.
 										</span>
 									</div>
-									<input type="text" class="form-control input-price text-right" id="rate" name="rate" placeholder="Enter rate" value="{{$data->rate?$data->rate:0}}" maxlength="14">
+									<input type="text" class="form-control input-price text-right" id="rate" name="rate" placeholder="Enter rate" value="{{$data->rate?$data->rate:0}}" maxlength="14" readonly>
 								</div>
 							</div>
 							<div class="form-group">
@@ -250,7 +250,7 @@ Edit Business Trips
 									<div class="input-group-prepend">
 										<span class="input-group-text">Rp.</span>
 									</div>
-									<input type="text" class="form-control input-price text-right" id="total-cost" name="total_cost" placeholder="Enter total cost" value="{{$data->total_cost?$data->total_cost:0}}">
+									<input type="text" class="form-control input-price text-right" id="total-cost" name="total_cost" placeholder="Enter total cost" value="{{$data->total_cost?$data->total_cost:0}}" readonly>
 								</div>
 							</div>
 							<div class="form-group">
