@@ -43,7 +43,8 @@
                                         <!-- Borrower -->
                                         <div class="form-group col-6">
                                             <label class="control-label" for="borrower">Borrower</label>
-                                            <select class="form-control" name="borrower" id="borrower" data-placeholder="Borrower" required></select>
+                                            <input type="text" class="form-control" value="{{$data->employee_name?$data->employee_name:$data->user_name}}" readonly>
+                                            <input type="hidden" name="issued_by" value="{{$data->issued_by}}">
                                         </div>
                                         <!-- Date Request -->
                                         <div class="form-group col-6">
@@ -304,19 +305,17 @@
                 var post      = new FormData($('#form')[0]),
                     date      = $('#form').find('input[name=date_borrowed]').data('daterangepicker'),
                     startDate = changeDateFormat(date.startDate.format('DD/MM/YYYY')),
-                    endDate   = changeDateFormat(date.endDate.format('DD/MM/YYYY')),
-                    borrowers = [],
+                    endDate   = changeDateFormat(date.endDate.format('DD/MM/YYYY')),                    
                     status = $('#form').find('button[type=submit]').attr('data-update');
 
-                $.each($('#borrower').find('option:selected'), function(index, value) {
-                    var employee_id = $(this).val();
-                    borrowers.push({
-                        employee_id: employee_id
-                    });
-                });
+                // $.each($('#borrower').find('option:selected'), function(index, value) {
+                //     var employee_id = $(this).val();
+                //     borrowers.push({
+                //         employee_id: employee_id
+                //     });
+                // });
 
-                post.append('status', status);
-                post.append('borrowers', JSON.stringify(borrowers));
+                post.append('status', status);                
                 post.append('startdate', startDate);
                 post.append('finishdate', endDate);
 
@@ -360,19 +359,17 @@
         var post      = new FormData($('#form')[0]),
             date      = $('#form').find('input[name=date_borrowed]').data('daterangepicker'),
             startDate = changeDateFormat(date.startDate.format('DD/MM/YYYY')),
-            endDate   = changeDateFormat(date.endDate.format('DD/MM/YYYY')),
-            borrowers = [],
+            endDate   = changeDateFormat(date.endDate.format('DD/MM/YYYY')),            
             status    = 4;
 
-        $.each($('#borrower').find('option:selected'), function(index, value) {
-            var employee_id = $(this).val();
-            borrowers.push({
-                employee_id: employee_id
-            });
-        });
+        // $.each($('#borrower').find('option:selected'), function(index, value) {
+        //     var employee_id = $(this).val();
+        //     borrowers.push({
+        //         employee_id: employee_id
+        //     });
+        // });
 
-        post.append('status', status);
-        post.append('borrowers', JSON.stringify(borrowers));
+        post.append('status', status);        
         post.append('startdate', startDate);
         post.append('finishdate', endDate);
 

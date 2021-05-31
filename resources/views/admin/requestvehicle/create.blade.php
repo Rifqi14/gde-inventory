@@ -42,7 +42,8 @@
                                         <!-- Borrower -->
                                         <div class="form-group col-6">
                                             <label class="control-label" for="borrower">Borrower</label>
-                                            <select class="form-control" name="borrower" id="borrower" data-placeholder="Borrower" required></select>
+                                            <input type="text" class="form-control" value="{{Auth::guard('admin')->user()->name}}" readonly>
+                                            <input type="hidden" name="issued_by" value="{{Auth::guard('admin')->user()->id}}">
                                         </div>
                                         <!-- Date Request -->
                                         <div class="form-group col-6">
@@ -266,18 +267,16 @@
                 var post = new FormData($('#form')[0]),
                     date = $('#form').find('input[name=date_borrowed]').data('daterangepicker'),
                     startDate = changeDateFormat(date.startDate.format('DD/MM/YYYY')),
-                    endDate = changeDateFormat(date.endDate.format('DD/MM/YYYY')),
-                    borrowers = [];
+                    endDate = changeDateFormat(date.endDate.format('DD/MM/YYYY'));                    
 
-                $.each($('#borrower').find('option:selected'), function(index, value) {
-                    var employee_id = $(this).val();
-                    borrowers.push({
-                        employee_id: employee_id
-                    });
-                });
+                // $.each($('#borrower').find('option:selected'), function(index, value) {
+                //     var employee_id = $(this).val();
+                //     borrowers.push({
+                //         employee_id: employee_id
+                //     });
+                // });
 
-                post.append('status', $('#form').find('select[name=status]').val());
-                post.append('borrowers', JSON.stringify(borrowers));
+                post.append('status', $('#form').find('select[name=status]').val());                
                 post.append('startdate', startDate);
                 post.append('finishdate', endDate);
 
