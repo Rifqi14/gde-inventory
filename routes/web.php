@@ -176,6 +176,7 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/employee/edit/{id}','Admin\EmployeeController@edit');        
         Route::get('/employee/detail/{id}','Admin\EmployeeController@detail');     
         Route::get('/employee/delete/{id}','Admin\EmployeeController@destroy');        
+        Route::get('/employee/dig','Admin\EmployeeController@dig')->name('employee.dig');
         Route::resource('/employee','Admin\EmployeeController');
         // Master Working Calendar
         Route::get('/calendar/read', 'Admin\CalendarController@read')->name('calendar.read');

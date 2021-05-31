@@ -245,6 +245,15 @@ Edit Business Trips
 								</div>
 							</div>
 							<div class="form-group">
+								<label for="total-cost">Total Cost:</label>
+								<div class="input-group">
+									<div class="input-group-prepend">
+										<span class="input-group-text">Rp.</span>
+									</div>
+									<input type="text" class="form-control input-price text-right" id="total-cost" name="total_cost" placeholder="Enter total cost" value="{{$data->total_cost?$data->total_cost:0}}">
+								</div>
+							</div>
+							<div class="form-group">
 								<label>Approval Status : </label>
 								<br>
 								<input type="hidden" name="status" id="status" value="{{$data->status}}">
@@ -323,6 +332,15 @@ Edit Business Trips
 		$('.departure-date').data('daterangepicker').setStartDate(moment(new Date()));
 		$('.arrived-date').data('daterangepicker').setStartDate(moment(new Date()).add(6, 'days'));
 
+		$('input[name=rate]').change(function (e) { 
+			e.preventDefault();
+			sumRate();
+		});
+
+		$('input[name=rate]').keyup(function (e) { 
+			sumRate();
+		});
+
 		@if($data->departure_date)
 		$('.departure-date').data('daterangepicker').setStartDate("{{date('d/m/Y',strtotime($data->departure_date))}}");
 		@endif
@@ -335,6 +353,7 @@ Edit Business Trips
 		initRequestVehicle();
 		initRemarks();
 		initInputPrice();
+		sumRate();
 
 		// FORM DEPART METHOD
 
@@ -1213,11 +1232,12 @@ Edit Business Trips
 	}
 
 	function sumRate() {
-		var rate 	  = 0,
+		var total 	  = 0,
 			departure = 0,
 			returning = 0,
 			lodging   = 0,
-			others 	  = 0;
+			others 	  = 0,
+			rate 	  = intCurrency($('input[name=rate]').val());
 
 		$.each($('#form-depart > .item-depart').find('input[class=depart]'), function(index, value) {
 			var price = intCurrency($(this).attr('data-price'));
@@ -1243,9 +1263,9 @@ Edit Business Trips
 			others += subs;
 		});
 
-		rate = departure + returning + lodging + others;		
+		total = departure + returning + lodging + others + rate;		
 
-		$('input[name=rate]').val(rate);
+		$('input[name=total_cost]').val(total);
 		initInputPrice();
 	}
 

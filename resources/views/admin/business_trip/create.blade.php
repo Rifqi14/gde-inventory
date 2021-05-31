@@ -336,6 +336,15 @@ Create Business Trips
                   <input type="text" class="form-control input-price text-right" id="rate" name="rate" placeholder="Enter rate" value="0" maxlength="14">
                 </div>
               </div>
+              <div class="form-group">
+                <label for="">Total Cost:</label>
+                <div class="input-group"> 
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Rp.</span>                    
+                  </div>
+                  <input type="text" class="form-control input-price text-right" name="total_cost" id="total-cost" placeholder="Automatically calculated" value="0">
+                </div>
+              </div>
               <div class="form-group row">
                 <div class="col-md-12">
                   <div class="form-group">
@@ -382,13 +391,15 @@ Create Business Trips
 
 @section('scripts')
 <script type="text/javascript">
-  var employeeID = "{{Auth::guard('admin')->user()->employee_id}}",
-    userID = "{{Auth::guard('admin')->user()->id}}",
-    username = "{{Auth::guard('admin')->user()->name}}";
+  var employeeID   = "{{Auth::guard('admin')->user()->employee_id}}",
+      userID       = "{{Auth::guard('admin')->user()->id}}",
+      username     = "{{Auth::guard('admin')->user()->name}}",
+      employeeRate = 0;
 
   $(function() {
+    employee();
     initSelect2();
-    initInputPrice();
+    initInputPrice();        
 
     $('.summernote').summernote({
       height: 145,
@@ -418,6 +429,15 @@ Create Business Trips
 
     $('.departure-date').data('daterangepicker').setStartDate(moment(new Date()));
     $('.arrived-date').data('daterangepicker').setStartDate(moment(new Date()).add(6, 'days'));
+
+    $('input[name=rate]').change(function (e) { 
+      e.preventDefault();
+      sumRate();
+    });
+
+    $('input[name=rate]').keyup(function (e) { 
+      sumRate();
+    });
 
     // FORM DEPART METHOD
 
@@ -726,6 +746,37 @@ Create Business Trips
 
   });
 
+  const employee = () => {
+    $.ajax({
+      type: "GET",
+      url: `{{route('employee.dig')}}`,
+      data: {
+        employee_id : employeeID
+      },
+      dataType: "json",
+      success: function (response) {
+        if(response.status){
+          var data = response.data;          
+          employeeRate = data.rate_business_trip;    
+          
+          $('input[name=rate]').val(employeeRate);
+          initInputPrice();
+          $('input[name=rate]').trigger('change');
+        }else{
+          console.log({
+            'message' : response.message
+          });
+        }
+      },
+      error :  function(){
+        console.log({
+          message : 'Failed to get employee data.'
+        });
+      }
+    });
+    
+  }
+
   function initSelect2() {
     $('.select2').select2({
       allowClear: true
@@ -1029,11 +1080,12 @@ Create Business Trips
   }
 
   function sumRate() {
-    var rate = 0,
-      departure = 0,
-      returning = 0,
-      lodging = 0,
-      others = 0;
+    var total     = 0,
+        departure = 0,
+        returning = 0,
+        lodging   = 0,
+        others    = 0,
+        rate      = intCurrency($('input[name=rate]').val());
 
     $.each($('#form-depart > .item-depart').find('input[class=depart]'), function(index, value) {
       var price = intCurrency($(this).attr('data-price'));
@@ -1059,9 +1111,9 @@ Create Business Trips
       others += subs;
     });
 
-    rate = departure + returning + lodging + others;
+    total = departure + returning + lodging + others + rate;
 
-    $('input[name=rate]').val(rate);
+    $('input[name=total_cost]').val(total);
     initInputPrice();
   }
 
@@ -1071,7 +1123,6 @@ Create Business Trips
     }
     $("form").first().trigger("submit");
   }
-
 
   function changeDateFormat(date) {
     var newdate = '';

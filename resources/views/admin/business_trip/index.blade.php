@@ -53,7 +53,7 @@ Business Trips
                   <th width="5%">No.</th>
                   <th width="20%">Business Trip Number</th>
                   <th width="20%" class="text-center">Schedule</th>
-                  <th width="20%" class="text-right">Rate</th>
+                  <th width="20%" class="text-right">Total Cost</th>
                   <th width="15%" class="text-center">Status</th>
                   <th width="10%" class="text-center">Action</th>
                 </tr>
@@ -85,7 +85,7 @@ Business Trips
                   <th width="5%">No.</th>
                   <th width="20%">Business Trip Number</th>
                   <th width="20%" class="text-center">Schedule</th>
-                  <th width="20%" class="text-right">Rate</th>
+                  <th width="20%" class="text-right">Total Cost</th>
                   <th width="15%" class="text-center">Status</th>
                   <th width="10%" class="text-center">Action</th>
                 </tr>
@@ -150,12 +150,12 @@ Business Trips
                   </div>
                 </div>
                 <div class="form-group">
-                  <label class="control-label" for="rate">Rate</label>
+                  <label class="control-label" for="total-cost">Total Cost</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp.</span>
                     </div>
-                    <input type="text" class="form-control input-price text-right rate" id="rate" name="rate" placeholder="Enter rate" value="0" maxlength="14">
+                    <input type="text" class="form-control input-price text-right total-cost" id="total-cost" name="total_cost" placeholder="Enter total cost" value="0" maxlength="14">
                   </div>
                 </div>
               </div>
@@ -242,13 +242,13 @@ Business Trips
               startDate          = schedule.startDate.format('YYYY-MM-DD'),
               endDate            = schedule.endDate.format('YYYY-MM-DD'),
               status             = $('#form-search').find('.general-status').select2('val'),
-              rate               = $('#form-search').find('.rate').val();
+              totalCost          = $('#form-search').find('.total-cost').val();
 
           data.businesstripnumber = businessTripNumber;
           data.startdate          = startDate;
           data.enddate            = endDate;
           data.status             = status;
-          data.rate               = rate;
+          data.total_cost         = totalCost;
         }
       },
       columnDefs: [{
@@ -271,7 +271,7 @@ Business Trips
         {
           render: function(data, type, row) {
             if (row.rate) {
-              return accounting.formatMoney(row.rate, " ", 0, ".", "");
+              return accounting.formatMoney(row.total_cost, " ", 0, ".", "");
             } else {
               return 0;
             }
@@ -330,7 +330,7 @@ Business Trips
           data: "schedule"
         },
         {
-          data: "rate"
+          data: "total_cost"
         }, {
           data: "status"
         }
@@ -360,13 +360,13 @@ Business Trips
             startDate            = schedule.startDate.format('YYYY-MM-DD'),
             endDate              = schedule.endDate.format('YYYY-MM-DD'),
             status               = $('#form-search').find('.approved-status').select2('val'),
-            rate                 = $('#form-search').find('.rate').val();
+            totalCost            = $('#form-search').find('.total-cost').val();
 
           data.businesstripnumber = businessTripNumber;
           data.startdate          = startDate;
           data.enddate            = endDate;
           data.status             = status;
-          data.rate               = rate;
+          data.total_cost         = totalCost;
         }
       },
       columnDefs: [{
@@ -388,7 +388,7 @@ Business Trips
         },
         {
           render: function(data, type, row) {
-            return accounting.formatMoney(row.rate, "", 0, ".", ",");
+            return accounting.formatMoney(row.total_cost, "", 0, ".", ",");
           },
           targets: [3]
         },
@@ -409,10 +409,12 @@ Business Trips
           render: function(data, type, row) {      
           var button = `<a class="dropdown-item" href="javascript:void(0);" onclick="detail(${row.id},'table-bt-approved')">
                           <i class="fa fa-eye"></i> View Data
-                        </a>
-                        <a class="dropdown-item" href="javascript:void(0);" onclick="">
-                          <i class="fa fa-print"></i> Print Data
                         </a>`;      
+            if(actionmenu.indexOf('print') > 0){
+              button += `<a class="dropdown-item" href="javascript:void(0);" onclick="">
+                          <i class="fa fa-print"></i> Print Data
+                        </a>`;
+            }            
             return `<div class="btn-group">
                                 <button type="button" class="btn btn-flat btn-sm dropdown-toggle" data-toggle="dropdown">
                                     <i class="fas fa-bars"></i>
@@ -549,6 +551,10 @@ Business Trips
 
     schedule.setStartDate(moment().startOf('month'));
     schedule.setEndDate(moment().endOf('month'));
+    $('#form-search').find('.business-trip-number').val('')
+    $('#form-search').find('.general-status').select2('val');
+    $('#form-search').find('.total-cost').val('');
+    $('.general-status').val(null).trigger('change');
 
     if (tableFilter == 'general') {
       $('.general-status').val(null).trigger('change');
