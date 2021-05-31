@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Models\WorkingShift;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -64,6 +65,7 @@ class WorkingShiftController extends Controller
             'time_in' => $request->time_in,
             'time_out' => $request->time_out,
             'status' => $request->status,
+            'total_working_time'    => Carbon::parse($request->time_in)->diffInHours(Carbon::parse($request->time_out)),
         ]);
 
         if (!$user) {
@@ -144,6 +146,7 @@ class WorkingShiftController extends Controller
         $user->time_in = $request->time_in;
         $user->time_out = $request->time_out;
         $user->status = $request->status;
+        $user->total_working_time   = Carbon::parse($user->time_in)->diffInHours(Carbon::parse($user->time_out));
         $user->save();
 
         if (!$user) {
