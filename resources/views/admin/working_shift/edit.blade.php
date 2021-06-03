@@ -1,7 +1,7 @@
 @extends('admin.layouts.app')
 
 @section('title')
-Edit Working Shift
+Edit {{ $menu_name }}
 @endsection
 
 @section('stylesheets')
@@ -12,13 +12,13 @@ Edit Working Shift
 <div class="row mb-3 mt-3">
 	<div class="col-sm-4">
 		<h1 id="title-branch" class="m-0 text-dark">
-			Working Shifts
+			{{ $menu_name }}
 		</h1>
 	</div>
 	<div class="col-sm-8">
 		<ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
-			<li class="breadcrumb-item">Preferences</li>
-			<li class="breadcrumb-item">Working Shifts</li>
+			<li class="breadcrumb-item">{{ $parent_name }}</li>
+			<li class="breadcrumb-item">{{ $menu_name }}</li>
 			<li class="breadcrumb-item active">Edit</li>
 		</ol>
 	</div>
@@ -32,8 +32,7 @@ Edit Working Shift
 		<div class="row">
 			<div class="col-12">
 				<div class="card">
-					<form class="form-horizontal no-margin"
-						action="{{route('workingshift.update', ['id' => $user->id])}}" id="form" method="post" />
+					<form class="form-horizontal no-margin" action="{{route('workingshift.update', ['id' => $user->id])}}" id="form" method="post" />
 					{{ csrf_field() }}
 					@method('PUT')
 					<div class="card-body">
@@ -55,22 +54,19 @@ Edit Working Shift
 						<div class="form-group row">
 							<label class="col-md-2 col-xs-12 control-label" for="shift_name">Shift Name:</label>
 							<div class="col-sm-6 controls">
-								<input type="text" class="form-control" name="shift_name" placeholder="Shift Name..."
-									value="{{$user->shift_name}}" />
+								<input type="text" class="form-control" name="shift_name" placeholder="Shift Name..." value="{{$user->shift_name}}" />
 							</div>
 						</div>
 						<div class="form-group row">
 							<label class="col-md-2 col-xs-12 control-label" for="time_in">Time In</label>
 							<div class="col-sm-6 controls">
-								<input type="time" class="form-control" name="time_in" placeholder="Time In..."
-									value="{{$user->time_in}}" />
+								<input type="text" class="form-control time-in" name="time_in" placeholder="Time In..." value="{{$user->time_in}}" />
 							</div>
 						</div>
 						<div class="form-group row">
 							<label class="col-md-2 col-xs-12 control-label" for="time_out">Time Out</label>
 							<div class="col-sm-6 controls">
-								<input type="time" class="form-control" name="time_out" placeholder="Time Out..."
-									value="{{$user->time_out}}" />
+								<input type="text" class="form-control time-out" name="time_out" placeholder="Time Out..." value="{{$user->time_out}}" />
 							</div>
 						</div>
 						<div class="form-group row">
@@ -89,8 +85,7 @@ Edit Working Shift
 							<b><i class="fas fa-save"></i></b>
 							Save
 						</button>
-						<a href="{{ route('workingshift.index') }}"
-							class="btn btn-sm btn-secondary color-palette btn-labeled legitRipple text-sm">
+						<a href="{{ route('workingshift.index') }}" class="btn btn-sm btn-secondary color-palette btn-labeled legitRipple text-sm">
 							<b><i class="fas fa-times"></i></b>
 							Cancel
 						</a>
@@ -107,6 +102,30 @@ Edit Working Shift
 @section('scripts')
 <script type="text/javascript">
 	$(function() {
+		$('.time-in').daterangepicker({
+			timePicker: true,
+			singleDatePicker: true,
+			timePicker24Hour: true,
+			timePickerIncrement: 1,
+			timePickerSeconds: false,
+			locale: {
+				format: 'HH:mm'
+			}
+		}).on('show.daterangepicker', function (ev, picker) {
+			picker.container.find('.calendar-table').hide();
+		});
+		$('.time-out').daterangepicker({
+			timePicker: true,
+			singleDatePicker: true,
+			timePicker24Hour: true,
+			timePickerIncrement: 1,
+			timePickerSeconds: false,
+			locale: {
+				format: 'HH:mm'
+			}
+		}).on('show.daterangepicker', function (ev, picker) {
+			picker.container.find('.calendar-table').hide();
+		});
 		
 		$(document).on("change", ".select2", function () {
 			if (!$.isEmptyObject($('#form').validate().submitted)) {
