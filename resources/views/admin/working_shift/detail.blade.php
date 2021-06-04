@@ -58,13 +58,13 @@ Detail {{ $menu_name }}
                         <div class="form-group row">
                             <label class="col-md-2 col-xs-12 control-label" for="time_in">Time In</label>
                             <div class="col-sm-6 controls">
-                                <input type="time" class="form-control" name="time_in" placeholder="Time In..." value="{{$user->time_in}}" readonly />
+                                <input type="text" class="form-control time-in" name="time_in" placeholder="Time In..." value="{{$user->time_in}}" readonly />
                             </div>
                         </div>
                         <div class="form-group row">
                             <label class="col-md-2 col-xs-12 control-label" for="time_out">Time Out</label>
                             <div class="col-sm-6 controls">
-                                <input type="time" class="form-control" name="time_out" placeholder="Time Out..." value="{{$user->time_out}}" readonly />
+                                <input type="text" class="form-control time-out" name="time_out" placeholder="Time Out..." value="{{$user->time_out}}" readonly />
                             </div>
                         </div>
                         <div class="form-group row">
@@ -96,6 +96,30 @@ Detail {{ $menu_name }}
 @section('scripts')
 <script type="text/javascript">
     $(function() {
+		$('.time-in').daterangepicker({
+			timePicker: true,
+			singleDatePicker: true,
+			timePicker24Hour: true,
+			timePickerIncrement: 1,
+			timePickerSeconds: false,
+			locale: {
+				format: 'HH:mm'
+			}
+		}).on('show.daterangepicker', function (ev, picker) {
+			picker.container.find('.calendar-table').hide();
+		});
+		$('.time-out').daterangepicker({
+			timePicker: true,
+			singleDatePicker: true,
+			timePicker24Hour: true,
+			timePickerIncrement: 1,
+			timePickerSeconds: false,
+			locale: {
+				format: 'HH:mm'
+			}
+		}).on('show.daterangepicker', function (ev, picker) {
+			picker.container.find('.calendar-table').hide();
+		});
 		$('.select2').select2();
 	});
 </script>
