@@ -117,6 +117,9 @@ Route::group(['prefix' => 'admin'], function () {
         Route::post('/purchasing/addnotes', 'Admin\PurchasingController@addnotes')->name('purchasing.addnotes');
         Route::get('/purchasing/test', 'Admin\PurchasingController@test');
         Route::resource('/purchasing', 'Admin\PurchasingController');
+        // Route Stock Adjustment
+        Route::get('/stockadjustment/read', 'Admin\StockAdjustmentController@read')->name('stockadjustment.read');
+        Route::resource('/stockadjustment', 'Admin\StockAdjustmentController');
         // Route Warehouse
         Route::get('/warehouse/read', 'Admin\WarehouseController@read')->name('warehouse.read');
         Route::get('/warehouse/select', 'Admin\WarehouseController@select')->name('warehouse.select');

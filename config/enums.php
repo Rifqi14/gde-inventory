@@ -60,6 +60,12 @@ return [
         'INPROGRESS'    => 'In Progress',
         'COMPLETED'     => 'Completed'
     ],
+    'status_adjustment'    => [
+        'DRAFT'         => 'Draft',
+        'WAITING'       => 'Waiting Approval',
+        'APPROVED'      => 'Approved',
+        'REJECTED'      => 'Rejected'
+    ],
     'status_global'     => [
         'draft'             => 'Draft',
         'waitingapproval'   => 'Waiting Approval',
