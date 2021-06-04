@@ -148,7 +148,7 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/businesstrip/select', 'Admin\BusinessTripController@select')->name('businesstrip.select');
         Route::get('/businesstrip/delete/{id}','Admin\BusinessTripController@destroy');        
         Route::get('/businesstrip/update/{id}','Admin\BusinessTripControlller@update');
-        Route::get('/businesstrip/edit/{id}','Admin\BusinessTripController@edit');        
+        Route::get('/businesstrip/edit/{id}','Admin\BusinessTripController@edit');                
         Route::resource('/businesstrip', 'Admin\BusinessTripController');
         // Route Product Category
         Route::get('/productcategory/read','Admin\ProductCategoryController@read')->name('productcategory.read');  
@@ -179,6 +179,7 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/employee/edit/{id}','Admin\EmployeeController@edit');        
         Route::get('/employee/detail/{id}','Admin\EmployeeController@detail');     
         Route::get('/employee/delete/{id}','Admin\EmployeeController@destroy');        
+        Route::get('/employee/dig','Admin\EmployeeController@dig')->name('employee.dig');
         Route::resource('/employee','Admin\EmployeeController');
         // Master Working Calendar
         Route::get('/calendar/read', 'Admin\CalendarController@read')->name('calendar.read');
@@ -214,6 +215,10 @@ Route::group(['prefix' => 'admin'], function () {
         // Attendance
         Route::get('/attendance/read', 'Admin\AttendanceController@read')->name('attendance.read');
         Route::resource('/attendance', 'Admin\AttendanceController');
+
+        // Attendance Log
+        Route::get('/attendancelog/read', 'Admin\AttendanceLogController@read')->name('attendancelog.read');
+        Route::resource('/attendancelog', 'Admin\AttendanceLogController');
 
         // Product Borrowing        
         Route::get('/productborrowing/read','Admin\ProductBorrowingController@read')->name('productborrowing.read');        

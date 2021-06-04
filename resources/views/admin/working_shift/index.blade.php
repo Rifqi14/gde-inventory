@@ -1,11 +1,24 @@
 @extends('admin.layouts.app')
 
 @section('title')
-Working Shifts
+{{ $menu_name }}
 @endsection
 
 @section('stylesheets')
 
+@endsection
+
+@section('button')
+@if (in_array('create', $actionmenu))
+<a href="{{ route('workingshift.create') }}" class="btn btn-labeled btn-sm text-sm btn-success btn-flat legitRipple ml-1">
+    <b><i class="fas fa-plus"></i></b> Create
+</a>
+@endif
+@if (in_array('read', $actionmenu))
+<a class="btn btn-labeled btn-sm text-sm btn-default btn-flat legitRipple ml-1" onclick="filter()">
+    <b><i class="fas fa-search"></i></b> Search
+</a>
+@endif
 @endsection
 
 @section('breadcrumb')
@@ -13,13 +26,13 @@ Working Shifts
     <div class="col-sm-4">
         <!-- <h5 class="m-0 ml-2 text-dark text-md breadcrumb">Grievance Redress &nbsp;<small class="font-uppercase"></small></h5> -->
         <h1 id="title-branch" class="m-0 text-dark">
-            Working Shifts
+            {{ $menu_name }}
         </h1>
     </div>
     <div class="col-sm-8">
         <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
-            <li class="breadcrumb-item">Preferences</li>
-            <li class="breadcrumb-item">Working Shifts</li>
+            <li class="breadcrumb-item">{{ $parent_name }}</li>
+            <li class="breadcrumb-item">{{ $menu_name }}</li>
         </ol>
     </div>
 </div>
@@ -33,14 +46,6 @@ Working Shifts
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <a class="btn btn-labeled btn-sm text-sm btn-default btn-flat legitRipple  float-right ml-1"
-                            onclick="filter()">
-                            <b><i class="fas fa-search"></i></b> Search
-                        </a>
-                        <a href="{{ route('workingshift.create') }}"
-                            class="btn btn-labeled btn-sm text-sm btn-success btn-flat legitRipple  float-right ml-1">
-                            <b><i class="fas fa-plus"></i></b> Create
-                        </a>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -64,8 +69,7 @@ Working Shifts
 </section>
 <!-- /.content -->
 
-<div id="add-filter" class="modal fade" data-backdrop="static" tabindex="-1" role="dialog"
-    aria-labelledby="filter-modal" aria-hidden="true">
+<div id="add-filter" class="modal fade" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="filter-modal" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -100,11 +104,8 @@ Working Shifts
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-labeled  btn-danger btn-sm btn-sm btn-flat legitRipple"
-                    data-dismiss="modal"><b><i class="fas fa-times"></i></b> Cancel</button>
-                <button type="submit" form="form-search"
-                    class="btn btn-labeled  btn-default  btn-sm btn-flat legitRipple"><b><i
-                            class="fas fa-search"></i></b> Search</button>
+                <button type="button" class="btn btn-labeled  btn-danger btn-sm btn-sm btn-flat legitRipple" data-dismiss="modal"><b><i class="fas fa-times"></i></b> Cancel</button>
+                <button type="submit" form="form-search" class="btn btn-labeled  btn-default  btn-sm btn-flat legitRipple"><b><i class="fas fa-search"></i></b> Search</button>
             </div>
         </div>
     </div>

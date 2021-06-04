@@ -72,12 +72,8 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label class="control-label" for="vehicle-name">Vehicle</label>
-                                    <input class="form-control" type="text" name="vehicle_name" id="vehicle-name" placeholder="Vehicle">
-                                </div>
-                                <div class="form-group">
-                                    <label class="control-label" for="police-number">Police Number</label>
-                                    <input class="form-control" type="text" name="police_number" id="police-number" placeholder="Police Number">
-                                </div>
+                                    <select name="vehicle" id="vehicle" class="form-control" data-placeholder="Choose vehicle"></select>
+                                </div>                                
                                 <div class="form-group">
                                     <label class="control-label" for="borrower">Borrower</label>
                                     <select class="form-control select2" name="borrower" id="borrower" data-placeholder="Borrower"></select>
@@ -150,7 +146,36 @@
         $('.datepicker').on('cancel.daterangepicker', function(ev, picker) {            
             $(this).val('');
         });
-        
+
+        $("#vehicle").select2({
+            ajax: {
+                url: "{{route('vehicle.select')}}",
+                type: 'GET',
+                dataType: 'json',
+                data: function(params) {
+                    return {
+                        name: params.term,
+                        page: params.page,
+                        limit: 30,
+                    };
+                },
+                processResults: function(data, params) {
+                    var more = (params.page * 30) < data.total;
+                    var option = [];
+                    $.each(data.rows, function(index, item) {
+                        option.push({
+                            id: item.id,
+                            text: `${item.vehicle_name} | ${item.police_number}`,
+                        });
+                    });
+                    return {
+                        results: option,
+                        more: more,
+                    };
+                },
+            },
+            allowClear: true,
+        });
 
         $('#form-search').find("#borrower").select2({
             ajax: {
@@ -178,8 +203,7 @@
                         more: more,
                     };
                 },
-            },
-            multiple: true,
+            },            
             allowClear: true,
         });
 
@@ -201,23 +225,16 @@
                 url: "{{route('requestvehicle.read')}}",
                 type: "GET",
                 data: function(data) {
-                    var vehicle = $('#form-search').find('input[id=vehicle-name]').val(),
+                    var vehicle = $('#vehicle').find('option:selected').val(),
                         plate = $('#form-search').find('input[id=police-number]').val(),
                         date = $('#form-search').find('input[id=date-request]').data('daterangepicker'),
                         status = $('#form-search').find('select[id=status').select2('val');
-                    borrowers = [];
+                        borrowers = $('#borrower').find('option:selected').val();                  
 
-                    $.each($('#form-search').find('select[id=borrower]').find('option:selected'), function(index, val) {
-                        var employee_id = $(this).val();
-                        borrowers.push({
-                            employee_id: employee_id
-                        });
-                    });
-
-                    data.vehicle = vehicle;
-                    data.plate = plate;
-                    data.borrowers = JSON.stringify(borrowers);
-                    data.status = status;
+                    data.vehicle  = vehicle;
+                    data.plate    = plate;
+                    data.borrower = borrowers;
+                    data.status   = status;
                     if ($('#form-search').find('#date-request').val()) {
                         data.startrequest = changeDateFormat(date.startDate.format('DD/MM/YYYY'));
                         data.finishrequest = changeDateFormat(date.endDate.format('DD/MM/YYYY'));
@@ -235,21 +252,10 @@
                 },
                 {
                     render: function(data, type, row) {
-                        return `${row.police_number} - ${row.vehicle_name}`;
+                        return `<p>${row.vehicle_name}<br><b>${row.police_number}</b></p>`;
                     },
                     targets: [1]
-                },
-                {
-                    render: function(data, type, row) {
-                        var label = '';
-                        $.each(row.borrowers, function(index, val) {
-                            var name = val.name;
-                            label += `<span class="badge bg-info text-sm">${name}</span> `;
-                        });
-                        return label;
-                    },
-                    targets: [2]
-                },
+                },                
                 {
                     render: function(data, type, row) {
                         var label = '',
@@ -272,18 +278,25 @@
                 {
                     render: function(data, type, row) {
                         var button = '';
-                        // update
-                        if (actionmenu.indexOf('update') > 0) {
-                            button += `<a class="dropdown-item" href="javascript:void(0);" onclick="edit(${row.id})">
-                                        <i class="far fa-edit"></i>Update Data
-                                    </a>`;
-                        }
-                        // delete
-                        if (actionmenu.indexOf('delete') > 0) {
-                            button += `<a class="dropdown-item" href="javascript:void(0);" onclick="destroy(${row.id})">
-                                        <i class="fa fa-trash-alt"></i> Delete Data
-                                    </a>`;
-                        }
+
+                            button += `<a class="dropdown-item" href="javascript:void(0);" onclick="show(${row.id})">
+                                            <i class="fa fa-eye"></i> View Data
+                                        </a>`;
+                    
+                        if(row.status < 3){
+                            // update
+                            if (actionmenu.indexOf('update') > 0) {
+                                button += `<a class="dropdown-item" href="javascript:void(0);" onclick="edit(${row.id})">
+                                            <i class="far fa-edit"></i>Update Data
+                                        </a>`;
+                            }
+                            // delete
+                            if (actionmenu.indexOf('delete') > 0) {
+                                button += `<a class="dropdown-item" href="javascript:void(0);" onclick="destroy(${row.id})">
+                                            <i class="fa fa-trash-alt"></i> Delete Data
+                                        </a>`;
+                            }
+                        }                        
                         return `<div class="btn-group">
                                 <button type="button" class="btn btn-flat btn-sm dropdown-toggle" data-toggle="dropdown">
                                     <i class="fas fa-bars"></i>
@@ -303,7 +316,7 @@
                     data: "vehicle_name"
                 },
                 {
-                    data: "borrowers"
+                    data: "issued_name"
                 },
                 {
                     data: "date_request"
@@ -343,6 +356,10 @@
         }
 
         window.location.href = `{{url('admin/requestvehicle/${id}/edit')}}`;
+    }
+
+    const show = (id) => {
+        window.location = `{{url('admin/requestvehicle/${id}')}}`;
     }
 
     function destroy(id) {

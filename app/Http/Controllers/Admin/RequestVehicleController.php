@@ -30,40 +30,35 @@ class RequestVehicleController extends Controller
 
     public function edit(Request $request,$id)
     {   
-        if ($id) {
-            $reqvehicle = RequestVehicle::with([
-                'borrowers' => function ($q)
-                {
-                    $q->selectRaw('
-                        borrower_request_vehicles.request_vehicle_id,
-                        borrower_request_vehicles.employee_id,
-                        employees.name
-                    ');
-                    $q->leftJoin('employees','employees.id','=','borrower_request_vehicles.employee_id');
-                }
-            ]);
-            $reqvehicle->selectRaw("
+        $query = RequestVehicle::selectRaw("
                 request_vehicles.*,
                 vehicles.vehicle_name,
-                vehicles.police_number
-            ");
-            $reqvehicle->leftJoin('vehicles','vehicles.id','=','request_vehicles.vehicle_id');
-            $reqvehicle->where('request_vehicles.id',$id);
-            $reqvehicle = $reqvehicle->first();
+                vehicles.police_number,
+                employees.name as employee_name,
+                users.name as user_name
+        ");
+        $query->leftJoin('vehicles','vehicles.id','=','request_vehicles.vehicle_id');
+        $query->leftJoin('users','users.id','=','request_vehicles.issued_by');
+        $query->leftJoin('employees','employees.id','=','users.employee_id');
+        $query->where('request_vehicles.id',$id);
+        $query = $query->first();
+            
+        if ($query) {            
 
-            if($reqvehicle->start_request){
-                $reqvehicle->start_request = date('d/m/Y', strtotime($reqvehicle->start_request));
+            if($query->start_request){
+                $query->start_request = date('d/m/Y', strtotime($query->start_request));
             }else{
-                $reqvehicle->start_request = '';
+                $query->start_request = '';
             }
 
-            if($reqvehicle->finish_request){
-                $reqvehicle->finish_request = date('d/m/Y', strtotime($reqvehicle->finish_request));
+            if($query->finish_request){
+                $query->finish_request = date('d/m/Y', strtotime($query->finish_request));
             }else{
-                $reqvehicle->finish_request = '';
+                $query->finish_request = '';
             }
             
-            $data = $reqvehicle;                    
+            $data = $query;                   
+                    
 
             return view('admin.requestvehicle.edit',compact('data'));
         }else{
@@ -73,64 +68,42 @@ class RequestVehicleController extends Controller
 
     public function read(Request $request)
     {
-        $draw    = $request->draw;
-        $start   = $request->start;
-        $length  = $request->length;
-        $query   = $request->search['value'];
-        $sort    = $request->columns[$request->order[0]['column']]['data'];
-        $dir     = $request->order[0]['dir'];
-        $vehicle = strtoupper($request->vehicle);
-        $plate   = strtoupper($request->plate);        
-        $status  = $request->status;
-        $borrowers     = [];        
+        $draw          = $request->draw;
+        $start         = $request->start;
+        $length        = $request->length;
+        $query         = $request->search['value'];
+        $sort          = $request->columns[$request->order[0]['column']]['data'];
+        $dir           = $request->order[0]['dir'];
+        $vehicle       = $request->vehicle;        
+        $status        = $request->status;             
         $startrequest  = $request->startrequest;
-        $finishrequest = $request->finishrequest;        
+        $finishrequest = $request->finishrequest;       
+        $borrower      = $request->borrower;        
 
-        if($request->borrowers){
-            foreach (json_decode($request->borrowers) as $key => $row) {
-                array_push($borrowers,intval($row->employee_id));
-            }
-        }
-
-        $query = RequestVehicle::with([
-            'borrowers' => function ($q) {
-                $q->selectRaw("
-                    borrower_request_vehicles.id,
-                    borrower_request_vehicles.request_vehicle_id,                    
-                    employees.name
-                ");
-                $q->leftJoin('employees', 'employees.id', '=', 'borrower_request_vehicles.employee_id');                                                        
-            }
-        ]);                
-        $query->selectRaw("
+        $query = RequestVehicle::selectRaw("
             distinct(request_vehicles.id),
             request_vehicles.start_request,
             request_vehicles.finish_request,
             request_vehicles.status,
             vehicles.vehicle_name,
-            vehicles.police_number
+            vehicles.police_number,
+            (case when employees.name is not null then employees.name else users.name end) as issued_name
         ");
-        $query->join('vehicles', 'vehicles.id', '=', 'request_vehicles.vehicle_id');        
-        if(count($borrowers) > 0){
-            $query->join('borrower_request_vehicles','borrower_request_vehicles.request_vehicle_id','=','request_vehicles.id');
-            $query->whereIn('borrower_request_vehicles.employee_id', $borrowers);
-        }
+        $query->leftJoin('vehicles', 'vehicles.id', '=', 'request_vehicles.vehicle_id');        
+        $query->leftJoin('users','users.id','=','request_vehicles.issued_by');
+        $query->leftJoin('employees','employees.id','=','users.employee_id');
         if ($vehicle) {
-            $query->whereRaw("upper(vehicles.vehicle_name) like '%$vehicle%'");
+            $query->where('request_vehicles.vehicle_id',$vehicle);
         }
-        if ($plate) {
-            $query->whereRaw("upper(vehicles.police_number) like '%$plate%'");
+        if($borrower)       {
+            $query->where('employees.id',$borrower);
         }
         if ($status) {
             $query->where('request_vehicles.status',$status);
         }
-        if ($startrequest) {
-            $query->where('request_vehicles.start_request','<=',"'$startrequest'");            
-            $query->orWhere('request_vehicles.start_request','>=',"'$finishrequest'");
-        }
-        if ($finishrequest) {
-            $query->where('request_vehicles.finish_request','<=',"'$startrequest'");            
-            $query->orWhere('request_vehicles.finish_request','>=',"'$finishrequest'");
+        if ($startrequest || $finishrequest) {
+            $query->where('request_vehicles.start_request','>=',$startrequest);            
+            $query->Where('request_vehicles.finish_request','<=',$finishrequest);
         }
 
         $rows  = clone $query;
@@ -230,6 +203,7 @@ class RequestVehicleController extends Controller
         $finishdate = $request->finishdate;
         $notes      = $request->notes;
         $status     = $request->status;
+        $issued_by  = $request->issued_by;        
 
         $reqvehicle = RequestVehicle::create([
             'vehicle_id'     => $vehicle,
@@ -237,15 +211,16 @@ class RequestVehicleController extends Controller
             'finish_request' => $finishdate,
             'remarks'        => $notes,
             'status'         => $status,
+            'issued_by'      => $issued_by
         ]);
 
         if ($reqvehicle) {
-            foreach (json_decode($borrowers) as $key => $row) {
-                BorrowerRequestVehicle::create([
-                    'request_vehicle_id' => $reqvehicle->id,
-                    'employee_id'        => $row->employee_id
-                ]);
-            }
+            // foreach (json_decode($borrowers) as $key => $row) {
+            //     BorrowerRequestVehicle::create([
+            //         'request_vehicle_id' => $reqvehicle->id,
+            //         'employee_id'        => $row->employee_id
+            //     ]);
+            // }
 
             $result = [
                 'status'  => true,
@@ -287,6 +262,7 @@ class RequestVehicleController extends Controller
         $borrowers  = $request->borrowers;
         $notes      = $request->notes;
         $status     = $request->status;
+        $issued_by  = $request->issued_by;
 
         $reqvehicle = RequestVehicle::find($id);   
         $reqvehicle->vehicle_id     = $vehicle; 
@@ -294,17 +270,18 @@ class RequestVehicleController extends Controller
         $reqvehicle->finish_request = $finishdate;        
         $reqvehicle->remarks        = $notes;
         $reqvehicle->status         = $status;
+        $reqvehicle->issued_by      = $issued_by;
         $reqvehicle->save();
         
         if ($reqvehicle) {
-            BorrowerRequestVehicle::where('request_vehicle_id',$reqvehicle->id)->delete();
+            // BorrowerRequestVehicle::where('request_vehicle_id',$reqvehicle->id)->delete();
 
-            foreach (json_decode($borrowers) as $key => $row) {
-                BorrowerRequestVehicle::create([
-                    'request_vehicle_id' => $reqvehicle->id,
-                    'employee_id'        => $row->employee_id
-                ]);
-            }
+            // foreach (json_decode($borrowers) as $key => $row) {
+            //     BorrowerRequestVehicle::create([
+            //         'request_vehicle_id' => $reqvehicle->id,
+            //         'employee_id'        => $row->employee_id
+            //     ]);
+            // }
 
             $result = [
                 'status'  => true,
@@ -323,6 +300,44 @@ class RequestVehicleController extends Controller
             'status'  => $result['status'],
             'message' => $result['message'],
         ], $result['point']);
+    }
+
+    public function show($id)
+    {   
+        $query = RequestVehicle::selectRaw("
+                request_vehicles.*,
+                vehicles.vehicle_name,
+                vehicles.police_number,
+                employees.name as employee_name,
+                users.name as user_name
+        ");
+        $query->leftJoin('vehicles','vehicles.id','=','request_vehicles.vehicle_id');
+        $query->leftJoin('users','users.id','=','request_vehicles.issued_by');
+        $query->leftJoin('employees','employees.id','=','users.employee_id');
+        $query->where('request_vehicles.id',$id);
+        $query = $query->first();
+            
+        if ($query) {            
+
+            if($query->start_request){
+                $query->start_request = date('d/m/Y', strtotime($query->start_request));
+            }else{
+                $query->start_request = '';
+            }
+
+            if($query->finish_request){
+                $query->finish_request = date('d/m/Y', strtotime($query->finish_request));
+            }else{
+                $query->finish_request = '';
+            }
+            
+            $data = $query;                   
+                    
+
+            return view('admin.requestvehicle.detail',compact('data'));
+        }else{
+            abort(404);
+        }        
     }
 
     public function delete($id)

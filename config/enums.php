@@ -70,5 +70,11 @@ return [
         'draft'             => 'Draft',
         'waitingapproval'   => 'Waiting Approval',
         'approved'          => 'Approved',
-    ]
+    ],
+    'status_w_rejected' => [
+        'DRAFT'         => 'Draft',
+        'WAITING'       => 'Waiting Approval',
+        'APPROVED'      => 'Approved',
+        'REJECTED'      => 'Rejected',
+    ],
 ];

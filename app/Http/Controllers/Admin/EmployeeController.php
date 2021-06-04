@@ -548,4 +548,28 @@ class EmployeeController extends Controller
             ], 400);
         }
     }
+
+    public function dig(Request $request)
+    {
+        $query = Employee::find($request->employee_id);
+
+        if($query){
+            $result = [
+                'status' => true,
+                'data'   => $query,
+                'point'  => 200
+            ];
+        }else{
+            $result = [
+                'status' => false,
+                'data'   => [],
+                'point'  => 400
+            ];
+        }
+
+        return response()->json([
+            'status' => $result['status'],
+            'data'   => $result['data']
+        ],$result['point']);
+    }
 }

@@ -32,8 +32,7 @@ Create Working Shift
 		<div class="row">
 			<div class="col-12">
 				<div class="card">
-					<form class="form-horizontal no-margin" action="{{route('workingshift.store')}}" id="form"
-						method="post" />
+					<form class="form-horizontal no-margin" action="{{route('workingshift.store')}}" id="form" method="post" />
 					{{ csrf_field() }}
 					<div class="card-body">
 						<span class="title">
@@ -58,13 +57,13 @@ Create Working Shift
 						<div class="form-group row">
 							<label class="col-md-2 col-xs-12 control-label" for="time_in">Time In</label>
 							<div class="col-sm-6 controls">
-								<input type="time" class="form-control" name="time_in" placeholder="Time In..." />
+								<input type="text" class="form-control time-in" name="time_in" placeholder="Time In..." />
 							</div>
 						</div>
 						<div class="form-group row">
 							<label class="col-md-2 col-xs-12 control-label" for="time_out">Time Out</label>
 							<div class="col-sm-6 controls">
-								<input type="time" class="form-control" name="time_out" placeholder="Time Out..." />
+								<input type="text" class="form-control time-out" name="time_out" placeholder="Time Out..." />
 							</div>
 						</div>
 						<div class="form-group row">
@@ -82,8 +81,7 @@ Create Working Shift
 							<b><i class="fas fa-save"></i></b>
 							Save
 						</button>
-						<a href="{{ route('workingshift.index') }}"
-							class="btn btn-sm btn-secondary color-palette btn-labeled legitRipple text-sm">
+						<a href="{{ route('workingshift.index') }}" class="btn btn-sm btn-secondary color-palette btn-labeled legitRipple text-sm">
 							<b><i class="fas fa-times"></i></b>
 							Cancel
 						</a>
@@ -100,7 +98,30 @@ Create Working Shift
 @section('scripts')
 <script type="text/javascript">
 	$(function() {
-		
+		$('.time-in').daterangepicker({
+			timePicker: true,
+			singleDatePicker: true,
+			timePicker24Hour: true,
+			timePickerIncrement: 1,
+			timePickerSeconds: false,
+			locale: {
+				format: 'HH:mm'
+			}
+		}).on('show.daterangepicker', function (ev, picker) {
+			picker.container.find('.calendar-table').hide();
+		});
+		$('.time-out').daterangepicker({
+			timePicker: true,
+			singleDatePicker: true,
+			timePicker24Hour: true,
+			timePickerIncrement: 1,
+			timePickerSeconds: false,
+			locale: {
+				format: 'HH:mm'
+			}
+		}).on('show.daterangepicker', function (ev, picker) {
+			picker.container.find('.calendar-table').hide();
+		});
 		$(document).on("change", ".select2", function () {
 			if (!$.isEmptyObject($('#form').validate().submitted)) {
 				$('#form').validate().form();

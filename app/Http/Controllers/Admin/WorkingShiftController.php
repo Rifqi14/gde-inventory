@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Models\WorkingShift;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Menu;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -14,6 +16,10 @@ class WorkingShiftController extends Controller
 {
     function __construct()
     {
+        $menu       = Menu::getByRoute('workingshift')->first();
+        $parent     = Menu::find($menu->parent_id);
+        View::share('parent_name', $parent->menu_name);
+        View::share('menu_name', $menu->menu_name);
         View::share('menu_active', url('admin/' . 'workingshift'));
         $this->middleware('accessmenu', ['except' => ['select']]);
     }
@@ -64,6 +70,7 @@ class WorkingShiftController extends Controller
             'time_in' => $request->time_in,
             'time_out' => $request->time_out,
             'status' => $request->status,
+            'total_working_time'    => Carbon::parse($request->time_in)->diffInHours(Carbon::parse($request->time_out)),
         ]);
 
         if (!$user) {
@@ -144,6 +151,7 @@ class WorkingShiftController extends Controller
         $user->time_in = $request->time_in;
         $user->time_out = $request->time_out;
         $user->status = $request->status;
+        $user->total_working_time   = Carbon::parse($user->time_in)->diffInHours(Carbon::parse($user->time_out));
         $user->save();
 
         if (!$user) {
