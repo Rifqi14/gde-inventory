@@ -1,5 +1,5 @@
 @extends('admin.layouts.app')
-@section('title','Edit Product Borrowing')
+@section('title',@$menu_name)
 
 @section('breadcrumb')
 <div class="row mb-3 mt-3">
@@ -10,8 +10,8 @@
     </div>
     <div class="col-sm-8">
         <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
-            <li class="breadcrumb-item">Inventory</li>
-            <li class="breadcrumb-item">Product Borrowing</li>
+            <li class="breadcrumb-item">{{ @$parent_name }}</li>
+            <li class="breadcrumb-item">{{ @$menu_name }}</li>
             <li class="breadcrumb-item active">Edit</li>
         </ol>
     </div>

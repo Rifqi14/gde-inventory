@@ -1,5 +1,5 @@
 @extends('admin.layouts.app')
-@section('title','Product Transfer')
+@section('title',@$menu_name)
 
 @section('breadcrumb')
 <div class="row mb-3 mt-3">
@@ -9,9 +9,9 @@
         </h1>
     </div>
     <div class="col-sm-8">
-        <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
-            <li class="breadcrumb-item">Inventory</li>
-            <li class="breadcrumb-item">Product Transfer</li>
+        <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">            
+            <li class="breadcrumb-item">{{ @$parent_name }}</li>
+            <li class="breadcrumb-item">{{ @$menu_name }}</li>
         </ol>
     </div>
 </div>
@@ -38,13 +38,13 @@
                     <div class="card-body">
                         <ul class="nav nav-tabs" id="suppDocumentTab" role="tablist">
                             <li class="nav-item">
-                                <button type="button" onclick="activeTab('general')" class="nav-link active pl-4 pr-4" id="general-tab" data-toggle="tab" data-target="#general" role="tab" aria-controls="document" aria-selected="true"><b>General</b></button>
+                                <button type="button" onclick="moveTab('general')" class="nav-link active pl-4 pr-4" id="general-tab" data-toggle="tab" data-target="#general" role="tab" aria-controls="document" aria-selected="true"><b>General</b></button>
                             </li>
                             <li class="nav-item">
-                                <button class="nav-link pl-4 pr-4" onclick="activeTab('approved')" id="approved-tab" data-toggle="tab" data-target="#approved" type="button" role="tab" aria-controls="photo" aria-selected="false"><b>Approved</b></button>
+                                <button class="nav-link pl-4 pr-4" onclick="moveTab('approved')" id="approved-tab" data-toggle="tab" data-target="#approved" type="button" role="tab" aria-controls="photo" aria-selected="false"><b>Approved</b></button>
                             </li>
                             <li class="nav-item">
-                                <button class="nav-link pl-4 pr-4" onclick="activeTab('archived')" id="archived-tab" data-toggle="tab" data-target="#archived" type="button" role="tab" aria-controls="photo" aria-selected="false"><b>Archive</b></button>
+                                <button class="nav-link pl-4 pr-4" onclick="moveTab('archived')" id="archived-tab" data-toggle="tab" data-target="#archived" type="button" role="tab" aria-controls="photo" aria-selected="false"><b>Archive</b></button>
                             </li>
                         </ul>
                         <div class="tab-content" id="dataTabContent">
@@ -109,6 +109,48 @@
         </div>
     </div>
 </section>
+<div id="add-filter" class="modal fade" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="filter-modal" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ @$menu_name }} Filter</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="form-search" method="POST">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="control-label" for="nik">NIK</label>
+                                    <input class="form-control" type="text" name="employee_nik" id="employee-nik" placeholder="NIK">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="control-label" for="employee-name">Name</label>
+                                    <input class="form-control" type="text" name="employee_name" id="employee-name" placeholder="Name">
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label class="control-label" for="employee-address">Address</label>
+                                    <input class="form-control" type="text" name="employee_address" id="employee-address" placeholder="Address">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-labeled  btn-danger btn-sm btn-sm btn-flat legitRipple" data-dismiss="modal" onclick="resetTable()"><b><i class="fas fa-times"></i></b> Cancel</button>
+                <button type="submit" form="form-search" class="btn btn-labeled  btn-default  btn-sm btn-flat legitRipple"><b><i class="fas fa-search"></i></b> Search</button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('scripts')
@@ -399,10 +441,22 @@
                 }
             ]
         });
+
+        $('#form-search').submit(function(e) {
+            e.preventDefault();
+            if (tab == 'general') {
+                generalTable.draw();
+            } else if (tab == 'approved') {
+                approvedTable.draw();
+            } else {
+                archivedTable.draw();
+            }
+            $('#add-filter').modal('hide');
+        });
     });
 
-    const activeTab = (tabs) => {
-        tab = tabs;
+    const moveTab = (tabs) => {
+        tabs  = tab;
     }
 
     const edit = (id) => {
@@ -413,7 +467,7 @@
         document.location = `{{ route('producttransfer.index') }}/${id}`;
     }
 
-    function destroy(id) {
+    const destroy = (id) => {
         bootbox.confirm({
             buttons: {
                 confirm: {
@@ -433,10 +487,10 @@
                         _token: "{{ csrf_token() }}"
                     };
                     $.ajax({
-                        url: `{{url('admin/producttransfer/delete/${id}')}}`,
+                        url: `{{route('producttransfer.index')}}/${id}`,
                         dataType: 'json',
                         data: data,
-                        type: 'GET',
+                        type: 'DELETE',
                         beforeSend: function() {
                             blockMessage('#content', 'Loading', '#fff');
                         }
@@ -461,6 +515,10 @@
 
     const archived = (id) => {
         document.location = `{{url('admin/producttransfer/archive/${id}')}}`;
+    }    
+
+    const filter = () =>{
+        $('#add-filter').modal('show');
     }
 </script>
 @endsection
