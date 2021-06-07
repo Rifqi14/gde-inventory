@@ -1,17 +1,17 @@
 @extends('admin.layouts.app')
-@section('title','Edit Product Borrowing')
+@section('title', "Edit $menu_name")
 
 @section('breadcrumb')
 <div class="row mb-3 mt-3">
     <div class="col-sm-4">
         <h1 id="title-branch" class="m-0 text-dark">
-            Product Borrowing
+            {{ $menu_name }}
         </h1>
     </div>
     <div class="col-sm-8">
         <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
-            <li class="breadcrumb-item">Inventory</li>
-            <li class="breadcrumb-item">Product Borrowing</li>
+            <li class="breadcrumb-item">{{ $parent_name }}</li>
+            <li class="breadcrumb-item">{{ $menu_name }}</li>
             <li class="breadcrumb-item active">Edit</li>
         </ol>
     </div>
@@ -42,19 +42,36 @@
                                     <!-- Product Category -->
                                     <div class="form-group">
                                         <label for="product-category" class="control-label">Product Category</label>
-                                        <select name="product_category" id="product-category" class="form-control select2" data-placeholder="Choose Product Category" required>
+                                        <select name="product_category" id="product-category" class="form-control select2" data-placeholder="Choose Product Category">
                                         </select>
                                     </div>
                                     <!-- Borrowing Date -->
-                                    <div class="form-group">
-                                        <label for="borrowing-date" class="control-label">Borrowing Date</label>
-                                        <div class="input-group">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text">
-                                                    <i class="far fa-calendar-alt"></i>
-                                                </span>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="borrowing-date" class="control-label">Borrowing Date</label>
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text">
+                                                            <i class="far fa-calendar-alt"></i>
+                                                        </span>
+                                                    </div>
+                                                    <input type="datepicker" class="form-control datepicker text-right" name="borrowing_date" id="borrowing-date" placeholder="Enter Borrowing Date" required>
+                                                </div>
                                             </div>
-                                            <input type="datepicker" class="form-control datepicker text-right" name="borrowing_date" id="borrowing-date" placeholder="Enter Borrowing Date" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="return-date" class="control-label">Return Date</label>
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text">
+                                                            <i class="far fa-calendar-alt"></i>
+                                                        </span>
+                                                    </div>
+                                                    <input type="datepicker" class="form-control datepicker text-right" name="return_date" id="return-date" placeholder="Enter Return Date" required>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -73,8 +90,8 @@
                                     </div>
                                     <!-- Status -->
                                     <div class="form-group" id="form-status">
-                                        <label for="status" class="control-label">Status</label>  
-                                        <br>                                        
+                                        <label for="status" class="control-label">Status</label>
+                                        <br>
                                     </div>
                                 </div>
                             </div>
@@ -94,7 +111,7 @@
                                 <select name="issued_by" id="issued-by" class="form-control select2" data-placeholder="Issued By" disabled>
                                     <option value=""></option>
                                     @if($data->issued_by)
-                                    <option value="{{$data->issued_by}}" selected>{{$data->issued_name}}</option>                                    
+                                    <option value="{{$data->issued_by}}" selected>{{$data->issued_name}}</option>
                                     @else if(Auth::guard('admin')->user()->id)
                                     <option value="{{Auth::guard('admin')->user()->id}}" selected>{{Auth::guard('admin')->user()->name}}</option>
                                     @endif
@@ -102,7 +119,7 @@
                             </div>
                             <!-- Description -->
                             <div class="form-group">
-                                <label for="description" class="control-label">Description</label>
+                                <label for="description" class="control-label">Purpose</label>
                                 <textarea name="description" id="description" cols="30" rows="5" class="form-control" placeholder="Enter Descripton">{{$data->description}}</textarea>
                             </div>
                             <input type="hidden" name="status" id="status" value="{{$data->status}}">
@@ -121,8 +138,8 @@
                                 <select name="product" id="product" class="form-control select2" data-placeholder="Choose Product"></select>
                             </div>
                             <div class="form-group">
-                                <button type="button" onclick="addProduct()" class="btn btn-labeled labeled-sm btn-md btn-block text-xs btn-success btn-flat legitRipple">
-                                    <b><i class="fas fa-plus"></i></b> Add Product
+                                <button type="button" onclick="addProduct()" class="btn btn-labeled text-sm btn-lg btn-outline-primary btn-flat btn-block legitRipple">
+                                    Add Product
                                 </button>
                             </div>
                             <!-- PRODUCTS -->
@@ -132,7 +149,7 @@
                                         <tr>
                                             <th width="200">Product Name</th>
                                             <th width="15" class="text-center">UOM</th>
-                                            <th width="15" class="text-right">Qty System</th>
+                                            <th width="15" class="text-right">Current Stock</th>
                                             <th width="10" class="text-right">Qty Borrowing</th>
                                             <th width="10" class="text-center">Action</th>
                                         </tr>
@@ -166,8 +183,8 @@
                             <div class="tab-content" id="suppDocumentTabContent">
                                 <div class="tab-pane fade show active" id="document" role="tabpanel" aria-labelledby="document-tab">
                                     <div class="form-group mt-3">
-                                        <button type="button" onclick="addDocument()" class="btn btn-labeled labeled-sm btn-md btn-block text-xs btn-success btn-flat legitRipple">
-                                            <b><i class="fas fa-plus"></i></b> Add Document
+                                        <button type="button" onclick="addDocument()" class="btn btn-labeled text-sm btn-lg btn-outline-primary btn-flat btn-block legitRipple">
+                                            Add Document
                                         </button>
                                     </div>
                                     <!-- TABLE DOCUMENT -->
@@ -182,14 +199,14 @@
                                         <tbody>
                                             <tr class="no-available-data">
                                                 <td colspan="3" class="text-center">No available data.</td>
-                                            </tr>                                            
+                                            </tr>
                                         </tbody>
                                     </table>
                                 </div>
                                 <div class="tab-pane fade show" id="photo" role="tabpanel" aria-labelledby="photo-tab">
                                     <div class="form-group mt-3">
-                                        <button type="button" onclick="addPhoto()" class="btn btn-labeled labeled-sm btn-md btn-block text-xs btn-success btn-flat legitRipple">
-                                            <b><i class="fas fa-plus"></i></b> Add Photo
+                                        <button type="button" onclick="addPhoto()" class="btn btn-labeled text-sm btn-lg btn-outline-primary btn-flat btn-block legitRipple">
+                                            Add Photo
                                         </button>
                                     </div>
                                     <!-- TABLE PHOTO -->
@@ -204,7 +221,7 @@
                                         <tbody>
                                             <tr class="no-available-data">
                                                 <td colspan="3" class="text-center">No available data.</td>
-                                            </tr>                                    
+                                            </tr>
                                         </tbody>
                                     </table>
                                 </div>
@@ -213,7 +230,7 @@
                     </div>
                     <div class="card-footer text-right">
                         <button type="button" onclick="onSubmit('approved')" class="btn btn-success btn-labeled legitRipple text-sm">
-                            <b><i class="fas fa-check-circle"></i></b>                            
+                            <b><i class="fas fa-check-circle"></i></b>
                             Approve
                         </button>
                         <button type="button" onclick="onSubmit('waiting')" class="btn bg-olive color-palette btn-labeled legitRipple text-sm">
@@ -253,11 +270,11 @@
     };
 
     $(function() {
-        var dataBorrowing = @json($data),
-            siteID        = {{$data->site_id}},
-            categoryID    = {{$data->product_category_id}},
-            warehouseID   = {{$data->warehouse_id}}
-            borrowingDate = '{{$data->date_borrowing}}',
+        var dataBorrowing   = @json($data),
+            siteID          = {{$data->site_id}},
+            warehouseID     = {{$data->warehouse_id}}
+            borrowingDate   = '{{$data->date_borrowing}}',
+            returnDate      = '{{$data->date_return}}',
             borrowingStatus = dataBorrowing.status,
             statusBadge     = '';
         
@@ -297,6 +314,10 @@
 
         if(borrowingDate){
            $('#borrowing-date').data('daterangepicker').setStartDate(borrowingDate);
+        }
+
+        if (returnDate) {
+            $('#return-date').data('daterangepicker').setStartDate(returnDate);
         }
 
         $('.summernote').summernote({
@@ -350,11 +371,20 @@
                 },
             },
             allowClear: true,
-        });        
+        }).on('select2:close', function(e) {
+            var data = $(this).find('option:selected').val();
+            var warehouse = $('#warehouse').select2('data');
+
+            if (warehouse[0] && warehouse[0].site_id != data) {
+                $('#warehouse').val(null).trigger('change');
+            }
+        }).on('select2:clearing', function() {
+            $('#warehouse').val(null).trigger('change');
+        });
 
         $("#warehouse").select2({
             ajax: {
-                url: "{{route('warehouse.select')}}",
+                url: "{{route('productborrowing.selectwarehouse')}}",
                 type: 'GET',
                 dataType: 'json',
                 data: function(params) {
@@ -384,18 +414,6 @@
                 },
             },
             allowClear: true,
-        }).on('select2:select', function(e) {
-            var data = e.params.data;            
-            if (data.site_id) {
-                $('#site').select2('trigger', 'select', {
-                    data: {
-                        id: data.site_id,
-                        text: `${data.site}`,
-                    }
-                });
-            }
-        }).on('select2:clearing', function() {
-            $('#site').val(null).trigger('change');
         });
 
         $("#product-category").select2({
@@ -426,6 +444,16 @@
                 },
             },
             allowClear: true,
+            escapeMarkup: function (text) { return text; },
+        }).on('select2:close', function(e) {
+            var data    = $(this).find('option:selected').val();
+            var product = $('#product').select2('data');
+
+            if (product[0] && product[0].product_category_id != data) {
+                $('#product').val(null).trigger('change');
+            }
+        }).on('select2:clearing', function() {
+            $('#product').val(null).trigger('change');
         });
 
         if(siteID){
@@ -443,28 +471,29 @@
                     id : warehouseID,
                     text : '{{$data->warehouse_name}}'
                 }
-            })
-        }
-
-        if(categoryID){
-            $('#product-category').select2('trigger','select',{
-                data : {
-                    id : categoryID,
-                    text : '{{$data->category_name}}'
-                }
             });
         }
 
         $("#product").select2({
             ajax: {
-                url: "{{route('product.select')}}",
+                url: "{{route('productborrowing.selectproduct')}}",
                 type: 'GET',
                 dataType: 'json',
                 data: function(params) {
                     var productCategory = $('#product-category').select2('val');
+                    var products      = [];
+                
+                    $.each($('#table-products > tbody > .product-item'), function (index, value) { 
+                        var product      = $(this).find('.item-product'),
+                            product_id   = product.val();
+                                            
+                        products.push(product_id);
+
+                    });
                     return {
                         name: params.term,
                         product_category_id : productCategory,
+                        products: products,
                         page: params.page,
                         limit: 30,
                     };
@@ -534,9 +563,6 @@
                 borrowing_date: {
                     required: true
                 },
-                product_category: {
-                    required: true
-                },
                 site : {
                     required: true
                 },
@@ -549,9 +575,6 @@
                     required: 'This field is required.'
                 },
                 borrowing_date: {
-                    required: 'This field is required.'
-                },
-                product_category: {
                     required: 'This field is required.'
                 },
                 site : {
@@ -589,6 +612,7 @@
                 var data          = new FormData($('#form')[0]),
                     issuedBy      = $('#form').find('#issued-by').select2('val'),
                     borrowingDate = $('#form').find('#borrowing-date').data('daterangepicker').startDate.format('YYYY-MM-DD'),
+                    returnDate    = $('#form').find('#return-date').data('daterangepicker').startDate.format('YYYY-MM-DD'),
                     products      = [],
                     documents     = [],
                     zeroValue     = false;
@@ -642,6 +666,7 @@
                 data.append('documents',JSON.stringify(documents));
                 data.append('issuedby',issuedBy);
                 data.append('dateborrowing',borrowingDate);
+                data.append('datereturn',returnDate);
 
                 $.ajax({
                     url: $('#form').attr('action'),
@@ -713,7 +738,7 @@
                         <td class="text-center" width="15">${uom}</td>
                         <td class="text-right" width="15">${qtySystem}</td>
                         <td class="text-center" width="15">
-                            <input type="number" name="qty_request" class="form-control numberfield text-right qty-request" placeholder="0" required>
+                            <input type="number" name="qty_request" class="form-control numberfield text-right qty-request" min="0" max="${qtySystem}" placeholder="0" required>
                         </td>
                         <td class="text-center" width="15">
                             <button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
@@ -803,7 +828,7 @@
                             <td class="text-center" width="15">${uom}</td>
                             <td class="text-right" width="15">${qtySystem}</td>
                             <td class="text-center" width="15">
-                                <input type="number" name="qty_request" class="form-control numberfield text-right qty-request" placeholder="0" value="${qtyRequest}" required>
+                                <input type="number" name="qty_request" class="form-control numberfield text-right qty-request" placeholder="0" min="0" max="${qtySystem}" value="${qtyRequest}" required>
                             </td>
                             <td class="text-center" width="15">
                                 <button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
