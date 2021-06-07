@@ -19,12 +19,12 @@ class ProductTransferController extends Controller
 
     public function __construct()
     {
-        // $menu   = Menu::where('menu_route', 'producttransfer')->first();
-        // $parent = Menu::find($menu->parent_id);
-        // View::share('parent_name', $parent->menu_name);
-        // View::share('menu_name', $menu->menu_name);
+        $menu   = Menu::where('menu_route', 'producttransfer')->first();
+        $parent = Menu::find($menu->parent_id);
+        View::share('parent_name', $parent->menu_name);
+        View::share('menu_name', $menu->menu_name);
         View::share('menu_active', url('admin' . 'producttransfer'));
-        // $this->middleware('accessmenu', ['except' => ['select']]);
+        $this->middleware('accessmenu', ['except' => ['select']]);
     }
 
     /**
