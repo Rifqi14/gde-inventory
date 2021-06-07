@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Menu;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -13,6 +14,10 @@ use Illuminate\Support\Facades\Validator;
 class VehicleController extends Controller
 {
     function __construct(){
+        $menu       = Menu::getByRoute('vehicle')->first();
+        $parent     = Menu::find($menu->parent_id);
+        View::share('parent_name', $parent->menu_name);
+        View::share('menu_name', $menu->menu_name);
         View::share('menu_active', url('admin/'.'vehicle'));
         $this->middleware('accessmenu', ['except' => ['select']]);
     }
@@ -153,7 +158,7 @@ class VehicleController extends Controller
             return response()->json([
                 'status' => false,
                 'message'     => "Cant update vehicles"
-            ], 200);
+            ], 400);
         }
 
         return response()->json([
@@ -176,7 +181,7 @@ class VehicleController extends Controller
         } catch (\Illuminate\Database\QueryException $e) {
             return response()->json([
                 'status'     => false,
-                'message'     => 'Error delete data'
+                'message'     => "Error delete data {$e->errorInfo[2]}"
             ], 400);
         }
         return response()->json([

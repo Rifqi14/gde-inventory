@@ -449,7 +449,6 @@
                     return {
                         name: params.term,
                         page: params.page,
-                        type: 'non_shift',
                         limit: 30,
                     };
                 },

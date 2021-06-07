@@ -1,8 +1,6 @@
 @extends('admin.layouts.app')
 
-@section('title')
-Vehicle Database
-@endsection
+@section('title', @$menu_name)
 
 @section('stylesheets')
 
@@ -13,13 +11,13 @@ Vehicle Database
     <div class="col-sm-4">
         <!-- <h5 class="m-0 ml-2 text-dark text-md breadcrumb">Grievance Redress &nbsp;<small class="font-uppercase"></small></h5> -->
         <h1 id="title-branch" class="m-0 text-dark">
-            Vehicle Database
+            {{ @$menu_name }}
         </h1>
     </div>
     <div class="col-sm-8">
         <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
-            <li class="breadcrumb-item">Preferences</li>
-            <li class="breadcrumb-item">Vehicle</li>
+            <li class="breadcrumb-item">{{ @$parent_name }}</li>
+            <li class="breadcrumb-item">{{ @$menu_name }}</li>
         </ol>
     </div>
 </div>
@@ -33,12 +31,10 @@ Vehicle Database
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <a class="btn btn-labeled btn-sm text-sm btn-default btn-flat legitRipple  float-right ml-1"
-                            onclick="filter()">
+                        <a class="btn btn-labeled btn-sm text-sm btn-default btn-flat legitRipple  float-right ml-1" onclick="filter()">
                             <b><i class="fas fa-search"></i></b> Search
                         </a>
-                        <a href="{{ route('vehicle.create') }}"
-                            class="btn btn-labeled btn-sm text-sm btn-success btn-flat legitRipple  float-right ml-1">
+                        <a href="{{ route('vehicle.create') }}" class="btn btn-labeled btn-sm text-sm btn-success btn-flat legitRipple  float-right ml-1">
                             <b><i class="fas fa-plus"></i></b> Create
                         </a>
                     </div>
@@ -65,8 +61,7 @@ Vehicle Database
 </section>
 <!-- /.content -->
 
-<div id="add-filter" class="modal fade" data-backdrop="static" tabindex="-1" role="dialog"
-    aria-labelledby="filter-modal" aria-hidden="true">
+<div id="add-filter" class="modal fade" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="filter-modal" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -82,8 +77,7 @@ Vehicle Database
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="control-label" for="police_number">Police Number</label>
-                                    <input type="text" name="police_number" class="form-control"
-                                        placeholder="Police Number">
+                                    <input type="text" name="police_number" class="form-control" placeholder="Police Number">
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -97,8 +91,7 @@ Vehicle Database
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="control-label" for="site_id">Unit</label>
-                                    <select type="text" class="form-control" id="unit_id" name="site_id"
-                                        data-placeholder="Unit"></select>
+                                    <select type="text" class="form-control" id="unit_id" name="site_id" data-placeholder="Unit"></select>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -115,11 +108,8 @@ Vehicle Database
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-labeled  btn-danger btn-sm btn-sm btn-flat legitRipple"
-                    data-dismiss="modal"><b><i class="fas fa-times"></i></b> Cancel</button>
-                <button type="submit" form="form-search"
-                    class="btn btn-labeled  btn-default  btn-sm btn-flat legitRipple"><b><i
-                            class="fas fa-search"></i></b> Search</button>
+                <button type="button" class="btn btn-labeled  btn-danger btn-sm btn-sm btn-flat legitRipple" data-dismiss="modal"><b><i class="fas fa-times"></i></b> Cancel</button>
+                <button type="submit" form="form-search" class="btn btn-labeled  btn-default  btn-sm btn-flat legitRipple"><b><i class="fas fa-search"></i></b> Search</button>
             </div>
         </div>
     </div>
@@ -186,7 +176,7 @@ Vehicle Database
                                         <a class="dropdown-item" href="javascript:void(0);" onclick="edit(${full.id})">
                                             <i class="far fa-edit"></i>Update Data
                                         </a>
-                                        <a class="dropdown-item " href="javascript:void(0);" onclick="destroy(${full.id})">
+                                        <a class="dropdown-item delete" href="javascript:void(0);" data-id="${full.id}">
                                             <i class="far fa-trash-alt"></i> Delete Data
                                         </a>
                                     </div>
@@ -229,6 +219,103 @@ Vehicle Database
 			},
 			allowClear: true,
 		});
+
+        $(document).on('click', '.delete', function () {
+            var id = $(this).data('id');
+            bootbox.confirm({
+                buttons: {
+                    confirm: {
+                        label: '<i class="fa fa-check"></i>',
+                        className: 'btn-primary btn-sm'
+                    },
+                    cancel: {
+                        label: '<i class="fa fa-undo"></i>',
+                        className: 'btn-default btn-sm'
+                    },
+                },
+                title: 'Delete data?',
+                message: 'Are you sure want to delete this data?',
+                callback: function (result) {
+                    if (result) {
+                        var data = {
+                            _token: "{{ csrf_token() }}"
+                        };
+                        $.ajax({
+                            url: `{{route('vehicle.index')}}/${id}`,
+                            dataType: 'json',
+                            data: data,
+                            type: 'DELETE',
+                            beforeSend: function () {
+                                blockMessage('#content', 'Loading', '#fff');
+                            }
+                        }).done(function (response) {
+                            $('#content').unblock();
+                            if (response.status) {
+                                toastr.options = {
+                                    "closeButton": false,
+                                    "debug": false,
+                                    "newestOnTop": false,
+                                    "progressBar": false,
+                                    "positionClass": "toast-top-right",
+                                    "preventDuplicates": false,
+                                    "onclick": null,
+                                    "showDuration": "300",
+                                    "hideDuration": "1000",
+                                    "timeOut": "5000",
+                                    "extendedTimeOut": "1000",
+                                    "showEasing": "swing",
+                                    "hideEasing": "linear",
+                                    "showMethod": "fadeIn",
+                                    "hideMethod": "fadeOut"
+                                }
+                                toastr.success(response.message);
+                                dataTable.ajax.reload(null, false);
+                            }else {
+                                toastr.options = {
+                                    "closeButton": false,
+                                    "debug": false,
+                                    "newestOnTop": false,
+                                    "progressBar": false,
+                                    "positionClass": "toast-top-right",
+                                    "preventDuplicates": false,
+                                    "onclick": null,
+                                    "showDuration": "300",
+                                    "hideDuration": "1000",
+                                    "timeOut": "5000",
+                                    "extendedTimeOut": "1000",
+                                    "showEasing": "swing",
+                                    "hideEasing": "linear",
+                                    "showMethod": "fadeIn",
+                                    "hideMethod": "fadeOut"
+                                }
+                                toastr.warning(response.message);
+                            }
+                        }).fail(function (response) {
+                            var response = response.responseJSON;
+                            $('#content').unblock();
+                            toastr.options = {
+                                "closeButton": false,
+                                "debug": false,
+                                "newestOnTop": false,
+                                "progressBar": false,
+                                "positionClass": "toast-top-right",
+                                "preventDuplicates": false,
+                                "onclick": null,
+                                "showDuration": "300",
+                                "hideDuration": "1000",
+                                "timeOut": "5000",
+                                "extendedTimeOut": "1000",
+                                "showEasing": "swing",
+                                "hideEasing": "linear",
+                                "showMethod": "fadeIn",
+                                "hideMethod": "fadeOut"
+                            }
+                            toastr.warning(response.message);
+                        })
+                    }
+                }
+            });
+        });
 	});
 
 	function edit(id)
@@ -260,7 +347,7 @@ Vehicle Database
                     _token: "{{ csrf_token() }}"
                 };
 				$.ajax({
-					url: `{{url('admin/user')}}/${id}`,
+					url: `{{url('admin/vehicle')}}/${id}`,
 					dataType: 'json', 
 					data:data,
 					type:'DELETE',

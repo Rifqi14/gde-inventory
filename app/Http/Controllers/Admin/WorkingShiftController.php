@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Models\WorkingShift;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Menu;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +16,10 @@ class WorkingShiftController extends Controller
 {
     function __construct()
     {
+        $menu       = Menu::getByRoute('workingshift')->first();
+        $parent     = Menu::find($menu->parent_id);
+        View::share('parent_name', $parent->menu_name);
+        View::share('menu_name', $menu->menu_name);
         View::share('menu_active', url('admin/' . 'workingshift'));
         $this->middleware('accessmenu', ['except' => ['select']]);
     }
