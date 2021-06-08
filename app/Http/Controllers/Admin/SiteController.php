@@ -245,14 +245,15 @@ class SiteController extends Controller
     
     public function select(Request $request)
     {
-        $start = $request->page ? $request->page - 1 : 0;
+        $start  = $request->page ? $request->page - 1 : 0;
         $length = $request->limit;
-        $name = strtoupper($request->name);
+        $name   = strtoupper($request->name);
+        $except = $request->site_id;
 
         //Count Data
         $query = DB::table('sites');
         $query->select('sites.*');
-        $query->whereRaw("upper(name) like '%$name%'");
+        $query->whereRaw("upper(name) like '%$name%'");                
 
         $row = clone $query;
         $recordsTotal = $row->count();
@@ -267,8 +268,9 @@ class SiteController extends Controller
             $data[] = $role;
         }
         return response()->json([
-            'total' => $recordsTotal,
-            'rows' => $data
+            'total'     => $recordsTotal,
+            'rows'      => $data,
+            'except'    => $except
         ], 200);
-    }
+    }    
 }

@@ -25,10 +25,11 @@ class WarehouseController extends Controller
 
     public function select(Request $request)
     {
-        $start = $request->page ? $request->page - 1 : 0;
-        $length = $request->limit;
-        $name = strtoupper($request->name);
-        $site_id = $request->site_id;
+        $start     = $request->page ? $request->page - 1 : 0;
+        $length    = $request->limit;
+        $name      = strtoupper($request->name);
+        $site_id   = $request->site_id;
+        $except_id = $request->exception_id;
 
         //Count Data
         $query = Warehouse::selectRaw("
@@ -39,6 +40,9 @@ class WarehouseController extends Controller
         $query->whereRaw("upper(warehouses.name) like '%$name%'");
         if($site_id){
             $query->where('site_id',$site_id);
+        }
+        if($except_id){
+            $query->where('warehouses.id','<>',$except_id);
         }
 
         $row = clone $query;
