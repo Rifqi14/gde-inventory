@@ -22,6 +22,7 @@ Route::get('admin/error', function () {
 Auth::routes();
 
 Route::get('/test', 'Admin\TestController@test')->name('test');
+Route::get('/businesstrip/rateprocess', 'Admin\BusinessTripController@rateprocess')->name('businesstrip.rateprocess');
 
 Route::get('/home', 'HomeController@index')->name('home');
 Route::group(['prefix' => 'admin'], function () {
@@ -219,6 +220,8 @@ Route::group(['prefix' => 'admin'], function () {
 
         // Product Borrowing        
         Route::get('/productborrowing/read','Admin\ProductBorrowingController@read')->name('productborrowing.read');        
+        Route::get('/productborrowing/selectwarehouse','Admin\ProductBorrowingController@selectwarehouse')->name('productborrowing.selectwarehouse');        
+        Route::get('/productborrowing/selectproduct','Admin\ProductBorrowingController@selectproduct')->name('productborrowing.selectproduct');        
         Route::get('/productborrowing/readarchived','Admin\ProductBorrowingController@readarchived')->name('productborrowing.readarchived');
         Route::get('/productborrowing/archive/{id}','Admin\ProductBorrowingController@archive');
         Route::get('/productborrowing/delete/{id}','Admin\ProductBorrowingController@destroy');                
