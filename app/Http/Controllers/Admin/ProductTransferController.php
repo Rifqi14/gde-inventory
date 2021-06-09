@@ -221,13 +221,17 @@ class ProductTransferController extends Controller
 
     public function read(Request $request)
     {
-        $draw   = $request->draw;
-        $start  = $request->start;
-        $length = $request->length;
-        $query  = $request->search['value'];
-        $sort   = $request->columns[$request->order[0]['column']]['data'];
-        $dir    = $request->order[0]['dir'];
-        $status = $request->status;
+        $draw       = $request->draw;
+        $start      = $request->start;
+        $length     = $request->length;
+        $query      = $request->search['value'];
+        $sort       = $request->columns[$request->order[0]['column']]['data'];
+        $dir        = $request->order[0]['dir'];
+        $number     = strtoupper($request->number);
+        $issuedBy   = $request->issuedby;
+        $startdate  = $request->start_date;
+        $finishdate = $request->finish_date;
+        $status     = $request->status;
 
         $query  = ProductTransfer::selectRaw("
             product_transfers.*,
@@ -239,6 +243,15 @@ class ProductTransferController extends Controller
         ");
         $query->leftJoin('users','users.id','=','product_transfers.issued_by');        
         $query->leftJoin('employees','employees.id','=','users.employee_id');
+        if($startdate && $finishdate){
+            $query->whereBetween('product_transfers.date_transfer',[$startdate,$finishdate]);
+        }
+        if($number){
+            $query->whereRaw("upper(product_transfers.transfer_number) like '%$number'");
+        }
+        if($issuedBy){
+            $query->where('employees.id',$issuedBy);
+        }
         if($status){
             $query->where('product_transfers.status',$status);
         }else{
@@ -269,13 +282,17 @@ class ProductTransferController extends Controller
 
     public function readarchived(Request $request)
     {
-        $draw   = $request->draw;
-        $start  = $request->start;
-        $length = $request->length;
-        $query  = $request->search['value'];
-        $sort   = $request->columns[$request->order[0]['column']]['data'];
-        $dir    = $request->order[0]['dir'];
-        $status = $request->status;
+        $draw       = $request->draw;
+        $start      = $request->start;
+        $length     = $request->length;
+        $query      = $request->search['value'];
+        $sort       = $request->columns[$request->order[0]['column']]['data'];
+        $dir        = $request->order[0]['dir'];
+        $number     = strtoupper($request->number);
+        $issuedBy   = $request->issuedby;
+        $startdate  = $request->start_date;
+        $finishdate = $request->finish_date;
+        $status     = $request->status;
 
         $query = ProductTransfer::withTrashed();
         $query->selectRaw("
@@ -292,7 +309,16 @@ class ProductTransferController extends Controller
         ");
         $query->leftJoin('users','users.id','=','product_transfers.issued_by');        
         $query->leftJoin('employees','employees.id','=','users.employee_id');                
-        $query->whereNotNull('deleted_at');
+        if($startdate && $finishdate){
+            $query->whereBetween('product_transfers.date_transfer',[$startdate,$finishdate]);
+        }
+        if($number){
+            $query->whereRaw("upper(product_transfers.transfer_number) like '%$number'");
+        }
+        if($issuedBy){
+            $query->where('employees.id',$issuedBy);
+        }
+        $query->whereNotNull('deleted_at');        
 
         $rows  = clone $query;
         $total = $rows->count();

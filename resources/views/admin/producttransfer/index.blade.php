@@ -124,20 +124,41 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label class="control-label" for="nik">NIK</label>
-                                    <input class="form-control" type="text" name="employee_nik" id="employee-nik" placeholder="NIK">
+                                    <label class="control-label" for="transfer-number">Transfer Number</label>
+                                    <input class="form-control" type="text" name="transfer_number" id="transfer-number" placeholder="Enter Borrowing Number">
+                                </div>
+                                <div class="form-group">
+                                    <label for="status" class="control-label">Status</label>
+                                    <div class="status-general">
+                                        <select class="form-control select2 general-status" id="general-status" name="status" data-placeholder="Choose Status">
+                                            <option value=""></option>
+                                            <option value="draft">Draft</option>
+                                            <option value="waiting">Waiting</option>
+                                        </select>
+                                    </div>
+                                    <div class="status-other" style="display: none;">
+                                        <select class="form-control select2 other-status" name="status" id="other-status" disabled>
+                                            <option value="approved">Approved</option>
+                                            <option value="archived">Archived</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label class="control-label" for="employee-name">Name</label>
-                                    <input class="form-control" type="text" name="employee_name" id="employee-name" placeholder="Name">
+                                    <label class="control-label" for="borrowig-date">Date</label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">
+                                                <i class="far fa-calendar-alt"></i>
+                                            </span>
+                                        </div>
+                                        <input type="datepicker" class="form-control datepicker text-right" name="dates" id="dates">
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-12">
                                 <div class="form-group">
-                                    <label class="control-label" for="employee-address">Address</label>
-                                    <input class="form-control" type="text" name="employee_address" id="employee-address" placeholder="Address">
+                                    <label class="control-label" for="issued-by">Issued By</label>
+                                    <select name="issued_by" id="issued-by" class="form-control" data-placeholder="Choose Emplooye"></select>
                                 </div>
                             </div>
                         </div>
@@ -177,6 +198,52 @@
     }
 
     $(function () {
+        $('.select2').select2({
+            allowClear: true
+        });
+
+        $('.datepicker').daterangepicker({
+            timePicker: false,
+            timePickerIncrement: 30,
+            drops: 'auto',
+            opens: 'center',
+            locale: {
+                format: 'DD/MM/YYYY'
+            },
+            startDate: moment().startOf('month'),
+            endDate: moment().endOf('month')
+        });
+
+        $("#issued-by").select2({
+            ajax: {
+                url: "{{route('employee.select')}}",
+                type: 'GET',
+                dataType: 'json',
+                data: function(params) {
+                    return {
+                        name: params.term,
+                        page: params.page,
+                        limit: 30,
+                    };
+                },
+                processResults: function(data, params) {
+                    var more = (params.page * 30) < data.total;
+                    var option = [];
+                    $.each(data.rows, function(index, item) {
+                        option.push({
+                            id: item.id,
+                            text: item.name,
+                        });
+                    });
+                    return {
+                        results: option,
+                        more: more,
+                    };
+                },
+            },            
+            allowClear: true,
+        });
+
         generalTable = $('#table-general').DataTable({
             processing: true,
             language: {
@@ -195,7 +262,18 @@
                 url: "{{route('producttransfer.read')}}",
                 type: "GET",
                 data: function(data) {
-                    data.status = '';
+                    var number      = $('#form-search').find('#transfer-number').val(),
+                        dates       = $('#form-search').find('#dates').data('daterangepicker'),
+                        startDate   = dates.startDate.format('YYYY-MM-DD'),
+                        finishDate  = dates.endDate.format('YYYY-MM-DD'),
+                        issuedby    = $('#form-search').find('#issued-by').val(),
+                        status      = $('#general-status').select2('val');
+
+                    data.number      = number;
+                    data.start_date  = startDate;
+                    data.finish_date = finishDate;
+                    data.issuedby    = issuedby;
+                    data.status      = status;
                 }
             },
             columnDefs: [{
@@ -296,7 +374,18 @@
                 url: "{{route('producttransfer.read')}}",
                 type: "GET",
                 data: function(data) {
-                    data.status = 'approved';
+                    var number      = $('#form-search').find('#transfer-number').val(),
+                        dates       = $('#form-search').find('#dates').data('daterangepicker'),
+                        startDate   = dates.startDate.format('YYYY-MM-DD'),
+                        finishDate  = dates.endDate.format('YYYY-MM-DD'),
+                        issuedby    = $('#form-search').find('#issued-by').val(),
+                        status      = $('#other-status').select2('val');
+
+                    data.number      = number;
+                    data.start_date  = startDate;
+                    data.finish_date = finishDate;
+                    data.issuedby    = issuedby;
+                    data.status      = status;
                 }
             },
             columnDefs: [{
@@ -383,7 +472,18 @@
                 url: "{{route('producttransfer.readarchived')}}",
                 type: "GET",
                 data: function(data) {
-                    data.status = 'archived';
+                    var number      = $('#form-search').find('#transfer-number').val(),
+                        dates       = $('#form-search').find('#dates').data('daterangepicker'),
+                        startDate   = dates.startDate.format('YYYY-MM-DD'),
+                        finishDate  = dates.endDate.format('YYYY-MM-DD'),
+                        issuedby    = $('#form-search').find('#issued-by').val(),
+                        status      = $('#other-status').select2('val');
+
+                    data.number      = number;
+                    data.start_date  = startDate;
+                    data.finish_date = finishDate;
+                    data.issuedby    = issuedby;
+                    data.status      = status;
                 }
             },
             columnDefs: [{
@@ -453,11 +553,7 @@
             }
             $('#add-filter').modal('hide');
         });
-    });
-
-    const moveTab = (tabs) => {
-        tabs  = tab;
-    }
+    });    
 
     const edit = (id) => {
         document.location = `{{ route('producttransfer.index') }}/${id}/edit`;
@@ -517,8 +613,47 @@
         document.location = `{{url('admin/producttransfer/archive/${id}')}}`;
     }    
 
-    const filter = () =>{
+    const filter = () => {
+        if (tab == 'general') {
+            $('.status-general').show();
+            $('.status-other').hide();
+        } else {
+            var state = {};
+            if (tab == 'approved') {
+                state = {
+                    id: 'approved',
+                    text: 'Approved'
+                };
+            } else if (tab == 'archived') {
+                state = {
+                    id: 'archived',
+                    text: 'Archived'
+                };
+            }
+
+            $('.other-status').select2('trigger', 'select', {
+                data: state
+            });
+            $('.status-other').show();
+            $('.status-general').hide();
+        }
+
         $('#add-filter').modal('show');
+    }
+
+    const moveTab = (tabs) => {
+        tab = tabs;
+    }
+
+    const resetTable = () => {
+        var dates = $('#form-search').find('#dates').data('daterangepicker');            
+            dates.setStartDate(moment().startOf('month'));
+            dates.setEndDate(moment().endOf('month'));
+        $('#form-search').find('#transfer-number').val(''),        
+        $('#form-search').find('#issued-by').val(null).trigger('change');
+        $('#general-status').val(null).trigger('change');
+
+        $('#form-search').trigger('submit');
     }
 </script>
 @endsection
