@@ -10,7 +10,7 @@
         <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
             <li class="breadcrumb-item">{{ @$menu_parent }}</li>
             <li class="breadcrumb-item">{{ @$menu_name }}</li>
-            <li class="breadcrumb-item">Edit</li>
+            <li class="breadcrumb-item">Detail</li>
         </ol>
     </div>
 </div>
@@ -42,7 +42,7 @@
                                     <!-- Site -->
                                     <div class="form-group">
                                         <label for="site">Site</label>
-                                        <select name="site" id="site" class="form-control select2" data-placeholder="Choose Site">
+                                        <select name="site" id="site" class="form-control select2" data-placeholder="Choose Site" disabled>
                                         </select>
                                     </div>
                                 </div>
@@ -50,7 +50,7 @@
                                     <!-- Product Category -->
                                     <div class="form-group">
                                         <label for="product_category_id">Product Category</label>
-                                        <select name="product_category" id="product-category-id" class="form-control select2" data-placeholder="Choose Product Category">
+                                        <select name="product_category" id="product-category-id" class="form-control select2" data-placeholder="Choose Product Category" disabled>
                                         </select>
                                     </div>
                                 </div>
@@ -58,7 +58,7 @@
                                     <!-- Warehouse -->
                                     <div class="form-group">
                                         <label for="warehouse">Warehouse</label>
-                                        <select name="warehouse" id="warehouse" class="form-control select2" data-placeholder="Choose Warehouse">
+                                        <select name="warehouse" id="warehouse" class="form-control select2" data-placeholder="Choose Warehouse" disabled>
                                         </select>
                                     </div>
                                 </div>
@@ -66,14 +66,13 @@
                                     <!-- Date Issued -->
                                     <div class="form-group">
                                         <label for="date_issued">Date Issued</label>
-                                        <input type="datepicker" name="date_issued" id="date-issued" class="form-control datepicker text-right" placeholder="Date Issued">
+                                        <input type="datepicker" name="date_issued" id="date-issued" class="form-control datepicker text-right" placeholder="Date Issued" readonly>
                                     </div>
                                 </div>
                                 <div class="col-sm-6">
                                     <!-- Status -->
                                     <div class="form-group form-status">
-                                        <label for="status">Status</label>
-                                        <input type="hidden" name="status" id="status" value="draft">                                        
+                                        <label for="status">Status</label>                                    
                                         <br>
                                     </div>
                                 </div>
@@ -108,24 +107,14 @@
                             <span class="title">
                                 <hr>
                                 <h5 class="text-md text-dark text-uppercase">Product Information</h5>
-                            </span>
-                            <div class="form-group">
-                                <label for="product_id" class="control-label">Product</label>
-                                <select id="product" class="form-control select2" data-placeholder="Choose Product"></select>
-                                <br>
-                                <button type="button" class="btn btn-success color-palette btn-labeled legitRipple text-sm btn-block" onclick="addProduct()">
-                                    <b><i class="fas fa-plus"></i></b>
-                                    Add
-                                </button>
-                            </div>
+                            </span>                            
                             <table id="table-products" class="table table-striped datatable" width="100%">
                                 <thead>
                                     <tr>
                                         <th width="200">Product Name</th>
                                         <th width="15" class="text-center">UOM</th>
                                         <th width="15" class="text-center">Qty System</th>
-                                        <th width="10" class="text-center">Qty Consume</th>
-                                        <th width="10" class="text-center">Action</th>
+                                        <th width="10" class="text-center">Qty Consume</th>                                        
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -154,62 +143,40 @@
                             </ul>
                             <div class="tab-content" id="suppDocumentTabContent">
                                 <!-- Document -->
-                                <div class="tab-pane fade show active" id="document" role="tabpanel" aria-labelledby="document-tab">
-                                    <div class="form-group mt-3">
-                                        <div class="form-group mt-3">
-                                            <button type="button" onclick="addDocument()" class="btn btn-labeled labeled-sm btn-md btn-block text-xs btn-success btn-flat legitRipple">
-                                                <b><i class="fas fa-plus"></i></b> Add Document
-                                            </button>
-                                        </div>
-                                    </div>
+                                <div class="tab-pane fade show active" id="document" role="tabpanel" aria-labelledby="document-tab">                                    
                                     <table id="table-document" class="table table-striped datatable" width="100%">
                                         <thead>
                                             <tr>
-                                                <th width="45%">Document Name</th>
-                                                <th width="45%" class="text-center">File</th>
-                                                <th width="10%" class="text-center">Action</th>
+                                                <th width="50%">Document Name</th>
+                                                <th width="50%" class="text-center">File</th>                                                
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr class="no-available-data">
-                                                <td colspan="3" class="text-center">No available data.</td>
+                                                <td colspan="2" class="text-center">No available data.</td>
                                             </tr>
                                         </tbody>
                                     </table>
                                 </div>
                                 <!-- Photo -->
-                                <div class="tab-pane fade show" id="photo" role="tabpanel" aria-labelledby="photo-tab">
-                                    <div class="form-group mt-3">
-                                        <button type="button" onclick="addPhoto()" class="btn btn-labeled labeled-sm btn-md btn-block text-xs btn-success btn-flat legitRipple">
-                                            <b><i class="fas fa-plus"></i></b> Add Photo
-                                        </button>
-                                    </div>
+                                <div class="tab-pane fade show" id="photo" role="tabpanel" aria-labelledby="photo-tab">                                    
                                     <table id="table-photo" class="table table-striped datatable" width="100%">
                                         <thead>
                                             <tr>
-                                                <th width="45%">Photo Name</th>
-                                                <th width="45%" class="text-center">File</th>
-                                                <th width="10%" class="text-center">Action</th>
+                                                <th width="50%">Photo Name</th>
+                                                <th width="50%" class="text-center">File</th>                                                
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr class="no-available-data">
-                                                <td colspan="3" class="text-center">No available data.</td>
+                                                <td colspan="2" class="text-center">No available data.</td>
                                             </tr>
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
                         </div>
-                        <div class="card-footer text-right">
-                            <button type="button" onclick="onSubmit('approved')" class="btn btn-success btn-labeled legitRipple text-sm">
-                                <b><i class="fas fa-check-circle"></i></b>
-                                Approve
-                            </button>
-                            <button type="button" onclick="onSubmit('waiting')" class="btn bg-olive color-palette btn-labeled legitRipple text-sm">
-                                <b><i class="fas fa-save"></i></b>
-                                Submit
-                            </button>
+                        <div class="card-footer text-right">                            
                             <a href="{{ route('consumable.index') }}" class="btn btn-secondary color-palette btn-labeled legitRipple text-sm">
                                 <b><i class="fas fa-times"></i></b>
                                 Cancel
@@ -256,18 +223,9 @@
         
         $('.summernote').summernote({
             height: 120,
-            toolbar: [
-                ['style', ['style']],
-                ['font-style', ['bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'clear']],
-                ['font', ['fontname']],
-                ['font-size', ['fontsize']],
-                ['font-color', ['color']],
-                ['para', ['ul', 'ol', 'paragraph']],
-                ['table', ['table']],
-                ['update', ['link', 'picture', 'video', 'hr']],
-                ['misc', ['fullscreen', 'codeview', 'help']],
-            ]
+            toolbar: []
         });
+        $('.summernote').summernote('disable');
 
         $('.datepicker').daterangepicker({
             singleDatePicker: true,
@@ -682,12 +640,7 @@
                                 <td width="100">${productName}</td>
                                 <td class="text-center" width="15">${uom}</td>
                                 <td class="text-center" width="15">${qtySystem}</td>
-                                <td class="text-center" width="15">
-                                    <input type="number" name="qty_consume" class="form-control numberfield text-right qty-consume" placeholder="0" value="${qtyConsume}" required>
-                                </td>
-                                <td class="text-center" width="15">
-                                    <button class="btn btn-md text-xs btn-danger btn-flat legitRipple" type="button" onclick="removeProduct($(this))"><i class="fas fa-trash"></i></button>
-                                </td>
+                                <td class="text-center" width="15">${qtyConsume}</td>                                
                             </tr>`;
             });
 
@@ -707,17 +660,12 @@
                     path       = `{{asset('assets/consumable/${consumeID}/document/${file}')}}`;
 
                 html += `<tr class="document-item">
-                            <td>
-                                <input type="text" class="form-control document-name" data-id="${id}" data-consume-id="${consumeID}" data-type="file" data-file="${file}" placeholder="Enter document name" value="${filename}" required>                                
-                            </td>
+                            <td>${filename}</td>
                             <td class="doc-cell text-center">                       
                                 <a href="${path}" target="_blank">
                                    <b><i class="fas fa-download"></i></b> Download File
                                 </a>                             
-                            </td>
-                            <td class="text-center">
-                                <button class="btn btn-md text-xs btn-danger btn-flat legitRipple" onclick="removeDoc($(this),${id})" type="button"><i class="fas fa-trash"></i></button>                                
-                            </td>
+                            </td>                            
                         </tr>`;
             });
 
@@ -737,17 +685,12 @@
                     path       = `{{asset('assets/consumable/${consumeID}/image/${file}')}}`;
 
                 html += `<tr class="photo-item">
-                            <td>
-                            <input type="text" class="form-control document-name" data-id="${id}" data-consume-id="${consumeID}" data-type="photo" data-file="${file}" placeholder="Enter photo name" value="${filename}" required>                            
-                            </td>
+                            <td>${filename}</td>
                             <td class="doc-cell text-center">          
                                 <a href="${path}" target="_blank">
                                    <b><i class="fas fa-download"></i></b> Download File
                                 </a>                      
-                            </td>
-                            <td class="text-center">
-                                <button class="btn btn-md text-xs btn-danger btn-flat legitRipple" onclick="removePhoto($(this),${id})" type="button"><i class="fas fa-trash"></i></button>                                
-                            </td>
+                            </td>                            
                         </tr>`;
             });
 
@@ -902,11 +845,6 @@
                 path : `assets/consumable/${consumeID}/image/${file}`
             });
         }
-    }
-
-    const onSubmit = (status) => {
-        $('input[name=status]').val(status);
-        $('form').first().trigger('submit');
-    }
+    }   
 </script>
 @endsection
