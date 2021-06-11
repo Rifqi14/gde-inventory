@@ -337,12 +337,13 @@ class ProductController extends Controller
         $start  = $request->page ? $request->page - 1 : 0;
         $length = $request->limit;
         $name   = strtoupper($request->name);
-        $product_category_id = $request->product_category_id;   
+        $product_category_id = $request->product_category_id;
+        $products   = $request->products ? $request->products : null;
     
         $query = Product::selectRaw("
             products.*,            
             product_uoms.uom_id,
-            uom_categories.name as uom
+            uoms.name as uom
         ");        
         $query->leftJoin('product_uoms','product_uoms.product_id','=','products.id');
         $query->leftJoin('uoms','uoms.id','=','product_uoms.uom_id');
@@ -354,6 +355,9 @@ class ProductController extends Controller
         }
         if($product_category_id){
             $query->where('product_category_id',$product_category_id);
+        }
+        if ($products) {
+            $query->whereNotIn('products.id', $products);
         }
     
         $rows  = clone $query;

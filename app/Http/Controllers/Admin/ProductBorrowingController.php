@@ -16,6 +16,10 @@ class ProductBorrowingController extends Controller
 
     function __construct()
     {
+        $menu       = Menu::GetByRoute('productborrowing')->first();
+        $parent     = Menu::find($menu->parent_id);
+        View::share('menu_name', $menu->menu_name);
+        View::share('menu_parent', $parent->menu_name);
         View::share('menu_active', url('admin/'.'productborrowing'));
     }
 

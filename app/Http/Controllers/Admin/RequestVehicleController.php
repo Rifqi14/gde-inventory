@@ -6,6 +6,7 @@ use App\Models\RequestVehicle;
 use App\Models\BorrowerRequestVehicle;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Validator;
 
@@ -146,16 +147,16 @@ class RequestVehicleController extends Controller
                 request_vehicles.finish_request,
                 request_vehicles.remarks,
                 vehicles.vehicle_name,
-                borrower_request_vehicles.employee_id,
                 employees.name as employee_name
             ');
             $query->leftJoin('vehicles','vehicles.id','=','request_vehicles.vehicle_id');
-            $query->join('borrower_request_vehicles',function($j) use ($employeeid){
-                $j->on('borrower_request_vehicles.request_vehicle_id','=','request_vehicles.id');            
-            }); 
-            $query->join('employees','employees.id','=','borrower_request_vehicles.employee_id');
+            // $query->join('borrower_request_vehicles',function($j) use ($employeeid){
+            //     $j->on('borrower_request_vehicles.request_vehicle_id','=','request_vehicles.id');            
+            // });
+            $query->leftJoin('users', 'users.id', '=', 'request_vehicles.issued_by');
+            $query->join('employees','employees.id','=','users.employee_id');
             $query->where([
-                ['borrower_request_vehicles.employee_id','=',$employeeid],
+                ['request_vehicles.issued_by','=',$employeeid],
                 ['request_vehicles.status','=',2]
             ]);
             if($search){
@@ -166,6 +167,9 @@ class RequestVehicleController extends Controller
 
             $query->offset($start);
             $query->limit($length);
+            $query->whereDoesntHave('business_trip.businesstrip', function (Builder $q) {
+                $q->where('status', 'approved');
+            });
             $reqvehicle = $query->get();
             
             foreach($reqvehicle as $key => $row){

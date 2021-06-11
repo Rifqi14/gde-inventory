@@ -12,4 +12,9 @@ class RequestVehicle extends Model
     {
         return $this->hasMany('App\Models\BorrowerRequestVehicle','request_vehicle_id');
     }
+
+    public function business_trip()
+    {
+        return $this->hasMany('App\Models\BusinessTripVehicle', 'request_vehicle_id');
+    }
 }

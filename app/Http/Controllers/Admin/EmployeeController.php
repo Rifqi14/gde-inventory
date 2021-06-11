@@ -551,6 +551,7 @@ class EmployeeController extends Controller
 
     public function dig(Request $request)
     {
+        dd($request->employee_id);
         $query = Employee::find($request->employee_id);
 
         if($query){
@@ -566,7 +567,6 @@ class EmployeeController extends Controller
                 'point'  => 400
             ];
         }
-
         return response()->json([
             'status' => $result['status'],
             'data'   => $result['data']

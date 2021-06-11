@@ -144,10 +144,14 @@ Route::group(['prefix' => 'admin'], function () {
         //Route Business Trip
         Route::get('/businesstrip/read', 'Admin\BusinessTripController@read')->name('businesstrip.read');
         Route::get('/businesstrip/select', 'Admin\BusinessTripController@select')->name('businesstrip.select');
-        Route::get('/businesstrip/delete/{id}','Admin\BusinessTripController@destroy');        
+        Route::get('/businesstrip/delete/{id}','Admin\BusinessTripController@destroy');
         Route::get('/businesstrip/update/{id}','Admin\BusinessTripControlller@update');
-        Route::get('/businesstrip/edit/{id}','Admin\BusinessTripController@edit');                
+        Route::get('/businesstrip/edit/{id}','Admin\BusinessTripController@edit');
+        Route::get('/businesstrip/createdeclare', 'Admin\BusinessTripController@createdeclare')->name('businesstrip.createdeclare');
         Route::resource('/businesstrip', 'Admin\BusinessTripController');
+        // Route Business Trip Declaration
+        Route::get('/declaration/read', 'Admin\BusinessTripDeclarationController@read')->name('declaration.read');
+        Route::resource('/declaration', 'Admin\BusinessTripDeclarationController');
         // Route Product Category
         Route::get('/productcategory/read','Admin\ProductCategoryController@read')->name('productcategory.read');  
         Route::get('/productcategory/select','Admin\ProductCategoryController@select')->name('productcategory.select');        
@@ -238,5 +242,8 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/producttransfer/delete/{id}','Admin\ProductTransferController@destroy');                
         Route::get('/producttransfer/archive/{id}','Admin\ProductTransferController@archive');
         Route::resource('/producttransfer','Admin\ProductTransferController');
+
+        // COnfig
+        Route::resource('/config', 'Admin\ConfigController');
     });
 });

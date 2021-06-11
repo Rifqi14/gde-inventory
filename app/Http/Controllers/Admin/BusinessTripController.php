@@ -17,12 +17,12 @@ use Illuminate\Support\Facades\DB;
 class BusinessTripController extends Controller
 {
     function __construct(){
-        // $menu   = Menu::where('menu_route', 'businesstrip')->first();
-        // $parent = Menu::find($menu->parent_id);
-        // View::share('parent_name', $parent->menu_name);
-        // View::share('menu_name', $menu->menu_name);
+        $menu   = Menu::where('menu_route', 'businesstrip')->first();
+        $parent = Menu::find($menu->parent_id);
+        View::share('parent_name', $parent->menu_name);
+        View::share('menu_name', $menu->menu_name);
         View::share('menu_active', url('admin/'.'businesstrip'));
-        // $this->middleware('accessmenu', ['except' => ['select']]);
+        $this->middleware('accessmenu', ['except' => ['select']]);
     }
     /**
      * Display a listing of the resource.
@@ -125,13 +125,23 @@ class BusinessTripController extends Controller
 
     public function select(Request $request)
     {
-        $start = $request->page ? $request->page - 1 : 0;
-        $length = $request->limit;
-        $name = strtoupper($request->name);
+        $start      = $request->page ? $request->page - 1 : 0;
+        $length     = $request->limit;
+        $number     = $request->request_number;
+        $purpose    = strtoupper($request->purpose);
+        $approved   = $request->approved;
 
         //Count Data
-        $query = DB::table('working_shifts');
-        $query->whereRaw("upper(shift_name) like '%$name%'");
+        $query = BusinessTrip::with(['transportation', 'departs', 'returns', 'vehicles', 'lodgings', 'others', 'issuedby.employees'])->doesntHave('btdeclaration');
+        if ($number) {
+            $query->whereRaw("upper(business_trip_number) like '%$number%'");
+        }
+        if ($purpose) {
+            $query->whereRaw("upper(purpose) like '%$purpose%'");
+        }
+        if ($approved) {
+            $query->where('status', 'approved');
+        }
 
         $row = clone $query;
         $recordsTotal = $row->count();
@@ -709,6 +719,21 @@ class BusinessTripController extends Controller
                 $query->total_cost = $total;
                 $query->save();
             }
+        }
+    }
+
+    /**
+     * Create declare business trip
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function createdeclare(Request $request)
+    {
+        if (in_array('create', $request->actionmenu)) {
+            return view('admin.declaration.create');
+        } else {
+            abort(403);
         }
     }
 

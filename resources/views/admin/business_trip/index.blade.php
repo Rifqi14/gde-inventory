@@ -1,7 +1,7 @@
 @extends('admin.layouts.app')
 
 @section('title')
-Business Trips
+{{  $menu_name  }}
 @endsection
 
 @section('stylesheets')
@@ -11,13 +11,13 @@ Business Trips
 <div class="row mb-3 mt-3">
   <div class="col-sm-4">
     <h1 id="title-branch" class="m-0 text-dark">
-      Business Trips
+      {{ $menu_name }}
     </h1>
   </div>
   <div class="col-sm-8">
     <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
-      <li class="breadcrumb-item">Human Resource</li>
-      <li class="breadcrumb-item active">Business Trips</li>
+      <li class="breadcrumb-item">{{ $parent_name }}</li>
+      <li class="breadcrumb-item active">{{ $menu_name }}</li>
     </ol>
   </div>
 </div>
@@ -31,7 +31,7 @@ Business Trips
       <div class="col-md-12">
         <div class="card">
           <div class="card-header">
-            <h3 class="card-title mt-2"> List of Business Trips</h3>
+            <h3 class="card-title mt-2"> List of Business Trips Request</h3>
             <div class="text-right">
               @if(in_array('read',$actionmenu))
               <button type="button" id="filter-general-business-trip" class="btn btn-labeled text-sm btn-sm btn-default btn-flat legitRipple float-right ml-1" onclick="filter('general')">
@@ -68,11 +68,16 @@ Business Trips
 
         <div class="card">
           <div class="card-header">
-            <h3 class="card-title"> List of Approved Business Trips</h3>
+            <h3 class="card-title"> List of Business Trips Declaration</h3>
             <div class="text-right">
               @if(in_array('read',$actionmenu))
               <button type="button" id="filter-general-business-trip" class="btn btn-labeled text-sm btn-sm btn-default btn-flat legitRipple float-right ml-1" onclick="filter('approved')">
                 <b><i class="fas fa-search"></i></b> Search
+              </button>
+              @endif
+              @if(in_array('create',$actionmenu))
+              <button type="button" id="add-business-trip" class="btn btn-labeled text-sm btn-sm btn-success btn-flat legitRipple float-right ml-1" onclick="windowLocation('{{route('businesstrip.createdeclare')}}')">
+                <b><i class="fas fa-plus"></i></b> Create
               </button>
               @endif
             </div>
@@ -128,9 +133,10 @@ Business Trips
                     <option value=""></option>
                     <option value="draft">Draft</option>
                     <option value="waiting">Waiting</option>
-                  </select>                  
-                </div>                  
-                <div class="form-group status-approved" style="display: none;">
+                    <option value="approved">Approved</option>
+                  </select>
+                </div>
+                <div class="form-group status-approved d-none" style="display: none;">
                   <label class="control-label" for="approved-status">Status</label>
                   <select name="approved_status" class="form-control select2 approved-status" id="apporved-status" style="display: none;" disabled>
                     <option value="approved" selected>Approved</option>
@@ -164,8 +170,8 @@ Business Trips
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-labeled  btn-danger btn-sm btn-sm btn-flat legitRipple" data-dismiss="modal" onclick="resetTable()"><b><i class="fas fa-times"></i></b> Cancel</button>
-        <button type="submit" form="form-search" class="btn btn-labeled  btn-default  btn-sm btn-flat legitRipple"><b><i class="fas fa-search"></i></b> Search</button>
+        <button type="button" class="btn btn-labeled btn-danger btn-sm btn-sm btn-flat legitRipple" data-dismiss="modal" onclick="resetTable()"><b><i class="fas fa-times"></i></b> Cancel</button>
+        <button type="submit" form="form-search" class="btn btn-labeled btn-default btn-sm btn-flat legitRipple"><b><i class="fas fa-search"></i></b> Search</button>
       </div>
     </div>
   </div>
@@ -265,7 +271,9 @@ Business Trips
         },
         {
           render : function(data, type, row){
-              return `<b>${row.business_trip_number}</b>`;
+              return `<a href="javascript:void(0);" onclick="edit(${row.id})">
+                        <b>${row.business_trip_number}</b>
+                      </a>`;
           }, targets : [1]
         },
         {
@@ -287,6 +295,8 @@ Business Trips
               badge = '<span class="badge bg-gray text-sm">Draft</span>';
             } else if (status == 'waiting') {
               badge = '<span class="badge bg-warning text-sm">Waiting</span>';
+            } else {
+              badge = '<span class="badge badge-info text-sm">Approved</span>';
             }
 
             return badge;
@@ -352,7 +362,7 @@ Business Trips
         [1, "asc"]
       ],
       ajax: {
-        url: "{{route('businesstrip.read')}}",
+        url: "{{route('declaration.read')}}",
         type: "GET",
         data: function(data) {
           var businessTripNumber = $('#form-search').find('.business-trip-number').val(),
@@ -383,12 +393,14 @@ Business Trips
         },
         {
           render : function(data, type, row){
-              return `<b>${row.business_trip_number}</b>`;
+              return `<a href="javascript:void(0);" onclick="edit(${row.id})">
+                        <b>${row.declaration_number}</b>
+                      </a>`;
           }, targets : [1]
         },
         {
           render: function(data, type, row) {
-            return accounting.formatMoney(row.total_cost, "", 0, ".", ",");
+            return accounting.formatMoney(row.rate, "", 0, ".", ",");
           },
           targets: [3]
         },
@@ -397,9 +409,7 @@ Business Trips
             var badge = '',
               status = row.status;
 
-            if (status == 'approved') {
-              badge = '<span class="badge badge-info text-sm">Approved</span>';
-            }
+            badge = '<span class="badge badge-success text-sm">Declare</span>';
 
             return badge;
           },
@@ -414,7 +424,12 @@ Business Trips
               button += `<a class="dropdown-item" href="javascript:void(0);" onclick="">
                           <i class="fa fa-print"></i> Print Data
                         </a>`;
-            }            
+            }          
+            if (actionmenu.indexOf('delete') > 0) {
+              button += `<a class="dropdown-item" href="javascript:void(0);" onclick="deleteDeclare(${row.id})">
+                                        <i class="fa fa-trash-alt"></i> Delete Data
+                                    </a>`;
+            }  
             return `<div class="btn-group">
                                 <button type="button" class="btn btn-flat btn-sm dropdown-toggle" data-toggle="dropdown">
                                     <i class="fas fa-bars"></i>
@@ -431,7 +446,7 @@ Business Trips
           data: "no"
         },
         {
-          data: "business_trip_number"
+          data: "declaration_number"
         },
         {
           data: "schedule"
@@ -454,6 +469,102 @@ Business Trips
       $('#add-filter').modal('hide');
     });
   });
+
+  const deleteDeclare = (id) => {
+    bootbox.confirm({
+        buttons: {
+            confirm: {
+                label: '<i class="fa fa-check"></i>',
+                className: 'btn-primary btn-sm'
+            },
+            cancel: {
+                label: '<i class="fa fa-undo"></i>',
+                className: 'btn-default btn-sm'
+            },
+        },
+        title: 'Delete data?',
+        message: 'Are you sure want to delete this site?',
+        callback: function (result) {
+            if (result) {
+                var data = {
+                    _token: "{{ csrf_token() }}"
+                };
+                $.ajax({
+                    url: `{{route('declaration.index')}}/${id}`,
+                    dataType: 'json',
+                    data: data,
+                    type: 'DELETE',
+                    beforeSend: function () {
+                        blockMessage('#content', 'Loading', '#fff');
+                    }
+                }).done(function (response) {
+                    $('#content').unblock();
+                    if (response.status) {
+                        toastr.options = {
+                            "closeButton": false,
+                            "debug": false,
+                            "newestOnTop": false,
+                            "progressBar": false,
+                            "positionClass": "toast-top-right",
+                            "preventDuplicates": false,
+                            "onclick": null,
+                            "showDuration": "300",
+                            "hideDuration": "1000",
+                            "timeOut": "5000",
+                            "extendedTimeOut": "1000",
+                            "showEasing": "swing",
+                            "hideEasing": "linear",
+                            "showMethod": "fadeIn",
+                            "hideMethod": "fadeOut"
+                        }
+                        toastr.success(response.message);
+                        tableApproved.ajax.reload(null, false);
+                    }else {
+                        toastr.options = {
+                            "closeButton": false,
+                            "debug": false,
+                            "newestOnTop": false,
+                            "progressBar": false,
+                            "positionClass": "toast-top-right",
+                            "preventDuplicates": false,
+                            "onclick": null,
+                            "showDuration": "300",
+                            "hideDuration": "1000",
+                            "timeOut": "5000",
+                            "extendedTimeOut": "1000",
+                            "showEasing": "swing",
+                            "hideEasing": "linear",
+                            "showMethod": "fadeIn",
+                            "hideMethod": "fadeOut"
+                        }
+                        toastr.warning(response.message);
+                    }
+                }).fail(function (response) {
+                    var response = response.responseJSON;
+                    $('#content').unblock();
+                    toastr.options = {
+                        "closeButton": false,
+                        "debug": false,
+                        "newestOnTop": false,
+                        "progressBar": false,
+                        "positionClass": "toast-top-right",
+                        "preventDuplicates": false,
+                        "onclick": null,
+                        "showDuration": "300",
+                        "hideDuration": "1000",
+                        "timeOut": "5000",
+                        "extendedTimeOut": "1000",
+                        "showEasing": "swing",
+                        "hideEasing": "linear",
+                        "showMethod": "fadeIn",
+                        "hideMethod": "fadeOut"
+                    }
+                    toastr.warning(response.message);
+                })
+            }
+        }
+    });
+  }
 
   function edit(id) {
     if (!id) {
@@ -479,52 +590,98 @@ Business Trips
       });
       return false;
     }
-
-    Swal.fire({
-      title: 'Are you sure?',
-      text: "Erased data cannot be reserved",
-      icon: 'error',
-      showCancelButton: true,
-      confirmButtonColor: '#3d9970',
-      cancelButtonColor: '#d81b60',
-      confirmButtonText: 'Yes, i am sure',
-      cancelButtonText: 'Cancel'
-    }).then((result) => {
-      if (result.value) {
-        var data = {
-          _token: "{{ csrf_token() }}"
-        };
-        $.ajax({
-          url: `{{url('admin/businesstrip/delete')}}/${id}`,
-          dataType: 'json',
-          data: data,
-          type: 'GET',
-          success: function(response) {
-            if (response.status) {
-              Swal.fire({
-                icon: 'success',
-                title: 'Deleted',
-                text: 'Data has been deleted.',
-                showConfirmButton: false,
-                timer: 1500
-              }).then(function() {
-                if (table == 'table-bt-general') {
-                  tableGeneral.row(id).remove().draw(false);
-                } else if (table == 'table-bt-approved') {
-                  tableApproved.row(id).remove().draw(false);
-                }
-              });
-            } else {
-              Swal.fire(
-                'Error!',
-                'Failed to delete data.',
-                'error'
-              );
+    bootbox.confirm({
+        buttons: {
+            confirm: {
+                label: '<i class="fa fa-check"></i>',
+                className: 'btn-primary btn-sm'
+            },
+            cancel: {
+                label: '<i class="fa fa-undo"></i>',
+                className: 'btn-default btn-sm'
+            },
+        },
+        title: 'Delete data?',
+        message: 'Are you sure want to delete this site?',
+        callback: function (result) {
+            if (result) {
+                var data = {
+                    _token: "{{ csrf_token() }}"
+                };
+                $.ajax({
+                    url: `{{route('businesstrip.index')}}/${id}`,
+                    dataType: 'json',
+                    data: data,
+                    type: 'DELETE',
+                    beforeSend: function () {
+                        blockMessage('#content', 'Loading', '#fff');
+                    }
+                }).done(function (response) {
+                    $('#content').unblock();
+                    if (response.status) {
+                        toastr.options = {
+                            "closeButton": false,
+                            "debug": false,
+                            "newestOnTop": false,
+                            "progressBar": false,
+                            "positionClass": "toast-top-right",
+                            "preventDuplicates": false,
+                            "onclick": null,
+                            "showDuration": "300",
+                            "hideDuration": "1000",
+                            "timeOut": "5000",
+                            "extendedTimeOut": "1000",
+                            "showEasing": "swing",
+                            "hideEasing": "linear",
+                            "showMethod": "fadeIn",
+                            "hideMethod": "fadeOut"
+                        }
+                        toastr.success(response.message);
+                        tableGeneral.ajax.reload(null, false);
+                    }else {
+                        toastr.options = {
+                            "closeButton": false,
+                            "debug": false,
+                            "newestOnTop": false,
+                            "progressBar": false,
+                            "positionClass": "toast-top-right",
+                            "preventDuplicates": false,
+                            "onclick": null,
+                            "showDuration": "300",
+                            "hideDuration": "1000",
+                            "timeOut": "5000",
+                            "extendedTimeOut": "1000",
+                            "showEasing": "swing",
+                            "hideEasing": "linear",
+                            "showMethod": "fadeIn",
+                            "hideMethod": "fadeOut"
+                        }
+                        toastr.warning(response.message);
+                    }
+                }).fail(function (response) {
+                    var response = response.responseJSON;
+                    $('#content').unblock();
+                    toastr.options = {
+                        "closeButton": false,
+                        "debug": false,
+                        "newestOnTop": false,
+                        "progressBar": false,
+                        "positionClass": "toast-top-right",
+                        "preventDuplicates": false,
+                        "onclick": null,
+                        "showDuration": "300",
+                        "hideDuration": "1000",
+                        "timeOut": "5000",
+                        "extendedTimeOut": "1000",
+                        "showEasing": "swing",
+                        "hideEasing": "linear",
+                        "showMethod": "fadeIn",
+                        "hideMethod": "fadeOut"
+                    }
+                    toastr.warning(response.message);
+                })
             }
-          }
-        });
-
-      }
+        }
     });
   }
 

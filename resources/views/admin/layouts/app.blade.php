@@ -80,11 +80,11 @@
             <a href="{{ url('') }}" class="brand-link">
                 <div class="row">
                     <div class="col-md-2">
-                        <img src="{{asset('assets/img/pmu.png')}}" alt="Project Management Unit Logo" class="brand-image img-circle elevation-1 ml-0 p-1" style="opacity: .8">
+                        <img src="{{ config('configs.app_icon') }}" alt="Project Management Unit Logo" class="brand-image img-circle elevation-1 ml-0 p-1" style="opacity: .8">
                     </div>
                     <div class="col-md-10">
                         <div class="development mt-2">
-                            <h6 class="brand-text text-sm text-center text-semibold font-italic">Project Management Unit
+                            <h6 class="brand-text text-sm text-center text-semibold font-italic">{{ config('configs.app_name') }}
                                 &reg;</h6>
                         </div>
                     </div>
@@ -95,7 +95,7 @@
                 <!-- Sidebar user panel (optional) -->
                 <div class="user-panel mt-3 pb-3 mb-3 d-flex">
                     <div class="image">
-                        <img src="{{asset('assets/img/dev.jpg')}}" class="img-circle elevation-1 img-pp" alt="Development Application">
+                        <img src="{{asset(Auth::guard('admin')->user()->employees()->first()->photo ? Auth::guard('admin')->user()->employees()->first()->photo : 'assets/img/dev.jpg')}}" class="img-circle elevation-1 img-pp" alt="Development Application">
                     </div>
                     <div class="info">
                         <a href="#" class="d-block">{{Auth::guard('admin')->user()->name}}</a>

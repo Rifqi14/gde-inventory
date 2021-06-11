@@ -73,7 +73,7 @@
                                     <!-- Status -->
                                     <div class="form-group form-status">
                                         <label for="status">Status</label>
-                                        <input type="hidden" name="status" id="status" value="draft">                                        
+                                        <input type="hidden" name="status" id="status" value="draft">
                                         <br>
                                     </div>
                                 </div>
@@ -96,8 +96,8 @@
                             </div>
                             <!-- Description -->
                             <div class="form-group">
-                                <label for="description" class="control-label">Description</label>
-                                <textarea name="description" id="description" rows="4" class="form-control summernote" placeholder="Description">{{$data->description}}</textarea>
+                                <label for="description" class="control-label">Purpose</label>
+                                <textarea name="description" id="description" rows="4" class="form-control summernote" placeholder="Purpose">{{$data->description}}</textarea>
                             </div>
                         </div>
                     </div>
@@ -113,8 +113,7 @@
                                 <label for="product_id" class="control-label">Product</label>
                                 <select id="product" class="form-control select2" data-placeholder="Choose Product"></select>
                                 <br>
-                                <button type="button" class="btn btn-success color-palette btn-labeled legitRipple text-sm btn-block" onclick="addProduct()">
-                                    <b><i class="fas fa-plus"></i></b>
+                                <button type="button" class="btn btn-labeled text-sm btn-lg btn-outline-primary btn-flat btn-block legitRipple" onclick="addProduct()">
                                     Add
                                 </button>
                             </div>
@@ -123,7 +122,7 @@
                                     <tr>
                                         <th width="200">Product Name</th>
                                         <th width="15" class="text-center">UOM</th>
-                                        <th width="15" class="text-center">Qty System</th>
+                                        <th width="15" class="text-center">Current Stock</th>
                                         <th width="10" class="text-center">Qty Consume</th>
                                         <th width="10" class="text-center">Action</th>
                                     </tr>
@@ -157,8 +156,7 @@
                                 <div class="tab-pane fade show active" id="document" role="tabpanel" aria-labelledby="document-tab">
                                     <div class="form-group mt-3">
                                         <div class="form-group mt-3">
-                                            <button type="button" onclick="addDocument()" class="btn btn-labeled labeled-sm btn-md btn-block text-xs btn-success btn-flat legitRipple">
-                                                <b><i class="fas fa-plus"></i></b> Add Document
+                                            <button type="button" onclick="addDocument()" class="btn btn-labeled text-sm btn-lg btn-outline-primary btn-flat btn-block legitRipple">Add Document
                                             </button>
                                         </div>
                                     </div>
@@ -180,8 +178,8 @@
                                 <!-- Photo -->
                                 <div class="tab-pane fade show" id="photo" role="tabpanel" aria-labelledby="photo-tab">
                                     <div class="form-group mt-3">
-                                        <button type="button" onclick="addPhoto()" class="btn btn-labeled labeled-sm btn-md btn-block text-xs btn-success btn-flat legitRipple">
-                                            <b><i class="fas fa-plus"></i></b> Add Photo
+                                        <button type="button" onclick="addPhoto()" class="btn btn-labeled text-sm btn-lg btn-outline-primary btn-flat btn-block legitRipple">
+                                            Add Photo
                                         </button>
                                     </div>
                                     <table id="table-photo" class="table table-striped datatable" width="100%">
@@ -374,7 +372,7 @@
                     badge = 'badge-info';                    
                     break;        
                 case 'rejected' :
-                    badge  : 'bg-red';                
+                    badge  = 'bg-red';                
                 default:
                     state = 'draft';
                     badge = 'badge-secondary';
@@ -447,7 +445,7 @@
                 type: 'GET',
                 dataType: 'json',
                 data: function(params) {
-                    var productCategory = $('#product-category').select2('val');
+                    var productCategory = $('#product-category-id').select2('val');
                     var products = [];
 
                     $.each($('#table-products > tbody > .product-item'), function(index, value) {

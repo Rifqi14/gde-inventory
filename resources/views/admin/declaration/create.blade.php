@@ -1,7 +1,7 @@
 @extends('admin.layouts.app')
 
 @section('title')
-Create {{ @$menu_name }} Request
+Create {{ @$menu_name }} Declaration
 @endsection
 
 @section('stylesheets')
@@ -12,7 +12,7 @@ Create {{ @$menu_name }} Request
 <div class="row mb-3 mt-3">
   <div class="col-sm-4">
     <h1 id="title-branch" class="m-0 text-dark">
-      {{ @$menu_name }} Request
+      {{ @$menu_name }} Declaration
     </h1>
   </div>
   <div class="col-sm-8">
@@ -29,7 +29,7 @@ Create {{ @$menu_name }} Request
 <!-- Main content -->
 <section class="content">
   <div class="container-fluid">
-    <form role="form" id="form" action="{{route('businesstrip.store')}}" method="post">
+    <form role="form" id="form" action="{{route('declaration.store')}}" method="post">
       {{ csrf_field() }}
       <div class="row">
         <div class="col-md-8">
@@ -52,42 +52,9 @@ Create {{ @$menu_name }} Request
                     <label>Price:</label>
                   </div>
                 </div>
-                <div class="row item-depart">
-                  <input type="hidden" class="depart" name="depart[]" data-type="flight" data-description="" data-price="0" />
-                  <div class="col-md-2">
-                    <div class="form-group">
-                      <select class="form-control select2 depart-type" id="depart-type" name="depart_type" data-placeholder="Depart">
-                        <option value="flight" selected>Flight</option>
-                        <option value="others">Others</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <input type="text" name="depart_description" class="form-control depart-description" id="depart-description" placeholder="Enter description" required />
-                    </div>
-                  </div>
-                  <div class="col-md-3">
-                    <div class="form-group">
-                      <div class="input-group">
-                        <div class="input-group-prepend">
-                          <span class="input-group-text">
-                            Rp.
-                          </span>
-                        </div>
-                        <input type="text" name="depart_price" class="form-control input-price text-right depart-price" id="depart-price" placeholder="Enter price" value="0" maxlength="14" required>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-md-1">
-                    <div class="form-group" style="margin-top: 2px;">
-                      <button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
-                    </div>
-                  </div>
-                </div>
               </div>
               <div class="text-right">
-                <button type="button" id="add-depart" data-urutan="1" onclick="addDepart()" class="btn btn-labeled labeled-sm btn-md text-xs btn-success btn-flat legitRipple">
+                <button type="button" id="add-depart" data-urutan="1" onclick="addDepart()" class="btn btn-labeled labeled-sm btn-md text-xs btn-success btn-flat legitRipple add-btn btn-depart">
                   <b><i class="fas fa-plus"></i></b> Add
                 </button>
               </div>
@@ -104,42 +71,9 @@ Create {{ @$menu_name }} Request
                     <label>Price:</label>
                   </div>
                 </div>
-                <div class="row item-return">
-                  <input type="hidden" class="returning" name="returning[]" data-type="others" data-description="" data-price="0" />
-                  <div class="col-md-2">
-                    <div class="form-group">
-                      <select class="form-control select2 returning-type" name="returning_type" id="returning-type" data-placeholder="Return">
-                        <option value="flight">Flight</option>
-                        <option value="others" selected>Others</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <input type="text" name="returning_description" class="form-control returning-description" id="returning-description" placeholder="Enter description" required />
-                    </div>
-                  </div>
-                  <div class="col-md-3">
-                    <div class="form-group">
-                      <div class="input-group">
-                        <div class="input-group-prepend">
-                          <span class="input-group-text">
-                            Rp.
-                          </span>
-                        </div>
-                        <input type="text" name="returning_price" class="form-control input-price text-right returning-price" id="returning-price" placeholder="Enter price" value="0" maxlength="14" required>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-md-1">
-                    <div class="form-group" style="margin-top: 2px;">
-                      <button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
-                    </div>
-                  </div>
-                </div>
               </div>
               <div class="text-right">
-                <button type="button" id="add-return" data-urutan="1" class="btn btn-labeled labeled-sm btn-md text-xs btn-success btn-flat legitRipple" onclick="addReturn()">
+                <button type="button" id="add-return" data-urutan="1" class="btn btn-labeled labeled-sm btn-md text-xs btn-success btn-flat legitRipple add-btn btn-return" onclick="addReturn()">
                   <b><i class="fas fa-plus"></i></b> Add
                 </button>
               </div>
@@ -158,20 +92,9 @@ Create {{ @$menu_name }} Request
                     <label>Location:</label>
                   </div>
                 </div>
-                <div class="row item-location">
-                  <input type="hidden" class="location" value="">
-                  <div class="col-md-11">
-                    <input type="text" class="form-control input-location" name="location[]" placeholder="Enter location">
-                  </div>
-                  <div class="col-md-1">
-                    <div class="form-group" style="margin-top: 2px;">
-                      <button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
-                    </div>
-                  </div>
-                </div>
               </div>
               <div class="text-right">
-                <button type="button" id="add-location" data-urutan="1" class="btn btn-labeled labeled-sm btn-md text-xs btn-success btn-flat legitRipple" onclick="addLocation()">
+                <button type="button" id="add-location" data-urutan="1" class="btn btn-labeled labeled-sm btn-md text-xs btn-success btn-flat legitRipple add-btn btn-location" onclick="addLocation()">
                   <b><i class="fas fa-plus"></i></b> Add
                 </button>
               </div>
@@ -187,7 +110,7 @@ Create {{ @$menu_name }} Request
               <div id="form-request-vehicle">
               </div>
               <div class="text-right">
-                <button type="button" id="add-return" data-urutan="1" class="btn btn-labeled labeled-sm btn-md text-xs btn-success btn-flat legitRipple" onclick="addVehicle()">
+                <button type="button" id="add-vehicle" data-urutan="1" class="btn btn-labeled labeled-sm btn-md text-xs btn-success btn-flat legitRipple add-btn btn-vehicle" onclick="addVehicle()">
                   <b><i class="fas fa-plus"></i></b> Add
                 </button>
               </div>
@@ -212,35 +135,9 @@ Create {{ @$menu_name }} Request
                     <label>Night:</label>
                   </div>
                 </div>
-                <div class="row item-lodging">
-                  <input type="hidden" class="lodging" name="lodging[]" data-place="" data-price="0" data-days="1">
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <input type="text" class="form-control place-lodging" id="place-loging" name="place_lodging" placeholder="Enter where lodging" required>
-                    </div>
-                  </div>
-                  <div class="col-md-3">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span class="input-group-text">
-                          Rp.
-                        </span>
-                      </div>
-                      <input type="text" class="form-control input-price text-right price-lodging" id="price-lodging" name="price_lodging" placeholder="Enter price" value="0" maxlength="14" required>
-                    </div>
-                  </div>
-                  <div class="col-md-2">
-                    <input type="number" class="form-control text-right days-lodging" id="days-lodging" name="days_lodging" placeholder="Enter qty" value="1" required>
-                  </div>
-                  <div class="col-md-1">
-                    <div class="form-group" style="margin-top: 2px;">
-                      <button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
-                    </div>
-                  </div>
-                </div>
               </div>
               <div class="text-right">
-                <button type="button" id="add-lodging" data-urutan="1" class="btn btn-labeled labeled-sm btn-md text-xs btn-success btn-flat legitRipple" onclick="addLodging()">
+                <button type="button" id="add-lodging" data-urutan="1" class="btn btn-labeled labeled-sm btn-md text-xs btn-success btn-flat legitRipple add-btn btn-lodging" onclick="addLodging()">
                   <b><i class="fas fa-plus"></i></b> Add
                 </button>
               </div>
@@ -269,7 +166,7 @@ Create {{ @$menu_name }} Request
                 </div>
               </div>
               <div class="text-right">
-                <button type="button" id="add-others" data-urutan="1" class="btn btn-labeled labeled-sm btn-md text-xs btn-success btn-flat legitRipple" onclick="addOthers()">
+                <button type="button" id="add-others" data-urutan="1" class="btn btn-labeled labeled-sm btn-md text-xs btn-success btn-flat legitRipple add-btn btn-other" onclick="addOthers()">
                   <b><i class="fas fa-plus"></i></b> Add
                 </button>
               </div>
@@ -285,15 +182,26 @@ Create {{ @$menu_name }} Request
                 <h5 class="text-md text-dark text-uppercase">General Information</h5>
               </span>
               <div class="form-group">
-                <label for="business-trip-number">Request Number</label>
+                <label for="business-trip-number">Declaration Number</label>
                 <input type="text" class="form-control" name="business_trip_number" id="business-trip-number" placeholder="Auto generate number" readonly>
               </div>
               <div class="form-group mt-4">
-                <label>Issued by:</label>
+                <label>Declaration by</label>
                 <select class="form-control select2" name="issued" id="issued" data-placeholder=" -Select WBS- " style="width: 100%;" disabled>
                   @if(Auth::guard('admin')->user()->id)
                   <option value="{{Auth::guard('admin')->user()->id}}" selected>{{Auth::guard('admin')->user()->name}}</option>
                   @endif
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="issued-by">Issued By</label>
+                <input type="hidden" class="form-control" name="user_id" id="user-id" placeholder="Issued By" readonly>
+                <input type="hidden" class="form-control" name="issued_id" id="issued-id" placeholder="Issued By" readonly>
+                <input type="text" class="form-control" name="issued_by" id="issued-by" placeholder="Issued By" readonly>
+              </div>
+              <div class="form-group">
+                <label for="business-trip-request">Business Trip Request</label>
+                <select name="business_trip_request" id="business-trip-request" class="form-control select2 business-trip-request" data-placeholder="Business Trip Request" onchange="disableAddButton(this)">
                 </select>
               </div>
               <div class="form-group row">
@@ -305,7 +213,7 @@ Create {{ @$menu_name }} Request
                         <i class="far fa-calendar-alt"></i>
                       </span>
                     </div>
-                    <input type="datepicker" class="form-control datepicker text-right departure-date" id="departure-date" onchange="employee()" required>
+                    <input type="datepicker" class="form-control datepicker text-right departure-date readonly-cls" id="departure-date" onchange="employee()" required>
                   </div>
                 </div>
                 <div class="col-md-6">
@@ -316,13 +224,13 @@ Create {{ @$menu_name }} Request
                         <i class="far fa-calendar-alt"></i>
                       </span>
                     </div>
-                    <input type="datepicker" class="form-control datepicker text-right arrived-date" id="arrived-date" onchange="employee()" required>
+                    <input type="datepicker" class="form-control datepicker text-right arrived-date readonly-cls" id="arrived-date" required>
                   </div>
                 </div>
               </div>
               <div class="form-group">
                 <label>Purpose:</label>
-                <input type="text" class="form-control" id="purpose" name="purpose" placeholder="Enter purpose" required>
+                <input type="text" class="form-control readonly-cls" id="purpose" name="purpose" placeholder="Enter purpose" onchange="employee()" required>
               </div>
               <div class="form-group">
                 <label>Rate:</label>
@@ -367,7 +275,7 @@ Create {{ @$menu_name }} Request
             </div>
           </div>
           <div class="text-right">
-            <button type="button" onclick="submitTest(`waiting`)" class="btn btn-success btn-labeled legitRipple text-sm">
+            <button type="button" onclick="submitTest(`waiting`)" class="btn btn-success btn-labeled legitRipple text-sm d-none">
               <b><i class="fas fa-check-circle"></i></b>
               Submit
             </button>
@@ -395,8 +303,341 @@ Create {{ @$menu_name }} Request
       username     = "{{Auth::guard('admin')->user()->name}}",
       employeeRate = 0;
 
-  $(function() {       
+  const disableAddButton = (e) => {
+    var requestNumber = $(e).val();
+    if (!requestNumber) {
+      $('.add-btn').prop('disabled', true);
+      $('.readonly-cls').prop('disabled', true);
+      $('.remove').trigger('click');
+      removeGeneral();
+      sumRate();
+    } else {
+      $('.add-btn').prop('disabled', false);
+      $('.readonly-cls').prop('disabled', false);
+      var businessTripData = $(e).select2('data')[0];
+      // console.log(businessTripData.datas);
+      $('.remove').trigger('click');
+      initiateGeneral(businessTripData.datas);
+      initiateData(businessTripData.datas);
+      employee();
+      sumRate();
+    }
+  }
 
+  const removeGeneral   = ()  => {
+    $('#user-id').val(null);
+    $('#issued-id').val(null);
+    $('#issued-by').val(null);
+    $('#purpose').val(null);
+    $('#rate').val(0);
+    $('.datepicker').daterangepicker({
+			singleDatePicker: true,
+			timePicker: false,
+			timePickerIncrement: 30,
+			drops: 'auto',
+			opens: 'center',
+			locale: {
+				format: 'DD/MM/YYYY'
+			},
+		});
+    $('.departure-date').data('daterangepicker').setStartDate(moment(new Date()));
+		$('.arrived-date').data('daterangepicker').setStartDate(moment(new Date()).add(6, 'days'));
+  }
+
+  const initiateGeneral = (e) => {
+    var departureDate   = new Date(e.departure_date);
+    var arrivedDate     = new Date(e.arrived_date);
+    var formatedDepart  = `${departureDate.getDate()}/${departureDate.getMonth() + 1}/${departureDate.getFullYear()}`;
+    var formatedArrived = `${arrivedDate.getDate()}/${arrivedDate.getMonth() + 1}/${arrivedDate.getFullYear()}`;
+
+    $('.departure-date').data('daterangepicker').setStartDate(formatedDepart);
+    $('.arrived-date').data('daterangepicker').setStartDate(formatedArrived);
+    $('#user-id').val(e.issuedby.id);
+    $('#issued-id').val(e.issuedby.employees.id);
+    $('#issued-by').val(e.issuedby.name);
+    $('#purpose').val(e.purpose);
+    $('#rate').val(e.rate);
+  }
+
+  const initiateData = (e) => {
+    var departs   = e.departs,
+        returns   = e.returns,
+        locations = e.location,
+        vehicles  = e.vehicles,
+        lodgings  = e.lodgings,
+        others    = e.others;
+
+		if(departs.length > 0){
+			var html     = '',				
+				remove   = `<div class="col-md-1">
+								<div class="form-group" style="margin-top: 2px;">                                            
+								<button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove"type="button"><i class="fas fa-trash"></i></button>
+								</div>
+							</div>`;
+			$.each(departs, function (index, value) { 
+				var type  = value.type,
+					desc  = value.description,
+					price = value.price?value.price:0,
+					mt    = index>0?'mt-2':'';
+
+				html += `<div class="row ${mt} item-depart">
+                  <input type="hidden" class="depart" name="depart[]" data-type="${type}" data-description="${desc}" data-price="${price}"/>
+                  <div class="col-md-2">
+                    <div class="form-group">                                          
+                      <select class="form-control select2 depart-type" name="depart_type" id="depart-type" data-placeholder="Depart">                        
+                        <option value="flight" ${type=='flight'?'selected':''}>Flight</option>
+                        <option value="others" ${type=='others'?'selected':''}>Others</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">                      
+                      <input type="text" name="depart_description" class="form-control depart-description" id="depart-description" placeholder="Enter description" value="${desc}" required/>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="form-group">                      
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text">
+                            Rp.
+                          </span>
+                        </div>
+                        <input type="text" name="depart_price" class="form-control input-price text-right depart-price" id="depart-price" placeholder="Enter price" value="${price}" maxlenght="14" required>
+                      </div>
+                    </div>
+                  </div>                  
+				  ${remove}
+                </div>`;
+			});			
+			$('#form-depart').append(html);
+		}else{
+			addDepart();
+		}		
+
+		if(returns.length > 0){
+			var html   = '',				
+				remove = `<div class="col-md-1">
+								<div class="form-group" style="margin-top: 2px;">
+								<button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
+								</div>
+							</div>`;
+
+			$.each(returns, function (index, value) { 
+				var type  = value.type,
+					desc  = value.description,
+					price = value.price?value.price:0,
+					mt    = index>0?'mt-2':'';
+				html += `<div class="row ${mt} item-return">
+                  <input type="hidden" class="returning" name="returning[]" data-type="${type}" data-description="${desc}" data-price="${price}"/>
+                  <div class="col-md-2">
+                    <div class="form-group">                                        
+                      <select class="form-control select2 returning-type" id=returning-type"" name="returning_type[]" data-placeholder="Return">
+                        <option value="flight" ${type=='flight'?'selected':''}>Flight</option>
+                        <option value="others" ${type=='others'?'selected':''}>Others</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">                      
+                      <input type="text" class="form-control returning-description" id="returning-description" name="returning_description[]" placeholder="Enter description" value="${desc}" required/>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="form-group">                      
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text">
+                            Rp.
+                          </span>
+                        </div>
+                        <input type="text" class="form-control input-price text-right returning-price" id="returning-price" name="returning_price[]" placeholder="Enter price" maxlength="14" value="${price}" required>
+                      </div>
+                    </div>
+                  </div>                  
+				  ${remove}
+                </div>`;
+			});
+			$('#form-return').append(html);
+		}else{
+			addReturn();
+		}
+
+		if(locations){
+			var html   = '',				
+				remove = `<div class="col-md-1">
+								<div class="form-group" style="margin-top: 2px;">
+								<button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
+								</div>
+							</div>`;
+
+			$.each(JSON.parse(locations), function (index, value) { 
+				 var location = value.location;
+
+				 html += `<div class="row item-location">
+							<input type="hidden" class="location" value="${location}">
+							<div class="col-md-11">
+								<input type="text" class="form-control input-location" name="location[]" placeholder="Enter location" value="${location}">
+							</div>                  
+							<div class="col-md-1">
+								<div class="form-group" style="margin-top: 2px;">
+								<button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
+								</div>
+							</div>
+						</div>`;
+			});
+
+			$('#form-location').append(html);
+		}else{
+			addLocation();
+		}
+
+		if(vehicles.length > 0){			
+			var html   = '',
+				remove = `<div class="col-md-1">
+							<div class="form-group" style="margin-top: 30px;">
+								<button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
+							</div>
+						  </div>`;			
+			$.each(vehicles, function (index, value) { 
+				var request_id 	  = value.request_vehicle_id,
+					vehicle       = value.vehicle_name,
+					description   = value.remarks,
+					startRequest  = value.start_request,
+					finishRequest = value.finish_request;								
+				
+				html += `<div class="row item-request-vehicle">        
+                  <input type="hidden" class="vehicles" name="vehicles[]" value=""/>
+                  <div class="col-12">
+                    <div class="form-group row">
+                      <div class="col-md-5">
+                        <div class="row">
+                          <label for="request-vehicle">Request Vehicle</label>
+                          <select name="request_vehicle" class="form-control select2 request-vehicle" data-placeholder="Request Vehicle" data-request-id="${request_id}" data-vehicle="${vehicle}" data-description="${description}" data-start-request="${startRequest}" data-finish-request="${finishRequest}"></select>
+                        </div>
+                        <div class="row mt-2">
+                          <label for="date-request-vehicle">Date Request Vehicle</label>
+                          <div class="input-group">
+                            <div class="input-group-append">
+                              <span class="input-group-text" id=""><i class="fa fa-calendar"></i></span>
+                            </div>
+                            <input type="text" class="form-control date-request-vehicle" name="date_request_vehicle" placeholder="Date Request Vehicle" readonly>
+                          </div>
+                        </div>                                                
+                      </div>                      
+                      <div class="col-md-6">
+                        <label for="remarks">Notes</label>
+                        <textarea class="form-control remarks" name="remarks" rows="3" placeholder="Notes" disabled></textarea>
+                      </div>
+                      ${remove}
+                    </div>
+                  </div>
+                </div>`;				
+			});			
+			$('#form-request-vehicle').html(html);		
+			initRequestVehicle();
+			initRemarks();
+			$.each($('#form-request-vehicle > .item-request-vehicle').find('.request-vehicle'), function (index, value) { 
+				 var request_id = $(this).attr('data-request-id'),
+					 vehicle 	= $(this).attr('data-vehicle'),
+					 notes 		= $(this).attr('data-description'),
+					 startReq 	= $(this).attr('data-start-request'),
+					 finishReq  = $(this).attr('data-finish-request');								
+					 				
+				$(this).select2('trigger','select',{
+					data : {
+						id 	 		: request_id,
+						text 		: `${vehicle} | ${startReq} - ${finishReq}`,
+						notes 		: `${notes}`,
+						daterequest : `${startReq} - ${finishReq}`
+					}
+				});
+			});			
+		}
+
+		if(lodgings.length > 0){
+			var html   = '',
+				remove = `<div class="col-md-1">
+							<div class="form-group" style="margin-top: 2px;">
+								<button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
+							</div>
+						  </div>`;
+			$.each(lodgings, function (index, value) { 
+				var place = value.place,
+					price = value.price?value.price:0,
+					days  = value.night?value.night:1,
+					mt    = index>0?'mt-2':'';
+
+				html  += `<div class="row ${mt} item-lodging">
+                  <input type="hidden" class="lodging" name="lodging[]" data-place="${place}" data-price="${price}" data-days="${days}">
+                  <div class="col-md-6">
+                    <div class="form-group">                      
+                    <input type="text" class="form-control place-lodging" id="place-loging" name="place_lodging" placeholder="Enter where lodging" value="${place}" required>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text">
+                          Rp.
+                        </span>
+                      </div>
+                      <input type="text" class="form-control input-price text-right price-lodging" id="price-lodging" name="price_lodging" placeholder="Enter price" value="${price}" maxlength="14" required>
+                    </div>
+                  </div>
+                  <div class="col-md-2">
+                  <input type="number" class="form-control text-right days-lodging" id="days-lodging" name="days_lodging" placeholder="Enter qty" value="${days}">
+                  </div>     
+				  ${remove}             
+                </div>`;				
+			});
+			$('#form-lodging').append(html);
+		}else{
+			addLodging();
+		}
+
+		if(others.length > 0){
+			var html 	= '',
+				remove 	= `<div class="col-md-1">
+							<div class="form-group" style="margin-top: 2px;">
+								<button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
+							</div>
+						  </div>`;
+
+			$.each(others, function (index, value) { 
+				var desc   = value.description,
+					price  = value.price?value.price:0,
+					qty    = value.qty?value.qty:1,
+					mt     = index>0?'mt-2':'';
+
+				 html += `<div class="row ${mt} item-others">
+                  <input type="hidden" class="others-data" name="others_data[]" data-description="${desc}" data-price="${price}" data-qty="${qty}">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <input type="text" class="form-control others-description" id="others-description" name="others_description" placeholder="Enter description" value="${desc}" required>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text">
+                          Rp.
+                        </span>
+                      </div>
+                      <input type="text" class="form-control input-price text-right others-price" id="others-price" name="others_price" placeholder="Enter price" value="${price}" maxlength="14" required>
+                    </div>
+                  </div>
+                  <div class="col-md-2">
+                    <input type="number" class="form-control text-right mr-2 others-qty" id="others-qty" name="others_qty" placeholder="Enter qty" value="${qty}" required>
+                  </div>
+                  ${remove}
+                </div>`;
+			});
+			$('#form-others').append(html)
+		}
+  }
+  $(function() {
+    $('#business-trip-request').trigger('change');
     $('.summernote').summernote({
       height: 145,
       toolbar: [
@@ -438,7 +679,7 @@ Create {{ @$menu_name }} Request
     // FORM DEPART METHOD
 
     $('#form-depart').on('click', '.remove', function() {
-      if ($('.item-depart').length > 1) {
+      if ($('.item-depart').length > 0) {
         $(this).parents('.item-depart').remove();
         $('#form-depart').find('.item-depart').first().removeClass('mt-2');
       }
@@ -465,7 +706,7 @@ Create {{ @$menu_name }} Request
     // FORM RETURN METHOD
 
     $('#form-return').on('click', '.remove', function() {
-      if ($('.item-return').length > 1) {
+      if ($('.item-return').length > 0) {
         $(this).parents('.item-return').remove();
         $('#form-return').find('.item-return').first().removeClass('mt-2');
       }
@@ -495,7 +736,7 @@ Create {{ @$menu_name }} Request
 
     // FORM LOCATION METHOD 
     $('#form-location').on('click','.remove', function(){
-      if ($('.item-location').length > 1) {
+      if ($('.item-location').length > 0) {
         $(this).parents('.item-location').remove();
         $('#form-location').find('.item-location').first().removeClass('mt-2');
       }
@@ -514,7 +755,7 @@ Create {{ @$menu_name }} Request
     // FORM LODGING METHOD
 
     $('#form-lodging').on('click', '.remove', function() {
-      if ($('.item-lodging').length > 1) {
+      if ($('.item-lodging').length > 0) {
         $(this).parents('.item-lodging').remove();
         $('#form-lodging').find('.item-lodging').first().removeClass('mt-2');
       }
@@ -574,9 +815,42 @@ Create {{ @$menu_name }} Request
       sumRate();
     });
 
-    employee();
     initSelect2();
     initInputPrice(); 
+
+
+
+    $('#business-trip-request').select2({
+      ajax: {
+        url: "{{ route('businesstrip.select') }}",
+        type: "GET",
+        dataType: "JSON",
+        data: function(params) {
+          return {
+            approved: true,
+            number: params.term,
+            page: params.page,
+            limit: 30,
+          };
+        },
+        processResults: function(data, params) {
+          var more = (params.page * 30) < data.total;
+          var option = [];
+          $.each(data.rows, function(index, item) {
+            option.push({
+              id: item.id,
+              text: item.business_trip_number,
+              datas: item,
+            });
+          });
+          return {
+            results: option,
+            more: more,
+          };
+        },
+      },
+      allowClear: true,
+    });
 
 
     // SUBMIT ACTION
@@ -762,7 +1036,7 @@ Create {{ @$menu_name }} Request
       type: "GET",
       url: `{{route('employee.dig')}}`,
       data: {
-        employee_id : employeeID
+        employee_id : $('#issued-id').val() ? $('#issued-id').val() : null
       },
       dataType: "json",
       success: function (response) {
