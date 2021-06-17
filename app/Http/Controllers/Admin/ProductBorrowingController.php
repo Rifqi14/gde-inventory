@@ -9,6 +9,7 @@ use App\Models\ProductBorrowingDocument; // Model for supporting document
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Menu;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Validator;
 class ProductBorrowingController extends Controller
@@ -19,7 +20,7 @@ class ProductBorrowingController extends Controller
         $menu       = Menu::GetByRoute('productborrowing')->first();
         $parent     = Menu::find($menu->parent_id);
         View::share('menu_name', $menu->menu_name);
-        View::share('menu_parent', $parent->menu_name);
+        View::share('parent_name', $parent->menu_name);
         View::share('menu_active', url('admin/'.'productborrowing'));
     }
 

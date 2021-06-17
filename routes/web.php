@@ -245,5 +245,14 @@ Route::group(['prefix' => 'admin'], function () {
 
         // COnfig
         Route::resource('/config', 'Admin\ConfigController');
+
+        // Currency
+        Route::get('/currency/read', 'Admin\CurrencyController@read')->name('currency.read');
+        Route::get('/currency/select', 'Admin\CurrencyController@select')->name('currency.select');
+        Route::resource('/currency', 'Admin\CurrencyController');
+
+        // Attendance Request
+        Route::get('/attendancerequest/read', 'Admin\AttendanceRequestController@read')->name('attendancerequest.read');
+        Route::resource('/attendancerequest', 'Admin\AttendanceRequestController');
     });
 });
