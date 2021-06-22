@@ -120,6 +120,8 @@ Route::group(['prefix' => 'admin'], function () {
         // Route Warehouse
         Route::get('/warehouse/read', 'Admin\WarehouseController@read')->name('warehouse.read');
         Route::get('/warehouse/select', 'Admin\WarehouseController@select')->name('warehouse.select');
+        Route::get('/warehouse/selectrack','Admin\WarehouseController@selectrack')->name('warehouse.selectrack');
+        Route::get('/warehouse/selectbin','Admin\WarehouseController@selectbin')->name('warehouse.selectbin');
         Route::resource('/warehouse', 'Admin\WarehouseController');
         // Route Rack
         Route::get('/rack/select', 'Admin\RackController@select')->name('rack.select');
@@ -207,6 +209,9 @@ Route::group(['prefix' => 'admin'], function () {
         Route::resource('/productserial', 'Admin\ProductSerialController');
 
         // Goods Receipt
+        Route::get('/goodsreceipt/read','Admin\GoodsReceiptController@read')->name('goodsreceipt.read');
+        Route::get('/goodsreceipt/contractproducts','Admin\GoodsReceiptController@contractproducts')->name('goodsreceipt.contractproducts');
+        Route::get('/goodsreceipt/borrowingproducts','Admin\GoodsReceiptController@borrowingproducts')->name('goodsreceipt.borrowingproducts');
         Route::resource('/goodsreceipt', 'Admin\GoodsReceiptController');
 
         // Attendance
