@@ -32,6 +32,9 @@ Route::group(['prefix' => 'admin'], function () {
 
     Route::group(['middleware' => ['auth:admin', 'page.admin']], function () {
         Route::get('/dashboard', 'Admin\DashboardController@index')->name('dashboard.index');
+        // Route Log Revise
+        Route::get('/logrevise/read', 'Admin\LogReviseController@read')->name('logrevise.read');
+        Route::resource('/logrevise', 'Admin\LogReviseController');
         //Route User
         Route::get('/user/read', 'Admin\UserController@read')->name('user.read');
         Route::get('/user/select', 'Admin\UserController@select')->name('user.select');
@@ -72,9 +75,9 @@ Route::group(['prefix' => 'admin'], function () {
         // Route Request Vehicle
         Route::get('/requestvehicle/read','Admin\RequestVehicleController@read')->name('requestvehicle.read');
         Route::get('/requestvehicle/select','Admin\RequestVehicleController@select')->name('requestvehicle.select');
-        Route::get('/requestvehicle/delete/{id}','Admin\RequestVehicleController@delete');
         Route::get('/requestvehicle/edit/{id}','Admin\RequestVehicleController@edit');
         Route::get('/requestvehicle/daterequest','Admin\RequestVehicleController@daterequest')->name('requestvehicle.daterequest');
+        Route::post('/requestvehicle/revise', 'Admin\RequestVehicleController@revise')->name('requestvehicle.revise');
         Route::resource('/requestvehicle','Admin\RequestVehicleController');
         //Route Working Shift
         Route::get('/workingshift/read', 'Admin\WorkingShiftController@read')->name('workingshift.read');
@@ -215,6 +218,7 @@ Route::group(['prefix' => 'admin'], function () {
         Route::resource('/goodsreceipt', 'Admin\GoodsReceiptController');
 
         // Attendance
+        Route::get('/attendance/generate', 'Admin\AttendanceController@generateHeaderWhenNotAttend')->name('attendance.generate');
         Route::get('/attendance/read', 'Admin\AttendanceController@read')->name('attendance.read');
         Route::resource('/attendance', 'Admin\AttendanceController');
 
@@ -246,6 +250,10 @@ Route::group(['prefix' => 'admin'], function () {
         // COnfig
         Route::resource('/config', 'Admin\ConfigController');
 
+        // Country
+        Route::get('/country/select', 'Admin\CountryController@select')->name('country.select');
+        Route::resource('/country', 'Admin\CountryController');
+
         // Currency
         Route::get('/currency/read', 'Admin\CurrencyController@read')->name('currency.read');
         Route::get('/currency/select', 'Admin\CurrencyController@select')->name('currency.select');
@@ -253,6 +261,7 @@ Route::group(['prefix' => 'admin'], function () {
 
         // Attendance Request
         Route::get('/attendancerequest/read', 'Admin\AttendanceRequestController@read')->name('attendancerequest.read');
+        Route::post('/attendancerequest/approve', 'Admin\AttendanceRequestController@approve')->name('attendancerequest.approve');
         Route::resource('/attendancerequest', 'Admin\AttendanceRequestController');
     });
 });

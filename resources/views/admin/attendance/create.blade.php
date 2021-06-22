@@ -57,6 +57,7 @@
                   <div class="form-group row">
                     <label class="col-md-12 col-xs-12 control-label" for="shift">Shift</label>
                     <div class="col-sm-12 controls">
+                      <input type="hidden" name="working_shift_id" value="{{ @$employee->working_shift_id }}">
                       <select name="shift" id="shift" class="form-control select2" onchange="changeShift(this)" required>
                         <option value="">Select Shift</option>
                       </select>
@@ -266,6 +267,17 @@
         },
         allowClear: true,
     });
+    @if ($employee->working_shift_id)
+      $('#shift').select2('trigger', 'select', {
+        data: {
+          id: `{{ $employee->workingshift->id }}`,
+          text: `{{ $employee->workingshift->shift_name . ' | ' . $employee->workingshift->time_in . ' - ' . $employee->workingshift->time_out }}`,
+          time_in: `{{ $employee->workingshift->time_in }}`,
+          time_out: `{{ $employee->workingshift->time_out }}`
+        }
+      });
+      $('#shift').prop('disabled', true);
+    @endif
   });
 </script>
 @endsection

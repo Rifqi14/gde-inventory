@@ -397,7 +397,7 @@ class AttendanceController extends Controller
         } else {
             return 0;
         }
-    }
+    }                                                                   
 
     /**
      * Count Overtime function

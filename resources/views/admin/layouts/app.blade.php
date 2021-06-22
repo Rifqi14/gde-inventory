@@ -42,6 +42,7 @@
     <link href='https://cdn.datatables.net/rowgroup/1.1.1/css/rowGroup.bootstrap4.min.css' rel='stylesheet' media='screen'>
     <link href='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css' rel='stylesheet' media='screen'>
     <link href='{{asset('assets/css/custom.css')}}' rel='stylesheet' media='screen'>
+    <link href='{{asset('assets/plugins/flag-icon-css/css/flag-icon.css')}}' rel='stylesheet' media='screen'>
     @yield('stylesheets')
 </head>
 
