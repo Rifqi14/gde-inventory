@@ -96,7 +96,7 @@
                 <!-- Sidebar user panel (optional) -->
                 <div class="user-panel mt-3 pb-3 mb-3 d-flex">
                     <div class="image">
-                        <img src="{{asset(Auth::guard('admin')->user()->employees() ? Auth::guard('admin')->user()->employees()->first()->photo : 'assets/img/dev.jpg')}}" class="img-circle elevation-1 img-pp" alt="Development Application">
+                        <img src="assets/img/dev.jpg" class="img-circle elevation-1 img-pp" alt="Development Application">
                     </div>
                     <div class="info">
                         <a href="#" class="d-block">{{Auth::guard('admin')->user()->name}}</a>
