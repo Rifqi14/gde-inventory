@@ -36,13 +36,13 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
-                        
+
                     </div>
                     <div class="card-body table-responsive p-0">
                         <table id="table-product" class="table table-striped datatable" width="100%">
                             <thead>
                                 <tr>
-                                    <th width="5"  class="text-center">No.</th>
+                                    <th width="5" class="text-center">No.</th>
                                     <th width="100">Nama Product</th>
                                     <th width="100">Category</th>
                                     <th width="20" class="text-right">Stock</th>
@@ -63,7 +63,7 @@
             <div class="modal-header">
                 <h5 class="modal-title text-bold">Filter Product</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
+                    <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
@@ -81,7 +81,7 @@
                             <div class="form-group">
                                 <label class="control-label" for="name">Category</label>
                                 <select name="product_category_id" data-placeholder="Product Category" style="width: 100%;" required class="select2 form-control" id="product_category_id">
-                                    </select>
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -148,7 +148,7 @@
                 },
                 {
                     render: function ( data, type, row ) {
-                        return row.category.name;
+                        return row.category.path;
                     },targets: [2]
                 },
                 {   
