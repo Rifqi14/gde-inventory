@@ -1,7 +1,7 @@
 @extends('admin.layouts.app')
 
 @section('title')
-Edit Vehicle
+Edit {{ @$menu_name }}
 @endsection
 
 @section('stylesheets')
@@ -12,13 +12,13 @@ Edit Vehicle
 <div class="row mb-3 mt-3">
 	<div class="col-sm-4">
 		<h1 id="title-branch" class="m-0 text-dark">
-			Vehicle Database
+			{{ @$menu_name }}
 		</h1>
 	</div>
 	<div class="col-sm-8">
 		<ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
-			<li class="breadcrumb-item">Preferences</li>
-			<li class="breadcrumb-item">Vehicle</li>
+			<li class="breadcrumb-item">{{ @$parent_name }}</li>
+			<li class="breadcrumb-item">{{ @$menu_name }}</li>
 			<li class="breadcrumb-item active">Edit</li>
 		</ol>
 	</div>

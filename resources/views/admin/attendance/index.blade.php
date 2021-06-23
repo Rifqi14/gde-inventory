@@ -5,11 +5,15 @@
   .text-danger {
     color: red !important;
   }
+
+  .badge-danger {
+    background-color: red !important;
+  }
 </style>
 @endsection
 
 @section('button')
-@if (in_array('create', $actionmenu))
+@if (in_array('create', $actionmenu) && !$attendanceToday && $employee_id->employees->payroll_type == 1)
 <button type="button" id="add-attendance" class="btn btn-labeled text-sm btn-sm btn-success btn-flat legitRipple" onclick="windowLocation('{{ route('attendance.create') }}')">
   <b><i class="fas fa-plus"></i></b> Create
 </button>
@@ -183,10 +187,12 @@
               width: "10%",
               render: function(data, type, row) {
                 html  = '';
-                if (row.diff_in && row.diff_in.diff_type == 'late') {
-                  html = `<b>${row.attendance_in}</b><br><small class="text-danger">${row.diff_in.diff_format}</small>`;
-                } else {
-                  html = `<b>${row.attendance_in}</b><br><small class="text-success">${row.diff_in.diff_format}</small>`;
+                if (row.diff_in) {
+                  if (row.diff_in.diff_type == 'late') {
+                    html = `<b>${row.attendance_in}</b><br><small class="text-danger">${row.diff_in.diff_format}</small>`;
+                  } else {
+                    html = `<b>${row.attendance_in}</b><br><small class="text-success">${row.diff_in.diff_format}</small>`;
+                  }
                 }
                 return row.diff_in ? html : '-'
               }, targets: [3]
@@ -195,10 +201,12 @@
               width: "10%",
               render: function(data, type, row) {
                 html  = '';
-                if (row.diff_out && row.diff_out.diff_type == 'late') {
-                  html = `<b>${row.attendance_out}</b><br><small class="text-danger">${row.diff_out.diff_format}</small>`;
-                } else {
-                  html = `<b>${row.attendance_out}</b><br><small class="text-success">${row.diff_out.diff_format}</small>`;
+                if (row.diff_out) {
+                  if (row.diff_out.diff_type == 'late') {
+                    html = `<b>${row.attendance_out}</b><br><small class="text-danger">${row.diff_out.diff_format}</small>`;
+                  } else {
+                    html = `<b>${row.attendance_out}</b><br><small class="text-success">${row.diff_out.diff_format}</small>`;
+                  }
                 }
                 return row.diff_out ? html : '-'
               }, targets: [4]
@@ -206,7 +214,23 @@
             {
               width: "10%",
               render: function(data, type, row) {
-                html  = `<b>WT: </b> ${row.working_time ? row.working_time : 0}<br><b>OT: </b> ${row.over_time ? row.over_time : 0}<br><b>Working Day: </b> ${row.day_work ? row.day_work : 0}`;
+                var workingday = '';
+                switch (row.day_work) {
+                  case '1':
+                    workingday = `<small class="badge badge-success">Full Day</small>`;
+                    break;
+                  case '0.5':
+                    workingday = `<small class="badge badge-warning">Half Day</small>`;
+                    break;
+                  case '0':
+                    workingday = `<small class="badge badge-danger">Absent</small>`;
+                    break;
+                
+                  default:
+                    workingday = `<small class="badge badge-info">Not Completed</small>`;
+                    break;
+                }
+                html  = `<b>WT: </b> ${row.working_time ? row.working_time : 0}<br><b>OT: </b> ${row.over_time ? row.over_time : 0}<br><b>Working Day: </b> ${workingday}`;
                 return html;
               }, targets: [5]
             },
@@ -234,7 +258,12 @@
                     break;
                 }
 
-                return `<small class="badge badge-${badge}">${status}</small>`;
+                if ((row.attendance_in && row.attendance_out) || row.status == 'APPROVED') {
+                  return `<small class="badge badge-${badge}">${status}</small>`;
+                } else {
+                  return `<small class="badge badge-info">Not Completed</small>`;
+                }
+
               }, targets: [6]
             },
             {   

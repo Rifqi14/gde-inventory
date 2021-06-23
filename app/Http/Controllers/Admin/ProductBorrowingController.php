@@ -10,6 +10,7 @@ use App\Models\ProductBorrowingDocument; // Model for supporting document
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Menu;
+
 use App\Models\Product;
 use App\Models\Warehouse;
 use Illuminate\Support\Facades\View;
@@ -19,10 +20,11 @@ class ProductBorrowingController extends Controller
 
     function __construct()
     {
-        $menu       = Menu::getByRoute('productborrowing')->first();
+
+        $menu       = Menu::GetByRoute('productborrowing')->first();
         $parent     = Menu::find($menu->parent_id);
-        View::share('parent_name', $parent->menu_name);
         View::share('menu_name', $menu->menu_name);
+        View::share('parent_name', $parent->menu_name);
         View::share('menu_active', url('admin/'.'productborrowing'));
         $this->middleware('accessmenu', ['except' => ['select']]);
     }

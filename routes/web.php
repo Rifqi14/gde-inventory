@@ -22,6 +22,7 @@ Route::get('admin/error', function () {
 Auth::routes();
 
 Route::get('/test', 'Admin\TestController@test')->name('test');
+Route::get('/businesstrip/rateprocess', 'Admin\BusinessTripController@rateprocess')->name('businesstrip.rateprocess');
 
 Route::get('/home', 'HomeController@index')->name('home');
 Route::group(['prefix' => 'admin'], function () {
@@ -31,6 +32,9 @@ Route::group(['prefix' => 'admin'], function () {
 
     Route::group(['middleware' => ['auth:admin', 'page.admin']], function () {
         Route::get('/dashboard', 'Admin\DashboardController@index')->name('dashboard.index');
+        // Route Log Revise
+        Route::get('/logrevise/read', 'Admin\LogReviseController@read')->name('logrevise.read');
+        Route::resource('/logrevise', 'Admin\LogReviseController');
         //Route User
         Route::get('/user/read', 'Admin\UserController@read')->name('user.read');
         Route::get('/user/select', 'Admin\UserController@select')->name('user.select');
@@ -71,9 +75,9 @@ Route::group(['prefix' => 'admin'], function () {
         // Route Request Vehicle
         Route::get('/requestvehicle/read','Admin\RequestVehicleController@read')->name('requestvehicle.read');
         Route::get('/requestvehicle/select','Admin\RequestVehicleController@select')->name('requestvehicle.select');
-        Route::get('/requestvehicle/delete/{id}','Admin\RequestVehicleController@delete');
         Route::get('/requestvehicle/edit/{id}','Admin\RequestVehicleController@edit');
         Route::get('/requestvehicle/daterequest','Admin\RequestVehicleController@daterequest')->name('requestvehicle.daterequest');
+        Route::post('/requestvehicle/revise', 'Admin\RequestVehicleController@revise')->name('requestvehicle.revise');
         Route::resource('/requestvehicle','Admin\RequestVehicleController');
         //Route Working Shift
         Route::get('/workingshift/read', 'Admin\WorkingShiftController@read')->name('workingshift.read');
@@ -145,10 +149,14 @@ Route::group(['prefix' => 'admin'], function () {
         //Route Business Trip
         Route::get('/businesstrip/read', 'Admin\BusinessTripController@read')->name('businesstrip.read');
         Route::get('/businesstrip/select', 'Admin\BusinessTripController@select')->name('businesstrip.select');
-        Route::get('/businesstrip/delete/{id}','Admin\BusinessTripController@destroy');        
+        Route::get('/businesstrip/delete/{id}','Admin\BusinessTripController@destroy');
         Route::get('/businesstrip/update/{id}','Admin\BusinessTripControlller@update');
-        Route::get('/businesstrip/edit/{id}','Admin\BusinessTripController@edit');                
+        Route::get('/businesstrip/edit/{id}','Admin\BusinessTripController@edit');
+        Route::get('/businesstrip/createdeclare', 'Admin\BusinessTripController@createdeclare')->name('businesstrip.createdeclare');
         Route::resource('/businesstrip', 'Admin\BusinessTripController');
+        // Route Business Trip Declaration
+        Route::get('/declaration/read', 'Admin\BusinessTripDeclarationController@read')->name('declaration.read');
+        Route::resource('/declaration', 'Admin\BusinessTripDeclarationController');
         // Route Product Category
         Route::get('/productcategory/read','Admin\ProductCategoryController@read')->name('productcategory.read');  
         Route::get('/productcategory/select','Admin\ProductCategoryController@select')->name('productcategory.select');        
@@ -215,6 +223,7 @@ Route::group(['prefix' => 'admin'], function () {
         Route::resource('/goodsreceipt', 'Admin\GoodsReceiptController');
 
         // Attendance
+        Route::get('/attendance/generate', 'Admin\AttendanceController@generateHeaderWhenNotAttend')->name('attendance.generate');
         Route::get('/attendance/read', 'Admin\AttendanceController@read')->name('attendance.read');
         Route::resource('/attendance', 'Admin\AttendanceController');
 
@@ -224,6 +233,8 @@ Route::group(['prefix' => 'admin'], function () {
 
         // Product Borrowing        
         Route::get('/productborrowing/read','Admin\ProductBorrowingController@read')->name('productborrowing.read');        
+        Route::get('/productborrowing/selectwarehouse','Admin\ProductBorrowingController@selectwarehouse')->name('productborrowing.selectwarehouse');        
+        Route::get('/productborrowing/selectproduct','Admin\ProductBorrowingController@selectproduct')->name('productborrowing.selectproduct');        
         Route::get('/productborrowing/readarchived','Admin\ProductBorrowingController@readarchived')->name('productborrowing.readarchived');
         Route::get('/productborrowing/archive/{id}','Admin\ProductBorrowingController@archive');
         Route::get('/productborrowing/delete/{id}','Admin\ProductBorrowingController@destroy');                
@@ -240,5 +251,22 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/producttransfer/delete/{id}','Admin\ProductTransferController@destroy');                
         Route::get('/producttransfer/archive/{id}','Admin\ProductTransferController@archive');
         Route::resource('/producttransfer','Admin\ProductTransferController');
+
+        // COnfig
+        Route::resource('/config', 'Admin\ConfigController');
+
+        // Country
+        Route::get('/country/select', 'Admin\CountryController@select')->name('country.select');
+        Route::resource('/country', 'Admin\CountryController');
+
+        // Currency
+        Route::get('/currency/read', 'Admin\CurrencyController@read')->name('currency.read');
+        Route::get('/currency/select', 'Admin\CurrencyController@select')->name('currency.select');
+        Route::resource('/currency', 'Admin\CurrencyController');
+
+        // Attendance Request
+        Route::get('/attendancerequest/read', 'Admin\AttendanceRequestController@read')->name('attendancerequest.read');
+        Route::post('/attendancerequest/approve', 'Admin\AttendanceRequestController@approve')->name('attendancerequest.approve');
+        Route::resource('/attendancerequest', 'Admin\AttendanceRequestController');
     });
 });

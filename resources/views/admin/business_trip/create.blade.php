@@ -1,7 +1,7 @@
 @extends('admin.layouts.app')
 
 @section('title')
-Create Business Trips
+Create {{ @$menu_name }} Request
 @endsection
 
 @section('stylesheets')
@@ -12,14 +12,13 @@ Create Business Trips
 <div class="row mb-3 mt-3">
   <div class="col-sm-4">
     <h1 id="title-branch" class="m-0 text-dark">
-      Business Trips
+      {{ @$menu_name }} Request
     </h1>
   </div>
   <div class="col-sm-8">
     <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
-      <li class="breadcrumb-item">Preferences</li>
-      <li class="breadcrumb-item">Activities</li>
-      <li class="breadcrumb-item">Business Trips</li>
+      <li class="breadcrumb-item">{{ @$parent_name }}</li>
+      <li class="breadcrumb-item">{{ @$menu_name }}</li>
       <li class="breadcrumb-item active">Create</li>
     </ol>
   </div>
@@ -157,20 +156,20 @@ Create Business Trips
                 <div class="row mt-4 mb-0">
                   <div class="col-md-10">
                     <label>Location:</label>
-                  </div>                  
+                  </div>
                 </div>
                 <div class="row item-location">
                   <input type="hidden" class="location" value="">
                   <div class="col-md-11">
                     <input type="text" class="form-control input-location" name="location[]" placeholder="Enter location">
-                  </div>                  
+                  </div>
                   <div class="col-md-1">
                     <div class="form-group" style="margin-top: 2px;">
                       <button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
                     </div>
                   </div>
                 </div>
-              </div>              
+              </div>
               <div class="text-right">
                 <button type="button" id="add-location" data-urutan="1" class="btn btn-labeled labeled-sm btn-md text-xs btn-success btn-flat legitRipple" onclick="addLocation()">
                   <b><i class="fas fa-plus"></i></b> Add
@@ -286,7 +285,7 @@ Create Business Trips
                 <h5 class="text-md text-dark text-uppercase">General Information</h5>
               </span>
               <div class="form-group">
-                <label for="business-trip-number">Business Trip Number</label>
+                <label for="business-trip-number">Request Number</label>
                 <input type="text" class="form-control" name="business_trip_number" id="business-trip-number" placeholder="Auto generate number" readonly>
               </div>
               <div class="form-group mt-4">
@@ -306,7 +305,7 @@ Create Business Trips
                         <i class="far fa-calendar-alt"></i>
                       </span>
                     </div>
-                    <input type="datepicker" class="form-control datepicker text-right departure-date" id="departure-date" required>
+                    <input type="datepicker" class="form-control datepicker text-right departure-date" id="departure-date" onchange="employee()" required>
                   </div>
                 </div>
                 <div class="col-md-6">
@@ -317,7 +316,7 @@ Create Business Trips
                         <i class="far fa-calendar-alt"></i>
                       </span>
                     </div>
-                    <input type="datepicker" class="form-control datepicker text-right arrived-date" id="arrived-date" required>
+                    <input type="datepicker" class="form-control datepicker text-right arrived-date" id="arrived-date" onchange="employee()" required>
                   </div>
                 </div>
               </div>
@@ -337,10 +336,10 @@ Create Business Trips
                 </div>
               </div>
               <div class="form-group">
-                <label for="">Total Cost:</label>
-                <div class="input-group"> 
+                <label for="">Estimated Cost:</label>
+                <div class="input-group">
                   <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>                    
+                    <span class="input-group-text">Rp.</span>
                   </div>
                   <input type="text" class="form-control input-price text-right" name="total_cost" id="total-cost" placeholder="Automatically calculated" value="0" readonly>
                 </div>
@@ -396,10 +395,7 @@ Create Business Trips
       username     = "{{Auth::guard('admin')->user()->name}}",
       employeeRate = 0;
 
-  $(function() {
-    employee();
-    initSelect2();
-    initInputPrice();        
+  $(function() {       
 
     $('.summernote').summernote({
       height: 145,
@@ -578,6 +574,10 @@ Create Business Trips
       sumRate();
     });
 
+    employee();
+    initSelect2();
+    initInputPrice(); 
+
 
     // SUBMIT ACTION
     $("#form").validate({
@@ -746,7 +746,18 @@ Create Business Trips
 
   });
 
+  const dateDiff = () => {
+    var expDepartureDate  = $('#departure-date').val().split("/");
+    var expArrivedDate    = $('#arrived-date').val().split("/");
+    var departureDate     = new Date(expDepartureDate[2], expDepartureDate[1] - 1, expDepartureDate[0], 0, 0, 0);
+    var arrivedDate       = new Date(expArrivedDate[2], expArrivedDate[1] - 1, expArrivedDate[0], 23, 59, 59);
+    var diff              = Math.abs(arrivedDate - departureDate);
+    var days              = diff / 1000 / 60 / 60 / 24;
+    return Math.round(days);
+  }
+  
   const employee = () => {
+    var days = dateDiff();
     $.ajax({
       type: "GET",
       url: `{{route('employee.dig')}}`,
@@ -757,9 +768,9 @@ Create Business Trips
       success: function (response) {
         if(response.status){
           var data = response.data;          
-          employeeRate = data.rate_business_trip;    
+          employeeRate = data.rate_business_trip;
           
-          $('input[name=rate]').val(employeeRate);
+          $('input[name=rate]').val(employeeRate * days);
           initInputPrice();
           $('input[name=rate]').trigger('change');
         }else{
@@ -791,7 +802,7 @@ Create Business Trips
         dataType: 'json',
         data: function(params) {
           return {
-            employee_id: employeeID,
+            employee_id: userID,
             search: params.term,
             page: params.page,
             limit: 30,

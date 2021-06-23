@@ -76,7 +76,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="card-footer text-right">                           
+                        <div class="card-footer text-right">
                             <a href="{{ route('requestvehicle.index') }}" class="btn btn-sm btn-secondary color-palette btn-labeled legitRipple text-sm">
                                 <b><i class="fas fa-times"></i></b>
                                 Cancel

@@ -228,7 +228,7 @@
                                     <div class="user-existed d-none">
                                         <div class="form-group">
                                             <label class="control-label" for="username">Username</label>
-                                            <input class="form-control" type="text" name="username" id="username" placeholder="Username" value="{{ $data->user->username }}">
+                                            <input class="form-control" type="text" name="username" id="username" placeholder="Username" value="{{ @$data->user->username }}">
                                         </div>
                                         <div class="form-group role-select">
                                             <label class="control-label" for="role">Group</label>

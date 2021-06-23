@@ -1,0 +1,38 @@
+[
+    {
+        "option": "app_name",
+        "value": "Geodipa Inventory"
+    },
+    {
+        "option": "app_copyright",
+        "value": "Geodipa Energi"
+    },
+    {
+        "option": "app_logo",
+        "value": "assets/img/no-image.png"
+    },
+    {
+        "option": "app_icon",
+        "value": "assets/img/no-image.png"
+    },
+    {
+        "option": "login_background",
+        "value": "assets/img/no-image.png"
+    },
+    {
+        "option": "company_name",
+        "value": "Goedipa Energi"
+    },
+    {
+        "option": "company_email",
+        "value": "admin@geodipa.com"
+    },
+    {
+        "option": "company_phone",
+        "value": "0830-1234-5678"
+    },
+    {
+        "option": "company_address",
+        "value": "Jl. Teluk Kumai Barat"
+    }
+]

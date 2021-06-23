@@ -1,17 +1,17 @@
 @extends('admin.layouts.app')
-@section('title','Request Vehicle')
+@section('title',@$menu_name)
 
 @section('breadcrumb')
 <div class="row mb-3 mt-3">
     <div class="col-sm-4">
         <h1 id="title-branch" class="m-0 text-dark">
-            Request Vehicle
+            {{ @$menu_name }}
         </h1>
     </div>
     <div class="col-sm-8">
         <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
-            <li class="breadcrumb-item">Master</li>
-            <li class="breadcrumb-item">Request Vehicle</li>
+            <li class="breadcrumb-item">{{ @$parent_name }}</li>
+            <li class="breadcrumb-item">{{ @$menu_name }}</li>
             <li class="breadcrumb-item">Create</li>
         </ol>
     </div>
