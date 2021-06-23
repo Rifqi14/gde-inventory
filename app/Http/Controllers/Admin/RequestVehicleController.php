@@ -6,16 +6,31 @@ use App\Models\RequestVehicle;
 use App\Models\BorrowerRequestVehicle;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\LogRevise;
+use App\Models\Menu;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Validator;
 
 class RequestVehicleController extends Controller
 {
+    private $menu_route;
     public function __construct()
     {
+        $menu             = Menu::getByRoute('requestvehicle')->first();
+        $parent           = Menu::find($menu->parent_id);
+        $this->menu_route = $menu->menu_route;
+        View::share('parent_name', $parent->menu_name);
+        View::share('menu_name', $menu->menu_name);
+        View::share('menu_route', $menu->menu_route);
         View::share('menu_active', url('admin' . '/requestvehicle'));
         $this->middleware('accessmenu', ['except' => ['select']]);
+    }
+
+    function getRouteName()
+    {
+        return $this->menu_route;
     }
 
     public function index()
@@ -31,18 +46,20 @@ class RequestVehicleController extends Controller
 
     public function edit(Request $request,$id)
     {   
-        $query = RequestVehicle::selectRaw("
-                request_vehicles.*,
-                vehicles.vehicle_name,
-                vehicles.police_number,
-                employees.name as employee_name,
-                users.name as user_name
-        ");
-        $query->leftJoin('vehicles','vehicles.id','=','request_vehicles.vehicle_id');
-        $query->leftJoin('users','users.id','=','request_vehicles.issued_by');
-        $query->leftJoin('employees','employees.id','=','users.employee_id');
-        $query->where('request_vehicles.id',$id);
-        $query = $query->first();
+        // $query = RequestVehicle::selectRaw("
+        //         request_vehicles.*,
+        //         vehicles.vehicle_name,
+        //         vehicles.police_number,
+        //         employees.name as employee_name,
+        //         users.name as user_name
+        // ");
+        // $query->leftJoin('vehicles','vehicles.id','=','request_vehicles.vehicle_id');
+        // $query->leftJoin('users','users.id','=','request_vehicles.issued_by');
+        // $query->leftJoin('employees','employees.id','=','users.employee_id');
+        // $query->where('request_vehicles.id',$id);
+        // $query = $query->first();
+
+        $query  = RequestVehicle::with(['vehiclerequest', 'issuedbyrequest', 'issuedbyrequest.employees'])->find($id);
             
         if ($query) {            
 
@@ -248,7 +265,6 @@ class RequestVehicleController extends Controller
     public function update(Request $request,$id)
     {
         $validator = Validator::make($request->all(), [
-            'vehicle'    => 'required',
             'startdate'  => 'required',
             'finishdate' => 'required'
         ]);
@@ -261,6 +277,7 @@ class RequestVehicleController extends Controller
         }
 
         $vehicle    = $request->vehicle;
+        $vehicle_id = $request->vehicle_id;
         $startdate  = $request->startdate;        
         $finishdate = $request->finishdate;
         $borrowers  = $request->borrowers;
@@ -269,12 +286,13 @@ class RequestVehicleController extends Controller
         $issued_by  = $request->issued_by;
 
         $reqvehicle = RequestVehicle::find($id);   
-        $reqvehicle->vehicle_id     = $vehicle; 
+        $reqvehicle->vehicle_id     = $reqvehicle->revise_status == 'NO' ? $vehicle_id : $vehicle; 
         $reqvehicle->start_request  = $startdate;
         $reqvehicle->finish_request = $finishdate;        
         $reqvehicle->remarks        = $notes;
         $reqvehicle->status         = $status;
         $reqvehicle->issued_by      = $issued_by;
+        $reqvehicle->revise_status  = 'NO';
         $reqvehicle->save();
         
         if ($reqvehicle) {
@@ -344,7 +362,7 @@ class RequestVehicleController extends Controller
         }        
     }
 
-    public function delete($id)
+    public function destroy($id)
     {
         try {
             $reqvehicle = RequestVehicle::find($id);
@@ -373,6 +391,58 @@ class RequestVehicleController extends Controller
                 'status' => false
             ],400);
         }
+    }
+
+    public function revise(Request $request)
+    {
+        $validator  = Validator::make($request->all(), [
+            'request_vehicle_id'        => 'required',
+            'revise_number'             => 'required',
+            'revise_reason'             => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status'        => false,
+                'message'       => $validator->errors()->first()
+            ], 200);
+        }
+
+        DB::beginTransaction();
+        $revise     = RequestVehicle::find($request->request_vehicle_id);
+        $revise->revise_status      = 'YES';
+        $revise->revise_number      += 1;
+        $revise->revise_reason      = $request->revise_reason;
+        $revise->save();
+
+        if (!$revise) {
+            DB::rollBack();
+            return response()->json([
+                'status'    => false,
+                'message'   => "Cant create revise"
+            ], 400);
+        }
+
+        $log    = LogRevise::create([
+            'route_menu'        => $this->getRouteName(),
+            'data_id'           => $revise->id,
+            'revise_number'     => $revise->revise_number,
+            'revise_reason'     => $revise->revise_reason,
+        ]);
+
+        if (!$log) {
+            DB::rollBack();
+            return response()->json([
+                'status'    => false,
+                'message'   => "Cant create revise"
+            ], 400);
+        }
+
+        DB::commit();
+        return response()->json([
+            'status'    => true,
+            'message'   => "Data has been revised",
+        ], 200);
     }
 
     public function daterequest(Request $request)

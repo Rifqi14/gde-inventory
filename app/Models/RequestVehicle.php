@@ -17,4 +17,14 @@ class RequestVehicle extends Model
     {
         return $this->hasMany('App\Models\BusinessTripVehicle', 'request_vehicle_id');
     }
+
+    public function issuedbyrequest()
+    {
+        return $this->belongsTo('App\User', 'issued_by', 'id');
+    }
+
+    public function vehiclerequest()
+    {
+        return $this->belongsTo('App\Models\Vehicle', 'vehicle_id', 'id');
+    }
 }

@@ -1,17 +1,17 @@
 @extends('admin.layouts.app')
-@section('title','Request Vehicle')
+@section('title',@$menu_name)
 
 @section('breadcrumb')
 <div class="row mb-3 mt-3">
     <div class="col-sm-4">
         <h1 id="title-branch" class="m-0 text-dark">
-            Request Vehicle
+            {{ @$menu_name }}
         </h1>
     </div>
     <div class="col-sm-8">
         <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
-            <li class="breadcrumb-item">Master</li>
-            <li class="breadcrumb-item">Request Vehicle</li>
+            <li class="breadcrumb-item">{{ @$parent_name }}</li>
+            <li class="breadcrumb-item">{{ @$menu_name }}</li>
         </ol>
     </div>
 </div>
@@ -73,7 +73,7 @@
                                 <div class="form-group">
                                     <label class="control-label" for="vehicle-name">Vehicle</label>
                                     <select name="vehicle" id="vehicle" class="form-control" data-placeholder="Choose vehicle"></select>
-                                </div>                                
+                                </div>
                                 <div class="form-group">
                                     <label class="control-label" for="borrower">Borrower</label>
                                     <select class="form-control select2" name="borrower" id="borrower" data-placeholder="Borrower"></select>
@@ -228,7 +228,7 @@
                     var vehicle = $('#vehicle').find('option:selected').val(),
                         plate = $('#form-search').find('input[id=police-number]').val(),
                         date = $('#form-search').find('input[id=date-request]').data('daterangepicker'),
-                        status = $('#form-search').find('select[id=status').select2('val');
+                        status = $('#form-search').find('select[id=status]').select2('val');
                         borrowers = $('#borrower').find('option:selected').val();                  
 
                     data.vehicle  = vehicle;
@@ -371,46 +371,97 @@
             return false;
         }
 
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "Erased data cannot be reserved",
-            icon: 'error',
-            showCancelButton: true,
-            confirmButtonColor: '#3d9970',
-            cancelButtonColor: '#d81b60',
-            confirmButtonText: 'Yes, i am sure',
-            cancelButtonText: 'Cancel'
-        }).then((result) => {
-            if (result.value) {
-                var data = {
-                    _token: "{{ csrf_token() }}"
-                };
-                $.ajax({
-                    url: `{{url('admin/requestvehicle/delete')}}/${id}`,
-                    dataType: 'json',
-                    data: data,
-                    type: 'GET',
-                    success: function(response) {
-                        if (response.status) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Deleted',
-                                text: 'Data has been deleted.',
-                                showConfirmButton: false,
-                                timer: 1500
-                            }).then(function() {
-                                dataTable.row(id).remove().draw(false);
-                            });
-                        } else {
-                            Swal.fire(
-                                'Error!',
-                                'Failed to delete data.',
-                                'error'
-                            );
+        bootbox.confirm({
+            buttons: {
+                confirm: {
+                    label: '<i class="fa fa-check"></i>',
+                    className: 'btn-primary btn-sm'
+                },
+                cancel: {
+                    label: '<i class="fa fa-undo"></i>',
+                    className: 'btn-default btn-sm'
+                },
+            },
+            title: 'Delete data?',
+            message: 'Are you sure want to delete this data?',
+            callback: function (result) {
+                if (result) {
+                    var data = {
+                        _token: "{{ csrf_token() }}"
+                    };
+                    $.ajax({
+                        url: `{{route('requestvehicle.index')}}/${id}`,
+                        dataType: 'json',
+                        data: data,
+                        type: 'DELETE',
+                        beforeSend: function () {
+                            blockMessage('#content', 'Loading', '#fff');
                         }
-                    }
-                });
-
+                    }).done(function (response) {
+                        $('#content').unblock();
+                        if (response.status) {
+                            toastr.options = {
+                                "closeButton": false,
+                                "debug": false,
+                                "newestOnTop": false,
+                                "progressBar": false,
+                                "positionClass": "toast-top-right",
+                                "preventDuplicates": false,
+                                "onclick": null,
+                                "showDuration": "300",
+                                "hideDuration": "1000",
+                                "timeOut": "5000",
+                                "extendedTimeOut": "1000",
+                                "showEasing": "swing",
+                                "hideEasing": "linear",
+                                "showMethod": "fadeIn",
+                                "hideMethod": "fadeOut"
+                            }
+                            toastr.success(response.message);
+                            dataTable.ajax.reload(null, false);
+                        }else {
+                            toastr.options = {
+                                "closeButton": false,
+                                "debug": false,
+                                "newestOnTop": false,
+                                "progressBar": false,
+                                "positionClass": "toast-top-right",
+                                "preventDuplicates": false,
+                                "onclick": null,
+                                "showDuration": "300",
+                                "hideDuration": "1000",
+                                "timeOut": "5000",
+                                "extendedTimeOut": "1000",
+                                "showEasing": "swing",
+                                "hideEasing": "linear",
+                                "showMethod": "fadeIn",
+                                "hideMethod": "fadeOut"
+                            }
+                            toastr.warning(response.message);
+                        }
+                    }).fail(function (response) {
+                        var response = response.responseJSON;
+                        $('#content').unblock();
+                        toastr.options = {
+                            "closeButton": false,
+                            "debug": false,
+                            "newestOnTop": false,
+                            "progressBar": false,
+                            "positionClass": "toast-top-right",
+                            "preventDuplicates": false,
+                            "onclick": null,
+                            "showDuration": "300",
+                            "hideDuration": "1000",
+                            "timeOut": "5000",
+                            "extendedTimeOut": "1000",
+                            "showEasing": "swing",
+                            "hideEasing": "linear",
+                            "showMethod": "fadeIn",
+                            "hideMethod": "fadeOut"
+                        }
+                        toastr.warning(response.message);
+                    })
+                }
             }
         });
     }

@@ -32,8 +32,7 @@ Detail Vehicle
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <form class="form-horizontal no-margin" action="{{route('vehicle.update', ['id' => $user->id])}}"
-                        id="form" method="post" />
+                    <form class="form-horizontal no-margin" action="{{route('vehicle.update', ['id' => $user->id])}}" id="form" method="post" />
                     {{ csrf_field() }}
                     <div class="card-body">
                         <span class="title">
@@ -43,22 +42,19 @@ Detail Vehicle
                         <div class="form-group row mt-4">
                             <label class="col-md-2 col-xs-12 control-label" for="site_id">Unit:</label>
                             <div class="col-sm-6 controls">
-                                <select type="text" class="select2 form-control" name="site_id" data-placeholder="Unit"
-                                    disabled></select>
+                                <select type="text" class="select2 form-control" name="site_id" data-placeholder="Unit" disabled></select>
                             </div>
                         </div>
                         <div class="form-group row">
                             <label class="col-md-2 col-xs-12 control-label" for="police_number">Police Number:</label>
                             <div class="col-sm-6 controls">
-                                <input type="text" class="form-control" name="police_number"
-                                    placeholder="Police Number..." value="{{$user->police_number}}" readonly />
+                                <input type="text" class="form-control" name="police_number" placeholder="Police Number..." value="{{$user->police_number}}" readonly />
                             </div>
                         </div>
                         <div class="form-group row">
                             <label class="col-md-2 col-xs-12 control-label" for="vehicle_name">Vehicle Name:</label>
                             <div class="col-sm-6 controls">
-                                <input type="text" class="form-control" name="vehicle_name"
-                                    placeholder="Vehicle Name..." value="{{$user->vehicle_name}}" readonly />
+                                <input type="text" class="form-control" name="vehicle_name" placeholder="Vehicle Name..." value="{{$user->vehicle_name}}" readonly />
                             </div>
                         </div>
                         <div class="form-group row">
@@ -74,14 +70,12 @@ Detail Vehicle
                         <div class="form-group row">
                             <label class="col-md-2 col-xs-12 control-label" for="remarks">Remarks:</label>
                             <div class="col-sm-6 controls">
-                                <textarea class="form-control" name="remarks" rows="4" style="resize: none;"
-                                    placeholder="Remarks..." readonly>{{$user->remarks}}</textarea>
+                                <textarea class="form-control" name="remarks" rows="4" style="resize: none;" placeholder="Remarks..." readonly>{{$user->remarks}}</textarea>
                             </div>
                         </div>
                     </div>
                     <div class="card-footer text-right">
-                        <a href="{{ route('vehicle.index') }}"
-                            class="btn btn-sm btn-secondary color-palette btn-labeled legitRipple text-sm">
+                        <a href="{{ route('vehicle.index') }}" class="btn btn-sm btn-secondary color-palette btn-labeled legitRipple text-sm">
                             <b><i class="fas fa-times"></i></b>
                             Cancel
                         </a>
