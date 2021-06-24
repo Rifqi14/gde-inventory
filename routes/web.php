@@ -224,6 +224,7 @@ Route::group(['prefix' => 'admin'], function () {
 
         // Attendance
         Route::get('/attendance/generate', 'Admin\AttendanceController@generateHeaderWhenNotAttend')->name('attendance.generate');
+        Route::get('/attendance/attendance/{month}/{year}', 'Admin\AttendanceController@generateAttendanceAMonth')->name('attendance.attendance');
         Route::get('/attendance/read', 'Admin\AttendanceController@read')->name('attendance.read');
         Route::resource('/attendance', 'Admin\AttendanceController');
 
