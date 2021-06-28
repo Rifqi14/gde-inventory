@@ -13,7 +13,7 @@
   </div>
   <div class="col-sm-8">
     <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
-      <li class="breadcrumb-item">Home</li>
+      <li class="breadcrumb-item">{{ $parent_name }}</li>
       <li class="breadcrumb-item">{{ $menu_name }}</li>
       <li class="breadcrumb-item">Create</li>
     </ol>

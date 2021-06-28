@@ -10,6 +10,7 @@ use App\Models\Employee;
 use App\Models\Menu;
 use App\Models\WorkingShift;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -472,6 +473,58 @@ class AttendanceController extends Controller
         return response()->json([
             'status'    => true,
             'message'   => "Success create data",
+        ], 200);
+    }
+
+    public function generateAttendanceAMonth($month, $year)
+    {
+        $from       = Carbon::createFromDate($year, $month, 01);
+        $to         = Carbon::createFromDate($year, $month)->endOfMonth();
+        $data = [];
+        $date = $from;
+
+        $employee_id        = Auth::guard('admin')->user()->employees;
+        if (!$employee_id) {
+            return response()->json([
+                'status'    => false,
+                'Message'   => "Error to generate attendance in month because employee for this user not found",
+            ], 400);
+        }
+        
+        while ($date < $to) {
+            $checkAttendance    = Attendance::where('employee_id', $employee_id->id)->where('attendance_date', $date->format('Y-m-d'))->first();
+            $data[]     = $checkAttendance;
+
+            $in         = Carbon::create($date->year, $date->month, $date->day, rand(7, 10), rand(0, 59), rand(0, 59))->toDateTimeString();
+            $out        = Carbon::create($date->year, $date->month, $date->day, rand(15, 17), rand(0, 59), rand(0, 59))->toDateTimeString();
+
+            if (!$checkAttendance) {
+                $dayWork   = 0;
+                $attendance = Attendance::create([
+                    'employee_id'       => $employee_id->id,
+                    'attendance_date'   => $date->format('Y-m-d'),
+                    'attendance_in'     => $in,
+                    'attendance_out'    => $out,
+                    'status'            => 'APPROVED',
+                    'working_time'      => $this->countWorkingTime($in, $out),
+                    'over_time'         => $this->countOvertime($this->countWorkingTime($in, $out), $employee_id->working_shift_id),
+                    'working_shift_id'  => $employee_id->workingshift->id,
+                    'day'               => $date->shortEnglishDayOfWeek,
+                ]);
+                if ($attendance->working_time >= $employee_id->workingshift->total_working_time) {
+                    $dayWork        = 1;
+                } else {
+                    $dayWork        = 0.5;
+                }
+                $attendance->day_work   = $dayWork;
+                $attendance->save();
+            }
+            $date->addDays(1);
+        }
+
+        return response()->json([
+            'status'    => true,
+            'message'   => "Attendance success been generate",
         ], 200);
     }
 }
