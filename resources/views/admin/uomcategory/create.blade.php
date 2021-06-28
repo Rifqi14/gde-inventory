@@ -1,17 +1,17 @@
 @extends('admin.layouts.app')
-@section('title','UOM Category')
+@section('title', $menu_name)
 
 @section('breadcrumb')
 <div class="row mb-3 mt-3">
     <div class="col-sm-4">
         <h1 id="title-branch" class="m-0 text-dark">
-            UOM Category
+            {{ $menu_name }}
         </h1>
     </div>
     <div class="col-sm-8">
         <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
-            <li class="breadcrumb-item">Master</li>
-            <li class="breadcrumb-item">UOM Category</li>
+            <li class="breadcrumb-item">{{ $parent_name }}</li>
+            <li class="breadcrumb-item">{{ $menu_name }}</li>
             <li class="breadcrumb-item">Create</li>
         </ol>
     </div>
@@ -28,7 +28,7 @@
                         <div class="card-body">
                             <span class="title">
                                 <hr>
-                                <h5 class="text-dark text-bold text-md">UOM Category Information</h5>
+                                <h5 class="text-dark text-bold text-md">{{ $menu_name }} Information</h5>
                             </span>
                             {{ csrf_field() }}
                             <div class="form-group row mt-4">
@@ -72,7 +72,7 @@
         "positionClass": "toast-top-right",
         "preventDuplicates": false,
         "onclick": null,
-        "showDuration": "300",
+        "showDuration": "300000",
         "hideDuration": "1000",
         "timeOut": "5000",
         "extendedTimeOut": "1000",
@@ -135,7 +135,7 @@
                     $('body').unblock();
                     var response = response.responseJSON;
                     var message = response.message?response.message:'Failed to insert data.';
-                    toastr.warning(message);s                    
+                    toastr.warning(message);
                 })
             }
         });

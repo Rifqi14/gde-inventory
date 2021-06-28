@@ -3,6 +3,7 @@ namespace App\Http\Controllers\Admin;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Menu;
 use App\Models\UomCategory;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\DB;
@@ -12,7 +13,11 @@ class UomCategoryController extends Controller
 {
     public function __construct()
     {
-        View::share('menu_active',url('admin'.'uomcategory'));
+        $menu       = Menu::GetByRoute('uomcategory')->first();
+        $parent     = Menu::parent($menu->parent_id)->first();
+        View::share('menu_name', $menu->menu_name);
+        View::share('parent_name', $parent->menu_name);
+        View::share('menu_active',url('admin/'.'uomcategory'));
     }
 
     public function index()
@@ -77,8 +82,10 @@ class UomCategoryController extends Controller
     public function store(Request $request)
     {        
         $validator = Validator::make($request->all(),[
-            'code' => 'required|unique:uom_categories,code',
+            'code' => 'required|unique:uom_categories,code|regex:/(^([a-z]+)(\d+)?$)/u',
             'name' => 'required'
+        ], [
+            'code.regex' => "Code must be only alphabet in lowercase only",
         ]);
 
         if ($validator->fails()) {
@@ -113,8 +120,10 @@ class UomCategoryController extends Controller
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'code' 	=> 'required|unique:uom_categories,code,'.$id,
+            'code' 	=> 'required|regex:regex:/(^([a-z]+)(\d+)?$)/u|unique:uom_categories,code,'.$id,
             'name' 	=> 'required'
+        ], [
+            'code.regex' => "Code must be only alphabet in lowercase only",
         ]);
 
         if ($validator->fails()) {
