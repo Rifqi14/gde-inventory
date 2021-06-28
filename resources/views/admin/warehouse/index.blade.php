@@ -1,5 +1,5 @@
 @extends('admin.layouts.app')
-@section('title', 'Warehouse')
+@section('title', $menu_name)
 @section('stylesheets')
 
 @endsection
@@ -16,14 +16,12 @@
 @section('breadcrumb')
 <div class="row mb-3 mt-3">
     <div class="col-sm-4">
-        <h1 id="title-branch" class="m-0 text-dark">
-            Warehouse
-        </h1>
+        <h1 id="title-branch" class="m-0 text-dark">{{$menu_name}}</h1>
     </div>
     <div class="col-sm-8">
         <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
-            <li class="breadcrumb-item">Home</li>
-            <li class="breadcrumb-item">Warehouse</li>
+            <li class="breadcrumb-item">{{$parent_name}}</li>
+            <li class="breadcrumb-item">{{$menu_name}}</li>
         </ol>
     </div>
 </div>
@@ -62,7 +60,7 @@
     <div class="modal-dialog modal-md">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title text-bold">Filter Warehouse</h5>
+                <h5 class="modal-title">Filter {{$menu_name}}</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -80,12 +78,12 @@
                         </div>
                         <div class="col-md-12">
                             <div class="form-group row">
-                                <label class="col-md-12 col-xs-12 control-label" for="type">Type</label>
+                                <label class="col-md-12 col-xs-12 control-label" for="status">Status</label>
                                 <div class="col-sm-12 controls">
-                                    <select name="type" id="type" class="form-control select2">
-                                        <option value="">Select Type</option>
-                                        @foreach(config('enums.warehouse_type') as $key => $type)
-                                        <option value="{{ $key }}">{{ $type }}</option>
+                                    <select name="status" id="status" class="form-control select2" data-placeholder="Choose status">                                        
+                                    <option value=""></option>
+                                        @foreach(config('enums.warehouse_status') as $key => $status)
+                                        <option value="{{ $key }}">{{ $status }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -113,13 +111,16 @@
         $('#form-filter').modal('show');
     }
     function edit(id) {
-        document.location = '{{route('warehouse.index')}}/' + id + '/edit';
+        document.location = `{{route('warehouse.index')}}/${id}/edit`;        
     }
     function view(id) {
-        document.location = '{{route('warehouse.index')}}/' + id;
+        document.location = `{{route('warehouse.index')}}/${id}`;
     }
     $(function(){
-        $(".select2").select2();
+        $(".select2").select2({
+            allowClear: true
+        });
+
         dataTable = $('.datatable').DataTable( {
             processing: true,
             language: {
@@ -137,9 +138,9 @@
                 type: "GET",
                 data:function(data){
                     var name = $('#form-search').find('input[name=name]').val();
-                    var type = $('#form-search').find('select[name=type]').val();
+                    var status = $('#form-search').find('select[name=status]').val();
                     data.name = name;
-                    data.type = type;
+                    data.status = status;
                 }
             },
             columnDefs:[
@@ -161,7 +162,17 @@
                 },
                 {
                     render: function ( data, type, row ) {
-                        return row.text_status;
+                        switch (row.status) {
+                            case 'active':
+                                badge = 'bg-success';
+                                status = row.status;
+                                break;                            
+                            default:
+                                badge = 'bg-red';
+                                status = row.status;
+                                break;
+                        }
+                        return `<span class="badge ${badge} color-platte text-sm" style="text-transform: capitalize;">${status}</span>`;
                     },targets: [4]
                 },
                 {   

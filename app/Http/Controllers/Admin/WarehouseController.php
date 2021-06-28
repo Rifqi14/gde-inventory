@@ -14,12 +14,19 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Warehouse;
 use App\Models\RackWarehouse;
 use App\Models\BinWarehouse;
+use App\Models\Site;
+use App\Models\Menu;
 
 class WarehouseController extends Controller
 {
     function __construct()
-    {
-        View::share('menu_active', url('admin/' . 'warehouse'));
+    {        
+
+        $menu   = Menu::where('menu_route', 'warehouse')->first();
+        $parent = Menu::find($menu->parent_id);
+        View::share('parent_name', $parent->menu_name);
+        View::share('menu_name', $menu->menu_name);
+        View::share('menu_active', url('admin/warehouse'));
         $this->middleware('accessmenu', ['except' => ['select']]);
     }    
     
@@ -198,13 +205,14 @@ class WarehouseController extends Controller
         $sort = $request->columns[$request->order[0]['column']]['data'];
         $dir = $request->order[0]['dir'];
         $name = strtoupper($request->name);
-        $type = $request->type;
+        $status = $request->status;
 
         //Count Data
-        $query = Warehouse::select('*')->withCount('rack');
+        $query = Warehouse::selectRaw('*')->withCount('rack');
         $query->whereRaw("upper(name) like '%$name%'");
-        if($type){
-            $query->where("type", $type);
+        $query->where('type','<>','virtual'); 
+        if($status){
+            $query->where('status', $status);
         }
 
         $row = clone $query;
@@ -217,13 +225,7 @@ class WarehouseController extends Controller
 
         $data = [];
         foreach ($warehouses as $warehouse) {
-            $warehouse->no = ++$start;
-            $text_status = '<span class="badge bg-success color-platte text-sm">'.config('enums.warehouse_status')[$warehouse->status].'</span>';
-            if($warehouse->status !== 'active'){
-                $text_status = '<span class="badge bg-red color-platte text-sm">'.config('enums.warehouse_status')[$warehouse->status].'</span>';
-            }
-            $warehouse->type = config('enums.warehouse_type')[$warehouse->type];
-            $warehouse->text_status = $text_status;
+            $warehouse->no = ++$start;                                    
             $warehouse->bin_count = $this->getBinTotal($warehouse->id);
             $data[] = $warehouse;
         }
@@ -240,7 +242,6 @@ class WarehouseController extends Controller
         $validator = Validator::make($request->all(), [
             'code'              => 'required|unique:warehouses',
             'name'              => 'required',
-            'type'              => 'required',
             'site_id'           => 'required',
             'province_id'       => 'required',
             'region_id'         => 'required',
@@ -260,8 +261,8 @@ class WarehouseController extends Controller
 
         $warehouse = Warehouse::create([
             'code'                  => $request->code,
-            'name'                  => $request->name,
-            'type'                  => $request->type,
+            'name'                  => $request->name,       
+            'type'                  => 'internal',
             'site_id'               => $request->site_id,
             'province_id'           => $request->province_id,
             'region_id'             => $request->region_id,
@@ -273,25 +274,26 @@ class WarehouseController extends Controller
             'status'                => $request->status
         ]);
         
-        if (!$warehouse) {
+        if ($warehouse) {
+            $this->generateWarehouseVirtual($warehouse->site_id);
+
+            return response()->json([
+                'status'     => true,
+                'results'     => route('warehouse.index'),
+            ], 200);               
+        }else{
             return response()->json([
                 'status'    => false,
                 'message'   => "Can't insert data warehouse"
             ], 400);
-        }
-
-        return response()->json([
-            'status'     => true,
-            'results'     => route('warehouse.index'),
-        ], 200);
+        }        
     }
 
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
             'code'              => 'required|unique:warehouses,code,' . $id,
-            'name'              => 'required',
-            'type'              => 'required',
+            'name'              => 'required',            
             'site_id'           => 'required',
             'province_id'       => 'required',
             'region_id'         => 'required',
@@ -310,30 +312,33 @@ class WarehouseController extends Controller
         }
 
         $warehouse = Warehouse::find($id);
-        $warehouse->code = $request->code;
-        $warehouse->name = $request->name;
-        $warehouse->type = $request->type;
-        $warehouse->site_id = $request->site_id;
-        $warehouse->province_id = $request->province_id;
-        $warehouse->region_id = $request->region_id;
-        $warehouse->district_id = $request->district_id;
-        $warehouse->subdistrict_id = $request->subdistrict_id;
-        $warehouse->postal_code = $request->postal_code;
-        $warehouse->address = $request->address;
-        $warehouse->description = $request->description;
-        $warehouse->status = $request->status;
+        $warehouse->code            = $request->code;
+        $warehouse->name            = $request->name;        
+        $warehouse->site_id         = $request->site_id;
+        $warehouse->province_id     = $request->province_id;
+        $warehouse->region_id       = $request->region_id;
+        $warehouse->district_id     = $request->district_id;
+        $warehouse->subdistrict_id  = $request->subdistrict_id;
+        $warehouse->postal_code     = $request->postal_code;
+        $warehouse->address         = $request->address;
+        $warehouse->description     = $request->description;
+        $warehouse->status          = $request->status;
         $warehouse->save();
-        if (!$warehouse) {
+
+        if ($warehouse) {
+            $this->generateWarehouseVirtual($warehouse->site_id);
+
+            return response()->json([
+                'status'     => true,
+                'results'     => route('warehouse.index'),
+            ], 200);            
+        }else{
             return response()->json([
                 'status' => false,
                 'message'     => "Can't update data warehouse"
             ], 400);
         }
 
-        return response()->json([
-            'status'     => true,
-            'results'     => route('warehouse.index'),
-        ], 200);
     }
 
     public function destroy($id)
@@ -361,5 +366,38 @@ class WarehouseController extends Controller
         }
         $total = BinWarehouse::whereIn('rack_id',$racks)->count();
         return $total;
+    }
+
+    public function generateWarehouseVirtual($site_id)
+    {
+        $query = Warehouse::where([
+            ['site_id','=',$site_id],
+            ['type','=','virtual']
+        ])->first();
+
+        if(!$query){
+            $site     = Site::find($site_id);
+            $sitecode = strtoupper($site->code);
+            $sitename = $site->name;
+
+            $query = Warehouse::create([
+                'code'          => "$sitecode - WV",
+                'name'          => "$sitename - Warehouse Virtual",
+                'type'          => 'virtual',
+                'site_id'       => $site_id,
+                'description'   => "Warehouse virtual of Unit or Site $sitename",
+                'postal_code'   => 0,
+                'address'       => '---',
+                'status'        => 'active'
+            ]);
+
+            if($query){
+                return response()->json([
+                    'status'    => false,
+                    'message'   => 'Failed to create warehouse virtual.'
+                ],400);
+            }
+        }
+
     }
 }
