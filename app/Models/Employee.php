@@ -27,4 +27,20 @@ class Employee extends Model
     {
         return $this->hasOne('App\Models\WorkingShift','id','working_shift_id');
     }
+
+    public function attendances()
+    {
+        return $this->hasMany('App\Models\Attendance', 'employee_id', 'id');
+    }
+
+    /**
+     * Scope a query to only include payroll yes
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopePayrollYes($query)
+    {
+        return $query->where('payroll_type', 1);
+    }
 }

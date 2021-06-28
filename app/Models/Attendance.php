@@ -52,7 +52,7 @@ class Attendance extends Model
      * @param integer $employee
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeEmployee($query, $employee)
+    public function scopeGetByEmployee($query, $employee)
     {
         return $query->where('employee_id', $employee);
     }

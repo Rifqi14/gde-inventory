@@ -1,7 +1,7 @@
 @extends('admin.layouts.app')
 
 @section('title')
-Create Vehicle
+Create {{ @$menu_name }}
 @endsection
 
 @section('stylesheets')
@@ -11,15 +11,14 @@ Create Vehicle
 @section('breadcrumb')
 <div class="row mb-3 mt-3">
 	<div class="col-sm-4">
-		<!-- <h5 class="m-0 ml-2 text-dark text-md breadcrumb">Grievance Redress &nbsp;<small class="font-uppercase"></small></h5> -->
 		<h1 id="title-branch" class="m-0 text-dark">
-			Vehicle Database
+			{{ @$menu_name }}
 		</h1>
 	</div>
 	<div class="col-sm-8">
 		<ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
-			<li class="breadcrumb-item">Preferences</li>
-			<li class="breadcrumb-item">Vehicle</li>
+			<li class="breadcrumb-item">{{ @$parent_name }}</li>
+			<li class="breadcrumb-item">{{ @$menu_name }}</li>
 			<li class="breadcrumb-item active">Create</li>
 		</ol>
 	</div>
@@ -42,7 +41,7 @@ Create Vehicle
 						</span>
 						<div class="form-group row mt-4">
 							<label class="col-md-2 col-xs-12 control-label" for="site_id">Unit:</label>
-							<div class="col-sm-6 controls">								
+							<div class="col-sm-6 controls">
 								<select type="text" class="select2 form-control" id="site_id" name="site_id" data-placeholder="Unit"></select>
 							</div>
 						</div>
@@ -70,7 +69,7 @@ Create Vehicle
 						<div class="form-group row">
 							<label class="col-md-2 col-xs-12 control-label" for="remarks">Remarks:</label>
 							<div class="col-sm-6 controls">
-								<textarea class="form-control" name="remarks" rows="4" style="resize: none;" placeholder="Remarks..."></textarea>
+								<textarea class="form-control summernote" name="remarks" rows="4" style="resize: none;" placeholder="Remarks..."></textarea>
 							</div>
 						</div>
 					</div>
@@ -95,8 +94,24 @@ Create Vehicle
 
 @section('scripts')
 <script type="text/javascript">
+	const summernote = () => {
+		$('.summernote').summernote({
+    	height:145,
+    	toolbar: [
+    		['style', ['style']],
+    		['font-style', ['bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'clear']],
+    		['font', ['fontname']],
+    		['font-size',['fontsize']],
+    		['font-color', ['color']],
+    		['para', ['ul', 'ol', 'paragraph']],
+    		['table', ['table']],
+    		['insert', ['link', 'picture', 'video', 'hr']],
+    		['misc', ['fullscreen', 'codeview', 'help']]
+    	]
+    });
+	}
 	$(function() {
-		
+		summernote();
 		$(document).on("change", ".select2", function () {
 			if (!$.isEmptyObject($('#form').validate().submitted)) {
 				$('#form').validate().form();

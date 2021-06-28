@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProductConsumableLog extends Model
 {
-    //
+    protected $guarded = [];
 }

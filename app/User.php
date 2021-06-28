@@ -56,4 +56,16 @@ class User extends Authenticatable
     {
         return $this->belongsTo('App\User', 'spv_id', 'id');
     }
+
+    /**
+     * Scope a query to only include 
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeUsernameTaken($query, $username)
+    {
+        $uppercaseUsername  = strtoupper($username);
+        return $query->whereRaw("upper(username) = $username");
+    }
 }

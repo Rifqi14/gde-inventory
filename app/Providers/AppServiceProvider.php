@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Config;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -23,6 +25,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        Schema::defaultStringLength(191);
+        if (Schema::hasTable('configs')) {
+            config([
+                'configs'   => Config::all([
+                    'option',
+                    'value'
+                ])->keyBy('option')->transform(function ($setting) {
+                    return $setting->value;
+                })->toArray()
+            ]);
+        }
     }
 }

@@ -51,4 +51,14 @@ class BusinessTrip extends Model
     {
         return $this->hasMany('App\Models\BusinessTripOther','business_trip_id');
     }
+
+    public function issuedby()
+    {
+        return $this->belongsTo('App\User', 'issued_by', 'id');
+    }
+
+    public function btdeclaration()
+    {
+        return $this->hasOne('App\Models\BusinessTripDeclaration', 'business_trip_id', 'id');
+    }
 }

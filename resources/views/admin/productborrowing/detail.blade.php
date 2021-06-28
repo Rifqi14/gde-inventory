@@ -22,7 +22,7 @@
 <section class="content">
     <div class="container-fluid">
         <form class="form-horizontal no-margin" id="form" enctype="multipart/form-data">
-            {{csrf_field()}}            
+            {{csrf_field()}}
             <div class="row">
                 <div class="col-md-8">
                     <div class="card">
@@ -72,8 +72,8 @@
                                     </div>
                                     <!-- Status -->
                                     <div class="form-group" id="form-status">
-                                        <label for="status" class="control-label">Status</label>  
-                                        <br>                                        
+                                        <label for="status" class="control-label">Status</label>
+                                        <br>
                                     </div>
                                 </div>
                             </div>
@@ -93,7 +93,7 @@
                                 <select name="issued_by" id="issued-by" class="form-control select2" data-placeholder="Issued By" disabled>
                                     <option value=""></option>
                                     @if($data->issued_by)
-                                    <option value="{{$data->issued_by}}" selected>{{$data->issued_name}}</option>                                    
+                                    <option value="{{$data->issued_by}}" selected>{{$data->issued_name}}</option>
                                     @else if(Auth::guard('admin')->user()->id)
                                     <option value="{{Auth::guard('admin')->user()->id}}" selected>{{Auth::guard('admin')->user()->name}}</option>
                                     @endif
@@ -114,7 +114,7 @@
                             <span class="title">
                                 <hr>
                                 <h5 class="text-md text-dark text-uppercase">Products Information</h5>
-                            </span>                            
+                            </span>
                             <!-- PRODUCTS -->
                             <div class="table-responsive">
                                 <table class="table table-striped" id="table-products" width="100%">
@@ -123,7 +123,7 @@
                                             <th width="200">Product Name</th>
                                             <th width="15" class="text-center">UOM</th>
                                             <th width="15" class="text-right">Qty System</th>
-                                            <th width="10" class="text-right">Qty Borrowing</th>                                            
+                                            <th width="10" class="text-right">Qty Borrowing</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -153,42 +153,42 @@
                                 </li>
                             </ul>
                             <div class="tab-content" id="suppDocumentTabContent">
-                                <div class="tab-pane fade show active" id="document" role="tabpanel" aria-labelledby="document-tab">                                    
+                                <div class="tab-pane fade show active" id="document" role="tabpanel" aria-labelledby="document-tab">
                                     <!-- TABLE DOCUMENT -->
                                     <table id="table-document" class="table table-striped datatable mt-3" width="100%">
                                         <thead>
                                             <tr>
                                                 <th width="50%">Document Name</th>
-                                                <th width="50%" class="text-center">File</th>                                                
+                                                <th width="50%" class="text-center">File</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr class="no-available-data">
                                                 <td colspan="2" class="text-center">No available data.</td>
-                                            </tr>                                            
+                                            </tr>
                                         </tbody>
                                     </table>
                                 </div>
-                                <div class="tab-pane fade show" id="photo" role="tabpanel" aria-labelledby="photo-tab">                                    
+                                <div class="tab-pane fade show" id="photo" role="tabpanel" aria-labelledby="photo-tab">
                                     <!-- TABLE PHOTO -->
                                     <table id="table-photo" class="table table-striped datatable mt-3" width="100%">
                                         <thead>
                                             <tr>
                                                 <th width="50%">Photo Name</th>
-                                                <th width="50%" class="text-center">File</th>                                                
+                                                <th width="50%" class="text-center">File</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr class="no-available-data">
                                                 <td colspan="2" class="text-center">No available data.</td>
-                                            </tr>                                    
+                                            </tr>
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="card-footer text-right">                        
+                    <div class="card-footer text-right">
                         <a href="{{ route('productborrowing.index') }}" class="btn btn-sm btn-secondary color-palette btn-labeled legitRipple text-sm">
                             <b><i class="fas fa-times"></i></b>
                             Cancel
@@ -224,7 +224,6 @@
     $(function() {
         var dataBorrowing = @json($data),
             siteID        = {{$data->site_id}},
-            categoryID    = {{$data->product_category_id}},
             warehouseID   = {{$data->warehouse_id}}
             borrowingDate = '{{$data->date_borrowing}}',
             deletedAt     = '{{$data->deleted_at}}',
@@ -418,15 +417,6 @@
                     text : '{{$data->warehouse_name}}'
                 }
             })
-        }
-
-        if(categoryID){
-            $('#product-category').select2('trigger','select',{
-                data : {
-                    id : categoryID,
-                    text : '{{$data->category_name}}'
-                }
-            });
         }
 
         $("#product").select2({

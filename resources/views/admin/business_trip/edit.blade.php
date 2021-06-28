@@ -1,7 +1,7 @@
 @extends('admin.layouts.app')
 
 @section('title')
-Edit Business Trips
+Edit {{ @$menu_name }} Request
 @endsection
 
 @section('stylesheets')
@@ -12,13 +12,13 @@ Edit Business Trips
 <div class="row mb-3 mt-3">
 	<div class="col-sm-4">
 		<h1 id="title-branch" class="m-0 text-dark">
-			Business Trips
+			{{ @$menu_name }} Request
 		</h1>
 	</div>
 	<div class="col-sm-8">
 		<ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
-			<li class="breadcrumb-item">Human Resource</li>
-			<li class="breadcrumb-item">Business Trips</li>
+			<li class="breadcrumb-item">{{ @$parent_name }}</li>
+			<li class="breadcrumb-item">{{ @$menu_name }}</li>
 			<li class="breadcrumb-item active">Edit</li>
 		</ol>
 	</div>
@@ -52,7 +52,7 @@ Edit Business Trips
 									<div class="col-md-3">
 										<label>Price:</label>
 									</div>
-								</div>								
+								</div>
 							</div>
 							@if($data->status != 'approved')
 							<div class="text-right">
@@ -73,7 +73,7 @@ Edit Business Trips
 									<div class="col-md-3">
 										<label>Price:</label>
 									</div>
-								</div>																								
+								</div>
 							</div>
 							@if($data->status != 'approved')
 							<div class="text-right">
@@ -81,7 +81,7 @@ Edit Business Trips
 									<b><i class="fas fa-plus"></i></b> Add
 								</button>
 							</div>
-							@endif							
+							@endif
 						</div>
 					</div>
 					<div class="card">
@@ -94,7 +94,7 @@ Edit Business Trips
 								<div class="row mt-4 mb-0">
 									<div class="col-md-10">
 										<label>Location:</label>
-									</div>                  
+									</div>
 								</div>
 							</div>
 							@if($data->status != 'approved')
@@ -103,11 +103,11 @@ Edit Business Trips
 									<b><i class="fas fa-plus"></i></b> Add
 								</button>
 							</div>
-							@endif	
-						</div>							
+							@endif
+						</div>
 					</div>
 					<div class="card">
-						<div class="card-body">		
+						<div class="card-body">
 							<!-- REQUEST VEHICLE -->
 							<span class="title">
 								<hr />
@@ -121,7 +121,7 @@ Edit Business Trips
 									<b><i class="fas fa-plus"></i></b> Add
 								</button>
 							</div>
-							@endif					
+							@endif
 						</div>
 					</div>
 					<div class="card">
@@ -142,7 +142,7 @@ Edit Business Trips
 									<div class="col-md-2">
 										<label>Night:</label>
 									</div>
-								</div>								
+								</div>
 							</div>
 							@if($data->status != 'approved')
 							<div class="text-right">
@@ -193,8 +193,8 @@ Edit Business Trips
 								<hr />
 								<h5 class="text-md text-dark text-uppercase">General Information</h5>
 							</span>
-							<div class="form-group"> 
-								<label for="business-trip-number">Business Trip Number</label>
+							<div class="form-group">
+								<label for="business-trip-number">Request Number</label>
 								<input type="text" class="form-control" name="business_trip_number" id="business-trip-number" placeholder="Auto Generate Number" value="{{$data->business_trip_number}}" readonly>
 							</div>
 							<div class="form-group mt-4">
@@ -214,7 +214,7 @@ Edit Business Trips
 												<i class="far fa-calendar-alt"></i>
 											</span>
 										</div>
-										<input type="datepicker" class="form-control datepicker text-right departure-date" id="departure-date" required>
+										<input type="datepicker" class="form-control datepicker text-right departure-date" id="departure-date" onchange="employee()" required>
 									</div>
 								</div>
 								<div class="col-md-6">
@@ -225,14 +225,14 @@ Edit Business Trips
 												<i class="far fa-calendar-alt"></i>
 											</span>
 										</div>
-										<input type="datepicker" class="form-control datepicker text-right arrived-date" id="arrived-date" required>
+										<input type="datepicker" class="form-control datepicker text-right arrived-date" id="arrived-date" onchange="employee()" required>
 									</div>
 								</div>
 							</div>
 							<div class="form-group">
 								<label for="purpose" class="control-label">Purpose</label>
 								<input type="text" class="form-control" name="purpose" id="purpose" value="{{$data->purpose}}">
-							</div>							
+							</div>
 							<div class="form-group">
 								<label>Rate:</label>
 								<div class="input-group">
@@ -245,7 +245,7 @@ Edit Business Trips
 								</div>
 							</div>
 							<div class="form-group">
-								<label for="total-cost">Total Cost:</label>
+								<label for="total-cost">Estimated Cost:</label>
 								<div class="input-group">
 									<div class="input-group-prepend">
 										<span class="input-group-text">Rp.</span>
@@ -281,9 +281,9 @@ Edit Business Trips
 						</button>
 						@endif
 						<a href="{{ route('businesstrip.index') }}" class="btn btn-secondary color-palette btn-labeled legitRipple text-sm">
-                            <b><i class="fas fa-times"></i></b>
-                            Cancel
-                        </a>
+							<b><i class="fas fa-times"></i></b>
+							Cancel
+						</a>
 					</div>
 				</div>
 			</div>
@@ -488,6 +488,8 @@ Edit Business Trips
 			sumRate();
 		});
 
+		employee();
+
 		$("#form").validate({
 			rules: {
 				business_trip_number: {
@@ -661,7 +663,49 @@ Edit Business Trips
 			}
 		});
 
-	});	
+	});
+	
+	const dateDiff = () => {
+    var expDepartureDate  = $('#departure-date').val().split("/");
+    var expArrivedDate    = $('#arrived-date').val().split("/");
+    var departureDate     = new Date(expDepartureDate[2], expDepartureDate[1] - 1, expDepartureDate[0], 0, 0, 0);
+    var arrivedDate       = new Date(expArrivedDate[2], expArrivedDate[1] - 1, expArrivedDate[0], 23, 59, 59);
+    var diff              = Math.abs(arrivedDate - departureDate);
+    var days              = diff / 1000 / 60 / 60 / 24;
+    return Math.round(days);
+  }
+  
+  const employee = () => {
+    var days = dateDiff();
+    $.ajax({
+      type: "GET",
+      url: `{{route('employee.dig')}}`,
+      data: {
+        employee_id : employeeID
+      },
+      dataType: "json",
+      success: function (response) {
+        if(response.status){
+          var data = response.data;          
+          employeeRate = data.rate_business_trip;
+          
+          $('input[name=rate]').val(employeeRate * days);
+          initInputPrice();
+          $('input[name=rate]').trigger('change');
+        }else{
+          console.log({
+            'message' : response.message
+          });
+        }
+      },
+      error :  function(){
+        console.log({
+          message : 'Failed to get employee data.'
+        });
+      }
+    });
+    
+  }
 
 	function initSelect2() {
 		$('.select2').select2({
@@ -677,7 +721,7 @@ Edit Business Trips
 			dataType: 'json',
 			data: function(params) {
 			return {
-				employee_id: employeeID,
+				employee_id: userID,
 				search: params.term,
 				page: params.page,
 				limit: 30,

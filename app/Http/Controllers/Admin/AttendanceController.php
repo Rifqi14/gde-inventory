@@ -10,6 +10,7 @@ use App\Models\Employee;
 use App\Models\Menu;
 use App\Models\WorkingShift;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -69,8 +70,8 @@ class AttendanceController extends Controller
         $data           = [];
         foreach ($attendances as $key => $attendance) {
             $attendance->no     = ++$start;
-            $attendance->diff_in    = $this->getDiffWithShift($attendance->shift, $attendance->attendance_in);
-            $attendance->diff_out   = $this->getDiffWithShift($attendance->shift, $attendance->attendance_out);
+            $attendance->diff_in    = $attendance->shift ? $this->getDiffWithShift($attendance->shift, $attendance->attendance_in) : null;
+            $attendance->diff_out   = $attendance->shift ? $this->getDiffWithShift($attendance->shift, $attendance->attendance_out, 'OUT') : null;
             $data[]             = $attendance;
         }
         return response()->json([
@@ -88,7 +89,9 @@ class AttendanceController extends Controller
      */
     public function index()
     {
-        return view('admin.attendance.index');
+        $employee_id        = Auth::guard('admin')->user();
+        $attendanceToday    = Attendance::getByEmployee($employee_id->employee_id)->date(date('Y-m-d'))->first();
+        return view('admin.attendance.index', compact('attendanceToday', 'employee_id'));
     }
 
     /**
@@ -101,7 +104,7 @@ class AttendanceController extends Controller
     {
         if (in_array('create', $request->actionmenu)) {
             $employee_id    = Auth::guard('admin')->user();
-            $employee       = Employee::find($employee_id->employee_id);
+            $employee       = Employee::with(['workingshift'])->find($employee_id->employee_id);
             if ($employee) {
                 return view('admin.attendance.create', compact('employee'));
             } else {
@@ -121,7 +124,6 @@ class AttendanceController extends Controller
     public function store(Request $request)
     {
         $validator      = Validator::make($request->all(), [
-            'shift' => 'required',
             'type'  => 'required',
         ]);
 
@@ -135,7 +137,7 @@ class AttendanceController extends Controller
         DB::beginTransaction();
         try {
             $time   = Carbon::now();
-            $sameAttendance = Attendance::date($time->toDateTime())->employee($request->employee_id)->first();
+            $sameAttendance = Attendance::date($time->toDateTime())->getByEmployee($request->employee_id)->first();
             if ($sameAttendance) {
                 return response()->json([
                     'status'        => false,
@@ -149,7 +151,7 @@ class AttendanceController extends Controller
                 'attendance_out'    => $request->type == 'out' ? $time->toDateTime() : null,
                 'status'            => 'WAITING',
                 'remarks'           => $request->description,
-                'working_shift_id'  => $request->shift,
+                'working_shift_id'  => $request->working_shift_id ? $request->working_shift_id : $request->shift,
                 'day'               => date('D'),
             ]);
 
@@ -204,6 +206,7 @@ class AttendanceController extends Controller
     {
         if (in_array('update', $request->actionmenu)) {
             $attendance     = Attendance::with(['employee'])->find($id);
+            // dd(($attendance->employee->user->spv_id != Auth::guard('admin')->user()->id) && in_array('approval', $request->actionmenu));
             if ($attendance) {
                 $countDayDiff   = Carbon::parse($attendance->attendance_date)->diffInDays(Carbon::now());
                 return view('admin.attendance.edit', compact('attendance', 'countDayDiff'));
@@ -236,34 +239,101 @@ class AttendanceController extends Controller
         }
 
         DB::beginTransaction();
-        try {
-            $time           = Carbon::now();
-            $attendance     = Attendance::find($id);
-            $shift          = WorkingShift::find($attendance->working_shift_id);
-            $attendance->attendance_out = $time->toDateTime();
-            $attendance->working_time   = $this->countWorkingTime($attendance->attendance_in, $attendance->attendance_out);
-            $attendance->over_time      = $this->countOvertime($attendance->working_time, $attendance->working_shift_id);
-            $attendance->remarks        = $request->description;
-            $attendance->day_work       = ($attendance->working_time >= $shift->total_working_time) ? 1 : 0.5;
-            if ($request->status == 'approved') {
-                $attendance->status     = 'APPROVED';
-            }
-            $attendance->save();
+        if ($request->status) {
+            try {
+                $attendance     = Attendance::find($id);
+                $shift          = WorkingShift::find($request->shift);
+                $daywork        = 0;
 
-            if ($attendance) {
-                $log        = AttendanceLog::create([
-                    'attendance_id'     => $attendance->id,
-                    'employee_id'       => $request->employee_id,
-                    'attendance'        => $time->toDateTime(),
-                    'type'              => 'OUT',
-                ]);
+                $attendance->attendance_in      = $request->check_in;
+                $attendance->attendance_out     = $request->check_out;
+                $attendance->working_time       = $this->countWorkingTime($attendance->attendance_in, $attendance->attendance_out);
+                $attendance->over_time          = $this->countOvertime($attendance->working_time, $attendance->working_shift_id);
+                $attendance->remarks            = $request->description;
+                if ($shift) {
+                    if ($attendance->working_time >= $shift->total_working_time) {
+                        $dayWork        = 1;
+                    } else {
+                        $dayWork        = 0.5;
+                    }
+                }
+                if (($attendance->attendance_in && !$attendance->attendance_out) || (!$attendance->attendance_in && $attendance->attendance_out)) {
+                    $dayWork    = null;
+                }
+                $attendance->day_work           = $dayWork;
+                $attendance->save();
+
+                if ($attendance) {
+                    $attendanceInExist  = AttendanceLog::attendanceId($attendance->id)->employeeId($request->employee_id)->attendanceTime($request->check_in)->type('IN')->first();
+                    $attendanceOutExist  = AttendanceLog::attendanceId($attendance->id)->employeeId($request->employee_id)->attendanceTime($request->check_out)->type('OUT')->first();
+                    if ($request->check_in && !$attendanceInExist) {
+                        $logIn      = AttendanceLog::create([
+                            'attendance_id'     => $attendance->id,
+                            'employee_id'       => $request->employee_id,
+                            'attendance'        => $request->check_in,
+                            'type'              => 'IN',
+                        ]);
+                    }
+
+                    if ($request->check_out && !$attendanceOutExist) {
+                        $logOut     = AttendanceLog::create([
+                            'attendance_id'     => $attendance->id,
+                            'employee_id'       => $request->employee_id,
+                            'attendance'        => $request->check_out,
+                            'type'              => 'OUT',
+                        ]);
+                    }
+                }
+            } catch (\Illuminate\Database\QueryException $ex) {
+                DB::rollBack();
+                return response()->json([
+                    'status'    => false,
+                    'message'   => "Error create data {$ex->errorInfo[2]}"
+                ], 400);
             }
-        } catch (\Illuminate\Database\QueryException $ex) {
-            DB::rollBack();
-            return response()->json([
-                'status'    => false,
-                'message'   => "Error create data {$ex->errorInfo[2]}"
-            ], 400);
+        } else {
+            try {
+                if (!$request->shift) {
+                    DB::rollBack();
+                    return response()->json([
+                        'status'    => false,
+                        'message'   => "Shift not set, please set shift first or create attendance request and wait for approval",
+                    ], 400);
+                }
+                $time           = Carbon::now();
+                $attendance     = Attendance::find($id);
+                $shift          = WorkingShift::find($attendance->working_shift_id);
+                $dayWork        = 0;
+                if ($shift) {
+                    if ($attendance->working_time >= $shift->total_working_time) {
+                        $dayWork        = 1;
+                    } else {
+                        $dayWork        = 0.5;
+                    }
+                }
+                
+                $attendance->attendance_out = $time->toDateTime();
+                $attendance->working_time   = $this->countWorkingTime($attendance->attendance_in, $attendance->attendance_out);
+                $attendance->over_time      = $this->countOvertime($attendance->working_time, $attendance->working_shift_id);
+                $attendance->remarks        = $request->description;
+                $attendance->day_work       = $dayWork;
+                $attendance->save();
+    
+                if ($attendance) {
+                    $log        = AttendanceLog::create([
+                        'attendance_id'     => $attendance->id,
+                        'employee_id'       => $request->employee_id,
+                        'attendance'        => $time->toDateTime(),
+                        'type'              => 'OUT',
+                    ]);
+                }
+            } catch (\Illuminate\Database\QueryException $ex) {
+                DB::rollBack();
+                return response()->json([
+                    'status'    => false,
+                    'message'   => "Error create data {$ex->errorInfo[2]}"
+                ], 400);
+            }
         }
         DB::commit();
         return response()->json([
@@ -328,7 +398,7 @@ class AttendanceController extends Controller
         } else {
             return 0;
         }
-    }
+    }                                                                   
 
     /**
      * Count Overtime function
@@ -360,13 +430,101 @@ class AttendanceController extends Controller
         if ($type == 'IN') {
             $shifts         = Carbon::parse($attendanceDate . ' ' . $shift->time_in);
         } else {
-            $shifts         = Carbon::parse($shift->time_out);
+            $shifts         = Carbon::parse($attendanceDate . ' ' . $shift->time_out);
         }
         $diffInMinutes      = $attendanceHour->diff($shifts, false);
         $data       = [
+            'shifts'        => $shifts->toDateTimeString(),
+            'attendance_hour'   => $attendanceHour->toDateTimeString(),
             'diff_type'     => $attendanceHour->diffInSeconds($shifts, false) < 0 ? 'late' : 'early',
             'diff_format'   => $attendanceHour->diffInSeconds($shifts, false) < 0 ? $diffInMinutes->format('- %H:%I:%S') : $diffInMinutes->format('+ %H:%I:%S'),
         ];
         return $attendance ? $data : false;
+    }
+
+    public function generateHeaderWhenNotAttend()
+    {
+        $employees  = Employee::payrollYes()->whereDoesntHave('attendances', function(\Illuminate\Database\Eloquent\Builder $query) {
+            $query->where('attendance_date', '=', date('Y-m-d'));
+        })->get();
+
+        DB::beginTransaction();
+        foreach ($employees as $key => $employee) {
+            try {
+                Attendance::create([
+                    'employee_id'       => $employee->id,
+                    'attendance_date'   => date('Y-m-d'),
+                    'status'            => 'APPROVED',
+                    'remarks'           => 'Tidak Hadir',
+                    'working_shift_id'  => $employee->working_shift_id ? $employee->working_shift_id : null,
+                    'day'               => date('D'),
+                    'day_work'          => 0,
+                ]);
+            } catch (\Illuminate\Database\QueryException $ex) {
+                DB::rollBack();
+                return response()->json([
+                    'status'    => false,
+                    'message'   => "Error delete data{$ex->errorInfo[2]}"
+                ], 400);
+            }
+        }
+                
+        DB::commit();
+        return response()->json([
+            'status'    => true,
+            'message'   => "Success create data",
+        ], 200);
+    }
+
+    public function generateAttendanceAMonth($month, $year)
+    {
+        $from       = Carbon::createFromDate($year, $month, 01);
+        $to         = Carbon::createFromDate($year, $month)->endOfMonth();
+        $data = [];
+        $date = $from;
+
+        $employee_id        = Auth::guard('admin')->user()->employees;
+        if (!$employee_id) {
+            return response()->json([
+                'status'    => false,
+                'Message'   => "Error to generate attendance in month because employee for this user not found",
+            ], 400);
+        }
+        
+        while ($date < $to) {
+            $checkAttendance    = Attendance::where('employee_id', $employee_id->id)->where('attendance_date', $date->format('Y-m-d'))->first();
+            $data[]     = $checkAttendance;
+
+            $in         = Carbon::create($date->year, $date->month, $date->day, rand(7, 10), rand(0, 59), rand(0, 59))->toDateTimeString();
+            $out        = Carbon::create($date->year, $date->month, $date->day, rand(15, 17), rand(0, 59), rand(0, 59))->toDateTimeString();
+
+            if (!$checkAttendance) {
+                $dayWork   = 0;
+                $attendance = Attendance::create([
+                    'employee_id'       => $employee_id->id,
+                    'attendance_date'   => $date->format('Y-m-d'),
+                    'attendance_in'     => $in,
+                    'attendance_out'    => $out,
+                    'status'            => 'APPROVED',
+                    'working_time'      => $this->countWorkingTime($in, $out),
+                    'over_time'         => $this->countOvertime($this->countWorkingTime($in, $out), $employee_id->working_shift_id),
+                    'working_shift_id'  => $employee_id->workingshift->id,
+                    'day'               => $date->shortEnglishDayOfWeek,
+                ]);
+                if ($attendance->working_time >= $employee_id->workingshift->total_working_time) {
+                    $dayWork        = 1;
+                } else {
+                    $dayWork        = 0.5;
+                }
+                $attendance->day_work   = $dayWork;
+                $attendance->save();
+            }
+            $date->addDays(1);
+        }
+
+        return response()->json([
+            'status'    => true,
+            'message'   => "Attendance success been generate",
+        ], 200);
     }
 }

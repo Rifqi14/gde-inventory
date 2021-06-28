@@ -9,6 +9,10 @@ use App\Models\ProductBorrowingDocument; // Model for supporting document
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Menu;
+
+use App\Models\Product;
+use App\Models\Warehouse;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Validator;
 class ProductBorrowingController extends Controller
@@ -16,7 +20,13 @@ class ProductBorrowingController extends Controller
 
     function __construct()
     {
+
+        $menu       = Menu::GetByRoute('productborrowing')->first();
+        $parent     = Menu::find($menu->parent_id);
+        View::share('menu_name', $menu->menu_name);
+        View::share('parent_name', $parent->menu_name);
         View::share('menu_active', url('admin/'.'productborrowing'));
+        $this->middleware('accessmenu', ['except' => ['select']]);
     }
 
     /**
@@ -61,7 +71,7 @@ class ProductBorrowingController extends Controller
                         $product->leftJoin('product_uoms',function ($join)
                         {
                             $join->on('product_uoms.product_id','=','product_borrowing_details.product_id');
-                            $join->on('product_uoms.id','=','product_borrowing_details.uom_id');
+                            $join->on('product_uoms.uom_id','=','product_borrowing_details.uom_id');
                         });
                         $product->leftJoin('uoms','uoms.id','=','product_uoms.uom_id');
                     }
@@ -69,17 +79,15 @@ class ProductBorrowingController extends Controller
                 ->selectRaw("
                     product_borrowings.*,
                     TO_CHAR(product_borrowings.borrowing_date,'DD/MM/YYYY') as date_borrowing,
+                    TO_CHAR(product_borrowings.return_date,'DD/MM/YYYY') as date_return,
                     sites.name as site_name,
                     warehouses.name as warehouse_name,
-                    product_categories.name as category_name,
                     users.name as issued_name
                 ")
                 ->leftJoin('sites','sites.id','=','product_borrowings.site_id')
                 ->leftJoin('warehouses','warehouses.id','=','product_borrowings.warehouse_id')
-                ->leftJoin('product_categories','product_categories.id','=','product_borrowings.product_category_id')
                 ->leftJoin('users','users.id','=','product_borrowings.issued_by')
-                ->find($id);           
-
+                ->find($id);
         if($data){
             return view('admin.productborrowing.detail',compact('data'));   
         }else{
@@ -102,7 +110,7 @@ class ProductBorrowingController extends Controller
                         $product->leftJoin('product_uoms',function ($join)
                         {
                             $join->on('product_uoms.product_id','=','product_borrowing_details.product_id');
-                            $join->on('product_uoms.id','=','product_borrowing_details.uom_id');
+                            $join->on('product_uoms.uom_id','=','product_borrowing_details.uom_id');
                         });
                         $product->leftJoin('uoms','uoms.id','=','product_uoms.uom_id');
                     }
@@ -110,14 +118,13 @@ class ProductBorrowingController extends Controller
                 ->selectRaw("
                     product_borrowings.*,
                     TO_CHAR(product_borrowings.borrowing_date,'DD/MM/YYYY') as date_borrowing,
+                    TO_CHAR(product_borrowings.return_date,'DD/MM/YYYY') as date_return,
                     sites.name as site_name,
                     warehouses.name as warehouse_name,
-                    product_categories.name as category_name,
                     users.name as issued_name
                 ")
                 ->leftJoin('sites','sites.id','=','product_borrowings.site_id')
                 ->leftJoin('warehouses','warehouses.id','=','product_borrowings.warehouse_id')
-                ->leftJoin('product_categories','product_categories.id','=','product_borrowings.product_category_id')
                 ->leftJoin('users','users.id','=','product_borrowings.issued_by')
                 ->withTrashed()
                 ->find($id);                
@@ -150,7 +157,7 @@ class ProductBorrowingController extends Controller
                         $product->leftJoin('product_uoms',function ($join)
                         {
                             $join->on('product_uoms.product_id','=','product_borrowing_details.product_id');
-                            $join->on('product_uoms.id','=','product_borrowing_details.uom_id');
+                            $join->on('product_uoms.uom_id','=','product_borrowing_details.uom_id');
                         });
                         $product->leftJoin('uoms','uoms.id','=','product_uoms.uom_id');
                     }
@@ -158,22 +165,99 @@ class ProductBorrowingController extends Controller
                 ->selectRaw("
                     product_borrowings.*,
                     TO_CHAR(product_borrowings.borrowing_date,'DD/MM/YYYY') as date_borrowing,
+                    TO_CHAR(product_borrowings.return_date,'DD/MM/YYYY') as date_return,
                     sites.name as site_name,
                     warehouses.name as warehouse_name,
-                    product_categories.name as category_name,
                     users.name as issued_name
                 ")
                 ->leftJoin('sites','sites.id','=','product_borrowings.site_id')
                 ->leftJoin('warehouses','warehouses.id','=','product_borrowings.warehouse_id')
-                ->leftJoin('product_categories','product_categories.id','=','product_borrowings.product_category_id')
                 ->leftJoin('users','users.id','=','product_borrowings.issued_by')
                 ->find($id);        
-                
         if($data){
             return view('admin.productborrowing.edit',compact('data'));
         }else{
             abort(404);
         }
+    }
+
+    public function selectwarehouse(Request $request)
+    {
+        $start = $request->page ? $request->page - 1 : 0;
+        $length = $request->limit;
+        $name = strtoupper($request->name);
+        $site_id = $request->site_id;
+
+        //Count Data
+        $query = Warehouse::selectRaw("
+            warehouses.*,
+            sites.name as site
+        ");
+        $query->leftJoin('sites','sites.id','=','warehouses.site_id');
+        $query->whereRaw("upper(warehouses.name) like '%$name%'");
+        $query->where('site_id',$site_id);
+
+        $row = clone $query;
+        $recordsTotal = $row->count();
+
+        $query->offset($start);
+        $query->limit($length);
+        $warehouses = $query->get();
+
+        $data = [];
+        foreach ($warehouses as $warehouse) {
+            $warehouse->no = ++$start;
+            $data[] = $warehouse;
+        }
+        return response()->json([
+            'total' => $recordsTotal,
+            'rows' => $data
+        ], 200);
+    }
+
+    public function selectproduct(Request $request)
+    {
+        $start  = $request->page ? $request->page - 1 : 0;
+        $length = $request->limit;
+        $name   = strtoupper($request->name);
+        $product_category_id = $request->product_category_id;  
+        $products            = $request->products;
+    
+        $query = Product::selectRaw("
+            products.*,            
+            product_uoms.uom_id,
+            uoms.name as uom
+        ");        
+        $query->leftJoin('product_uoms','product_uoms.product_id','=','products.id');
+        $query->leftJoin('uoms','uoms.id','=','product_uoms.uom_id');
+        $query->leftJoin('uom_categories','uom_categories.id','=','uoms.uom_category_id');
+        if($name){
+            $query->whereRaw("
+                upper(products.name) like '%$name%'
+            ");
+        }
+        if ($products) {
+            $query->whereNotIn('products.id', $products);
+        }
+        $query->where('product_category_id',$product_category_id);
+    
+        $rows  = clone $query;
+        $total = $rows->count();
+    
+        $query->offset($start);
+        $query->limit($length);
+        $queries = $query->get();
+    
+        $data = [];
+        foreach ($queries as $key => $row) {
+            $row->qty_system = 10;            
+            $data[] = $row;
+        }
+    
+        return response()->json([
+            'total' => $total,
+            'rows'  => $data
+        ],200);
     }
 
     public function read(Request $request)
@@ -193,6 +277,7 @@ class ProductBorrowingController extends Controller
         $query = ProductBorrowing::selectRaw("
             product_borrowings.*,
             TO_CHAR(product_borrowings.borrowing_date,'DD/MM/YYYY') as borrowing_date,
+            TO_CHAR(product_borrowings.return_date,'DD/MM/YYYY') as return_date,
             users.name as issued
         ");        
         $query->leftJoin('users','users.id','=','product_borrowings.issued_by');
@@ -285,12 +370,11 @@ class ProductBorrowingController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(),[
-            'borrowing_number' => 'required|unique:product_borrowings,borrowing_number',
-            'product_category' => 'required',
             'site'             => 'required',
             'warehouse'        => 'required',
             'issuedby'         => 'required',
-            'dateborrowing'    => 'required',            
+            'dateborrowing'    => 'required',
+            'datereturn'       => 'required',
         ]);
 
         if($validator->fails()){
@@ -300,25 +384,29 @@ class ProductBorrowingController extends Controller
             ],400);
         }                              
 
-        $number          = $request->borrowing_number;
-        $productcategory = $request->product_category;
         $site            = $request->site;
         $warehouse       = $request->warehouse;
         $issuedby        = $request->issuedby;
         $borrowingdate   = $request->dateborrowing;
+        $returndate      = $request->datereturn;
         $description     = $request->description;
         $status          = $request->status;
 
         $query = ProductBorrowing::create([
-            'borrowing_number'      => $number,
-            'product_category_id'   => $productcategory,
             'site_id'               => $site,
             'warehouse_id'          => $warehouse,
             'issued_by'             => $issuedby,
             'borrowing_date'        => $borrowingdate,
+            'return_date'           => $returndate,
             'description'           => $description,
             'status'                => $status
-        ]);                    
+        ]);
+
+        $code               = explode('-', $query->index_number);
+        $month              = date('m');
+        $borrowingNumber    = "$code[0]-$code[1]-$month-$code[2]";
+        $query->borrowing_number    = $borrowingNumber;
+        $query->save();
         
         if ($query) {
             $now           = date('Y-m-d H:i:s');
@@ -450,7 +538,6 @@ class ProductBorrowingController extends Controller
     {                       
         $validator = Validator::make($request->all(),[
             'borrowing_number' => 'required|unique:product_borrowings,borrowing_number,'.$id,
-            'product_category' => 'required',
             'site'             => 'required',
             'warehouse'        => 'required',
             'issuedby'         => 'required',
@@ -464,22 +551,20 @@ class ProductBorrowingController extends Controller
             ],400);
         }
 
-        $number          = $request->borrowing_number;
-        $productcategory = $request->product_category;
         $site            = $request->site;
         $warehouse       = $request->warehouse;
         $issuedby        = $request->issuedby;
         $borrowingdate   = $request->dateborrowing;
+        $returndate      = $request->datereturn;
         $description     = $request->description;
         $status          = $request->status;
 
         $query = ProductBorrowing::find($id);
-        $query->borrowing_number    = $number;
-        $query->product_category_id = $productcategory;
         $query->site_id             = $site;
         $query->warehouse_id        = $warehouse;
         $query->issued_by           = $issuedby;
         $query->borrowing_date      = $borrowingdate;
+        $query->return_date         = $returndate;
         $query->description         = $description;
         $query->status              = $status;
         $query->save();

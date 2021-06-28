@@ -2,14 +2,30 @@
 
 namespace App\Models;
 
+use Alfa6661\AutoNumber\AutoNumberTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ProductBorrowing extends Model
 {
     protected $guarded = [];
-    use SoftDeletes;        
+    use SoftDeletes;
+    use AutoNumberTrait;
 
+    public function getAutoNumberOptions()
+    {
+        $code   = 'BRW';
+        $year   = date('Y');
+        $month  = date('m');
+
+        return [
+            'index_number'  => [
+                'format'    => "$code-$year-?",
+                'length'    => 6
+            ]
+        ];
+    }
+    
     public function products()
     {
         return $this->hasMany('App\Models\ProductBorrowingDetail','product_borrowing_id');

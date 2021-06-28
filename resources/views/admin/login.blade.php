@@ -12,26 +12,35 @@ Login Application
         text-transform: none;
         color: #030356 !important;
     }
+
     #bg-kiri {
+        background: url("{{ config('configs.login_background') }}");
+        background-size: cover;
         background-color: #030356;
     }
+
     .ml-100 {
-        margin-left:100px;;
+        margin-left: 100px;
+        ;
     }
+
     .lp-height {
         height: 100vh;
     }
+
     .txt {
         position: relative;
         top: 40%;
         transform: translateY(-50%);
         margin-left: 20px;
     }
+
     .txt p {
         color: #fff;
         font-size: 2rem;
         font-weight: 600;
     }
+
     #bgks-kiri {
         height: 100%;
         position: relative;
@@ -62,13 +71,12 @@ Login Application
                     <!-- /.login-logo -->
                     <div class="card login-card mt-5">
                         <div class="card-body login-card-body">
-                            <h1 id="title-branch" >Log In</h1>
+                            <h1 id="title-branch">Log In</h1>
                             <form action="#" id="signin-form" novalidate="novalidate" class="mt-5">
                                 {{ csrf_field() }}
                                 <div class="form-group">
                                     <div class="input-group mb-3">
-                                        <input type="text" placeholder="Username" required="" value="" name="username" id="username"
-                                            class="form-control">
+                                        <input type="text" placeholder="Username" required="" value="" name="username" id="username" class="form-control">
                                         <div class="input-group-append">
                                             <div class="input-group-text">
                                                 <span class="fas fa-envelope"></span>
@@ -78,8 +86,7 @@ Login Application
                                 </div>
                                 <div class="form-group">
                                     <div class="input-group mb-3">
-                                        <input type="password" placeholder="Password" required="" value="" name="password" id="password"
-                                            class="form-control">
+                                        <input type="password" placeholder="Password" required="" value="" name="password" id="password" class="form-control">
                                         <div class="input-group-append">
                                             <div class="input-group-text">
                                                 <span class="fas fa-lock"></span>
@@ -90,17 +97,17 @@ Login Application
                                 <div class="row">
                                     <div class="col-6">
                                         <button class="btn btn-danger text-uppercase btn-block btn-with-loader text-bold mb-1" data-style="slide-down">
-                                        <i class="fas fa-spinner"></i>
-                                        <span>
-                                        Login
-                                        </span>
+                                            <i class="fas fa-spinner"></i>
+                                            <span>
+                                                Login
+                                            </span>
                                         </button>
                                     </div>
                                     <div class="col-6">
                                         <a href="{{ url('admin/registration') }}" class="btn bg-gray color-platte text-uppercase btn-block btn-with-loader text-bold mb-1" data-style="slide-down">
-                                        <span>
-                                        Register
-                                        </span>
+                                            <span>
+                                                Register
+                                            </span>
                                         </a>
                                     </div>
                                     <!-- /.col -->
@@ -238,5 +245,3 @@ Login Application
 </script>
 <script src='{{asset('assets/js/main/login.js')}}'></script>
 @endsection
-
-

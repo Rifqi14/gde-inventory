@@ -22,7 +22,7 @@ class EmployeeController extends Controller
         $parent = Menu::find($menu->parent_id);
         View::share('parent_name', $parent->menu_name);
         View::share('menu_name', $menu->menu_name);
-        View::share('menu_active', url('admin' . 'employee'));
+        View::share('menu_active', url('admin/' . 'employee'));
         $this->middleware('accessmenu', ['except' => ['select']]);
     }
 
@@ -232,6 +232,8 @@ class EmployeeController extends Controller
         $user = ['status' => false, 'message' => 'Employee without user account.'];
 
         if ($as_user) {
+            $usernameTaken = User::usernameTaken($request->username)->first();
+            dd($usernameTaken);
             $account = User::create([
                 'name'        => $employee->name,
                 'email'       => $employee->email,
@@ -324,6 +326,7 @@ class EmployeeController extends Controller
             'email'          => 'required|unique:employees,email,' . $id,
             'nid'            => 'required|unique:employees,nid,' . $id,
             'nik'            => 'required|unique:employees,nik,' . $id,
+            'username'       => 'unique:users,username,' . $id . ',employee_id',
             'address'        => 'required',
             'city'           => 'required',
             'province'       => 'required',
@@ -551,6 +554,7 @@ class EmployeeController extends Controller
 
     public function dig(Request $request)
     {
+        dd($request->employee_id);
         $query = Employee::find($request->employee_id);
 
         if($query){
@@ -566,7 +570,6 @@ class EmployeeController extends Controller
                 'point'  => 400
             ];
         }
-
         return response()->json([
             'status' => $result['status'],
             'data'   => $result['data']
