@@ -268,5 +268,11 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/attendancerequest/read', 'Admin\AttendanceRequestController@read')->name('attendancerequest.read');
         Route::post('/attendancerequest/approve', 'Admin\AttendanceRequestController@approve')->name('attendancerequest.approve');
         Route::resource('/attendancerequest', 'Admin\AttendanceRequestController');
+
+        // Goods Issue 
+        Route::get('/goodsissue/read','Admin\GoodsIssueController@read')->name('goodsissue.read');
+        Route::get('/goodsissue/consumableproducts','Admin\GoodsIssueController@consumableproducts')->name('goodsissue.consumableproducts');
+        Route::get('/goodsissue/transferproducts','Admin\GoodsIssueController@transferproducts')->name('goodsissue.transferproducts');
+        Route::resource('/goodsissue','Admin\GoodsIssueController');
     });
 });

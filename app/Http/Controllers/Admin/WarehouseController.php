@@ -111,9 +111,12 @@ class WarehouseController extends Controller
 
         $query = RackWarehouse::selectRaw("
             rack_warehouses.*,
-            warehouses.name as warehouse
+            warehouses.name as warehouse,
+            warehouses.site_id,
+            sites.name as site
         ");
         $query->leftJoin('warehouses','warehouses.id','=','rack_warehouses.warehouse_id');
+        $query->leftJoin('sites','sites.id','=','warehouses.site_id');
         if($warehouseid){
             $query->where('rack_warehouses.warehouse_id',$warehouseid);
         }
@@ -142,21 +145,28 @@ class WarehouseController extends Controller
 
     public function selectbin(Request $request)
     {
-        $start  = $request->page ? $request->page - 1 : 0;
-        $length = $request->limit;
-        $name   = strtoupper($request->name);        
-        $rackid = $request->rack_id;
+        $start       = $request->page ? $request->page - 1 : 0;
+        $length      = $request->limit;
+        $name        = strtoupper($request->name);        
+        $warehouseid = $request->warehouse_id;
+        $rackid      = $request->rack_id;
 
         $query = BinWarehouse::selectRaw("
             bin_warehouses.*,            
             rack_warehouses.warehouse_id,
             rack_warehouses.name as rack,
-            warehouses.name as warehouse
+            warehouses.name as warehouse,
+            warehouses.site_id,
+            sites.name as site
         ");
         $query->leftJoin('rack_warehouses','rack_warehouses.id','=','bin_warehouses.rack_id');
         $query->leftJoin('warehouses','warehouses.id','=','rack_warehouses.warehouse_id');
+        $query->leftJoin('sites','sites.id','=','warehouses.site_id');
         if($rackid){
             $query->where('bin_warehouses.rack_id',$rackid);
+        }
+        if($warehouseid){
+            $query->where('rack_warehouses.warehouse_id',$warehouseid);
         }
         if($name){
             $query->whereRaw("upper(bin_warehouses.name) like '%$name%'");
