@@ -16,9 +16,11 @@ class UomController extends Controller
      * Define default method when access this controller
      */
     function __construct() {
-        $menu   = Menu::GetByRoute('uomcategory')->first();
+        $menu   = Menu::GetByRoute('uom')->first();
+        $parent = Menu::find($menu->parent_id);
         View::share('menu_name', $menu->menu_name);
-        View::share('menu_active', url('admin/uomcategory'));
+        View::share('parent_name', $parent->menu_name);
+        View::share('menu_active', url('admin/uom'));
         $this->middleware('accessmenu', ['except' => ['select']]);
     }
 
