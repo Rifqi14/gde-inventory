@@ -12,12 +12,19 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 use App\Models\Site;
-
+use App\Models\Menu;
+use App\Models\Warehouse;
 class SiteController extends Controller
 {
     function __construct()
     {
-        View::share('menu_active', url('admin/' . 'site'));
+        View::share('menu_active', url('admin/' . 'site'));        
+
+        $menu   = Menu::where('menu_route', 'site')->first();
+        $parent = Menu::find($menu->parent_id);
+        View::share('parent_name', $parent->menu_name);
+        View::share('menu_name', $menu->menu_name);
+        View::share('menu_active', url('admin/site'));
         $this->middleware('accessmenu', ['except' => ['select', 'set']]);
     }
 
@@ -115,24 +122,29 @@ class SiteController extends Controller
             'code'                  => $request->code,
             'name'                  => $request->name
         ]);
-        if (!$site) {
+
+        if ($site) {
+            $logo = $request->file('logo');
+            if ($logo) {
+                $path = 'assets/site/';
+                $logo->move($path, $site->code . '.' . $logo->getClientOriginalExtension());
+                $filename = $path . $site->code . '.' . $logo->getClientOriginalExtension();
+                $site->logo = $filename ? $filename : '';
+                $site->save();
+            }        
+
+            $this->generateWarehouseVirtual($site->id);
+            
+            return response()->json([
+                'status'     => true,
+                'results'     => route('site.index'),
+            ], 200);   
+        }else{
             return response()->json([
                 'status'    => false,
                 'message'   => $site
             ], 400);
-        }
-        $logo = $request->file('logo');
-        if ($logo) {
-            $path = 'assets/site/';
-            $logo->move($path, $site->code . '.' . $logo->getClientOriginalExtension());
-            $filename = $path . $site->code . '.' . $logo->getClientOriginalExtension();
-            $site->logo = $filename ? $filename : '';
-            $site->save();
-        }
-        return response()->json([
-            'status'     => true,
-            'results'     => route('site.index'),
-        ], 200);
+        }        
     }
 
     /**
@@ -181,28 +193,32 @@ class SiteController extends Controller
         $site->code = $request->code;
         $site->name = $request->name;
         $site->save();
-        if (!$site) {
+        if ($site) {
+            $logo = $request->file('logo');
+
+            if ($logo) {
+                if (file_exists($site->logo)) {
+                    unlink($site->logo);
+                }
+                $path = 'assets/site/';
+                $logo->move($path, $site->code . '.' . $logo->getClientOriginalExtension());
+                $filename = $path . $site->code . '.' . $logo->getClientOriginalExtension();
+                $site->logo = $filename ? $filename : '';
+                $site->save();
+            }
+
+            $this->generateWarehouseVirtual($site->id);
+
+            return response()->json([
+                'status'     => true,
+                'results'     => route('site.index'),
+            ], 200);   
+        }else{
             return response()->json([
                 'status' => false,
                 'message'     => $site
             ], 400);
-        }
-        $logo = $request->file('logo');
-        if ($logo) {
-            if (file_exists($site->logo)) {
-                unlink($site->logo);
-            }
-            $path = 'assets/site/';
-            $logo->move($path, $site->code . '.' . $logo->getClientOriginalExtension());
-            $filename = $path . $site->code . '.' . $logo->getClientOriginalExtension();
-            $site->logo = $filename ? $filename : '';
-            $site->save();
-        }
-
-        return response()->json([
-            'status'     => true,
-            'results'     => route('site.index'),
-        ], 200);
+        }        
     }
 
     /**
@@ -216,16 +232,17 @@ class SiteController extends Controller
         try {
             $site = Site::find($id);
             $site->delete();
+
+            return response()->json([
+                'status'    => true,
+                'message'   => 'Successfully delete data.'
+            ], 200);
         } catch (QueryException $th) {
             return response()->json([
                 'status'    => false,
                 'message'   => 'Error delete data ' . $th->errorInfo[2]
             ], 400);
-        }
-        return response()->json([
-            'status'    => true,
-            'message'   => 'Failed delete data'
-        ], 200);
+        }        
     }
 
     public function show(Request $request,$id)
@@ -273,4 +290,36 @@ class SiteController extends Controller
             'except'    => $except
         ], 200);
     }    
+
+    public function generateWarehouseVirtual($site_id)
+    {
+        $query = Warehouse::where([
+            ['site_id','=',$site_id],
+            ['type','=','virtual']
+        ])->first();
+
+        if(!$query){
+            $site     = Site::find($site_id);
+            $sitecode = strtoupper($site->code);
+            $sitename = $site->name;
+
+            $query = Warehouse::create([
+                'code'          => "$sitecode - WV",
+                'name'          => "$sitename - Warehouse Virtual",
+                'type'          => 'virtual',
+                'site_id'       => $site_id,
+                'description'   => "Warehouse virtual of Unit or Site $sitename",
+                'postal_code'   => 0,
+                'address'       => '---',
+                'status'        => 'active'
+            ]);
+
+            if(!$query){
+                return response()->json([
+                    'status'    => false,
+                    'message'   => 'Failed to create warehouse virtual.'
+                ],400);
+            }
+        }
+    }
 }

@@ -1,5 +1,5 @@
 @extends('admin.layouts.app')
-@section('title', 'Site')
+@section('title', $menu_name)
 @section('stylesheets')
 
 @endsection
@@ -8,14 +8,14 @@
 <div class="row mb-3 mt-3">
     <div class="col-sm-4">
         <h1 id="title-branch" class="m-0 text-dark">
-            Edit Site
+            Edit {{$menu_name}}
         </h1>
     </div>
     <div class="col-sm-8">
         <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
-            <li class="breadcrumb-item">Home</li>
-            <li class="breadcrumb-item">Site</li>
-            <li class="breadcrumb-item">Edit</li> 
+            <li class="breadcrumb-item">{{$parent_name}}</li>
+            <li class="breadcrumb-item">{{$menu_name}}</li>
+            <li class="breadcrumb-item">Edit</li>
         </ol>
     </div>
 </div>
@@ -30,24 +30,24 @@
                         <div class="card-body">
                             <span class="title">
                                 <hr />
-                                <h5 class="text-md text-dark text-bold">Site Information</h5>
+                                <h5 class="text-md text-dark text-uppercase">Site Information</h5>
                             </span>
                             <div class="mt-5"></div>
                             <div class="form-group row">
-                                <label class="col-md-2 col-xs-12 control-label" for="name">Code <b class="text-danger">*</b></label>
+                                <label class="col-md-2 col-xs-12 control-label" for="name">Code <b style="color: red;">*</b></label>
                                 <div class="col-sm-6 controls">
                                     <input type="text" class="form-control" id="code" name="code" placeholder="Code" required="" aria-required="true" value="{{ $site->code }}">
                                     <p class="help-block mb-0">Ex. awesomesite (Only letters and number input).</p>
                                 </div>
                             </div>
                             <div class="form-group row">
-                                <label class="col-md-2 col-xs-12 control-label" for="name">Name <b class="text-danger">*</b></label>
+                                <label class="col-md-2 col-xs-12 control-label" for="name">Name <b style="color: red;">*</b></label>
                                 <div class="col-sm-6 controls">
                                     <input type="text" class="form-control" id="name" name="name" placeholder="Name" required="" aria-required="true" value="{{ $site->name }}">
                                 </div>
                             </div>
                         </div>
-                        <div class="card-footer">
+                        <div class="card-footer text-right">
                             {{ csrf_field() }}
                             <input type="hidden" name="_method" value="put">
                             <button type="submit" class="btn bg-olive color-palette btn-labeled legitRipple text-sm btn-sm">
@@ -70,88 +70,75 @@
 @section('scripts')
 <script src="{{ asset('assets/js/jquery.inputmask.js') }}"></script>
 <script>
-    $(function(){
-        $("input[name=code]").inputmask("Regex", { regex: "^[a-zA-Z0-9_.-]*$" });
+    toastr.options = {
+        "closeButton": false,
+        "debug": false,
+        "newestOnTop": false,
+        "progressBar": false,
+        "positionClass": "toast-top-right",
+        "preventDuplicates": false,
+        "onclick": null,
+        "showDuration": "300",
+        "hideDuration": "1000",
+        "timeOut": "5000",
+        "extendedTimeOut": "1000",
+        "showEasing": "swing",
+        "hideEasing": "linear",
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut"
+    };
+
+    $(function() {
+        $("input[name=code]").inputmask("Regex", {
+            regex: "^[a-zA-Z0-9_.-]*$"
+        });
         $("#form").validate({
             errorElement: 'span',
             errorClass: 'help-block',
             focusInvalid: false,
-            highlight: function (e) {
+            highlight: function(e) {
                 $(e).closest('.form-group').removeClass('has-success').addClass('has-error');
             },
-            success: function (e) {
+            success: function(e) {
                 $(e).closest('.form-group').removeClass('has-error').addClass('has-success');
                 $(e).remove();
             },
-            errorPlacement: function (error, element) {
-                if(element.is(':file')) {
+            errorPlacement: function(error, element) {
+                if (element.is(':file')) {
                     error.insertAfter(element.parent().parent().parent());
-                }else if(element.parent('.input-group').length) {
+                } else if (element.parent('.input-group').length) {
                     error.insertAfter(element.parent());
-                }else if (element.attr('type') == 'checkbox') {
+                } else if (element.attr('type') == 'checkbox') {
                     error.insertAfter(element.parent());
-                }else{
+                } else {
                     error.insertAfter(element);
                 }
             },
-            submitHandler: function() { 
+            submitHandler: function() {
                 $.ajax({
-                    url:$('#form').attr('action'),
-                    method:'post',
+                    url: $('#form').attr('action'),
+                    method: 'post',
                     data: new FormData($('#form')[0]),
                     processData: false,
                     contentType: false,
-                    dataType: 'json', 
-                    beforeSend:function(){
+                    dataType: 'json',
+                    beforeSend: function() {
                         blockMessage('#content', 'Loading', '#fff');
                     }
-                }).done(function(response){
+                }).done(function(response) {
                     $('#content').unblock();
-                    if(response.status){
+                    if (response.status) {
+                        toastr.success('Data has been saved.');
                         document.location = response.results;
-                    }else{	
-                        toastr.options = {
-                            "closeButton": false,
-                            "debug": false,
-                            "newestOnTop": false,
-                            "progressBar": false,
-                            "positionClass": "toast-top-right",
-                            "preventDuplicates": false,
-                            "onclick": null,
-                            "showDuration": "300",
-                            "hideDuration": "1000",
-                            "timeOut": "5000",
-                            "extendedTimeOut": "1000",
-                            "showEasing": "swing",
-                            "hideEasing": "linear",
-                            "showMethod": "fadeIn",
-                            "hideMethod": "fadeOut"
-                        }
+                    } else {
                         toastr.warning(response.message);
                     }
                     return;
-                }).fail(function(response){
+                }).fail(function(response) {
                     $('#content').unblock();
-                    var response = response.responseJSON;
-                    toastr.options = {
-                        "closeButton": false,
-                        "debug": false,
-                        "newestOnTop": false,
-                        "progressBar": false,
-                        "positionClass": "toast-top-right",
-                        "preventDuplicates": false,
-                        "onclick": null,
-                        "showDuration": "300",
-                        "hideDuration": "1000",
-                        "timeOut": "5000",
-                        "extendedTimeOut": "1000",
-                        "showEasing": "swing",
-                        "hideEasing": "linear",
-                        "showMethod": "fadeIn",
-                        "hideMethod": "fadeOut"
-                    }
+                    var response = response.responseJSON;                    
                     toastr.warning(response.message);
-                })	
+                })
             }
         });
     });

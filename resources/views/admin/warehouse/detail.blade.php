@@ -1,5 +1,5 @@
 @extends('admin.layouts.app')
-@section('title', 'Warehouse')
+@section('title', $menu_name)
 @section('stylesheets')
 <style>
     .list-group-item{
@@ -26,14 +26,14 @@
 <div class="row mb-3 mt-3">
     <div class="col-sm-4">
         <h1 id="title-branch" class="m-0 text-dark">
-            Edit Warehouse
+            Detail {{$menu_name}}
         </h1>
     </div>
     <div class="col-sm-8">
         <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
-            <li class="breadcrumb-item">Home</li>
-            <li class="breadcrumb-item">Warehouse</li>
-            <li class="breadcrumb-item">Edit</li> 
+            <li class="breadcrumb-item">{{ $parent_name }}</li>
+            <li class="breadcrumb-item">{{ $menu_name }}</li>
+            <li class="breadcrumb-item">Detail</li>
         </ol>
     </div>
 </div>
@@ -79,6 +79,9 @@
                             </li>
                             <li class="list-group-item">
                                 <b>Postal Code</b> <a class="float-right">{{ $warehouse->postal_code }}</a>
+                            </li>
+                            <li class="list-group-item">
+                                <b>Status</b> <a class="float-right status-label"></a>
                             </li>
                         </ul>
                     </div>
@@ -319,7 +322,7 @@
 <script>
     var warehouse_id = '{{ $warehouse->id }}';
 </script>
-<script>
+<script>    
     function filterRack(){
         $("#filter-rack").modal("show");
     }
@@ -558,6 +561,19 @@
     }
 
     $(function(){
+        var state = '{{$warehouse->status}}';
+        switch (state) {
+            case 'active':
+                badge = 'bg-success';
+                break;
+        
+            default:
+                badge = 'bg-red';
+                break;
+        }
+
+        $('a.status-label').html(`<span class="badge ${badge} color-platte text-sm" style="text-transform: capitalize;">${state}</span>`);
+
         $(".select2").select2();
 
         tableRack = $('#rack-table').DataTable( {
