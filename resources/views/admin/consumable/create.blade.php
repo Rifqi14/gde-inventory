@@ -407,7 +407,7 @@
 
     $("#product").select2({
       ajax: {
-        url: "{{route('product.select')}}",
+        url: "{{route('productborrowing.selectproduct')}}",
         type: 'GET',
         dataType: 'json',
         data: function(params) {

@@ -5,11 +5,11 @@
 <div class="row mb-3 mt-3">
     <div class="col-sm-4">
         <h1 id="title-branch" class="m-0 text-dark">
-            Product Transfer
+            {{ @$menu_name }}
         </h1>
     </div>
     <div class="col-sm-8">
-        <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">            
+        <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
             <li class="breadcrumb-item">{{ @$parent_name }}</li>
             <li class="breadcrumb-item">{{ @$menu_name }}</li>
         </ol>
@@ -102,7 +102,7 @@
                                     </table>
                                 </div>
                             </div>
-                        </div>                                                
+                        </div>
                     </div>
                 </div>
             </div>

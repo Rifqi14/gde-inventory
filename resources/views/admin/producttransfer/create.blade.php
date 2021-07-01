@@ -5,12 +5,12 @@
 <div class="row mb-3 mt-3">
     <div class="col-sm-4">
         <h1 id="title-branch" class="m-0 text-dark">
-            Product Transfer
+            {{ @$menu_name }}
         </h1>
     </div>
     <div class="col-sm-8">
         <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
-        <li class="breadcrumb-item">{{ @$parent_name }}</li>
+            <li class="breadcrumb-item">{{ @$parent_name }}</li>
             <li class="breadcrumb-item">{{ @$menu_name }}</li>
             <li class="breadcrumb-item">Create</li>
         </ol>
@@ -119,11 +119,13 @@
                                 <h5 class="text-md text-dark text-uppercase">Product Information</h5>
                             </span>
                             <div class="form-group">
+                                <label for="product_category_id" class="control-label">Product Category</label>
+                                <select name="product_category_id" id="product_category_id" class="form-control select2" data-placeholder="Choose Product Category"></select>
+                                <br>
                                 <label for="product" class="control-label">Product</label>
                                 <select name="product" id="product" class="form-control select2" data-placeholder="Choose Product"></select>
                                 <br>
-                                <button type="button" class="btn btn-success color-palette btn-labeled legitRipple text-sm btn-block" onclick="addProduct()">
-                                    <b><i class="fas fa-plus"></i></b>
+                                <button type="button" class="btn btn-labeled text-sm btn-lg btn-outline-primary btn-flat btn-block legitRipple" onclick="addProduct()">
                                     Add
                                 </button>
                             </div>
@@ -168,8 +170,8 @@
                             <div class="tab-content" id="suppDocumentTabContent">
                                 <div class="tab-pane fade show active" id="document" role="tabpanel" aria-labelledby="document-tab">
                                     <div class="form-group mt-3">
-                                        <button type="button" onclick="addDocument()" class="btn btn-labeled labeled-sm btn-md btn-block text-xs btn-success btn-flat legitRipple">
-                                            <b><i class="fas fa-plus"></i></b> Add Document
+                                        <button type="button" onclick="addDocument()" class="btn btn-labeled text-sm btn-lg btn-outline-primary btn-flat btn-block legitRipple">
+                                            Add Document
                                         </button>
                                     </div>
                                     <!-- TABLE DOCUMENT -->
@@ -184,14 +186,14 @@
                                         <tbody>
                                             <tr class="no-available-data">
                                                 <td colspan="3" class="text-center">No available data.</td>
-                                            </tr>                                            
+                                            </tr>
                                         </tbody>
                                     </table>
                                 </div>
                                 <div class="tab-pane fade show" id="photo" role="tabpanel" aria-labelledby="photo-tab">
                                     <div class="form-group mt-3">
-                                        <button type="button" onclick="addPhoto()" class="btn btn-labeled labeled-sm btn-md btn-block text-xs btn-success btn-flat legitRipple">
-                                            <b><i class="fas fa-plus"></i></b> Add Photo
+                                        <button type="button" onclick="addPhoto()" class="btn btn-labeled text-sm btn-lg btn-outline-primary btn-flat btn-block legitRipple">
+                                            Add Photo
                                         </button>
                                     </div>
                                     <!-- TABLE PHOTO -->
@@ -206,26 +208,26 @@
                                         <tbody>
                                             <tr class="no-available-data">
                                                 <td colspan="3" class="text-center">No available data.</td>
-                                            </tr>                                    
+                                            </tr>
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
                         </div>
                         <div class="card-footer text-right">
-                        <button type="button" onclick="onSubmit('waiting')" class="btn btn-success btn-labeled legitRipple text-sm">
-                            <b><i class="fas fa-check-circle"></i></b>
-                            Submit
-                        </button>
-                        <button type="button" onclick="onSubmit('draft')" class="btn bg-olive color-palette btn-labeled legitRipple text-sm">
-                            <b><i class="fas fa-save"></i></b>
-                            Save
-                        </button>
-                        <a href="{{ route('producttransfer.index') }}" class="btn btn-secondary color-palette btn-labeled legitRipple text-sm">
-                            <b><i class="fas fa-times"></i></b>
-                            Cancel
-                        </a>
-                    </div>
+                            <button type="button" onclick="onSubmit('waiting')" class="btn btn-success btn-labeled legitRipple text-sm">
+                                <b><i class="fas fa-check-circle"></i></b>
+                                Submit
+                            </button>
+                            <button type="button" onclick="onSubmit('draft')" class="btn bg-olive color-palette btn-labeled legitRipple text-sm">
+                                <b><i class="fas fa-save"></i></b>
+                                Save
+                            </button>
+                            <a href="{{ route('producttransfer.index') }}" class="btn btn-secondary color-palette btn-labeled legitRipple text-sm">
+                                <b><i class="fas fa-times"></i></b>
+                                Cancel
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -287,15 +289,69 @@
             ]
         });
 
-        $("#product").select2({
+        $("#product_category_id").select2({
             ajax: {
-                url: "{{route('product.select')}}",
+                url: "{{route('productcategory.select')}}",
                 type: 'GET',
                 dataType: 'json',
                 data: function(params) {
                     return {
                         name: params.term,
                         page: params.page,
+                        limit: 30,
+                    };
+                },
+                processResults: function(data, params) {
+                    var more = (params.page * 30) < data.total;
+                    var option = [];
+                    $.each(data.rows, function(index, item) {
+                        option.push({
+                            id: item.id,
+                            text: item.name,
+                        });
+                    });
+                    return {
+                        results: option,
+                        more: more,
+                    };
+                },
+            },
+            allowClear: true,
+            escapeMarkup: function(text) {
+                return text;
+            },
+        }).on('select2:close', function(e) {
+            var data    = $(this).find('option:selected').val();
+            var product = $('#product').select2('data');
+
+            if (product[0] && product[0].product_category_id != data) {
+                $('#product').val(null).trigger('change');
+            }
+        }).on('select2:clearing', function() {
+            $('#product').val(null).trigger('change');
+        });
+
+        $("#product").select2({
+            ajax: {
+                url: "{{route('productborrowing.selectproduct')}}",
+                type: 'GET',
+                dataType: 'json',
+                data: function(params) {
+                    var productCategory = $('#product_category_id').select2('val');
+                    var products = [];
+
+                    $.each($('#table-products > tbody > .product-item'), function(index, value) {
+                        var product = $(this).find('.item-product'),
+                        product_id = product.val();
+
+                        products.push(product_id);
+
+                    });
+                    return {
+                        name: params.term,
+                        page: params.page,
+                        product_category_id: productCategory,
+                        products: products,
                         limit: 30,
                     };
                 },
