@@ -84,7 +84,7 @@
                             </span>
                             <div class="form-group row">
                                 <label class="col-md-12 col-xs-12 control-label" for="issued-by">Issued By</label>
-                                <div class="col-sm-12 controls">                                    
+                                <div class="col-sm-12 controls">
                                     <input type="text" class="form-control" name="issuedby" value="{{$data->issued}}" readonly>
                                 </div>
                             </div>
@@ -96,7 +96,7 @@
                             </div>
                             <div class="form-group form-status">
                                 <label for="state" class="control-label">Status</label>
-                                <div class="controls">                                    
+                                <div class="controls">
                                 </div>
                             </div>
                         </div>
@@ -109,7 +109,7 @@
                             <span class="title">
                                 <h5 class="text-md text-dark text-uppercase">Product Information</h5>
                                 <hr>
-                            </span>                            
+                            </span>
                             <div class="form-group table-responsive">
                                 <table id="table-product" class="table table-striped" width="100%">
                                     <thead>
@@ -119,7 +119,7 @@
                                             <th width="30" class="text-right">Qty Request</th>
                                             <th width="30" class="text-right">Qty Receive</th>
                                             <th width="100">Rack</th>
-                                            <th width="100">Bin</th>                                            
+                                            <th width="100">Bin</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -148,13 +148,13 @@
                                 </li>
                             </ul>
                             <div class="tab-content" id="suppDocumentTabContent">
-                                <div class="tab-pane fade show active" id="document" role="tabpanel" aria-labelledby="document-tab">                                    
+                                <div class="tab-pane fade show active" id="document" role="tabpanel" aria-labelledby="document-tab">
                                     <div class="form-group">
                                         <table id="table-document" class="table table-striped" width="100%">
                                             <thead>
                                                 <tr>
                                                     <th width="50%">Document Name</th>
-                                                    <th width="50%">File</th>                                                    
+                                                    <th width="50%">File</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -165,13 +165,13 @@
                                         </table>
                                     </div>
                                 </div>
-                                <div class="tab-pane fade show" id="photo" role="tabpanel" aria-labelledby="photo-tab">                                    
+                                <div class="tab-pane fade show" id="photo" role="tabpanel" aria-labelledby="photo-tab">
                                     <div class="form-group">
                                         <table id="table-photo" class="table table-striped datatable" width="100%">
                                             <thead>
                                                 <tr>
                                                     <th width="50%">Photo Name</th>
-                                                    <th width="50%">File</th>                                                    
+                                                    <th width="50%">File</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -184,7 +184,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="card-footer text-right">                            
+                        <div class="card-footer text-right">
                             <a href="{{ route('goodsissue.index') }}" class="btn btn-secondary color-palette btn-labeled legitRipple text-sm">
                                 <b><i class="fas fa-times"></i></b>
                                 Cancel
