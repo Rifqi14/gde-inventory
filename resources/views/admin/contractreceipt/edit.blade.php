@@ -2,7 +2,7 @@
 @section('title', $menu_name)
 @section('stylesheets')
 <style>
-  #table-document tbody tr td:nth-child(3) .input-group {
+  #table-document-user tbody tr td:nth-child(3) .input-group {
     margin-bottom: .25rem !important;
   }
 
@@ -13,7 +13,22 @@
         position: relative;
         cursor: default;
     } */
-  #table-document tbody tr td:nth-child(3) .input-group:last-child {
+  #table-document-user tbody tr td:nth-child(3) .input-group:last-child {
+    margin-bottom: 0px !important;
+  }
+
+  #table-document-safeguard tbody tr td:nth-child(3) .input-group {
+    margin-bottom: .25rem !important;
+  }
+
+  /* #table-document tbody tr td:nth-child(3) .input-group button{
+        user-select: none;
+        z-index: 0;
+        opacity: 0;
+        position: relative;
+        cursor: default;
+    } */
+  #table-document-safeguard tbody tr td:nth-child(3) .input-group:last-child {
     margin-bottom: 0px !important;
   }
 
@@ -41,7 +56,6 @@
   }
 </style>
 @endsection
-
 @section('breadcrumb')
 <div class="row mb-3 mt-3">
   <div class="col-sm-4">
@@ -79,7 +93,8 @@
                   <div class="form-group row">
                     <label for="contract_id" class="col-md-12 col-xs-12 control-label">Contract</label>
                     <div class="col-sm-12 controls">
-                      <select name="contract_id" id="contract_id" class="form-control select2" required data-placeholder="Select Contract">
+                      <input type="hidden" name="contract_id" value="{{ $contractreceipt->contract_id }}">
+                      <select name="contract" id="contract_id" class="form-control select2" required data-placeholder="Select Contract" disabled>
 
                       </select>
                     </div>
@@ -89,7 +104,8 @@
                   <div class="form-group row">
                     <label for="warehouse_id" class="col-md-12 col-xs-12 control-label">Warehouse</label>
                     <div class="col-sm-12 controls">
-                      <select name="warehouse_id" id="warehouse_id" class="form-control select2" required data-placeholder="Select Warehouse">
+                      <input type="hidden" name="warehouse_id" value="{{ $contractreceipt->warehouse->id }}">
+                      <select name="warehouse" id="warehouse_id" class="form-control select2" required data-placeholder="Select Warehouse" disabled>
 
                       </select>
                     </div>
@@ -115,8 +131,18 @@
                   <div class="form-group row">
                     <label for="batch_id" class="col-md-12 col-xs-12 control-label">Batch</label>
                     <div class="col-sm-12 controls">
-                      <select name="batch" id="batch_id" class="form-control select2" required data-placeholder="Select Batch">
+                      <input type="hidden" name="batch" value="{{ $contractreceipt->batch }}">
+                      <select name="batch_id" id="batch_id" class="form-control select2" required data-placeholder="Select Batch" disabled>
 
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-6">
+                  <div class="form-group row">
+                    <label for="role_id" class="col-md-12 col-xs-12 control-label">User</label>
+                    <div class="col-sm-12 controls">
+                      <select name="role_id" id="role_id" class="form-control select2" required data-placeholder="Select User" disabled>
                       </select>
                     </div>
                   </div>
@@ -149,14 +175,113 @@
             <div class="card-body">
               <span class="title">
                 <hr>
-                <h5 class="text-md text-dark text-bold">Document List</h5>
+                <h5 class="text-md text-dark text-bold">Safeguard Document</h5>
               </span>
               <div class="mt-5"></div>
-              <button type="button" id="add-document" class="btn btn-labeled text-sm btn-sm btn-outline-primary btn-flat btn-block legitRipple" onclick="addDocument()">Add</button>
-              <table id="table-document" class="table table-striped datatable" width="100%">
+              <button type="button" id="add-document" class="btn btn-labeled text-sm btn-sm btn-outline-primary btn-flat btn-block legitRipple" onclick="addDocument('safeguard')">Add</button>
+              <table id="table-document-safeguard" class="table table-striped datatable" width="100%">
                 <thead>
                   <tr>
-                    <th width="5%" class="text-center">No.</th>
+                    <th width="35%">Document Name</th>
+                    <th width="35%">Upload Document</th>
+                    <th width="10%" class="text-center">Approval</th>
+                    <th width="10%" class="text-center">Upload Date</th>
+                    <th width="5%" class="text-center">#</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @if ($contractreceipt->document)
+                  @foreach ($contractreceipt->document->where('document_type', 'safeguard') as $key => $item)
+                  <tr data-number="{{ ++$key }}">
+                    <td>
+                      <input type="hidden" name="contract_document_receipts_safeguard[]" value="{{ $key }}">
+                      <input type="hidden" name="contract_document_receipts_id_safeguard[{{ $key }}]" value="{{ $item->id }}">
+                      <input type="hidden" name="document_type_safeguard[]" value="{{ $item->document_type }}">
+                      <input type="text" class="form-control" id="document_name_safeguard{{ $key }}" name="document_name_safeguard[{{ $key }}]" placeholder="Document Name" aria-required="true" value="{{ $item->document_name }}" readonly>
+                    </td>
+                    <td>
+                      @foreach ($item->detail as $keys => $items)
+                      <div class="input-group download">
+                        <a href="{{ asset($items->source) }}" class="" dl-id="44" download="" target="_blank">
+                          <b><i class="fas fa-download"></i></b> Download - Rev {{ ++$keys }}
+                        </a>
+                        <button type="button" class="btn btn-transparent text-md p-0 pl-2 float-right" onclick="removeFile($(this))" data-type="safeguard" data-doc="{{ $keys }}" data-id="{{ $items->id }}">
+                          <i class="fas fa-trash text-maroon color-palette"></i>
+                        </button>
+                      </div>
+                      @endforeach
+                      @if ($item->detail->where('status', 'Approved')->count() == 0)
+                      <div class="input-group">
+                        <div class="custom-file">
+                          <input type="hidden" name="file_contract_safeguard[{{ $key }}][]">
+                          <input type="file" class="custom-file-input" name="file_safeguard[{{ $key }}][]" onchange="changePath(this)">
+                          <label class="custom-file-label" for="exampleInputFile">Attach Image</label>
+                        </div>
+                        <div class="input-group-append">
+                          <span class="input-group-text" id=""><i class="fa fa-upload"></i></span>
+                        </div>
+                        <button type="button" class="btn btn-transparent text-md" onclick="addUpload($(this))" data-doc="{{ $key }}">
+                          <i class="fas fa-plus text-green color-palette"></i>
+                        </button>
+                      </div>
+                      @endif
+                    </td>
+                    <td class="text-center" style="padding-top: .5rem;">
+                      @foreach ($item->detail as $keyApproval => $itemApproval)
+                      @switch($itemApproval->status)
+                      @case('Approved')
+                      <div class="mt-2"></div>
+                      <span class="badge bg-success">{{ $itemApproval->status }}</span>
+                      <div class="mb-2"></div>
+                      @break
+                      @case('Rejected')
+                      <div class="mt-2"></div>
+                      <span class="badge bg-maroon">{{ $itemApproval->status }}</span>
+                      <div class="mb-2"></div>
+                      @break
+                      @default
+                      <div class="mt-1"></div>
+                      <button type="button" class="btn text-sm btn-sm bg-green btn-flat legitRipple" onclick="approveDocument('Approved', {{ $itemApproval->id }})" data-toggle="tooltip" data-placement="top" title="Approved Request">
+                        <b><i class="fas fa-check"></i></b>
+                      </button>
+                      <button type="button" class="btn text-sm btn-sm bg-red btn-flat legitRipple" onclick="approveDocument('Rejected', {{ $itemApproval->id }})" data-toggle="tooltip" data-placement="top" title="Reject Request">
+                        <b><i class="fas fa-times"></i></b>
+                      </button>
+                      @endswitch
+                      @endforeach
+                    </td>
+                    <td class="text-center">
+                      @foreach ($item->detail as $keyDocument => $itemDocument)
+                      <div class="mb-1"></div>
+                      <span>{{ date("d/m/Y", strtotime($itemDocument->upload_date)) }}</span>
+                      @endforeach
+                      <div class="mt-3"></div>
+                      <span>{{ date("d/m/Y") }}</span>
+                    </td>
+                    <td class="text-center">
+                      {{-- <button type="button" class="btn btn-transparent text-md" onclick="removeDocument($(this))" data-document="{{ $i }}">
+                      <i class="fas fa-trash text-maroon color-palette"></i>
+                      </button> --}}
+                      <input type="hidden" name="deleted_file_id_safeguard[{{ $key }}]" value="[]">
+                      <div class="mb-1"></div>
+                      #
+                    </td>
+                  </tr>
+                  @endforeach
+                  @endif
+                </tbody>
+              </table>
+            </div>
+            <div class="card-body">
+              <span class="title">
+                <hr>
+                <h5 class="text-md text-dark text-bold">User Document</h5>
+              </span>
+              <div class="mt-5"></div>
+              <button type="button" id="add-document" class="btn btn-labeled text-sm btn-sm btn-outline-primary btn-flat btn-block legitRipple" onclick="addDocument('user')">Add</button>
+              <table id="table-document-user" class="table table-striped datatable" width="100%">
+                <thead>
+                  <tr>
                     <th width="40%">Document Name</th>
                     <th width="40%">Upload Document</th>
                     <th width="10%" class="text-center">Upload Date</th>
@@ -164,63 +289,55 @@
                   </tr>
                 </thead>
                 <tbody>
-                  @for ($i = 1; $i <= $contractreceipt->document_count; $i++)
-                    <tr data-number="{{ $i }}">
-                      <td class="text-center">
-                        <div class="mb-1"></div>
-                        {{ $i }}
-                      </td>
-                      <td>
-                        <input type="hidden" name="contract_document_receipts[]" value="{{ $i }}">
-                        <input type="hidden" name="contract_document_receipts_id[{{ $i }}]" value="{{ $contractreceipt->document[$i - 1]->id }}">
-                        <input type="text" class="form-control" id="document_name_{{ $i }}" name="document_name[{{ $i }}]" placeholder="Document Name" aria-required="true" value="{{ $contractreceipt->document[$i - 1]->document_name }}">
-                      </td>
-                      <td>
-                        @php $n = 1; @endphp
-                        @foreach ($contractreceipt->document[$i - 1]->detail as $key => $row)
-                        @if($row->source)
-                        <div class="input-group download">
-                          <a href="{{ asset($row->source) }}" class="" dl-id="44" download="" target="_blank">
-                            <b><i class="fas fa-download"></i></b> Download - Rev {{ $n++ }}
-                          </a>
-                          <button type="button" class="btn btn-transparent text-md p-0 pl-2 float-right" onclick="removeFile($(this))" data-doc="{{ $i }}" data-id="{{ $row->id }}">
-                            <i class="fas fa-trash text-maroon color-palette"></i>
-                          </button>
+                  @if ($contractreceipt->document)
+                  @foreach ($contractreceipt->document->where('document_type', 'user') as $key => $item)
+                  <tr data-number="{{ ++$key }}" data-type="user_document">
+                    <td>
+                      <input type="hidden" name="contract_document_receipts_user[]" value="{{ $key }}">
+                      <input type="hidden" name="contract_document_receipts_id_user[{{ $key }}]" value="{{ $item->id }}">
+                      <input type="hidden" name="document_type_user[]" value="user">
+                      <input type="text" class="form-control" id="document_name_user{{ $key }}" name="document_name_user[{{ $key }}]" placeholder="Document Name" aria-required="true" value="{{ $item->document_name }}">
+                    </td>
+                    <td>
+                      @foreach ($item->detail as $keys => $items)
+                      <div class="input-group download">
+                        <a href="{{ asset($items->source) }}" class="" dl-id="44" download="" target="_blank">
+                          <b><i class="fas fa-download"></i></b> Download - Rev {{ ++$keys }}
+                        </a>
+                        <button type="button" class="btn btn-transparent text-md p-0 pl-2 float-right" onclick="removeFile($(this))" data-type="user" data-doc="{{ $keys }}" data-id="{{ $items->id }}">
+                          <i class="fas fa-trash text-maroon color-palette"></i>
+                        </button>
+                      </div>
+                      @endforeach
+                      <div class="input-group">
+                        <div class="custom-file">
+                          <input type="hidden" name="file_contract_user[{{ $key }}][]">
+                          <input type="file" class="custom-file-input" name="file_user[{{ $key }}][]" onchange="changePath(this)">
+                          <label class="custom-file-label" for="exampleInputFile">Attach Image</label>
                         </div>
-                        @endif
-                        @endforeach
-                        <div class="input-group">
-                          <div class="custom-file">
-                            <input type="hidden" name="file_contract[{{ $i }}][]">
-                            <input type="file" class="custom-file-input" name="file[{{ $i }}][]" onchange="changePath(this)">
-                            <label class="custom-file-label" for="exampleInputFile">Attach Image</label>
-                          </div>
-                          <div class="input-group-append">
-                            <span class="input-group-text" id=""><i class="fa fa-upload"></i></span>
-                          </div>
-                          <button type="button" class="btn btn-transparent text-md" onclick="addUpload($(this))" data-doc="{{ $i }}">
-                            <i class="fas fa-plus text-green color-palette"></i>
-                          </button>
+                        <div class="input-group-append">
+                          <span class="input-group-text" id=""><i class="fa fa-upload"></i></span>
                         </div>
-                      </td>
-                      <td class="text-center">
-                        <div class="mb-1"></div>
-                        @if($contractreceipt->document[$i - 1]->date_uploaded)
-                        {{ date("d/m/Y", strtotime($contractreceipt->document[$i - 1]->date_uploaded)) }}
-                        @else
-                        -
-                        @endif
-                      </td>
-                      <td class="text-center">
-                        <input type="hidden" name="deleted_file_id[{{ $i }}]" value="[]">
-                        {{-- <button type="button" class="btn btn-transparent text-md" onclick="removeDocument($(this))" data-document="{{ $i }}">
-                        <i class="fas fa-trash text-maroon color-palette"></i>
-                        </button> --}}
-                        <div class="mb-1"></div>
-                        #
-                      </td>
-                    </tr>
-                    @endfor
+                        <button type="button" class="btn btn-transparent text-md" onclick="addUpload($(this))" data-doc="{{ $key }}">
+                          <i class="fas fa-plus text-green color-palette"></i>
+                        </button>
+                      </div>
+                    </td>
+                    <td class="text-center">
+                      <div class="mb-1"></div>
+                      {{ date("d/m/Y") }}
+                    </td>
+                    <td class="text-center">
+                      {{-- <button type="button" class="btn btn-transparent text-md" onclick="removeDocument($(this))" data-document="{{ $i }}">
+                      <i class="fas fa-trash text-maroon color-palette"></i>
+                      </button> --}}
+                      <input type="hidden" name="deleted_file_id_user[{{ $key }}]" value="[]">
+                      <div class="mb-1"></div>
+                      #
+                    </td>
+                  </tr>
+                  @endforeach
+                  @endif
                 </tbody>
               </table>
             </div>
@@ -273,24 +390,121 @@
     $("form").first().trigger("submit");
   }
 
-  const addDocument = () => {
-    var number  = $('table').find('tr:last').data('number') ? $('table').find('tr:last').data('number') + 1 : 1;
+  const approveDocument = (type, document_id) => {
+    var title = type == 'Approved' ? 'Approve document?' : 'Reject document?';
+    var message = type == 'Approved' ? 'Are you sure want to approve this document?' : 'Are you sure want to reject this document?';
+    bootbox.confirm({
+      buttons: {
+        confirm: {
+          label: `<i class="fa fa-check"></i>`,
+          className: 'btn-primary btn-sm',
+        },
+        cancel: {
+          label: '<i class="fa fa-undo"></i>',
+          className: 'btn-default btn-sm',
+        },
+      },
+      title: title,
+      message: message,
+      callback: function (result) {
+          if (result) {
+              var data = {
+                  _token: "{{ csrf_token() }}",
+                  type: type,
+                  document_id: document_id,
+              };
+              $.ajax({
+                  url: `{{route('contractreceipt.approval')}}`,
+                  dataType: 'json',
+                  data: data,
+                  method: 'post',
+                  beforeSend: function () {
+                      blockMessage('#content', 'Loading', '#fff');
+                  }
+              }).done(function (response) {
+                  $('#content').unblock();
+                  if (response.status) {
+                      toastr.options = {
+                          "closeButton": false,
+                          "debug": false,
+                          "newestOnTop": false,
+                          "progressBar": false,
+                          "positionClass": "toast-top-right",
+                          "preventDuplicates": false,
+                          "onclick": null,
+                          "showDuration": "300",
+                          "hideDuration": "1000",
+                          "timeOut": "5000",
+                          "extendedTimeOut": "1000",
+                          "showEasing": "swing",
+                          "hideEasing": "linear",
+                          "showMethod": "fadeIn",
+                          "hideMethod": "fadeOut"
+                      }
+                      toastr.success(response.message);
+                      setTimeout(function(){location.reload()}, 3000);
+                  }else {
+                      toastr.options = {
+                          "closeButton": false,
+                          "debug": false,
+                          "newestOnTop": false,
+                          "progressBar": false,
+                          "positionClass": "toast-top-right",
+                          "preventDuplicates": false,
+                          "onclick": null,
+                          "showDuration": "300",
+                          "hideDuration": "1000",
+                          "timeOut": "5000",
+                          "extendedTimeOut": "1000",
+                          "showEasing": "swing",
+                          "hideEasing": "linear",
+                          "showMethod": "fadeIn",
+                          "hideMethod": "fadeOut"
+                      }
+                      toastr.warning(response.message);
+                  }
+              }).fail(function (response) {
+                  var response = response.responseJSON;
+                  $('#content').unblock();
+                  toastr.options = {
+                      "closeButton": false,
+                      "debug": false,
+                      "newestOnTop": false,
+                      "progressBar": false,
+                      "positionClass": "toast-top-right",
+                      "preventDuplicates": false,
+                      "onclick": null,
+                      "showDuration": "300",
+                      "hideDuration": "1000",
+                      "timeOut": "5000",
+                      "extendedTimeOut": "1000",
+                      "showEasing": "swing",
+                      "hideEasing": "linear",
+                      "showMethod": "fadeIn",
+                      "hideMethod": "fadeOut"
+                  }
+                  toastr.warning(response.message);
+              })
+          }
+      }
+    });
+  }
+
+  const addDocument = (type) => {
+    var number  = $(`#table-document-${type}`).find('tr:last').data('number') ? $(`#table-document-${type}`).find('tr:last').data('number') + 1 : 1;
     var dateNow = moment().format('DD/MM/YYYY');
     var html = `
     <tr data-number="${number}">
-      <td class="text-center">
-        <div class="mb-1"></div>
-        ${number}
-      </td>
       <td>
-        <input type="hidden" name="contract_document_receipts[]" value="${number}">
-        <input type="text" class="form-control" id="document_name_${number}" name="document_name[${number}]" placeholder="Document Name" aria-required="true">
+        <input type="hidden" name="contract_document_receipts_${type}[]" value="${number}">
+        <input type="hidden" name="document_type_${type}[]" value="${type}">
+        <input type="text" class="form-control" id="document_name_${number}" name="document_name_${type}[${number}]" placeholder="Document Name" aria-required="true">
       </td>
       <td>
         <div class="input-group">
           <div class="custom-file">
-            <input type="hidden" name="file_contract[${number}][]">
-            <input type="file" class="custom-file-input" name="file[${number}][]" onchange="changePath(this)">
+            <input type="hidden" name="file_contract_${type}[${number}][]">
+            <input type="file" class="custom-file-input" name="file_${type}[${number}][]" onchange="changePath(this)">
             <label class="custom-file-label" for="exampleInputFile">Attach Image</label>
           </div>
           <div class="input-group-append">
@@ -306,14 +520,14 @@
         ${dateNow}
       </td>
       <td class="text-center">
-        <button type="button" class="btn btn-transparent text-md" onclick="removeDocument($(this))" data-document=${number}>
+        <button type="button" class="btn btn-transparent text-md" onclick="removeDocument($(this))" data-document=${number} data-type="${type}">
           <i class="fas fa-trash text-maroon color-palette"></i>
         </button>
       </td>
     </tr>
     `;
-    $('#table-document tbody .empty').remove();
-    $('#table-document tbody').append(html);
+    $(`#table-document-${type} tbody .empty`).remove();
+    $(`#table-document-${type} tbody`).append(html);
   }
 
   const addUpload = (e) => {
@@ -343,11 +557,112 @@
 
   const removeFile = (e) => {
     var number = e.attr("data-doc");
+    var type = e.attr("data-type");
     var id = e.attr("data-id");
-    var deleted = JSON.parse($('input[name="deleted_file_id['+number+']"]').val());
+    var deleted = type == 'safeguard' ? JSON.parse($(`input[name="deleted_file_id_safeguard[${number}]"]`).val()) : JSON.parse($(`input[name="deleted_file_id_user[${number}]"]`).val());
     deleted.push(id);
-    $('input[name="deleted_file_id['+number+']"]').val(JSON.stringify(deleted));
+    type == 'safeguard' ? $(`input[name="deleted_file_id_safeguard[${number}]"]`).val(JSON.stringify(deleted)) : $(`input[name="deleted_file_id_user[${number}]"]`).val(JSON.stringify(deleted));
     e.parent().remove();
+  }
+
+  const removeFile2 = (e) => {
+    var type = e.attr("data-type");
+    var id = e.attr("data-id");
+    bootbox.confirm({
+      buttons: {
+        confirm: {
+          label: `<i class="fa fa-check"></i>`,
+          className: 'btn-primary btn-sm',
+        },
+        cancel: {
+          label: '<i class="fa fa-undo"></i>',
+          className: 'btn-default btn-sm',
+        },
+      },
+      title: "Delete document?",
+      message: "Are you sure want to delete this document?",
+      callback: function (result) {
+          if (result) {
+              var data = {
+                  _token: "{{ csrf_token() }}",
+                  type: type,
+                  id: id,
+              };
+              $.ajax({
+                  url: `{{route('contractreceipt.approval')}}`,
+                  dataType: 'json',
+                  data: data,
+                  method: 'post',
+                  beforeSend: function () {
+                      blockMessage('#content', 'Loading', '#fff');
+                  }
+              }).done(function (response) {
+                  $('#content').unblock();
+                  if (response.status) {
+                      toastr.options = {
+                          "closeButton": false,
+                          "debug": false,
+                          "newestOnTop": false,
+                          "progressBar": false,
+                          "positionClass": "toast-top-right",
+                          "preventDuplicates": false,
+                          "onclick": null,
+                          "showDuration": "300",
+                          "hideDuration": "1000",
+                          "timeOut": "5000",
+                          "extendedTimeOut": "1000",
+                          "showEasing": "swing",
+                          "hideEasing": "linear",
+                          "showMethod": "fadeIn",
+                          "hideMethod": "fadeOut"
+                      }
+                      toastr.success(response.message);
+                      setTimeout(function(){location.reload()}, 3000);
+                  }else {
+                      toastr.options = {
+                          "closeButton": false,
+                          "debug": false,
+                          "newestOnTop": false,
+                          "progressBar": false,
+                          "positionClass": "toast-top-right",
+                          "preventDuplicates": false,
+                          "onclick": null,
+                          "showDuration": "300",
+                          "hideDuration": "1000",
+                          "timeOut": "5000",
+                          "extendedTimeOut": "1000",
+                          "showEasing": "swing",
+                          "hideEasing": "linear",
+                          "showMethod": "fadeIn",
+                          "hideMethod": "fadeOut"
+                      }
+                      toastr.warning(response.message);
+                  }
+              }).fail(function (response) {
+                  var response = response.responseJSON;
+                  $('#content').unblock();
+                  toastr.options = {
+                      "closeButton": false,
+                      "debug": false,
+                      "newestOnTop": false,
+                      "progressBar": false,
+                      "positionClass": "toast-top-right",
+                      "preventDuplicates": false,
+                      "onclick": null,
+                      "showDuration": "300",
+                      "hideDuration": "1000",
+                      "timeOut": "5000",
+                      "extendedTimeOut": "1000",
+                      "showEasing": "swing",
+                      "hideEasing": "linear",
+                      "showMethod": "fadeIn",
+                      "hideMethod": "fadeOut"
+                  }
+                  toastr.warning(response.message);
+              })
+          }
+      }
+    });
   }
 
   const changePath = (that) => {
@@ -370,7 +685,8 @@
   }
 
   $(function(){
-    summernote();
+    
+    $('.summernote').summernote('disable');
     $(".select2").select2();
 
     $('#contract_id').select2({
@@ -412,6 +728,42 @@
             exp_status: '{{ $contractreceipt->contract->exp_status }}',
             contract_date: '{{ $contractreceipt->contract->contract_signing_date }}',
         }
+    });
+
+    $("#role_id").select2({
+        ajax: {
+            url: "{{route('role.select')}}",
+            type: 'GET',
+            dataType: 'json',
+            data: function(params) {
+                return {
+                    name: params.term,
+                    page: params.page,
+                    limit: 30,
+                };
+            },
+            processResults: function(data, params) {
+                var more = (params.page * 30) < data.total;
+                var option = [];
+                $.each(data.rows, function(index, item) {
+                    option.push({
+                        id: item.id,
+                        text: item.name
+                    });
+                });
+                return {
+                    results: option,
+                    more: more,
+                };
+            },
+        },
+        allowClear: true,
+    });
+    $('#role_id').select2('trigger', 'select', {
+      data: {
+        id: `{{ $contractreceipt->role_id }}`,
+        text: `{{ $contractreceipt->role->name }}`
+      }
     });
 
     $('#warehouse_id').select2({
