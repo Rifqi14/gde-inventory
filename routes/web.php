@@ -280,5 +280,8 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/goodsissue/consumableproducts','Admin\GoodsIssueController@consumableproducts')->name('goodsissue.consumableproducts');
         Route::get('/goodsissue/transferproducts','Admin\GoodsIssueController@transferproducts')->name('goodsissue.transferproducts');
         Route::resource('/goodsissue','Admin\GoodsIssueController');
+
+        // Contract Document Receipt Detail
+        Route::resource('/contractdocument', 'Admin\ContractDocumentReceiptDetailController');
     });
 });
