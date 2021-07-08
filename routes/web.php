@@ -123,7 +123,10 @@ Route::group(['prefix' => 'admin'], function () {
         Route::resource('/purchasing', 'Admin\PurchasingController');
         // Route Stock Adjustment
         Route::get('/stockadjustment/read', 'Admin\StockAdjustmentController@read')->name('stockadjustment.read');
+        Route::get('/stockadjustment/getitemserial', 'Admin\StockAdjustmentController@getitemserial')->name('stockadjustment.getitemserial');
         Route::get('/stockadjustment/selectproduct', 'Admin\StockAdjustmentController@selectproduct')->name('stockadjustment.selectproduct');
+        Route::get('/stockadjustment/getuomproduct', 'Admin\StockAdjustmentController@getuomproduct')->name('stockadjustment.getuomproduct');
+        Route::get('/stockadjustment/getdetailserial', 'Admin\StockAdjustmentController@getdetailserial')->name('stockadjustment.getdetailserial');
         Route::resource('/stockadjustment', 'Admin\StockAdjustmentController');
         // Route Warehouse
         Route::get('/warehouse/read', 'Admin\WarehouseController@read')->name('warehouse.read');

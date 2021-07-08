@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Alfa6661\AutoNumber\AutoNumberTrait;
 
 class StockAdjustment extends Model
 {
@@ -51,5 +52,29 @@ class StockAdjustment extends Model
     public function productasset()
     {
         return $this->hasMany('App\Models\StockAdjustmentProductAsset', 'stock_adjustment_id', 'id');
+    }
+
+    public function warehouse()
+    {
+        return $this->hasOne('App\Models\Warehouse', 'id', 'warehouse_id');
+    }
+
+    public function totalItems(){
+        
+    }
+
+    use AutoNumberTrait;
+
+    public function getAutoNumberOptions()
+    {
+        $code = 'ADJ';
+        $year = date('Y');
+
+        return [
+            'key_number' => [
+                'format' => "$code-$year-?",
+                'length' => 6
+            ]
+        ];
     }
 }

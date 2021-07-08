@@ -2450,3 +2450,210 @@ li + .dropdown-header.highlight,
 .nav-tabs-custom.tab-default > .nav-tabs > li.active {
   border-top-color: #d2d6de;
 }
+
+.custom-file-label {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    padding-right: 70px;
+}
+.button-trasparent{
+    background: transparent;
+}
+.button-trasparent .input-group-text{
+    background: transparent;
+    border: 0px solid;
+}
+.button-add-doc{
+    cursor: pointer;
+}
+.hover-up{
+    position: relative;
+    top: 0px;
+    transition-duration: .3s;
+}
+.hover-up:hover{
+    position: relative;
+    top: -2px;
+}
+.wrapper-table {
+    position: relative;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: .25rem;
+}
+button.btn-custom-circle {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: 50% !important;
+    display: inline-block;
+    margin-top: 1px;
+    background-color: #f8f9fa;
+    border-color: #ddd;
+}
+button.btn-custom-circle.delete {
+  color: #dc3545;
+}
+
+button.btn-custom-circle.delete:hover {
+  color: #c82333;
+}
+
+button.btn-custom-circle.edit {
+  color: #1f52bb;
+}
+
+button.btn-custom-circle.edit:hover {
+  color: #000;
+}
+#serialModal .modal-body {
+    min-height: 90vh;
+    padding: 0px;
+}
+#serialModal .serial-modal-left{
+    background: #fff;
+    position: relative;
+    width: 50%;
+    border-radius: .3rem 0px 0px .3rem;
+    height: 90vh;
+}
+#serialModal .serial-modal-left .cst-header{
+    font-size: 1.6rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    position: relative;
+    padding: 10px 10px 5px;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 0px;
+}
+#serialModal .serial-modal-left .cst-footer{
+    position: absolute;
+    width: 100%;
+    bottom: 0px;
+    padding: 10px;
+    border-top: 1px solid #ddd;
+}
+#serialModal .serial-modal-left .scroll-wrapper {
+    position: relative;
+    height: calc(90vh - 106px);
+    padding-top: 10px;
+    padding-bottom: 10px;
+    overflow: auto;
+}
+#serialModal .serial-modal-left .cst-header .back-button{
+    background: transparent;
+    border: 0px solid;
+    padding: 0px 5px 0px 0px;
+    font-size: 1.2rem;
+    position: relative;
+    top: -1px;
+    left: 0px;
+    color: #212529;
+    transition-duration: .3s;
+}
+#serialModal .serial-modal-left .cst-header .back-button:hover{
+    color: #0277BD;
+    left: -3px;
+}
+#serialModal .serial-modal-left .product-info{
+    position: relative;
+    padding: 0px 10px;
+}
+#serialModal .serial-modal-left .product-info h1{
+    position: relative;
+    font-size: 1.2rem;
+    margin-bottom: 2px;
+    line-height: 1;
+}
+#serialModal .serial-modal-left .product-info p{
+    position: relative;
+    margin-bottom: 0px;
+    color: #555;
+    font-style: italic;
+    line-height: 1;
+}
+#serialModal .serial-modal-left .product-info button{
+    position: relative;
+    float: right;
+    z-index: 999;
+}
+#serialModal .serial-modal-left .product-items{
+    position: relative;
+    padding: 10px 10px 0px;
+}
+#serialModal .serial-modal-left .product-items .product-item{
+    position: relative;
+    border: 1px solid #ddd;
+    border-radius: .3rem;
+    box-shadow: 0px 0px 18px -13px rgb(0 0 0 / 50%);
+    padding: 5px 10px;
+    margin-bottom: 10px;
+    /* cursor: pointer; */
+}
+#serialModal .serial-modal-left .product-items .product-item h1{
+    font-size: 1rem;
+    line-height: 30px;
+    margin-bottom: 0px;
+    display: inline;
+    font-weight: bold;
+}
+#serialModal .serial-modal-left .product-items .product-item p{
+    margin-bottom: 0px;
+    display: inline;
+    font-style: italic;
+    line-height: 30px;
+}
+#serialModal .serial-modal-left .product-items .product-item button{
+    width: 25px;
+    height: 30px;
+    float: right;
+}
+#serialModal .serial-modal-left .product-items .product-item button i{
+    font-size: 13px;
+}
+#serialModal .serial-modal-right{
+    background: rgba(0,0,0,.05);
+    position: absolute;
+    width: 50%;
+    height: 100%;
+    right: 0px;
+    top: 0px;
+    border-radius: 0px .3rem .3rem 0px;
+}
+@media screen and (max-width: 991px) {
+    #serialModal .serial-modal-right{
+        position: relative;
+    }
+}
+#serialModal .serial-modal-right .empty-content{
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    font-weight: bold;
+    font-size: 23px;
+    color: #aaa;
+    user-select: none;
+}
+#serialModal .serial-modal-right .form-wrapper{
+    position: relative;
+    height: calc(90vh - 51px);
+    overflow: auto;
+    padding-right: 15px;
+    padding-left: 15px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    box-shadow: inset 0px 0px 4px 0px rgb(0 0 0 / 30%);
+}
+#serialModal .serial-modal-right .cst-footer{
+    position: absolute;
+    width: 100%;
+    bottom: 0px;
+    padding: 10px;
+    border-top: 1px solid #ddd;
+}
+.cursor-pointer{
+    cursor: pointer;
+}
