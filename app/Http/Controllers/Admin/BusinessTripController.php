@@ -10,6 +10,7 @@ use App\Models\BusinessTripTransportation;
 use App\Models\BusinessTripLodging;
 use App\Models\BusinessTripVehicle;
 use App\Models\BusinessTripOther;
+use App\Models\Currency;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -40,8 +41,9 @@ class BusinessTripController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function create(Request $request)
-    {        
-        return view('admin.business_trip.create');
+    {
+        $currencies   = Currency::all();
+        return view('admin.business_trip.create', compact('currencies'));
     }
     
      /**

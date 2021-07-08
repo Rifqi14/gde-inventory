@@ -218,6 +218,7 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/contractreceipt/selectbatch', 'Admin\ContractReceiptController@selectbatch')->name('contractreceipt.selectbatch');
         Route::get('/contractreceipt/read', 'Admin\ContractReceiptController@read')->name('contractreceipt.read');
         Route::get('/contractreceipt/bulkdownload', 'Admin\ContractReceiptController@bulkdownload')->name('contractreceipt.bulkdownload');
+        Route::post('/contractreceipt/approval', 'Admin\ContractReceiptController@approval')->name('contractreceipt.approval');
         Route::resource('/contractreceipt', 'Admin\ContractReceiptController');
 
         // Product Serial
