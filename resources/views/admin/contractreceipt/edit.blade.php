@@ -804,12 +804,14 @@
         },
         allowClear: true,
     });
+    @if ($contractreceipt->role_id) 
     $('#role_id').select2('trigger', 'select', {
       data: {
         id: `{{ $contractreceipt->role_id }}`,
         text: `{{ $contractreceipt->role->name }}`
       }
     });
+    @endif
 
     $('#warehouse_id').select2({
       ajax: {
