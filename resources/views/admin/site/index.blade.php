@@ -193,7 +193,7 @@
                                         <i class="far fa-eye"></i>View Data
                                     </a>`;
                         // update
-                        if (actionmenu.indexOf('update') > 0) {
+                        if (actionmenu.indexOf('update') >= 0) {
                             button += `<a class="dropdown-item" href="javascript:void(0);" onclick="edit(${row.id})">
                                         <i class="far fa-edit"></i>Update Data
                                     </a>`;

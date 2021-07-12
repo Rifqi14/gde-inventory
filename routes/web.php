@@ -279,5 +279,13 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/goodsissue/consumableproducts','Admin\GoodsIssueController@consumableproducts')->name('goodsissue.consumableproducts');
         Route::get('/goodsissue/transferproducts','Admin\GoodsIssueController@transferproducts')->name('goodsissue.transferproducts');
         Route::resource('/goodsissue','Admin\GoodsIssueController');
+
+        // Stock Movement
+        Route::resource('/stockmovement','Admin\StockMovementController');
+
+        // Stock Adjustment 
+        Route::get('/stockadjustment/read','Admin\StockAdjusmentController@read')->name('stockadjustment.read');
+        Route::post('/stockadjustment/productserial','Admin\StockAdjusmentController@productserial')->name('stockadjustment.productserial');
+        Route::resource('/stockadjustment','Admin\StockAdjusmentController');
     });
 });
