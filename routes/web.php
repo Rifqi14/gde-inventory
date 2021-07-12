@@ -215,6 +215,7 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/contractreceipt/selectbatch', 'Admin\ContractReceiptController@selectbatch')->name('contractreceipt.selectbatch');
         Route::get('/contractreceipt/read', 'Admin\ContractReceiptController@read')->name('contractreceipt.read');
         Route::get('/contractreceipt/bulkdownload', 'Admin\ContractReceiptController@bulkdownload')->name('contractreceipt.bulkdownload');
+        Route::post('/contractreceipt/approval', 'Admin\ContractReceiptController@approval')->name('contractreceipt.approval');
         Route::resource('/contractreceipt', 'Admin\ContractReceiptController');
 
         // Product Serial
@@ -287,5 +288,9 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/stockadjustment/read','Admin\StockAdjusmentController@read')->name('stockadjustment.read');
         Route::post('/stockadjustment/productserial','Admin\StockAdjusmentController@productserial')->name('stockadjustment.productserial');
         Route::resource('/stockadjustment','Admin\StockAdjusmentController');
+
+        // Contract Document Receipt Detail
+        Route::resource('/contractdocument', 'Admin\ContractDocumentReceiptDetailController');
+
     });
 });

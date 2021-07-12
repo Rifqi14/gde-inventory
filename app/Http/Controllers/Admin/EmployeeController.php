@@ -44,6 +44,8 @@ class EmployeeController extends Controller
             'user.sites',
             'user.roles',
             'user.spv',
+            'ratecurrency.country',
+            'salarycurrency.country',
             'region' => function ($q) {
                 $q->selectRaw('regions.id,regions.name,regions.province_id');
             },
@@ -52,7 +54,7 @@ class EmployeeController extends Controller
             },
             'workingshift' => function ($q) {
                 $q->selectRaw('working_shifts.id,working_shifts.shift_name');
-            }
+            },
         ])->find($id);
         if ($employee) {
             $data = $employee;
@@ -164,16 +166,19 @@ class EmployeeController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'employee_name'  => 'required',
-            'email'          => 'required|unique:employees,email',
-            'nid'            => 'required|unique:employees,nid',
-            'nik'            => 'required|unique:employees,nik',
-            'address'        => 'required',
-            'city'           => 'required',
-            'province'       => 'required',
-            'shift_type'     => 'required',
-            'join_date'      => 'required',
-            'salary'         => 'required',
+            'employee_name'         => 'required',
+            'email'                 => 'required|unique:employees,email',
+            'nid'                   => 'required|unique:employees,nid',
+            'nik'                   => 'required|unique:employees,nik',
+            'address'               => 'required',
+            'city'                  => 'required',
+            'province'              => 'required',
+            'shift_type'            => 'required',
+            'join_date'             => 'required',
+            'salary'                => 'required',
+            'rate_business_trip'    => 'required',
+            'rate_currency_id'      => 'required',
+            'salary_currency_id'    => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -200,6 +205,8 @@ class EmployeeController extends Controller
         $joindate           = $request->date_join;
         $resigndate         = $request->date_resign;
         $salary             = str_replace('.', '', $request->salary);
+        $curr_rate          = $request->rate_currency_id;
+        $curr_salary        = $request->salary_currency_id;
         $as_user            = $request->user;
         $photo              = $request->file('photo');
         $payroll            = $request->payroll;
@@ -227,6 +234,8 @@ class EmployeeController extends Controller
             'payroll_type'          => $payroll,
             'position'              => $request->position,
             'rate_business_trip'    => $rate_business_trip,
+            'rate_currency_id'      => $curr_rate,
+            'salary_currency_id'    => $curr_salary,
         ]);
 
         $user = ['status' => false, 'message' => 'Employee without user account.'];
@@ -322,17 +331,19 @@ class EmployeeController extends Controller
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'employee_name'  => 'required',
-            'email'          => 'required|unique:employees,email,' . $id,
-            'nid'            => 'required|unique:employees,nid,' . $id,
-            'nik'            => 'required|unique:employees,nik,' . $id,
-            'username'       => 'unique:users,username,' . $id . ',employee_id',
-            'address'        => 'required',
-            'city'           => 'required',
-            'province'       => 'required',
-            'shift_type'     => 'required',
-            'join_date'      => 'required',
-            'salary'         => 'required'
+            'employee_name'         => 'required',
+            'email'                 => 'required|unique:employees,email,' . $id,
+            'nid'                   => 'required|unique:employees,nid,' . $id,
+            'nik'                   => 'required|unique:employees,nik,' . $id,
+            'username'              => 'unique:users,username,' . $id . ',employee_id',
+            'address'               => 'required',
+            'city'                  => 'required',
+            'province'              => 'required',
+            'shift_type'            => 'required',
+            'join_date'             => 'required',
+            'salary'                => 'required',
+            'rate_currency_id'      => 'required',
+            'salary_currency_id'    => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -365,6 +376,8 @@ class EmployeeController extends Controller
         $has_photo          = $request->has_photo;
         $payroll            = $request->payroll;
         $rate_business_trip = str_replace('.', '', $request->rate_business_trip);
+        $rate_currency_id   = $request->rate_currency_id;
+        $salary_currency_id = $request->salary_currency_id;
 
         $employee = Employee::find($id);
         $employee->name                 = $name;
@@ -388,6 +401,8 @@ class EmployeeController extends Controller
         $employee->payroll_type         = $payroll;
         $employee->position             = $request->position;
         $employee->rate_business_trip   = $rate_business_trip;
+        $employee->rate_currency_id     = $rate_currency_id;
+        $employee->salary_currency_id   = $salary_currency_id;
         $employee->save();
 
         DB::beginTransaction();

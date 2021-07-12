@@ -67,6 +67,7 @@ class ContractReceiptController extends Controller
         $length         = $request->limit;
         $no             = $request->name;
         $contract_id    = $request->contract_id;
+        $batchAlreadyTake = ContractReceipt::where('contract_id', $contract_id)->pluck('batch')->toArray();
 
         // Count Data
         $query          = BatchContract::select("*");
@@ -74,6 +75,7 @@ class ContractReceiptController extends Controller
             $query->where("no",$no);
         }
         $query->where("contract_id",$contract_id);
+        $query->whereNotIn('no', $batchAlreadyTake);
 
         $row            = clone $query;
         $recordsTotal   = $row->count();
@@ -127,6 +129,7 @@ class ContractReceiptController extends Controller
             // dd($status_receipts);
             switch ($status_receipts) {
                 case $contractreceipt->status == 'WAITING':
+                case $contractreceipt->status == 'DELIVERY':
                     $class_status = "bg-warning";
                     break;
                 case $contractreceipt->status == 'INPROGRESS':
@@ -222,35 +225,100 @@ class ContractReceiptController extends Controller
             'batch'             => $request->batch,
             'total_batch'       => $total_batch,
             'remarks'           => $request->remarks,
+            'role_id'           => $request->role_id,
             'status'            => 'WAITING',
         ]);
         if ($contractreceipt) {
 
-            if($request->contract_document_receipts){
-                foreach($request->contract_document_receipts as $key => $row){
+            if($request->contract_document_receipts_user){
+                foreach($request->contract_document_receipts_user as $key => $row){
                     $contractdocumentreceipt = ContractDocumentReceipt::create([
                         'contract_receipt_id' => $contractreceipt->id,
                         'batch' => $request->batch,
-                        'document_name' => $request->document_name[$row],
+                        'document_name' => $request->document_name_user[$row],
+                        'document_type' => $request->document_type_user[$key],
                     ]);
 
                     if($contractdocumentreceipt){
-                        if($request->file_contract[$row]){
-                            foreach($request->file_contract[$row] as $keys => $rows){
+                        if($request->file_contract_user[$row]){
+                            foreach($request->file_contract_user[$row] as $keys => $rows){
+                                $lastRevision = ContractDocumentReceiptDetail::where('contract_document_receipt_id', $contractdocumentreceipt->id)->max('revision_number');
                                 $data = [
                                     'contract_document_receipt_id'  => $contractdocumentreceipt->id,
                                     'source' => '',
                                     'upload_date'                   => date("Y-m-d"),
+                                    'status'                        => 'Waiting Approval',
+                                    'revision_number'               => 1
                                 ];
-                                if (isset($request->file('file')[$row])) {
-                                    $file = $request->file('file')[$row][$keys];
+                                if (isset($request->file('file_user')[$row])) {
+                                    $file = $request->file('file_user')[$row][$keys];
                                     $path = 'assets/procurement/contract/recipt/';
                                     if (!file_exists($path)) {
                                         mkdir($path, 0777, true);
                                     }
-                                    $document_name = preg_replace('/[^a-zA-Z0-9_-]+/', '-', strtolower($request->document_name[$row]));
-                                    $file->move($path, $contractreceipt->id."-".$document_name.'-'.$keys.'.'.$file->getClientOriginalExtension());
-                                    $filename = $path.$contractreceipt->id."-".$document_name.'-'.$keys.'.'.$file->getClientOriginalExtension();
+                                    $document_name = preg_replace('/[^a-zA-Z0-9_-]+/', '-', strtolower($request->document_name_user[$row]));
+                                    $file->move($path, $contractreceipt->id."-".$document_name.'-Rev1'.'.'.$file->getClientOriginalExtension());
+                                    $filename = $path.$contractreceipt->id."-".$document_name.'-Rev1'.'.'.$file->getClientOriginalExtension();
+
+                                    $data["source"] = $filename;
+
+                                    $contractdocumentreceiptdetail = ContractDocumentReceiptDetail::create($data);
+
+                                    if(!$contractdocumentreceiptdetail){
+                                        DB::rollback();
+                                        return response()->json([
+                                            'status'    => false,
+                                            'message'   => "failed Insert Contract Document Receipt"
+                                        ], 400);
+                                    }
+                                }
+                            }
+                        }
+                    }else{
+                        DB::rollback();
+                        return response()->json([
+                            'status'    => false,
+                            'message'   => "failed Insert Contract Document Receipt"
+                        ], 400);
+                    }
+                }
+                $countDocument = ContractDocumentReceipt::where('contract_receipt_id', $contractreceipt->id)->count();
+                $countDetail = $this->getUploadedDocument($contractreceipt->id);
+                if ($countDocument == $countDetail) {
+                    $contractreceipt->status = 'INPROGRESS';
+                    $contractreceipt->save();
+                }
+            }
+
+            if($request->contract_document_receipts_safeguard){
+                foreach($request->contract_document_receipts_safeguard as $key => $row){
+                    $contractdocumentreceipt = ContractDocumentReceipt::create([
+                        'contract_receipt_id' => $contractreceipt->id,
+                        'batch' => $request->batch,
+                        'document_name' => $request->document_name_safeguard[$row],
+                        'document_type' => $request->document_type_safeguard[$key],
+                    ]);
+
+                    if($contractdocumentreceipt){
+                        if($request->file_contract_safeguard[$row]){
+                            foreach($request->file_contract_safeguard[$row] as $keys => $rows){
+                                $lastRevision = ContractDocumentReceiptDetail::where('contract_document_receipt_id', $contractdocumentreceipt->id)->max('revision_number');
+                                $data = [
+                                    'contract_document_receipt_id'  => $contractdocumentreceipt->id,
+                                    'source' => '',
+                                    'upload_date'                   => date("Y-m-d"),
+                                    'status'                        => 'Waiting Approval',
+                                    'revision_number'               => 1,
+                                ];
+                                if (isset($request->file('file_safeguard')[$row])) {
+                                    $file = $request->file('file_safeguard')[$row][$keys];
+                                    $path = 'assets/procurement/contract/recipt/';
+                                    if (!file_exists($path)) {
+                                        mkdir($path, 0777, true);
+                                    }
+                                    $document_name = preg_replace('/[^a-zA-Z0-9_-]+/', '-', strtolower($request->document_name_safeguard[$row]));
+                                    $file->move($path, $contractreceipt->id."-".$document_name.'-Rev1'.'.'.$file->getClientOriginalExtension());
+                                    $filename = $path.$contractreceipt->id."-".$document_name.'-Rev1'.'.'.$file->getClientOriginalExtension();
 
                                     $data["source"] = $filename;
 
@@ -335,7 +403,7 @@ class ContractReceiptController extends Controller
     public function edit(Request $request,$id)
     {
         if(in_array('update',$request->actionmenu)){
-            $contractreceipt = ContractReceipt::where("id",$id)->with("contract","warehouse","document","document.detail")->withCount("document")->first();
+            $contractreceipt = ContractReceipt::where("id",$id)->with("contract","warehouse","document","document.detail", "role")->withCount("document")->first();
             foreach($contractreceipt->document as $key => $row){
                 $contractreceipt->document[$key]->date_uploaded = null;
                 foreach($contractreceipt->document[$key]->detail as $detail){
@@ -345,8 +413,24 @@ class ContractReceiptController extends Controller
                     }
                 }
             }
+
+            $safeguardsDocuments    = $contractreceipt->document;
+            $approvedBtn = false;
+            $totalApprove           = 0;
+            foreach ($safeguardsDocuments as $key => $value) {
+                foreach ($value->detail as $keys => $values) {
+                    if ($values->status == 'Approved') {
+                        ++$totalApprove;
+                    }
+                }
+            }
+            $totalSafeguard         = $safeguardsDocuments->count();
+            if ($totalApprove >= $totalSafeguard) {
+                $approvedBtn = true;
+            }
+            // dd($contractreceipt->document->find(100)->detail->sortBy('id'));
             if ($contractreceipt) {
-                return view('admin.contractreceipt.edit', compact('contractreceipt'));
+                return view('admin.contractreceipt.edit', compact('contractreceipt', 'approvedBtn'));
             } else {
                 abort(404);
             }
@@ -390,12 +474,12 @@ class ContractReceiptController extends Controller
 
         if ($contractreceipt->save()) {
 
-            if($request->contract_document_receipts){
-                foreach($request->contract_document_receipts as $key => $row){
-                    if(isset($request->contract_document_receipts_id[$row])){
+            if($request->contract_document_receipts_user){
+                foreach($request->contract_document_receipts_user as $key => $row){
+                    if(isset($request->contract_document_receipts_id_user[$row])){
                         // update
-                        if(count(json_decode($request->deleted_file_id[$row])) > 0){
-                            foreach(json_decode($request->deleted_file_id[$row]) as $deleted){
+                        if(count(json_decode($request->deleted_file_id_user[$row])) > 0){
+                            foreach(json_decode($request->deleted_file_id_user[$row]) as $deleted){
                                 $docdetail = ContractDocumentReceiptDetail::find($deleted);
                                 unlink(public_path($docdetail->source));
                                 if(!$docdetail->delete()){
@@ -408,27 +492,30 @@ class ContractReceiptController extends Controller
                             }
                         }
 
-                        $contractdocumentreceipt = ContractDocumentReceipt::find($request->contract_document_receipts_id[$row]);
+                        $contractdocumentreceipt = ContractDocumentReceipt::find($request->contract_document_receipts_id_user[$row]);
                         $contractdocumentreceipt->batch = $request->batch;
-                        $contractdocumentreceipt->document_name = $request->document_name[$row];
+                        $contractdocumentreceipt->document_name = $request->document_name_user[$row];
 
                         if($contractdocumentreceipt->save()){
-                            if($request->file_contract[$row]){
-                                foreach($request->file_contract[$row] as $keys => $rows){
+                            if($request->file_contract_user[$row]){
+                                foreach($request->file_contract_user[$row] as $keys => $rows){
+                                    $lastRevision = ContractDocumentReceiptDetail::where('contract_document_receipt_id', $contractdocumentreceipt->id)->max('revision_number');
                                     $data = [
                                         'contract_document_receipt_id'  => $contractdocumentreceipt->id,
                                         'source' => '',
                                         'upload_date'                   => date("Y-m-d"),
+                                        'status'                        => 'Waiting Approval',
+                                        'revision_number'               => ++$lastRevision,
                                     ];
-                                    if (isset($request->file('file')[$row])) {
-                                        $file = $request->file('file')[$row][$keys];
+                                    if (isset($request->file('file_user')[$row])) {
+                                        $file = $request->file('file_user')[$row][$keys];
                                         $path = 'assets/procurement/contract/recipt/';
                                         if (!file_exists($path)) {
                                             mkdir($path, 0777, true);
                                         }
-                                        $document_name = preg_replace('/[^a-zA-Z0-9_-]+/', '-', strtolower($request->document_name[$row]));
-                                        $file->move($path, $contractreceipt->id."-".$document_name.'-'.$keys.'.'.$file->getClientOriginalExtension());
-                                        $filename = $path.$contractreceipt->id."-".$document_name.'-'.$keys.'.'.$file->getClientOriginalExtension();
+                                        $document_name = preg_replace('/[^a-zA-Z0-9_-]+/', '-', strtolower($request->document_name_user[$row]));
+                                        $file->move($path, $contractreceipt->id."-".$document_name.'-Rev'.$lastRevision.'.'.$file->getClientOriginalExtension());
+                                        $filename = $path.$contractreceipt->id."-".$document_name.'-Rev'.$lastRevision.'.'.$file->getClientOriginalExtension();
 
                                         $data["source"] = $filename;
 
@@ -456,26 +543,29 @@ class ContractReceiptController extends Controller
                         $contractdocumentreceipt = ContractDocumentReceipt::create([
                             'contract_receipt_id' => $contractreceipt->id,
                             'batch' => $request->batch,
-                            'document_name' => $request->document_name[$row],
+                            'document_name' => $request->document_name_user[$row],
                         ]);
 
                         if($contractdocumentreceipt){
-                            if($request->file_contract[$row]){
-                                foreach($request->file_contract[$row] as $keys => $rows){
+                            if($request->file_contract_user[$row]){
+                                foreach($request->file_contract_user[$row] as $keys => $rows){
+                                    $lastRevision = ContractDocumentReceiptDetail::where('contract_document_receipt_id', $contractdocumentreceipt->id)->max('revision_number');
                                     $data = [
                                         'contract_document_receipt_id'  => $contractdocumentreceipt->id,
                                         'source' => '',
                                         'upload_date'                   => date("Y-m-d"),
+                                        'status'                        => 'Waiting Approval',
+                                        'revision_number'               => ++$lastRevision,
                                     ];
-                                    if (isset($request->file('file')[$row])) {
-                                        $file = $request->file('file')[$row][$keys];
+                                    if (isset($request->file('file_user')[$row])) {
+                                        $file = $request->file('file_user')[$row][$keys];
                                         $path = 'assets/procurement/contract/recipt/';
                                         if (!file_exists($path)) {
                                             mkdir($path, 0777, true);
                                         }
-                                        $document_name = preg_replace('/[^a-zA-Z0-9_-]+/', '-', strtolower($request->document_name[$row]));
-                                        $file->move($path, $contractreceipt->id."-".$document_name.'-'.$keys.'.'.$file->getClientOriginalExtension());
-                                        $filename = $path.$contractreceipt->id."-".$document_name.'-'.$keys.'.'.$file->getClientOriginalExtension();
+                                        $document_name = preg_replace('/[^a-zA-Z0-9_-]+/', '-', strtolower($request->document_name_user[$row]));
+                                        $file->move($path, $contractreceipt->id."-".$document_name.'-Rev'.$lastRevision.'.'.$file->getClientOriginalExtension());
+                                        $filename = $path.$contractreceipt->id."-".$document_name.'-Rev'.$lastRevision.'.'.$file->getClientOriginalExtension();
 
                                         $data["source"] = $filename;
 
@@ -506,6 +596,144 @@ class ContractReceiptController extends Controller
                     $contractreceipt->status = 'INPROGRESS';
                     $contractreceipt->save();
                 }
+            }
+            if($request->contract_document_receipts_safeguard){
+                foreach($request->contract_document_receipts_safeguard as $key => $row){
+                    if(isset($request->contract_document_receipts_id_safeguard[$row])){
+                        // update
+                        if(count(json_decode($request->deleted_file_id_safeguard[$row])) > 0){
+                            foreach(json_decode($request->deleted_file_id_safeguard[$row]) as $deleted){
+                                $docdetail = ContractDocumentReceiptDetail::find($deleted);
+                                unlink(public_path($docdetail->source));
+                                if(!$docdetail->delete()){
+                                    DB::rollback();
+                                    return response()->json([
+                                        'status'    => false,
+                                        'message'   => "Failed delete contract document receipt"
+                                    ], 400);
+                                }
+                            }
+                        }
+
+                        $contractdocumentreceipt = ContractDocumentReceipt::find($request->contract_document_receipts_id_safeguard[$row]);
+                        $contractdocumentreceipt->batch = $request->batch;
+                        $contractdocumentreceipt->document_name = $request->document_name_safeguard[$row];
+
+                        if($contractdocumentreceipt->save()){
+                            if($request->file_contract_safeguard[$row]){
+                                foreach($request->file_contract_safeguard[$row] as $keys => $rows){
+                                    $lastRevision = ContractDocumentReceiptDetail::where('contract_document_receipt_id', $contractdocumentreceipt->id)->max('revision_number');
+                                    $data = [
+                                        'contract_document_receipt_id'  => $contractdocumentreceipt->id,
+                                        'source' => '',
+                                        'upload_date'                   => date("Y-m-d"),
+                                        'status'                        => 'Waiting Approval',
+                                        'revision_number'               => ++$lastRevision,
+                                    ];
+                                    if (isset($request->file('file_safeguard')[$row])) {
+                                        $file = $request->file('file_safeguard')[$row][$keys];
+                                        $path = 'assets/procurement/contract/recipt/';
+                                        if (!file_exists($path)) {
+                                            mkdir($path, 0777, true);
+                                        }
+                                        $document_name = preg_replace('/[^a-zA-Z0-9_-]+/', '-', strtolower($request->document_name_safeguard[$row]));
+                                        $file->move($path, $contractreceipt->id."-".$document_name.'-Rev'.$lastRevision.'.'.$file->getClientOriginalExtension());
+                                        $filename = $path.$contractreceipt->id."-".$document_name.'-Rev'.$lastRevision.'.'.$file->getClientOriginalExtension();
+
+                                        $data["source"] = $filename;
+
+                                        $contractdocumentreceiptdetail = ContractDocumentReceiptDetail::create($data);
+
+                                        if(!$contractdocumentreceiptdetail){
+                                            DB::rollback();
+                                            return response()->json([
+                                                'status'    => false,
+                                                'message'   => "Failed add contract document receipt"
+                                            ], 400);
+                                        }
+                                    }
+                                }
+                            }
+                        }else{
+                            DB::rollback();
+                            return response()->json([
+                                'status'    => false,
+                                'message'   => "Failed update contract document receipt"
+                            ], 400);
+                        }
+                    }else{
+                        // add new
+                        $contractdocumentreceipt = ContractDocumentReceipt::create([
+                            'contract_receipt_id' => $contractreceipt->id,
+                            'batch' => $request->batch,
+                            'document_name' => $request->document_name_user[$row],
+                        ]);
+
+                        if($contractdocumentreceipt){
+                            if($request->file_contract_user[$row]){
+                                foreach($request->file_contract_user[$row] as $keys => $rows){
+                                    $lastRevision = ContractDocumentReceiptDetail::where('contract_document_receipt_id', $contractdocumentreceipt->id)->max('revision_number');
+                                    $data = [
+                                        'contract_document_receipt_id'  => $contractdocumentreceipt->id,
+                                        'source' => '',
+                                        'upload_date'                   => date("Y-m-d"),
+                                        'status'                        => 'Waiting Approval',
+                                        'revision_number'               => ++$lastRevision,
+                                    ];
+                                    if (isset($request->file('file_user')[$row])) {
+                                        $file = $request->file('file_user')[$row][$keys];
+                                        $path = 'assets/procurement/contract/recipt/';
+                                        if (!file_exists($path)) {
+                                            mkdir($path, 0777, true);
+                                        }
+                                        $document_name = preg_replace('/[^a-zA-Z0-9_-]+/', '-', strtolower($request->document_name_user[$row]));
+                                        $file->move($path, $contractreceipt->id."-".$document_name.'-Rev'.$lastRevision.'.'.$file->getClientOriginalExtension());
+                                        $filename = $path.$contractreceipt->id."-".$document_name.'-Rev'.$lastRevision.'.'.$file->getClientOriginalExtension();
+
+                                        $data["source"] = $filename;
+
+                                        $contractdocumentreceiptdetail = ContractDocumentReceiptDetail::create($data);
+
+                                        if(!$contractdocumentreceiptdetail){
+                                            DB::rollback();
+                                            return response()->json([
+                                                'status'    => false,
+                                                'message'   => "Failed add contract document receipt"
+                                            ], 400);
+                                        }
+                                    }
+                                }
+                            }
+                        }else{
+                            DB::rollback();
+                            return response()->json([
+                                'status'    => false,
+                                'message'   => "Failed add contract document receipt"
+                            ], 400);
+                        }
+                    }
+                }
+                $countDocument = ContractDocumentReceipt::where('contract_receipt_id', $contractreceipt->id)->count();
+                $countDetail = $this->getUploadedDocument($contractreceipt->id);
+                if ($countDocument == $countDetail) {
+                    $contractreceipt->status = 'INPROGRESS';
+                    $contractreceipt->save();
+                }
+            }
+
+            $safeguardsDocuments    = $contractreceipt->document->where('document_type', 'safeguard');
+            $totalApprove           = 0;
+            foreach ($safeguardsDocuments as $key => $value) {
+                foreach ($value->detail as $keys => $values) {
+                    if ($values->status == 'Approved') {
+                        ++$totalApprove;
+                    }
+                }
+            }
+            $totalSafeguard         = $safeguardsDocuments->count();
+            if ($totalApprove >= $totalSafeguard) {
+                $contractreceipt->status    = 'DELIVERY';
+                $contractreceipt->save();
             }
 
             if ($request->status == 'COMPLETED') {
@@ -570,5 +798,52 @@ class ContractReceiptController extends Controller
             'name'      => $filename,
             'message'   => "Success Download Document",
           ], 200);
+    }
+
+    public function approval(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'type'          => 'required',
+            'document_id'   => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status'    => false,
+                'message'   => $validator->errors()->first()
+            ], 400);
+        }
+
+        DB::beginTransaction();
+        try {
+            $document = ContractDocumentReceiptDetail::find($request->document_id);
+            $document->status   = $request->type;
+            $document->save();
+
+            try {
+                if ($document->status == 'Approved') {
+                    $updateAnother = ContractDocumentReceiptDetail::where('contract_document_receipt_id', $document->contract_document_receipt_id)->where('id', '<>', $request->document_id);
+                    $updateAnother->update(['status' => 'Rejected']);
+                }
+            } catch (\Illuminate\Database\QueryException $ex) {
+                DB::rollBack();
+                return response()->json([
+                    'status'    => false,
+                    'message'   => 'Failed to approve / reject document',
+                ], 400);
+            }
+        } catch (\Illuminate\Database\QueryException $ex) {
+            DB::rollBack();
+            return response()->json([
+                'status'    => false,
+                'message'   => 'Failed to approve / reject document',
+            ], 400);
+        }
+        
+        DB::commit();
+        return response()->json([
+            'status'    => true,
+            'message'   => "Success approve / reject document",
+        ], 200);
     }
 }

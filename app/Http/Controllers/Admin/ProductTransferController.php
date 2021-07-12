@@ -23,7 +23,7 @@ class ProductTransferController extends Controller
         $parent = Menu::find($menu->parent_id);
         View::share('parent_name', $parent->menu_name);
         View::share('menu_name', $menu->menu_name);
-        View::share('menu_active', url('admin' . 'producttransfer'));
+        View::share('menu_active', url('admin/' . 'producttransfer'));
         $this->middleware('accessmenu', ['except' => ['select']]);
     }
 

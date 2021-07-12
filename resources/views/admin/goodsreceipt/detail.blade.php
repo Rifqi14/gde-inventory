@@ -8,7 +8,7 @@
 <div class="row mb-3 mt-3">
   <div class="col-sm-4">
     <h1 id="title-branch" class="m-0 text-dark">
-        Detail {{ $menu_name }}
+      Detail {{ $menu_name }}
     </h1>
   </div>
   <div class="col-sm-8">
@@ -97,7 +97,7 @@
               <span class="title">
                 <hr>
                 <h5 class="text-md text-dark text-uppercase">Product Information</h5>
-              </span>              
+              </span>
               <div class="form-group">
                 <table id="table-product" class="table table-striped datatable" width="100%">
                   <thead>
@@ -107,7 +107,7 @@
                       <th width="10%" class="text-right">Qty Order</th>
                       <th width="10%" class="text-right">Qty Receipt</th>
                       <th width="10%">Rack</th>
-                      <th width="10%">Bin</th>                      
+                      <th width="10%">Bin</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -126,7 +126,7 @@
               <span class="title">
                 <hr>
                 <h5 class="text-md text-dark text-uppercase">Supporting Document</h5>
-              </span>              
+              </span>
               <ul class="nav nav-tabs" id="suppDocumentTab" role="tablist">
                 <li class="nav-item">
                   <button type="button" class="nav-link active pl-4 pr-4" id="document-tab" data-toggle="tab" data-target="#document" role="tab" aria-controls="document" aria-selected="true"><b>Document</b></button>
@@ -136,13 +136,13 @@
                 </li>
               </ul>
               <div class="tab-content" id="suppDocumentTabContent">
-                <div class="tab-pane fade show active" id="document" role="tabpanel" aria-labelledby="document-tab">                  
+                <div class="tab-pane fade show active" id="document" role="tabpanel" aria-labelledby="document-tab">
                   <div class="form-group">
                     <table id="table-document" class="table table-striped datatable" width="100%">
                       <thead>
                         <tr>
                           <th width="50%">Document Name</th>
-                          <th width="50%">File</th>                          
+                          <th width="50%">File</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -153,13 +153,13 @@
                     </table>
                   </div>
                 </div>
-                <div class="tab-pane fade show" id="photo" role="tabpanel" aria-labelledby="photo-tab">                  
+                <div class="tab-pane fade show" id="photo" role="tabpanel" aria-labelledby="photo-tab">
                   <div class="form-group">
                     <table id="table-photo" class="table table-striped datatable" width="100%">
                       <thead>
                         <tr>
                           <th width="50%">Photo Name</th>
-                          <th width="50%">File</th>                          
+                          <th width="50%">File</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -172,7 +172,7 @@
                 </div>
               </div>
             </div>
-            <div class="card-footer text-right">              
+            <div class="card-footer text-right">
               <a href="{{ route('goodsreceipt.index') }}" class="btn btn-secondary color-palette btn-labeled legitRipple text-sm">
                 <b><i class="fas fa-times"></i></b>
                 Cancel
@@ -236,7 +236,17 @@
 
     $('.summernote').summernote({
       height: 145,
-      toolbar: []
+      toolbar: [
+        ['style', ['style']],
+        ['font-style', ['bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'clear']],
+        ['font', ['fontname']],
+        ['font-size', ['fontsize']],
+        ['font-color', ['color']],
+        ['para', ['ul', 'ol', 'paragraph']],
+        ['table', ['table']],
+        ['insert', ['link', 'picture', 'video', 'hr']],
+        ['misc', ['fullscreen', 'codeview', 'help']]
+      ]
     });
     
     $('.summernote').summernote('disable');
@@ -355,7 +365,7 @@
   });
 
   const initData = () => {
-    var products = @json($data->contractref?$data->contractref:$data->borrowingref);
+    var products = @json(count($data->contractref) > 0?$data->contractref:$data->borrowingref);
     var files    = @json($data->files);
     var images   = @json($data->images);
 

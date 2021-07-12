@@ -71,9 +71,12 @@ Create {{ @$menu_name }} Request
                     <div class="form-group">
                       <div class="input-group">
                         <div class="input-group-prepend">
-                          <span class="input-group-text">
+                          <select name="transport_currency_id" id="transport_currency_id" class="form-control select2 currency_id" aria-placeholder="Sym">
+                            <option value="">Sym</option>
+                          </select>
+                          {{-- <span class="input-group-text">
                             Rp.
-                          </span>
+                          </span> --}}
                         </div>
                         <input type="text" name="depart_price" class="form-control input-price text-right depart-price" id="depart-price" placeholder="Enter price" value="0" maxlength="14" required>
                       </div>
@@ -123,9 +126,12 @@ Create {{ @$menu_name }} Request
                     <div class="form-group">
                       <div class="input-group">
                         <div class="input-group-prepend">
-                          <span class="input-group-text">
+                          <select name="returning_currency_id" id="returning_currency_id" class="form-control select2 currency_id" aria-placeholder="Sym">
+                            <option value="">Sym</option>
+                          </select>
+                          {{-- <span class="input-group-text">
                             Rp.
-                          </span>
+                          </span> --}}
                         </div>
                         <input type="text" name="returning_price" class="form-control input-price text-right returning-price" id="returning-price" placeholder="Enter price" value="0" maxlength="14" required>
                       </div>
@@ -222,9 +228,9 @@ Create {{ @$menu_name }} Request
                   <div class="col-md-3">
                     <div class="input-group">
                       <div class="input-group-prepend">
-                        <span class="input-group-text">
-                          Rp.
-                        </span>
+                        <select name="lodging_currency_id" id="lodging_currency_id" class="form-control select2 currency_id" aria-placeholder="Sym">
+                          <option value="">Sym</option>
+                        </select>
                       </div>
                       <input type="text" class="form-control input-price text-right price-lodging" id="price-lodging" name="price_lodging" placeholder="Enter price" value="0" maxlength="14" required>
                     </div>
@@ -329,7 +335,9 @@ Create {{ @$menu_name }} Request
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <span class="input-group-text">
-                      Rp.
+                      @if (Auth::guard('admin')->user()->employees)
+                      {{ Auth::guard('admin')->user()->employees->ratecurrency->symbol }}
+                      @endif
                     </span>
                   </div>
                   <input type="text" class="form-control input-price text-right" id="rate" name="rate" placeholder="Enter rate" value="0" maxlength="14" readonly>
@@ -337,12 +345,14 @@ Create {{ @$menu_name }} Request
               </div>
               <div class="form-group">
                 <label for="">Estimated Cost:</label>
-                <div class="input-group">
+                @foreach ($currencies as $currency)
+                <div class="input-group mt-2">
                   <div class="input-group-prepend">
-                    <span class="input-group-text">Rp.</span>
+                    <span class="input-group-text">{{ $currency->symbol }}</span>
                   </div>
-                  <input type="text" class="form-control input-price text-right" name="total_cost" id="total-cost" placeholder="Automatically calculated" value="0" readonly>
+                  <input type="text" class="form-control input-price text-right" name="total_cost" id="total-cost-{{ strtolower($currency->currency) }}" placeholder="Automatically calculated" value="0" data-id="{{ $currency->id }}" readonly>
                 </div>
+                @endforeach
               </div>
               <div class="form-group row">
                 <div class="col-md-12">
@@ -395,8 +405,17 @@ Create {{ @$menu_name }} Request
       username     = "{{Auth::guard('admin')->user()->name}}",
       employeeRate = 0;
 
-  $(function() {       
+  const formatCountry = (currency) => {
+      console.log(currency);
+      if (!currency.code) { return currency.text; }
+      var $currency = $(
+      '<span class="flag-icon flag-icon-'+ currency.code.toLowerCase() +' flag-icon-squared"></span>' +
+      '&nbsp;&nbsp;&nbsp;<span class="flag-text">'+ currency.text+"</span>"
+      );
+      return $currency;
+  }
 
+  $(function() {       
     $('.summernote').summernote({
       height: 145,
       toolbar: [
@@ -574,10 +593,45 @@ Create {{ @$menu_name }} Request
       sumRate();
     });
 
+    
     employee();
     initSelect2();
     initInputPrice(); 
-
+    
+    $(".currency_id").select2({
+        ajax: {
+            url: "{{route('currency.select')}}",
+            type: 'GET',
+            dataType: 'json',
+            data: function(params) {
+                return {
+                    name: params.term,
+                    page: params.page,
+                    limit: 30,
+                };
+            },
+            processResults: function(data, params) {
+                params.page = params.page || 1;
+                var more = (params.page * 30) < data.total;
+                var option = [];
+                $.each(data.rows, function(index, item) {
+                    option.push({
+                        id: item.id,
+                        text: item.symbol,
+                        code: item.country ? item.country.code : item.country_id,
+                    });
+                });
+                return {
+                    results: option,
+                    pagination: {
+                        more: more,
+                    }
+                };
+            },
+        },
+        templateResult: formatCountry,
+        allowClear: true,
+    });
 
     // SUBMIT ACTION
     $("#form").validate({
@@ -792,6 +846,41 @@ Create {{ @$menu_name }} Request
     $('.select2').select2({
       allowClear: true
     });
+
+    $(".currency_id").select2({
+        ajax: {
+            url: "{{route('currency.select')}}",
+            type: 'GET',
+            dataType: 'json',
+            data: function(params) {
+                return {
+                    name: params.term,
+                    page: params.page,
+                    limit: 30,
+                };
+            },
+            processResults: function(data, params) {
+                params.page = params.page || 1;
+                var more = (params.page * 30) < data.total;
+                var option = [];
+                $.each(data.rows, function(index, item) {
+                    option.push({
+                        id: item.id,
+                        text: item.symbol,
+                        code: item.country ? item.country.code : item.country_id,
+                    });
+                });
+                return {
+                    results: option,
+                    pagination: {
+                        more: more,
+                    }
+                };
+            },
+        },
+        templateResult: formatCountry,
+        allowClear: true,
+    });
   }
 
   function initRequestVehicle() {
@@ -889,9 +978,9 @@ Create {{ @$menu_name }} Request
                     <div class="form-group">                      
                       <div class="input-group">
                         <div class="input-group-prepend">
-                          <span class="input-group-text">
-                            Rp.
-                          </span>
+                          <select name="transport_currency_id" class="form-control select2 currency_id" aria-placeholder="Sym">
+                            <option value="">Sym</option>
+                          </select>
                         </div>
                         <input type="text" name="depart_price" class="form-control input-price text-right depart-price" placeholder="Enter price" value="0" maxlenght="14" required>
                       </div>
@@ -933,9 +1022,9 @@ Create {{ @$menu_name }} Request
                     <div class="form-group">                      
                       <div class="input-group">
                         <div class="input-group-prepend">
-                          <span class="input-group-text">
-                            Rp.
-                          </span>
+                          <select name="returning_currency_id" class="form-control select2 currency_id" aria-placeholder="Sym">
+                            <option value="">Sym</option>
+                          </select>
                         </div>
                         <input type="text" class="form-control input-price text-right returning-price" name="returning_price" placeholder="Enter price" value="0" maxlength="14" required>
                       </div>
@@ -1034,9 +1123,9 @@ Create {{ @$menu_name }} Request
                   <div class="col-md-3">
                     <div class="input-group">
                       <div class="input-group-prepend">
-                        <span class="input-group-text">
-                          Rp.
-                        </span>
+                        <select name="lodging_currency_id" class="form-control select2 currency_id" aria-placeholder="Sym">
+                          <option value="">Sym</option>
+                        </select>
                       </div>
                       <input type="text" class="form-control input-price text-right price-lodging" id="price-lodging" name="price_lodging" placeholder="Enter price" value="0" maxlength="14" required>
                     </div>
@@ -1051,6 +1140,7 @@ Create {{ @$menu_name }} Request
                   </div>
                 </div>`;
     $('#form-lodging').append(html);
+    initSelect2();
     initInputPrice();
   }
 
@@ -1070,9 +1160,9 @@ Create {{ @$menu_name }} Request
                   <div class="col-md-3">
                     <div class="input-group">
                       <div class="input-group-prepend">
-                        <span class="input-group-text">
-                          Rp.
-                        </span>
+                        <select name="other_currency_id" class="form-control select2 currency_id" aria-placeholder="Sym">
+                          <option value="">Sym</option>
+                        </select>
                       </div>
                       <input type="text" class="form-control input-price text-right others-price" id="others-price" name="others_price" placeholder="Enter price" value="0" maxlength="14" required>
                     </div>
@@ -1087,6 +1177,7 @@ Create {{ @$menu_name }} Request
                   </div>
                 </div>`;
     $('#form-others').append(html);
+    initSelect2();
     initInputPrice();
   }
 

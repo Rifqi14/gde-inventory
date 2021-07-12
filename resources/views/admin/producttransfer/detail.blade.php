@@ -5,12 +5,12 @@
 <div class="row mb-3 mt-3">
     <div class="col-sm-4">
         <h1 id="title-branch" class="m-0 text-dark">
-            Product Transfer
+            {{ @$menu_name }}
         </h1>
     </div>
     <div class="col-sm-8">
         <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
-        <li class="breadcrumb-item">{{ @$parent_name }}</li>
+            <li class="breadcrumb-item">{{ @$parent_name }}</li>
             <li class="breadcrumb-item">{{ @$menu_name }}</li>
             <li class="breadcrumb-item">Detail</li>
         </ol>
@@ -112,7 +112,7 @@
                                             <th width="200">Product Name</th>
                                             <th width="15" class="text-center">UOM</th>
                                             <th width="15" class="text-center">Qty System</th>
-                                            <th width="10" class="text-center">Qty Transfer</th>                                            
+                                            <th width="10" class="text-center">Qty Transfer</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -142,13 +142,13 @@
                             </li>
                         </ul>
                         <div class="tab-content" id="suppDocumentTabContent">
-                            <div class="tab-pane fade show active" id="document" role="tabpanel" aria-labelledby="document-tab">                                
+                            <div class="tab-pane fade show active" id="document" role="tabpanel" aria-labelledby="document-tab">
                                 <!-- TABLE DOCUMENT -->
                                 <table id="table-document" class="table table-striped datatable mt-3" width="100%">
                                     <thead>
                                         <tr>
                                             <th width="45%">Document Name</th>
-                                            <th width="45%" class="text-center">File</th>                                            
+                                            <th width="45%" class="text-center">File</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -158,13 +158,13 @@
                                     </tbody>
                                 </table>
                             </div>
-                            <div class="tab-pane fade show" id="photo" role="tabpanel" aria-labelledby="photo-tab">                                
+                            <div class="tab-pane fade show" id="photo" role="tabpanel" aria-labelledby="photo-tab">
                                 <!-- TABLE PHOTO -->
                                 <table id="table-photo" class="table table-striped datatable mt-3" width="100%">
                                     <thead>
                                         <tr>
                                             <th width="45%">Photo Name</th>
-                                            <th width="45%" class="text-center">File</th>                                            
+                                            <th width="45%" class="text-center">File</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -192,7 +192,8 @@
 @section('scripts')
 <script>
     $(function() {
-        var originSiteID = {{$data->origin_site_id?$data->origin_site_id:null}},
+        var dataTransfer = @json($data),
+            originSiteID = {{$data->origin_site_id?$data->origin_site_id:null}},
             destSiteID   = {{$data->destination_site_id?$data->destination_site_id:null}},
             originWareID = {{$data->origin_warehouse_id?$data->origin_warehouse_id:null}},
             destWareID   = {{$data->destination_warehouse_id?$data->destination_warehouse_id:null}},
@@ -225,6 +226,8 @@
         }
 
         $('.form-status').append(`<span class="badge ${badgeCol} text-sm" style="text-transform: capitalize;">${state}</span>`);
+
+        initDocuments();
 
         $('.select2').select2({
             allowClear: true
@@ -445,5 +448,92 @@
             });
         }
     });
+
+    function initDocuments() {
+       var  dataProducts  = @json($data->products),
+            dataFiles     = @json($data->files),
+            dataImages    = @json($data->images); 
+            
+        // Init Products
+        if(dataProducts.length > 0){
+            var html  = ``,        
+                table = $('#table-product > tbody');
+
+            $.each(dataProducts, function (index, value) { 
+                 var id          = value.product_id,
+                     productName = value.product_name,
+                     categoryID  = value.product_category_id,
+                     uomID       = value.uom_id,
+                     uom         = value.uom_name,
+                     qtySystem   = value.qty_system,
+                     qtyRequest  = value.qty_requested;
+
+                 html += `<tr class="product-item">
+                            <input type="hidden" class="item-product" value="${id}" data-category-id="${categoryID}" data-uom-id="${uomID}" data-qty-system="${qtySystem}" data-qty-request="0">
+                            <td width="100">${productName}</td>
+                            <td class="text-center" width="15">${uom}</td>
+                            <td class="text-right" width="15">${qtySystem}</td>
+                            <td class="text-right" width="15">${qtyRequest}</td>                            
+                        </tr>`;            
+            });
+
+            table.find('.no-available-data').remove();
+            table.append(html);
+        }
+        
+        // Init Files
+        if(dataFiles.length > 0){
+            var html  = ``,
+                table = $('#table-document > tbody');
+            $.each(dataFiles, function (index, value) { 
+                var id          = value.id,
+                    borrowingID = value.product_transfer_id,
+                    docName     = value.document_name,
+                    docFile     = value.file,
+                    path        = `{{asset('assets/producttransfer/${borrowingID}/document/${docFile}')}}`;
+
+                html += `<tr class="document-item">
+                            <td>${docName}</td>
+                            <td class="doc-cell">
+                                <div class="input-group download">
+                                    <a href="${path}" target="_blank">
+                                        <b><i class="fas fa-download"></i></b> Download File
+                                    </a>                                
+                                </div>
+                            </td>                            
+                        </tr>`;            
+            });            
+            
+            table.find('.no-available-data').remove();
+            table.append(html);            
+        }
+
+        // Init Images
+        if(dataImages.length > 0){
+            var html  = ``,
+                table = $('#table-photo > tbody');
+
+            $.each(dataImages, function (index, value) { 
+                var borrowingID = value.product_transfer_id,
+                    imageName   = value.document_name,
+                    imageFile   = value.file,
+                    path        = `assets/producttransfer/${borrowingID}/image/${imageFile}`;
+
+                html += `<tr class="photo-item">
+                            <td>${imageName}</td>
+                            <td class="doc-cell">
+                                <div class="input-group download">
+                                    <a href="${path}" target="_blank">
+                                        <b><i class="fas fa-download"></i></b> Download File
+                                    </a>                                
+                                </div>
+                            </td>                            
+                        </tr>`;            
+            });            
+            
+            table.find('.no-available-data').remove();
+            table.append(html);            
+        }                
+    }  
 </script>
 @endsection

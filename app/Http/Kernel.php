@@ -67,6 +67,8 @@ class Kernel extends HttpKernel
         'accesssitemenu' => \App\Http\Middleware\AccessSiteMenu::class,
         //Xss
         'XssSanitization' => \App\Http\Middleware\XssSanitization::class,
+        'jwt.auth' => \Tymon\JWTAuth\Http\Middleware\Authenticate::class,
+        'jwt.refresh' => \Tymon\JWTAuth\Http\Middleware\RefreshToken::class,
     ];
 
     /**

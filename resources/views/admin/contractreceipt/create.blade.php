@@ -104,8 +104,17 @@
                   <div class="form-group row">
                     <label for="batch_id" class="col-md-12 col-xs-12 control-label">Batch</label>
                     <div class="col-sm-12 controls">
-                      <select name="batch" id="batch_id" class="form-control select2" required disabled data-placeholder="Select Batch">
+                      <select name="batch" id="batch_id" class="form-control select2" required data-placeholder="Select Batch">
 
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-6">
+                  <div class="form-group row">
+                    <label for="role_id" class="col-md-12 col-xs-12 control-label">User</label>
+                    <div class="col-sm-12 controls">
+                      <select name="role_id" id="role_id" class="form-control select2" required data-placeholder="Select User">
                       </select>
                     </div>
                   </div>
@@ -136,14 +145,13 @@
             <div class="card-body">
               <span class="title">
                 <hr>
-                <h5 class="text-md text-dark text-bold">Document List</h5>
+                <h5 class="text-md text-dark text-bold">Safeguard Document</h5>
               </span>
               <div class="mt-5"></div>
-              <button type="button" id="add-document" class="btn btn-labeled text-sm btn-sm btn-outline-primary btn-flat btn-block legitRipple" onclick="addDocument()">Add</button>
-              <table id="table-document" class="table table-striped datatable" width="100%">
+              <button type="button" id="add-document" class="btn btn-labeled text-sm btn-sm btn-outline-primary btn-flat btn-block legitRipple" onclick="addDocument('safeguard')">Add</button>
+              <table id="table-document-safeguard" class="table table-striped datatable" width="100%">
                 <thead>
                   <tr>
-                    <th width="5%" class="text-center">No.</th>
                     <th width="40%">Document Name</th>
                     <th width="40%">Upload Document</th>
                     <th width="10%" class="text-center">Upload Date</th>
@@ -151,20 +159,80 @@
                   </tr>
                 </thead>
                 <tbody>
-                  @for ($i = 1; $i <= 11; $i++) <tr data-number="{{ $i }}">
-                    <td class="text-center">
-                      <div class="mb-1"></div>
-                      {{ $i }}
-                    </td>
+                  @php
+                  $documentName = [
+                  'Berita Acara Site Visit',
+                  'Berita Acara Inspeksi Kendaraan',
+                  'Receiving Notice',
+                  'Journey Management Plan',
+                  'Permit to Work (Lifting Plan, JSA, SOP)',
+                  ];
+                  @endphp
+                  @for ($i = 1; $i <= 5; $i++) <tr data-number="{{ $i }}">
                     <td>
-                      <input type="hidden" name="contract_document_receipts[]" value="{{ $i }}">
-                      <input type="text" class="form-control" id="document_name_{{ $i }}" name="document_name[{{ $i }}]" placeholder="Document Name" aria-required="true">
+                      <input type="hidden" name="contract_document_receipts_safeguard[]" value="{{ $i }}">
+                      <input type="hidden" name="document_type_safeguard[]" value="safeguard">
+                      <input type="text" class="form-control" id="document_name_safeguard{{ $i }}" name="document_name_safeguard[{{ $i }}]" placeholder="Document Name" value="{{ $documentName[$i-1] }}" readonly aria-required="true">
                     </td>
                     <td>
                       <div class="input-group">
                         <div class="custom-file">
-                          <input type="hidden" name="file_contract[{{ $i }}][]">
-                          <input type="file" class="custom-file-input" name="file[{{ $i }}][]" onchange="changePath(this)">
+                          <input type="hidden" name="file_contract_safeguard[{{ $i }}][]">
+                          <input type="file" class="custom-file-input" name="file_safeguard[{{ $i }}][]" onchange="changePath(this)">
+                          <label class="custom-file-label" for="exampleInputFile">Attach Image</label>
+                        </div>
+                        <div class="input-group-append">
+                          <span class="input-group-text" id=""><i class="fa fa-upload"></i></span>
+                        </div>
+                        <button type="button" class="btn btn-transparent text-md" onclick="addUpload($(this))" data-doc="{{ $i }}">
+                          <i class="fas fa-plus text-green color-palette"></i>
+                        </button>
+                      </div>
+                    </td>
+                    <td class="text-center">
+                      <div class="mb-1"></div>
+                      {{ date("d/m/Y") }}
+                    </td>
+                    <td class="text-center">
+                      {{-- <button type="button" class="btn btn-transparent text-md" onclick="removeDocument($(this))" data-document="{{ $i }}">
+                      <i class="fas fa-trash text-maroon color-palette"></i>
+                      </button> --}}
+                      <div class="mb-1"></div>
+                      #
+                    </td>
+                    </tr>
+                    @endfor
+                </tbody>
+              </table>
+            </div>
+            <div class="card-body">
+              <span class="title">
+                <hr>
+                <h5 class="text-md text-dark text-bold">User Document</h5>
+              </span>
+              <div class="mt-5"></div>
+              <button type="button" id="add-document" class="btn btn-labeled text-sm btn-sm btn-outline-primary btn-flat btn-block legitRipple" onclick="addDocument('user')">Add</button>
+              <table id="table-document-user" class="table table-striped datatable" width="100%">
+                <thead>
+                  <tr>
+                    <th width="40%">Document Name</th>
+                    <th width="40%">Upload Document</th>
+                    <th width="10%" class="text-center">Upload Date</th>
+                    <th width="5%" class="text-center">#</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for ($i = 1; $i <= 6; $i++) <tr data-number="{{ $i }}" data-type="user_document">
+                    <td>
+                      <input type="hidden" name="contract_document_receipts_user[]" value="{{ $i }}">
+                      <input type="hidden" name="document_type_user[]" value="user">
+                      <input type="text" class="form-control" id="document_name_user{{ $i }}" name="document_name_user[{{ $i }}]" placeholder="Document Name" aria-required="true">
+                    </td>
+                    <td>
+                      <div class="input-group">
+                        <div class="custom-file">
+                          <input type="hidden" name="file_contract_user[{{ $i }}][]">
+                          <input type="file" class="custom-file-input" name="file_user[{{ $i }}][]" onchange="changePath(this)">
                           <label class="custom-file-label" for="exampleInputFile">Attach Image</label>
                         </div>
                         <div class="input-group-append">
@@ -228,24 +296,21 @@
     });
   }
 
-  const addDocument = () => {
-    var number  = $('table').find('tr:last').data('number') ? $('table').find('tr:last').data('number') + 1 : 1;
+  const addDocument = (type) => {
+    var number  = $(`#table-document-${type}`).find('tr:last').data('number') ? $(`#table-document-${type}`).find('tr:last').data('number') + 1 : 1;
     var dateNow = moment().format('DD/MM/YYYY');
     var html = `
     <tr data-number="${number}">
-      <td class="text-center">
-        <div class="mb-1"></div>
-        ${number}
-      </td>
       <td>
-        <input type="hidden" name="contract_document_receipts[]" value="${number}">
-        <input type="text" class="form-control" id="document_name_${number}" name="document_name[${number}]" placeholder="Document Name" aria-required="true">
+        <input type="hidden" name="contract_document_receipts_${type}[]" value="${number}">
+        <input type="hidden" name="document_type_${type}[]" value="${type}">
+        <input type="text" class="form-control" id="document_name_${number}" name="document_name_${type}[${number}]" placeholder="Document Name" aria-required="true">
       </td>
       <td>
         <div class="input-group">
           <div class="custom-file">
-            <input type="hidden" name="file_contract[${number}][]">
-            <input type="file" class="custom-file-input" name="file[${number}][]" onchange="changePath(this)">
+            <input type="hidden" name="file_contract_${type}[${number}][]">
+            <input type="file" class="custom-file-input" name="file_${type}[${number}][]" onchange="changePath(this)">
             <label class="custom-file-label" for="exampleInputFile">Attach Image</label>
           </div>
           <div class="input-group-append">
@@ -261,14 +326,14 @@
         ${dateNow}
       </td>
       <td class="text-center">
-        <button type="button" class="btn btn-transparent text-md" onclick="removeDocument($(this))" data-document=${number}>
+        <button type="button" class="btn btn-transparent text-md" onclick="removeDocument($(this))" data-document=${number} data-type="${type}">
           <i class="fas fa-trash text-maroon color-palette"></i>
         </button>
       </td>
     </tr>
     `;
-    $('#table-document tbody .empty').remove();
-    $('#table-document tbody').append(html);
+    $(`#table-document-${type} tbody .empty`).remove();
+    $(`#table-document-${type} tbody`).append(html);
   }
 
   const addUpload = (e) => {
@@ -302,16 +367,17 @@
   }
 
   const removeDocument = (a) => {
-    var number = a.attr('data-document');
-    $("#table-document tbody").find("tr[data-number="+number+"]").remove();
-    var is_empty  = !$.trim($("#table-document tbody").html());
+    var number  = a.attr('data-document');
+    var type    = a.data('type');
+    $(`#table-document-${type} tbody`).find("tr[data-number="+number+"]").remove();
+    var is_empty  = !$.trim($(`#table-document-${type} tbody`).html());
     if (is_empty) {
       html  = `
           <tr class="empty">
             <td colspan="5" class="text-center">Document Not Available</td>
           </tr>
       `;
-      $("#table-document tbody").append(html);
+      $(`#table-document-${type} tbody`).append(html);
     }
   }
 
@@ -349,6 +415,36 @@
       allowClear: true,
       templateSelection: selectionContract,
       templateResult: resultContract
+    });
+
+    $("#role_id").select2({
+        ajax: {
+            url: "{{route('role.select')}}",
+            type: 'GET',
+            dataType: 'json',
+            data: function(params) {
+                return {
+                    name: params.term,
+                    page: params.page,
+                    limit: 30,
+                };
+            },
+            processResults: function(data, params) {
+                var more = (params.page * 30) < data.total;
+                var option = [];
+                $.each(data.rows, function(index, item) {
+                    option.push({
+                        id: item.id,
+                        text: item.name
+                    });
+                });
+                return {
+                    results: option,
+                    more: more,
+                };
+            },
+        },
+        allowClear: true,
     });
 
     $('#warehouse_id').select2({

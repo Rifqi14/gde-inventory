@@ -26,6 +26,30 @@ class Currency extends Model
     }
 
     /**
+     * Define relation one to many with employees table
+     *
+     * @author Muhammad Rifqi <rifqi.persie@gmail.com>
+     * 
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function currencyrate()
+    {
+        return $this->hasMany('App\Models\Employee', 'rate_currency_id', 'id');
+    }
+
+    /**
+     * Define relation one to many with employees table
+     *
+     * @author Muhammad Rifqi <rifqi.persie@gmail.com>
+     * 
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function currencysalary()
+    {
+        return $this->hasMany('App\Models\Employee', 'salary_currency_id', 'id');
+    }
+
+    /**
      * Scope a query to only include country_id
      *
      * @param int $country_id

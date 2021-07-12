@@ -78,6 +78,7 @@ class GoodsReceiptController extends Controller
                 $product->leftJoin('rack_warehouses', 'rack_warehouses.id', '=', 'goods_receipt_products.rack_id');
                 $product->leftJoin('bin_warehouses', 'bin_warehouses.id', '=', 'goods_receipt_products.bin_id');
                 $product->leftJoin('contracts', 'contracts.id', '=', 'goods_receipt_products.reference_id');
+                $product->where('goods_receipt_products.type', 'contract');
             },
             'borrowingref' => function ($product) {
                 $product->selectRaw("
@@ -93,6 +94,7 @@ class GoodsReceiptController extends Controller
                 $product->leftJoin('rack_warehouses', 'rack_warehouses.id', '=', 'goods_receipt_products.rack_id');
                 $product->leftJoin('bin_warehouses', 'bin_warehouses.id', '=', 'goods_receipt_products.bin_id');
                 $product->leftJoin('product_borrowings', 'product_borrowings.id', '=', 'goods_receipt_products.reference_id');
+                $product->where('goods_receipt_products.type', 'borrowing');
             },
             'files',
             'images'
@@ -140,6 +142,7 @@ class GoodsReceiptController extends Controller
                 $product->leftJoin('rack_warehouses', 'rack_warehouses.id', '=', 'goods_receipt_products.rack_id');
                 $product->leftJoin('bin_warehouses', 'bin_warehouses.id', '=', 'goods_receipt_products.bin_id');
                 $product->leftJoin('contracts', 'contracts.id', '=', 'goods_receipt_products.reference_id');
+                $product->where('goods_receipt_products.type', 'contract');
             },
             'borrowingref' => function ($product) {
                     $product->selectRaw("
@@ -155,6 +158,7 @@ class GoodsReceiptController extends Controller
                 $product->leftJoin('rack_warehouses', 'rack_warehouses.id', '=', 'goods_receipt_products.rack_id');
                 $product->leftJoin('bin_warehouses', 'bin_warehouses.id', '=', 'goods_receipt_products.bin_id');
                 $product->leftJoin('product_borrowings', 'product_borrowings.id', '=', 'goods_receipt_products.reference_id');
+                $product->where('goods_receipt_products.type', 'borrowing');
             },
             'files',
             'images'

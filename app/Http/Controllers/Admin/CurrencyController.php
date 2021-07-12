@@ -63,7 +63,29 @@ class CurrencyController extends Controller
 
     public function select(Request $request)
     {
-        # code...
+        $start          = $request->page ? ($request->page - 1) * $request->limit : 0;
+        $length         = $request->limit;
+        $name           = strtoupper($request->name);
+
+        // Count Data
+        $query          = Currency::with(['country'])->whereRaw("upper(currency) like '%$name%'");
+        
+        $row            = clone $query;
+        $recordsTotal   = $row->count();
+
+        $query->offset($start);
+        $query->limit($length);
+        $currencies  = $query->get();
+
+        $data       = [];
+        foreach ($currencies as $key => $currency) {
+            $currency->no    = ++$start;
+            $data[]         = $currency;
+        }
+        return response()->json([
+            'total'     => $recordsTotal,
+            'rows'      => $data,
+        ], 200);
     }
 
     /**

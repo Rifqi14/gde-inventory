@@ -33,6 +33,16 @@ class Employee extends Model
         return $this->hasMany('App\Models\Attendance', 'employee_id', 'id');
     }
 
+    public function ratecurrency()
+    {
+        return $this->belongsTo('App\Models\Currency', 'rate_currency_id', 'id');
+    }
+
+    public function salarycurrency()
+    {
+        return $this->belongsTo('App\Models\Currency', 'salary_currency_id', 'id');
+    }
+
     /**
      * Scope a query to only include payroll yes
      *

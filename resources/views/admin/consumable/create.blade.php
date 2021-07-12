@@ -407,7 +407,7 @@
 
     $("#product").select2({
       ajax: {
-        url: "{{route('product.select')}}",
+        url: "{{route('productborrowing.selectproduct')}}",
         type: 'GET',
         dataType: 'json',
         data: function(params) {
@@ -520,7 +520,9 @@
                 product_id      : product_id,
                 category_id     : categoryID,
                 uom_id          : uomID,
-                qty_system      : qtySystem,
+                qty_system    
+                  <b><i class="fas fa-plus"></i></b>
+                    : qtySystem,
                 qty_consume      : qtyConsume
             });
 

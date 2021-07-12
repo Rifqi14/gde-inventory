@@ -205,13 +205,37 @@
                                         </div>
                                     </div>
                                     <!-- Salary -->
-                                    <div class="form-group">
-                                        <label class="control-label" for="rate-business-trip">Rate Business Trip</label>
-                                        <input class="form-control input-price text-right" type="text" name="rate_business_trip" id="rate-business-trip" value="{{$data->rate_business_trip?$data->rate_business_trip:0}}" maxlength="15">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="rate_currency_id" class="control-label">Currency</label>
+                                                <select name="rate_currency_id" id="rate_currency_id" class="form-control select2">
+                                                    <option value="">Select Currency</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="control-label" for="rate-business-trip">Rate Business Trip</label>
+                                                <input class="form-control input-price text-right" type="text" name="rate_business_trip" id="rate-business-trip" value="{{$data->rate_business_trip?$data->rate_business_trip:0}}" maxlength="15">
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="form-group">
-                                        <label class="control-label" for="base-salary">Base Salary</label>
-                                        <input class="form-control input-price text-right" type="text" name="salary" id="base-salary" value="{{$data->salary?$data->salary:0}}" maxlength="15">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="salary_currency_id" class="control-label">Currency</label>
+                                                <select name="salary_currency_id" id="salary_currency_id" class="form-control select2">
+                                                    <option value="">Select Currency</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="control-label" for="base-salary">Base Salary</label>
+                                                <input class="form-control input-price text-right" type="text" name="salary" id="base-salary" value="{{$data->salary?$data->salary:0}}" maxlength="15">
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="form-group">
                                         <label class="control-label" for="position">Position</label>
@@ -287,6 +311,17 @@
         }
         $('.user-existed').addClass('d-none');
     }
+
+    const formatCountry = (currency) => {
+        console.log(currency);
+        if (!currency.code) { return currency.text; }
+        var $currency = $(
+        '<span class="flag-icon flag-icon-'+ currency.code.toLowerCase() +' flag-icon-squared"></span>' +
+        '&nbsp;&nbsp;&nbsp;<span class="flag-text">'+ currency.text+"</span>"
+        );
+        return $currency;
+    }
+    
     $(function() {
         $('#user').trigger('change');
         $('.select2').select2({
@@ -562,6 +597,93 @@
             },
             allowClear: true,
         });
+
+        $("#rate_currency_id").select2({
+            ajax: {
+                url: "{{route('currency.select')}}",
+                type: 'GET',
+                dataType: 'json',
+                data: function(params) {
+                    return {
+                        name: params.term,
+                        page: params.page,
+                        limit: 30,
+                    };
+                },
+                processResults: function(data, params) {
+                    params.page = params.page || 1;
+                    var more = (params.page * 30) < data.total;
+                    var option = [];
+                    $.each(data.rows, function(index, item) {
+                        option.push({
+                            id: item.id,
+                            text: item.currency,
+                            code: item.country ? item.country.code : item.country_id,
+                        });
+                    });
+                    return {
+                        results: option,
+                        pagination: {
+                            more: more,
+                        }
+                    };
+                },
+            },
+            templateResult: formatCountry,
+            allowClear: true,
+        });
+
+        $("#salary_currency_id").select2({
+            ajax: {
+                url: "{{route('currency.select')}}",
+                type: 'GET',
+                dataType: 'json',
+                data: function(params) {
+                    return {
+                        name: params.term,
+                        page: params.page,
+                        limit: 30,
+                    };
+                },
+                processResults: function(data, params) {
+                    params.page = params.page || 1;
+                    var more = (params.page * 30) < data.total;
+                    var option = [];
+                    $.each(data.rows, function(index, item) {
+                        option.push({
+                            id: item.id,
+                            text: item.currency,
+                            code: item.country ? item.country.code : item.country_id,
+                        });
+                    });
+                    return {
+                        results: option,
+                        pagination: {
+                            more: more,
+                        }
+                    };
+                },
+            },
+            templateResult: formatCountry,
+            allowClear: true,
+        });
+
+        @if ($data->rate_currency_id)
+            $('#rate_currency_id').select2('trigger', 'select', {
+                data: {
+                    id: {{ $data->ratecurrency->id }},
+                    text: `{{ $data->ratecurrency->currency }}`,
+                }
+            });
+        @endif
+        @if ($data->salary_currency_id)
+            $('#salary_currency_id').select2('trigger', 'select', {
+                data: {
+                    id: {{ $data->salarycurrency->id }},
+                    text: `{{ $data->salarycurrency->currency }}`,
+                }
+            });
+        @endif
 
         @if ($data->user)
             @if ($data->user->roles->count() > 0)

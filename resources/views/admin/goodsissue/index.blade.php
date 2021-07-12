@@ -59,58 +59,58 @@
     </div>
 </section>
 <div class="modal fade" id="form-filter">
-  <div class="modal-dialog modal-md">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Filter {{ $menu_name }}</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form id="form-search" method="post" autocomplete="off">
-          @csrf
-          <div class="row">
-            <div class="col-md-6">
-              <div class="form-group">
-                <label class="control-label" for="date">Date</label>
-                <input type="text" id="date" class="form-control datepicker text-right" placeholder="Enter date">
-              </div>
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Filter {{ $menu_name }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
-            <div class="col-md-6">
-              <div class="form-group">
-                <label class="control-label" for="receipt_number">Issued Number</label>
-                <input type="text" id="issued-number" class="form-control" placeholder="Enter receipt number">
-              </div>
-            </div>            
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="products" class="control-label">Products</label>
-                <input type="number" class="form-control text-right" id="products" placeholder="Enter product quantity">
-              </div>
+            <div class="modal-body">
+                <form id="form-search" method="post" autocomplete="off">
+                    @csrf
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label" for="date">Date</label>
+                                <input type="text" id="date" class="form-control datepicker text-right" placeholder="Enter date">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label" for="receipt_number">Issued Number</label>
+                                <input type="text" id="issued-number" class="form-control" placeholder="Enter receipt number">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="products" class="control-label">Products</label>
+                                <input type="number" class="form-control text-right" id="products" placeholder="Enter product quantity">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label" for="status">Status</label>
+                                <select id="status" class="form-control select2" data-placeholder="Select status">
+                                    <option value=""></option>
+                                    @foreach(config('enums.status_w_rejected') as $key => $type)
+                                    @if($type == 'Rejected' || $type == 'Approved')
+                                    <option value="{{ $key }}">{{ $type }}</option>
+                                    @endif
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-right mt-4">
+                        <button type="button" class="btn btn-labeled  btn-danger btn-sm btn-sm btn-flat legitRipple" data-dismiss="modal" onclick="resetTable()"><b><i class="fas fa-times"></i></b> Cancel</button>
+                        <button type="submit" form="form-search" class="btn btn-labeled  btn-default  btn-sm btn-flat legitRipple"><b><i class="fas fa-search"></i></b> Search</button>
+                    </div>
+                </form>
             </div>
-            <div class="col-md-6">
-              <div class="form-group">
-                <label class="control-label" for="status">Status</label>
-                <select id="status" class="form-control select2" data-placeholder="Select status">
-                  <option value=""></option>
-                  @foreach(config('enums.status_w_rejected') as $key => $type)
-                    @if($type == 'Rejected' || $type == 'Approved')
-                    <option value="{{ $key }}">{{ $type }}</option>
-                    @endif
-                  @endforeach
-                </select>
-              </div>
-            </div>
-          </div>
-          <div class="text-right mt-4">
-          <button type="button" class="btn btn-labeled  btn-danger btn-sm btn-sm btn-flat legitRipple" data-dismiss="modal" onclick="resetTable()"><b><i class="fas fa-times"></i></b> Cancel</button>
-                <button type="submit" form="form-search" class="btn btn-labeled  btn-default  btn-sm btn-flat legitRipple"><b><i class="fas fa-search"></i></b> Search</button>
-          </div>
-        </form>
-      </div>
+        </div>
     </div>
-  </div>
 </div>
 @endsection
 

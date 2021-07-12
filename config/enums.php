@@ -58,7 +58,8 @@ return [
     'status_receipt'    => [
         'WAITING'       => 'Waiting',
         'INPROGRESS'    => 'In Progress',
-        'COMPLETED'     => 'Completed'
+        'COMPLETED'     => 'Completed',
+        'DELIVERY'      => 'Delivery',
     ],
     'status_adjustment'    => [
         'DRAFT'         => 'Draft',

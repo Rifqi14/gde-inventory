@@ -1,4 +1,4 @@
-    @extends('admin.layouts.app')
+@extends('admin.layouts.app')
 @section('title',$menu_name)
 
 @section('breadcrumb')
@@ -113,8 +113,7 @@
                                 <hr>
                             </span>
                             <div class="form-group">
-                                <button type="button" class="btn btn-success color-palette btn-labeled legitRipple text-sm btn-block" onclick="addReference()">
-                                    <b><i class="fas fa-plus"></i></b>
+                                <button type="button" class="btn btn-labeled text-sm btn-lg btn-outline-primary btn-flat btn-block legitRipple" onclick="addReference()">
                                     Add
                                 </button>
                             </div>
@@ -160,8 +159,7 @@
                             <div class="tab-content" id="suppDocumentTabContent">
                                 <div class="tab-pane fade show active" id="document" role="tabpanel" aria-labelledby="document-tab">
                                     <div class="form-group mt-3">
-                                        <button type="button" class="btn btn-success color-palette btn-labeled legitRipple text-sm btn-block" onclick="addDocument()">
-                                            <b><i class="fas fa-plus"></i></b>
+                                        <button type="button" class="btn btn-labeled text-sm btn-lg btn-outline-primary btn-flat btn-block legitRipple" onclick="addDocument()">
                                             Add
                                         </button>
                                     </div>
@@ -184,8 +182,7 @@
                                 </div>
                                 <div class="tab-pane fade show" id="photo" role="tabpanel" aria-labelledby="photo-tab">
                                     <div class="form-group mt-3">
-                                        <button type="button" class="btn btn-success color-palette btn-labeled legitRipple text-sm btn-block" onclick="addPhoto()">
-                                            <b><i class="fas fa-plus"></i></b>
+                                        <button type="button" class="btn btn-labeled text-sm btn-lg btn-outline-primary btn-flat btn-block legitRipple" onclick="addPhoto()">
                                             Add
                                         </button>
                                     </div>
@@ -857,7 +854,7 @@
                   <td width="100"><b>${reference}</b></td>
                   <td class="text-right" width="30">${qty}</td>
                   <td class="text-right" width="30">
-                    <input type="number" class="form-control numberfield text-right qty-receive" placeholder="0">
+                    <input type="number" class="form-control numberfield text-right qty-receive" placeholder="0" min="1" max="${qty}">
                   </td>
                   <td width="100">
                     <div class="form-group">
