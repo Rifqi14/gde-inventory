@@ -1,17 +1,17 @@
 @extends('admin.layouts.app')
-@section('title', $menu_name)
+@section('title','Product Borrowing')
 
 @section('breadcrumb')
 <div class="row mb-3 mt-3">
     <div class="col-sm-4">
         <h1 id="title-branch" class="m-0 text-dark">
-            {{ $menu_name }}
+            Product Borrowing
         </h1>
     </div>
     <div class="col-sm-8">
         <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
-            <li class="breadcrumb-item">{{ $parent_name }}</li>
-            <li class="breadcrumb-item">{{ $menu_name }}</li>
+            <li class="breadcrumb-item">Inventory</li>
+            <li class="breadcrumb-item">Product Borrowing</li>
         </ol>
     </div>
 </div>
@@ -253,16 +253,6 @@
                 },
                 {
                     render: function(data, type, row) {
-                        return `<b><a href="javascript:void(0)" onclick="edit(${row.id})">${row.borrowing_number}</a></b>`;
-                    }, targets: [1],
-                },
-                {
-                    render: function(data, type, row) {
-                        return `${row.borrowing_date} s/d ${row.return_date}`;
-                    }, targets: [2],
-                },
-                {
-                    render: function(data, type, row) {
                         var badge = '',
                             status = row.status;
                         if (status == 'draft') {
@@ -365,11 +355,6 @@
                 },
                 {
                     render: function(data, type, row) {
-                        return `${row.borrowing_date} s/d ${row.return_date}`;
-                    }, targets: [2],
-                },
-                {
-                    render: function(data, type, row) {
                         var badge = '',
                             status = row.status;
                         if (status == 'draft') {
@@ -387,7 +372,7 @@
                 },
                 {
                     render: function(data, type, row) {
-                        var button = `<a class="dropdown-item" href="javascript:void(0);" onclick="show(${row.id})">
+                        var button = `<a class="dropdown-item" href="javascript:void(0);" onclick="archive(${row.id})">
                                         <i class="far fa-eye"></i>View Data
                                     </a>`;                     
                         return `<div class="btn-group">
@@ -524,10 +509,10 @@
                         _token: "{{ csrf_token() }}"
                     };
                     $.ajax({
-                        url: `{{route('productborrowing.index')}}/${id}`,
+                        url: `{{url('admin/productborrowing/delete')}}/${id}`,
                         dataType: 'json',
                         data: data,
-                        type: 'DELETE',
+                        type: 'GET',
                         beforeSend: function() {
                             blockMessage('#content', 'Loading', '#fff');
                         }

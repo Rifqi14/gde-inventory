@@ -732,9 +732,7 @@
         data.append('products', JSON.stringify(products));
         data.append('documents',JSON.stringify(documents));
         data.append('undocuments',JSON.stringify(deletedDoc));
-        data.append('receiptdate', receiptDate);
-
-        // s
+        data.append('receiptdate', receiptDate);        
 
         $.ajax({
           url: $('#form').attr('action'),
