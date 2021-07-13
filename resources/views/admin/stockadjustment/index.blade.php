@@ -72,7 +72,12 @@
             <div class="col-md-6">
               <div class="form-group">
                 <label class="control-label" for="date">Date</label>
-                <input type="text" id="date" class="form-control datepicker text-right" placeholder="Enter date">
+                <div class="input-group">
+                    <input type="text" id="date" class="form-control datepicker text-right" placeholder="Enter date">
+                    <div class="input-group-append">
+                        <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                    </div>
+                </div>                
               </div>
             </div>
             <div class="col-md-6">

@@ -51,9 +51,15 @@
                     </div>
                   </div>
                 </div>
+                <div class="col-md-6">
+                  <div class="form-group row">
+                    <label for="issued-by" class="cl-md-12 col-xs-12 control-label">Issued By</label>
+                    <input type="text" class="form-control" placeholder="Issued by" value="{{$data->issued}}" readonly>
+                  </div>
+                </div>
                 <div class="col-sm-6">
                   <div class="form-group">
-                    <label for="unit">Unit</label>
+                    <label for="unit">Site</label>
                     <select name="site" id="site" class="form-control select2" data-placeholder="Unit" disabled></select>
                   </div>
                 </div>
@@ -61,6 +67,12 @@
                   <div class="form-group">
                     <label for="warehouse">Warehouse</label>
                     <select name="warehouse" id="warehouse" class="form-control select2" data-placeholder="Warehouse" disabled></select>
+                  </div>
+                </div>
+                <div class="col-sm-6">
+                  <div class="form-group form-status">
+                    <label for="state" class="control-label">Status</label>
+                    <div class="controls"></div>
                   </div>
                 </div>
               </div>
@@ -73,21 +85,13 @@
               <span class="title">
                 <hr>
                 <h5 class="text-md text-dark text-uppercase">Other Information</h5>
-              </span>
-              <div class="form-group row">
-                <label for="issued-by" class="cl-md-12 col-xs-12 control-label">Issued By</label>
-                <input type="text" class="form-control" placeholder="Issued by" value="{{$data->issued}}" readonly>
-              </div>
+              </span>              
               <div class="form-group row">
                 <label for="description" class="col-md-12 col-xs-12 control-label">Description</label>
                 <div class="col-sm-12 controls">
-                  <textarea class="form-control summernote" name="description" id="description" rows="4" placeholder="Description">{{$data->description}}</textarea>
+                  <textarea class="form-control summernote" name="description" id="description" rows="4" placeholder="Description"></textarea>
                 </div>
-              </div>
-              <div class="form-group form-status">
-                <label for="state" class="control-label">Status</label>
-                <div class="controls"></div>
-              </div>
+              </div>              
             </div>
           </div>
         </div>
@@ -103,6 +107,7 @@
                   <thead>
                     <tr>
                       <th width="10%">Product Name</th>
+                      <th width="10%">Product Category</th>
                       <th width="10%">Reference</th>
                       <th width="10%" class="text-right">Qty Order</th>
                       <th width="10%" class="text-right">Qty Receipt</th>
@@ -112,7 +117,7 @@
                   </thead>
                   <tbody>
                     <tr class="no-available-data">
-                      <td colspan="6" class="text-center">No available data.</td>
+                      <td colspan="7" class="text-center">No available data.</td>
                     </tr>
                   </tbody>
                 </table>
@@ -236,20 +241,11 @@
 
     $('.summernote').summernote({
       height: 145,
-      toolbar: [
-        ['style', ['style']],
-        ['font-style', ['bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'clear']],
-        ['font', ['fontname']],
-        ['font-size', ['fontsize']],
-        ['font-color', ['color']],
-        ['para', ['ul', 'ol', 'paragraph']],
-        ['table', ['table']],
-        ['insert', ['link', 'picture', 'video', 'hr']],
-        ['misc', ['fullscreen', 'codeview', 'help']]
-      ]
-    });
+      toolbar: []
+    });    
     
     $('.summernote').summernote('disable');
+    $('#description').summernote('code',@json($data->description));
 
     $('.datepicker').daterangepicker({
       singleDatePicker: true,
@@ -376,6 +372,7 @@
       $.each(products, function (index, value) { 
         var productID    = value.product_id,
             product      = value.product,
+            category     = value.category,
             referenceID  = value.reference_id,
             reference    = value.reference,
             uomID        = value.uom_id,
@@ -389,6 +386,7 @@
 
             html += `<tr class="product-item">                   
                       <td width="100">${product}</td>
+                      <td width="100">${category}</td>
                       <td width="100"><b>${reference}</b></td>
                       <td class="text-right" width="30">${order}</td>
                       <td class="text-right" width="30">${receipt}</td>
@@ -419,10 +417,7 @@
                             <a href="${path}" target="_blank">
                               <b><i class="fas fa-download"></i></b> Download File
                             </a>                             
-                        </td>
-                        <td class="text-center">
-                            <button class="btn btn-md text-xs btn-danger btn-flat legitRipple" onclick="removeDoc($(this),${id})" type="button"><i class="fas fa-trash"></i></button>                                
-                        </td>
+                        </td>                        
                     </tr>`;
         });
 

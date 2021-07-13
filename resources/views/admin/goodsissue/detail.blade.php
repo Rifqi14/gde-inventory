@@ -33,6 +33,7 @@
                                 <hr>
                             </span>
                             <div class="row">
+                                <!-- Issued Number -->
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="issued-number" class="control-label">Issued Number</label>
@@ -41,32 +42,52 @@
                                         </div>
                                     </div>
                                 </div>
+                                <!-- Issued By -->
+                                <div class="col-sm-6">
+                                    <div class="form-group row">
+                                        <label class="col-md-12 col-xs-12 control-label" for="issued-by">Issued By</label>
+                                        <div class="col-sm-12 controls">
+                                            <input type="text" class="form-control" name="issuedby" value="{{$data->issued}}" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Date -->
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="date" class="control-label">Date</label>
                                         <div class="controls">
                                             <div class="input-group">
                                                 <input type="text" id="date" class="form-control datepicker text-right" readonly>
-                                                <div class="input-group-prepend">
+                                                <div class="input-group-append">
                                                     <span class="input-group-text"><i class="fas fa-calendar"></i></span>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                                <!-- Site -->
                                 <div class="col-sm-6">
                                     <div class="form-group row">
-                                        <label for="unit" class="col-md-12 col-xs-12 control-label">Unit</label>
+                                        <label for="unit" class="col-md-12 col-xs-12 control-label">Site</label>
                                         <div class="col-sm-12 controls">
                                             <select name="site" id="site" class="form-control" data-placeholder="Choose site" disabled></select>
                                         </div>
                                     </div>
                                 </div>
+                                <!-- Warehouse -->
                                 <div class="col-sm-6">
                                     <div class="form-group row">
                                         <label for="warehouse" class="col-md-12 col-xs-12 control-label">Warehouse</label>
                                         <div class="col-sm-12 controls">
                                             <select name="warehouse" id="warehouse" class="form-control" data-placeholder="Choose warehouse" disabled></select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Status -->
+                                <div class="col-sm-6">
+                                    <div class="form-group form-status">
+                                        <label for="state" class="control-label">Status</label>
+                                        <div class="controls">
                                         </div>
                                     </div>
                                 </div>
@@ -81,24 +102,13 @@
                             <span class="title">
                                 <h5 class="text-md text-dark text-uppercase">Other Information</h5>
                                 <hr>
-                            </span>
-                            <div class="form-group row">
-                                <label class="col-md-12 col-xs-12 control-label" for="issued-by">Issued By</label>
-                                <div class="col-sm-12 controls">
-                                    <input type="text" class="form-control" name="issuedby" value="{{$data->issued}}" readonly>
-                                </div>
-                            </div>
+                            </span>                            
                             <div class="form-group row">
                                 <label for="description" class="col-md-12 col-xs-12 control-label">Description</label>
                                 <div class="col-sm-12 controls">
-                                    <textarea class="form-control summernote" name="description" id="description" rows="4" placeholder="Description">{{$data->description}}</textarea>
+                                    <textarea class="form-control summernote" name="description" id="description" rows="4" placeholder="Description"></textarea>
                                 </div>
-                            </div>
-                            <div class="form-group form-status">
-                                <label for="state" class="control-label">Status</label>
-                                <div class="controls">
-                                </div>
-                            </div>
+                            </div>                            
                         </div>
                     </div>
                 </div>
@@ -115,6 +125,7 @@
                                     <thead>
                                         <tr>
                                             <th width="100">Product Name</th>
+                                            <th width="100">Product Category</th>
                                             <th width="100">Reference</th>
                                             <th width="30" class="text-right">Qty Request</th>
                                             <th width="30" class="text-right">Qty Receive</th>
@@ -247,6 +258,7 @@
         });
 
         $('.summernote').summernote('disable');
+        $('#description').summernote('code',@json($data->description));
 
         $('.datepicker').daterangepicker({
             singleDatePicker: true,
@@ -379,6 +391,7 @@
                     table   = $('#table-product > tbody');
                 var productID    = value.product_id,
                     product      = value.product,
+                    category     = value.category,
                     referenceID  = value.reference_id,
                     reference    = value.reference,
                     uomID        = value.uom_id,
@@ -392,6 +405,7 @@
 
                     html = `<tr class="product-item">                        
                                 <td width="100">${product}</td>
+                                <td width="100">${category}</td>
                                 <td width="100"><b>${reference}</b></td>
                                 <td class="text-right" width="30">${qtyRequest}</td>
                                 <td class="text-right" width="30">${qtyReceive}</td>

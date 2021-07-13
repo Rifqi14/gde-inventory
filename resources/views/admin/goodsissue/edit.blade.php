@@ -34,6 +34,7 @@
                                 <hr>
                             </span>
                             <div class="row">
+                                <!-- Issued Number -->
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="issued-number" class="control-label">Issued Number</label>
@@ -42,33 +43,59 @@
                                         </div>
                                     </div>
                                 </div>
+                                <!-- Issued By -->
+                                <div class="col-sm-6">
+                                    <div class="form-group row">
+                                        <label class="col-md-12 col-xs-12 control-label" for="issued-by">Issued By</label>
+                                        <div class="col-sm-12 controls">
+                                            <input type="text" class="form-control" value="{{$data->issued}}" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Date -->
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="date" class="control-label">Date</label>
                                         <div class="controls">
                                             <div class="input-group">
                                                 <input type="text" id="date" class="form-control datepicker text-right">
-                                                <div class="input-group-prepend">
+                                                <div class="input-group-append">
                                                     <span class="input-group-text"><i class="fas fa-calendar"></i></span>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                </div>      
+                                <!-- Product Category -->
+                                <div class="col-md-6">
+                                    <label for="product-category" class="control-label">Product Category</label>
+                                    <div class="controls">
+                                        <select id="product-category" class="form-control select2" data-placeholder="Choose Product Category"></select>
+                                    </div>
+                                </div>   
+                                <!-- Site  -->
                                 <div class="col-sm-6">
                                     <div class="form-group row">
-                                        <label for="unit" class="col-md-12 col-xs-12 control-label">Unit</label>
+                                        <label for="unit" class="col-md-12 col-xs-12 control-label">Site</label>
                                         <div class="col-sm-12 controls">
-                                            <select name="unit" id="unit" class="form-control" data-placeholder="Choose unit"></select>
+                                            <select name="unit" id="unit" class="form-control" data-placeholder="Choose site"></select>
                                         </div>
                                     </div>
                                 </div>
+                                <!-- Warehouse -->
                                 <div class="col-sm-6">
                                     <div class="form-group row">
                                         <label for="warehouse" class="col-md-12 col-xs-12 control-label">Warehouse</label>
                                         <div class="col-sm-12 controls">
                                             <select name="warehouse" id="warehouse" class="form-control" data-placeholder="Choose warehouse"></select>
                                         </div>
+                                    </div>
+                                </div>
+                                <!-- Status -->
+                                <div class="col-sm-6">
+                                    <div class="form-group form-status">
+                                        <label for="state" class="control-label">Status</label>
+                                        <div class="controls"></div>
                                     </div>
                                 </div>
                             </div>
@@ -82,23 +109,14 @@
                             <span class="title">
                                 <h5 class="text-md text-dark text-uppercase">Other Information</h5>
                                 <hr>
-                            </span>
-                            <div class="form-group row">
-                                <label class="col-md-12 col-xs-12 control-label" for="issued-by">Issued By</label>
-                                <div class="col-sm-12 controls">
-                                    <input type="text" class="form-control" value="{{$data->issued}}" readonly>
-                                </div>
-                            </div>
+                            </span>                            
+                            <!-- Description -->
                             <div class="form-group row">
                                 <label for="description" class="col-md-12 col-xs-12 control-label">Description</label>
                                 <div class="col-sm-12 controls">
-                                    <textarea class="form-control summernote" name="description" id="description" rows="4" placeholder="Description">{{$data->description}}</textarea>
+                                    <textarea class="form-control summernote" name="description" id="description" rows="4" placeholder="Description"></textarea>
                                 </div>
-                            </div>
-                            <div class="form-group form-status">
-                                <label for="state" class="control-label">Status</label>
-                                <div class="controls"></div>
-                            </div>
+                            </div>                            
                         </div>
                     </div>
                 </div>
@@ -120,6 +138,7 @@
                                     <thead>
                                         <tr>
                                             <th width="100">Product Name</th>
+                                            <th width="100">Product Category</th>
                                             <th width="100">Reference</th>
                                             <th width="30" class="text-right">Qty Request</th>
                                             <th width="30" class="text-right">Qty Receive</th>
@@ -130,7 +149,7 @@
                                     </thead>
                                     <tbody>
                                         <tr class="no-available-data">
-                                            <td colspan="7" class="text-center">No available data.</td>
+                                            <td colspan="8" class="text-center">No available data.</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -227,7 +246,7 @@
 </section>
 
 <div class="modal fade" id="form-reference">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" style="text-transform: capitalize;">Add reference</h5>
@@ -254,9 +273,10 @@
                                     <thead>
                                         <tr>
                                             <th width="5%" class="text-center">No</th>
-                                            <th width="15%" class="text-center">Date</th>
-                                            <th width="20%">Consumable Number</th>
-                                            <th width="20%">Produk</th>
+                                            <th width="10%" class="text-center">Date</th>
+                                            <th width="30%">Consumable Number</th>
+                                            <th width="30%">Product</th>
+                                            <th width="30%">Product Category</th>
                                             <th width="10%" class="text-center">Qty</th>
                                             <th width="15%" class="text-center">UOM</th>
                                             <th width="15%" class="text-center">Action</th>
@@ -269,9 +289,10 @@
                                     <thead>
                                         <tr>
                                             <th width="5%" class="text-center">No</th>
-                                            <th width="15%" class="text-center">Date</th>
-                                            <th width="20%">Transfer Number</th>
-                                            <th width="20%">Produk</th>
+                                            <th width="10%" class="text-center">Date</th>
+                                            <th width="30%">Transfer Number</th>
+                                            <th width="30%">Product</th>
+                                            <th width="30%">Product Category</th>
                                             <th width="10%" class="text-center">Qty</th>
                                             <th width="15%" class="text-center">UOM</th>
                                             <th width="15%" class="text-center">Action</th>
@@ -352,6 +373,8 @@
                 ['misc', ['fullscreen', 'codeview', 'help']]
             ]
         });
+
+        $('#description').summernote('code',@json($data->description));
 
         $('.datepicker').daterangepicker({
             singleDatePicker: true,
@@ -447,6 +470,36 @@
             }
         });
 
+        $("#product-category").select2({
+            ajax: {
+                url: "{{ route('productcategory.select') }}",
+                type: "GET",
+                dataType: "JSON",
+                data: function(params) {
+                    return {
+                        name: params.term,
+                        page: params.page,
+                        limit: 30,
+                    };
+                },
+                processResults: function(data, params) {
+                    var more = (params.page * 30) < data.total;
+                    var option = [];
+                    $.each(data.rows, function(index, item) {
+                        option.push({
+                            id: item.id,
+                            text: item.name,
+                        });
+                    });
+                    return {
+                        results: option,
+                        more: more,
+                    };
+                },
+            },
+            allowClear: true,
+        });
+
         if(issuedDate){
             date = $('#date').data('daterangepicker');
             date.setStartDate(issuedDate);
@@ -488,16 +541,21 @@
                 url: "{{route('goodsissue.consumableproducts')}}",
                 type: "GET",
                 data: function(data) {
-                    data.except = issuedProduct;
+                    data.except      = issuedProduct;
+                    data.category_id = $('#form').find('#product-category').find('option:selected').val();
                 }
             },
             columnDefs: [{
                     orderable: false,
-                    targets: [0, 6]
+                    targets: [0, 7]
                 },
                 {
                     className: "text-center",
-                    targets: [0, 1, 4, 5, 6]
+                    targets: [0, 1, 6,7]
+                },
+                {
+                    className: "text-right",
+                    targets: [5]
                 },
                 {
                     render: function(data, type, row) {
@@ -508,17 +566,18 @@
                 {
                     render: function(data, type, row) {
                         var referenceID = row.product_consumable_id,
-                            reference = row.consumable_number,
-                            productID = row.product_id,
-                            product = row.product,
-                            uomID = row.uom_id,
-                            qty = row.qty ? row.qty : 0;
+                            reference   = row.consumable_number,
+                            productID   = row.product_id,
+                            product     = row.product,
+                            category    = row.category,
+                            uomID       = row.uom_id,
+                            qty         = row.qty ? row.qty : 0;
 
-                        return `<button class="btn btn-md text-xs btn-success btn-flat legitRipple" onclick="addProduct($(this),'consumable')" type="button" data-reference-id="${referenceID}" data-reference="${reference}" data-product-id="${productID}" data-product="${product}" data-uom-id="${uomID}" data-qty="${qty}">
-                      <i class="fas fa-plus"></i>
-                    </button>`;
+                        return `<button class="btn btn-md text-xs btn-success btn-flat legitRipple" onclick="addProduct($(this),'consumable')" type="button" data-reference-id="${referenceID}" data-reference="${reference}" data-product-id="${productID}" data-product="${product}" data-category="${category}" data-uom-id="${uomID}" data-qty="${qty}">
+                                    <i class="fas fa-plus"></i>
+                                </button>`;
                     },
-                    targets: [6]
+                    targets: [7]
                 }
             ],
             columns: [{
@@ -532,6 +591,9 @@
                 },
                 {
                     data: "product"
+                },
+                {
+                    data: "category"
                 },
                 {
                     data: "qty"
@@ -560,16 +622,21 @@
                 url: "{{route('goodsissue.transferproducts')}}",
                 type: "GET",
                 data: function(data) {
-                    data.except = issuedProduct;
+                    data.except      = issuedProduct;
+                    data.category_id = $('#form').find('#product-category').find('option:selected').val();
                 }
             },
             columnDefs: [{
                     orderable: false,
-                    targets: [0, 6]
+                    targets: [0, 7]
                 },
                 {
                     className: "text-center",
-                    targets: [0, 1, 4, 5, 6]
+                    targets: [0, 1, 6, 7]
+                },
+                {
+                    className: "text-right",
+                    targets: [5]
                 },
                 {
                     render: function(data, type, row) {
@@ -580,17 +647,18 @@
                 {
                     render: function(data, type, row) {
                         var referenceID = row.product_transfer_id,
-                            reference = row.transfer_number,
-                            productID = row.product_id,
-                            product = row.product,
-                            uomID = row.uom_id,
-                            qty = row.qty ? row.qty : 0;
+                            reference   = row.transfer_number,
+                            productID   = row.product_id,
+                            product     = row.product,
+                            category    = row.category,
+                            uomID       = row.uom_id,
+                            qty         = row.qty ? row.qty : 0;
 
-                        return `<button class="btn btn-md text-xs btn-success btn-flat legitRipple" onclick="addProduct($(this),'transfer')" type="button" data-reference-id="${referenceID}" data-reference="${reference}" data-product-id="${productID}" data-product="${product}" data-uom-id="${uomID}" data-qty="${qty}">
-                      <i class="fas fa-plus"></i>
-                    </button>`;
+                        return `<button class="btn btn-md text-xs btn-success btn-flat legitRipple" onclick="addProduct($(this),'transfer')" type="button" data-reference-id="${referenceID}" data-reference="${reference}" data-product-id="${productID}" data-product="${product}" data-category="${category}" data-uom-id="${uomID}" data-qty="${qty}">
+                                    <i class="fas fa-plus"></i>
+                                </button>`;
                     },
-                    targets: [6]
+                    targets: [7]
                 }
             ],
             columns: [{
@@ -604,6 +672,9 @@
                 },
                 {
                     data: "product"
+                },
+                {
+                    data: "category"
                 },
                 {
                     data: "qty"
@@ -911,6 +982,7 @@
                     table   = $('#table-product > tbody');
                 var productID    = value.product_id,
                     product      = value.product,
+                    category     = value.category,
                     referenceID  = value.reference_id,
                     reference    = value.reference,
                     uomID        = value.uom_id,
@@ -925,6 +997,7 @@
                     html = `<tr class="product-item">
                         <input type="hidden" class="item-product" value="${productID}" data-reference-id="${referenceID}" data-uom-id="${uomID}" data-qty-request="${qtyRequest}" data-type="${type}">                        
                         <td width="100">${product}</td>
+                        <td width="100">${category}</td>
                         <td width="100"><b>${reference}</b></td>
                         <td class="text-right" width="30">${qtyRequest}</td>
                         <td class="text-right" width="30">
@@ -1068,17 +1141,19 @@
 
     const addProduct = (that, type) => {
         var referenceID = that.attr('data-reference-id'),
-            reference = that.attr('data-reference'),
-            productID = that.attr('data-product-id'),
-            product = that.attr('data-product'),
-            uomID = that.attr('data-uom-id'),
-            qty = that.attr('data-qty'),
-            table = $('#table-product > tbody');
+            reference   = that.attr('data-reference'),
+            productID   = that.attr('data-product-id'),
+            product     = that.attr('data-product'),
+            category    = that.attr('data-category'),
+            uomID       = that.attr('data-uom-id'),
+            qty         = that.attr('data-qty'),
+            table       = $('#table-product > tbody');
 
 
         var html = `<tr class="product-item">
                   <input type="hidden" class="item-product" value="${productID}" data-reference-id="${referenceID}" data-uom-id="${uomID}" data-qty-request="${qty}" data-type="${type}">                        
                   <td width="100">${product}</td>
+                  <td width="100">${category}</td>
                   <td width="100"><b>${reference}</b></td>
                   <td class="text-right" width="30">${qty}</td>
                   <td class="text-right" width="30">
@@ -1124,7 +1199,7 @@
         that.closest('.product-item').remove();
         if ($('#table-product > tbody > .product-item').length == 0) {
             var html = `<tr class="no-available-data">
-                    <td colspan="7" class="text-center">No available data.</td>
+                    <td colspan="8" class="text-center">No available data.</td>
                   </tr>`;
             $('#table-product > tbody').append(html);
 
