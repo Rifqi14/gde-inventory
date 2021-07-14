@@ -46,6 +46,14 @@
                                         <label for="origin-warehouse" class="control-label">Origin Warehouse</label>
                                         <select name="origin_warehouse" id="origin-warehouse" class="form-control select2" data-placeholder="Choose origin warehouse"></select>
                                     </div>
+                                    <div class="form-group">
+                                        <label for="vehicle_type" class="control-label">Shipping Vehicle Type</label>
+                                        <select name="vehicle_type" id="vehicle_type" data-placeholder="Choose Vehicle Type" class="form-control select2">
+                                            <option value=""></option>
+                                            <option value="Rent">Rent</option>
+                                            <option value="Internal">Internal</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="form-group">
@@ -66,6 +74,16 @@
                                     <div class="form-group">
                                         <label for="destination-warehouse" class="control-label">Destination Warehouse</label>
                                         <select name="destination_warehouse" id="destination-warehouse" class="form-control select2" data-placeholder="Choose destination warehouse"></select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="police_number" class="control-label">Police Number</label>
+                                        <input type="text" class="form-control" placeholder="Police Number" name="police_number">
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label for="product_category_id" class="control-label">Product Category</label>
+                                        <select name="product_category_id" id="product_category_id" class="form-control select2" data-placeholder="Choose Product Category"></select>
                                     </div>
                                 </div>
                             </div>
@@ -119,9 +137,6 @@
                                 <h5 class="text-md text-dark text-uppercase">Product Information</h5>
                             </span>
                             <div class="form-group">
-                                <label for="product_category_id" class="control-label">Product Category</label>
-                                <select name="product_category_id" id="product_category_id" class="form-control select2" data-placeholder="Choose Product Category"></select>
-                                <br>
                                 <label for="product" class="control-label">Product</label>
                                 <select name="product" id="product" class="form-control select2" data-placeholder="Choose Product"></select>
                                 <br>
@@ -184,8 +199,21 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr class="no-available-data">
-                                                <td colspan="3" class="text-center">No available data.</td>
+                                            <tr class="document-item">
+                                                <td>
+                                                    <input type="text" class="form-control document-name" name="document_name[]" placeholder="Enter document name" required>
+                                                </td>
+                                                <td>
+                                                    <div class="input-group">
+                                                        <div class="custom-file">
+                                                            <input type="file" class="custom-file-input" name="attachment[]" required>
+                                                            <label class="custom-file-label" for="exampleInputFile">Attach a file</label>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="text-center">
+                                                    {{-- <button class="btn btn-md text-xs btn-danger btn-flat legitRipple" type="button" onclick="removeDoc($(this))"><i class="fas fa-trash"></i></button> --}}
+                                                </td>
                                             </tr>
                                         </tbody>
                                     </table>

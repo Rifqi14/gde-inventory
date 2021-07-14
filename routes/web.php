@@ -283,5 +283,8 @@ Route::group(['prefix' => 'admin'], function () {
 
         // Contract Document Receipt Detail
         Route::resource('/contractdocument', 'Admin\ContractDocumentReceiptDetailController');
+
+        // Contract Document Receipt Detail
+        Route::resource('/salaryreport', 'Admin\SalaryReportController');
     });
 });
