@@ -334,20 +334,30 @@ class ProductController extends Controller
     }
     public function select(Request $request)
     {
-        $start  = $request->page ? $request->page - 1 : 0;
-        $length = $request->limit;
-        $name   = strtoupper($request->name);
+        $start               = $request->page ? $request->page - 1 : 0;
+        $length              = $request->limit;
+        $name                = strtoupper($request->name);
         $product_category_id = $request->product_category_id;
-        $products   = $request->products ? $request->products : null;
+        $productException    = $request->products ? $request->products : null;
+        $warehouse_id        = $request->warehouse_id;
     
         $query = Product::selectRaw("
             products.*,            
             product_uoms.uom_id,
-            uoms.name as uom
+            uoms.name as uom,
+            product_categories.name as category
         ");        
         $query->leftJoin('product_uoms','product_uoms.product_id','=','products.id');
         $query->leftJoin('uoms','uoms.id','=','product_uoms.uom_id');
         $query->leftJoin('uom_categories','uom_categories.id','=','uoms.uom_category_id');
+        $query->leftJoin('product_categories','product_categories.id','=','products.product_category_id');
+        if($warehouse_id){
+            $query->selectRaw("stock_warehouses.stock::INTEGER as stock_warehouse");
+            $query->leftJoin('stock_warehouses',function($join) use ($warehouse_id){
+                $join->on('stock_warehouses.product_id','=','products.id');
+                $join->on('stock_warehouses.warehouse_id','=',DB::raw($warehouse_id));
+            });
+        }
         if($name){
             $query->whereRaw("
                 upper(products.name) like '%$name%'
@@ -356,8 +366,8 @@ class ProductController extends Controller
         if($product_category_id){
             $query->where('product_category_id',$product_category_id);
         }
-        if ($products) {
-            $query->whereNotIn('products.id', $products);
+        if ($productException) {
+            $query->whereNotIn('products.id', $productException);
         }
     
         $rows  = clone $query;

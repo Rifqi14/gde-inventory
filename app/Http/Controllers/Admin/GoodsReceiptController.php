@@ -61,62 +61,70 @@ class GoodsReceiptController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Request $request,$id)
     {
-        $query = GoodsReceipt::with([
-            'contractref' => function ($product) {
-                $product->selectRaw("
-                    goods_receipt_products.*,
-                    products.name as product,
-                    uoms.name as uom,                    
-                    contracts.number as reference,
-                    rack_warehouses.name as rack,
-                    bin_warehouses.name as bin
-                ");
-                $product->leftJoin('products', 'products.id', '=', 'goods_receipt_products.product_id');
-                $product->leftJoin('uoms', 'uoms.id', '=', 'goods_receipt_products.uom_id');
-                $product->leftJoin('rack_warehouses', 'rack_warehouses.id', '=', 'goods_receipt_products.rack_id');
-                $product->leftJoin('bin_warehouses', 'bin_warehouses.id', '=', 'goods_receipt_products.bin_id');
-                $product->leftJoin('contracts', 'contracts.id', '=', 'goods_receipt_products.reference_id');
-                $product->where('goods_receipt_products.type', 'contract');
-            },
-            'borrowingref' => function ($product) {
-                $product->selectRaw("
-                    goods_receipt_products.*,
-                    products.name as product,
-                    uoms.name as uom,                    
-                    product_borrowings.borrowing_number as reference,
-                    rack_warehouses.name as rack,
-                    bin_warehouses.name as bin
-                ");
-                $product->leftJoin('products', 'products.id', '=', 'goods_receipt_products.product_id');
-                $product->leftJoin('uoms', 'uoms.id', '=', 'goods_receipt_products.uom_id');
-                $product->leftJoin('rack_warehouses', 'rack_warehouses.id', '=', 'goods_receipt_products.rack_id');
-                $product->leftJoin('bin_warehouses', 'bin_warehouses.id', '=', 'goods_receipt_products.bin_id');
-                $product->leftJoin('product_borrowings', 'product_borrowings.id', '=', 'goods_receipt_products.reference_id');
-                $product->where('goods_receipt_products.type', 'borrowing');
-            },
-            'files',
-            'images'
-        ]);
-        $query->selectRaw("
-            goods_receipts.*,
-            TO_CHAR(goods_receipts.receipt_date,'DD/MM/YYYY') as date_receipt,
-            users.name as issued,
-            warehouses.name as warehouse,
-            warehouses.site_id,
-            sites.name as site
-        ");
-        $query->leftJoin('warehouses', 'warehouses.id', '=', 'goods_receipts.warehouse_id');
-        $query->leftJoin('sites', 'sites.id', '=', 'warehouses.site_id');
-        $query->leftJoin('users', 'users.id', '=', 'goods_receipts.issued_by');
-        $data  = $query->find($id);    
-
-        if ($data) {
-            return view('admin.goodsreceipt.edit', compact('data'));
+        if (in_array('update', $request->actionmenu)) {
+            $query = GoodsReceipt::with([
+                'contractref' => function ($product) {
+                    $product->selectRaw("
+                        goods_receipt_products.*,
+                        products.name as product,
+                        product_categories.name as category,
+                        uoms.name as uom,                    
+                        contracts.number as reference,
+                        rack_warehouses.name as rack,
+                        bin_warehouses.name as bin
+                    ");
+                    $product->leftJoin('products', 'products.id', '=', 'goods_receipt_products.product_id');
+                    $product->leftJoin('product_categories','product_categories.id','=','products.product_category_id');
+                    $product->leftJoin('uoms', 'uoms.id', '=', 'goods_receipt_products.uom_id');
+                    $product->leftJoin('rack_warehouses', 'rack_warehouses.id', '=', 'goods_receipt_products.rack_id');
+                    $product->leftJoin('bin_warehouses', 'bin_warehouses.id', '=', 'goods_receipt_products.bin_id');
+                    $product->leftJoin('contracts', 'contracts.id', '=', 'goods_receipt_products.reference_id');
+                    $product->where('goods_receipt_products.type', 'contract');
+                },
+                'borrowingref' => function ($product) {
+                    $product->selectRaw("
+                        goods_receipt_products.*,
+                        products.name as product,
+                        product_categories.name as category,
+                        uoms.name as uom,                    
+                        product_borrowings.borrowing_number as reference,
+                        rack_warehouses.name as rack,
+                        bin_warehouses.name as bin
+                    ");
+                    $product->leftJoin('products', 'products.id', '=', 'goods_receipt_products.product_id');
+                    $product->leftJoin('product_categories','product_categories.id','=','products.product_category_id');
+                    $product->leftJoin('uoms', 'uoms.id', '=', 'goods_receipt_products.uom_id');
+                    $product->leftJoin('rack_warehouses', 'rack_warehouses.id', '=', 'goods_receipt_products.rack_id');
+                    $product->leftJoin('bin_warehouses', 'bin_warehouses.id', '=', 'goods_receipt_products.bin_id');
+                    $product->leftJoin('product_borrowings', 'product_borrowings.id', '=', 'goods_receipt_products.reference_id');
+                    $product->where('goods_receipt_products.type', 'borrowing');
+                },
+                'files',
+                'images'
+            ]);
+            $query->selectRaw("
+                goods_receipts.*,
+                TO_CHAR(goods_receipts.receipt_date,'DD/MM/YYYY') as date_receipt,
+                users.name as issued,
+                warehouses.name as warehouse,
+                warehouses.site_id,
+                sites.name as site
+            ");
+            $query->leftJoin('warehouses', 'warehouses.id', '=', 'goods_receipts.warehouse_id');
+            $query->leftJoin('sites', 'sites.id', '=', 'warehouses.site_id');
+            $query->leftJoin('users', 'users.id', '=', 'goods_receipts.issued_by');
+            $data  = $query->find($id);    
+    
+            if ($data) {
+                return view('admin.goodsreceipt.edit', compact('data'));
+            } else {
+                abort(404);
+            }
         } else {
-            abort(404);
-        }
+            abort(403);
+        }        
     }
 
     /**
@@ -132,12 +140,14 @@ class GoodsReceiptController extends Controller
                     $product->selectRaw("
                     goods_receipt_products.*,
                     products.name as product,
+                    product_categories.name as category,
                     uoms.name as uom,                    
                     contracts.number as reference,
                     rack_warehouses.name as rack,
                     bin_warehouses.name as bin
                 ");
                 $product->leftJoin('products', 'products.id', '=', 'goods_receipt_products.product_id');
+                $product->leftJoin('product_categories','product_categories.id','=','products.product_category_id');
                 $product->leftJoin('uoms', 'uoms.id', '=', 'goods_receipt_products.uom_id');
                 $product->leftJoin('rack_warehouses', 'rack_warehouses.id', '=', 'goods_receipt_products.rack_id');
                 $product->leftJoin('bin_warehouses', 'bin_warehouses.id', '=', 'goods_receipt_products.bin_id');
@@ -148,12 +158,14 @@ class GoodsReceiptController extends Controller
                     $product->selectRaw("
                     goods_receipt_products.*,
                     products.name as product,
+                    product_categories.name as category,
                     uoms.name as uom,                    
                     product_borrowings.borrowing_number as reference,
                     rack_warehouses.name as rack,
                     bin_warehouses.name as bin
                 ");
                 $product->leftJoin('products', 'products.id', '=', 'goods_receipt_products.product_id');
+                $product->leftJoin('product_categories','product_categories.id','=','products.product_category_id');
                 $product->leftJoin('uoms', 'uoms.id', '=', 'goods_receipt_products.uom_id');
                 $product->leftJoin('rack_warehouses', 'rack_warehouses.id', '=', 'goods_receipt_products.rack_id');
                 $product->leftJoin('bin_warehouses', 'bin_warehouses.id', '=', 'goods_receipt_products.bin_id');
@@ -619,13 +631,14 @@ class GoodsReceiptController extends Controller
 
     public function contractproducts(Request $request)
     {
-        $draw       = $request->draw;
-        $start      = $request->start;
-        $length     = $request->length;
-        $query      = $request->search['value'];
-        $sort       = $request->columns[$request->order[0]['column']]['data'];
-        $dir        = $request->order[0]['dir'];
-        $except     = $request->except;
+        $draw        = $request->draw;
+        $start       = $request->start;
+        $length      = $request->length;
+        $query       = $request->search['value'];
+        $sort        = $request->columns[$request->order[0]['column']]['data'];
+        $dir         = $request->order[0]['dir'];
+        $except      = $request->except;
+        $category_id = $request->category_id;
 
         $query = ContractProduct::selectRaw("
             contracts.number as contract_number,
@@ -635,11 +648,13 @@ class GoodsReceiptController extends Controller
             contract_products.uom_id,
             contract_products.qty,            
             products.name as product,
+            product_categories.name as category,
             uoms.name as uom
         ");        
         $query->leftJoin('contracts', 'contracts.id', '=', 'contract_products.contract_id');
         $query->leftJoin('products', 'products.id', '=', 'contract_products.product_id');
         $query->leftJoin('uoms', 'uoms.id', '=', 'contract_products.uom_id');        
+        $query->leftJoin('product_categories','product_categories.id','=','products.product_category_id');
         $query->where('contracts.status', 'approved');
         $query->whereNotIn('contract_products.product_id', function($que){
             $que->selectRaw("goods_receipt_products.product_id");
@@ -650,6 +665,9 @@ class GoodsReceiptController extends Controller
                 ['goods_receipt_products.type','=','contract']
             ]);
         });
+        if($category_id){
+            $query->where('product_categories.id',$category_id);
+        }
         if ($except) {
             $query->whereNotIn('contract_products.product_id', $except);
         }
@@ -679,13 +697,14 @@ class GoodsReceiptController extends Controller
 
     public function borrowingproducts(Request $request)
     {
-        $draw       = $request->draw;
-        $start      = $request->start;
-        $length     = $request->length;
-        $query      = $request->search['value'];
-        $sort       = $request->columns[$request->order[0]['column']]['data'];
-        $dir        = $request->order[0]['dir'];
-        $except     = $request->except;
+        $draw        = $request->draw;
+        $start       = $request->start;
+        $length      = $request->length;
+        $query       = $request->search['value'];
+        $sort        = $request->columns[$request->order[0]['column']]['data'];
+        $dir         = $request->order[0]['dir'];
+        $except      = $request->except;
+        $category_id = $request->category_id;
 
         $query = ProductBorrowingDetail::selectRaw("
             product_borrowings.borrowing_number,
@@ -695,11 +714,13 @@ class GoodsReceiptController extends Controller
             product_borrowing_details.uom_id,
             product_borrowing_details.qty_requested as qty,
             products.name as product,
+            product_categories.name as category,
             uoms.name as uom
         ");
         $query->leftJoin('product_borrowings', 'product_borrowings.id', '=', 'product_borrowing_details.product_borrowing_id');
         $query->leftJoin('products', 'products.id', '=', 'product_borrowing_details.product_id');
         $query->leftJoin('uoms', 'uoms.id', '=', 'product_borrowing_details.uom_id');
+        $query->leftJoin('product_categories','product_categories.id','=','products.product_category_id');
         $query->where('product_borrowings.status', 'approved');    
         $query->whereNotIn('product_borrowing_details.product_id',function($que){
             $que->selectRaw("goods_receipt_products.product_id");
@@ -710,6 +731,9 @@ class GoodsReceiptController extends Controller
                 ['goods_receipt_products.type','=','borrowing']
             ]);
         });  
+        if($category_id){
+            $query->where('product_categories.id',$category_id);
+        }
         if($except){
             $query->whereNotIn('product_borrowing_details.product_id',$except);
         }

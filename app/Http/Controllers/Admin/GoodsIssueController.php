@@ -70,12 +70,14 @@ class GoodsIssueController extends Controller
                     $products->selectRaw("
                         goods_issue_products.*,
                         products.name as product,
+                        product_categories.name as category,
                         uoms.name as uom,                    
                         product_consumables.consumable_number as reference,
                         rack_warehouses.name as rack,
                         bin_warehouses.name as bin
                     ");
                     $products->leftJoin('products','products.id','=','goods_issue_products.product_id');
+                    $products->leftJoin('product_categories','product_categories.id','=','products.product_category_id');
                     $products->leftJoin('uoms','uoms.id','=','goods_issue_products.uom_id');
                     $products->leftJoin('rack_warehouses', 'rack_warehouses.id', '=', 'goods_issue_products.rack_id');
                     $products->leftJoin('bin_warehouses', 'bin_warehouses.id', '=', 'goods_issue_products.bin_id');
@@ -85,12 +87,14 @@ class GoodsIssueController extends Controller
                     $products->selectRaw("
                         goods_issue_products.*,
                         products.name as product,
+                        product_categories.name as category,
                         uoms.name as uom,                    
                         product_transfers.transfer_number as reference,
                         rack_warehouses.name as rack,
                         bin_warehouses.name as bin
                     ");
                     $products->leftJoin('products','products.id','=','goods_issue_products.product_id');
+                    $products->leftJoin('product_categories','product_categories.id','=','products.product_category_id');
                     $products->leftJoin('uoms','uoms.id','=','goods_issue_products.uom_id');
                     $products->leftJoin('rack_warehouses', 'rack_warehouses.id', '=', 'goods_issue_products.rack_id');
                     $products->leftJoin('bin_warehouses', 'bin_warehouses.id', '=', 'goods_issue_products.bin_id');
@@ -138,12 +142,14 @@ class GoodsIssueController extends Controller
                     $products->selectRaw("
                         goods_issue_products.*,
                         products.name as product,
+                        product_categories.name as category,
                         uoms.name as uom,                    
                         product_consumables.consumable_number as reference,
                         rack_warehouses.name as rack,
                         bin_warehouses.name as bin
                     ");
                     $products->leftJoin('products','products.id','=','goods_issue_products.product_id');
+                    $products->leftJoin('product_categories','product_categories.id','=','products.product_category_id');
                     $products->leftJoin('uoms','uoms.id','=','goods_issue_products.uom_id');
                     $products->leftJoin('rack_warehouses', 'rack_warehouses.id', '=', 'goods_issue_products.rack_id');
                     $products->leftJoin('bin_warehouses', 'bin_warehouses.id', '=', 'goods_issue_products.bin_id');
@@ -153,12 +159,14 @@ class GoodsIssueController extends Controller
                     $products->selectRaw("
                         goods_issue_products.*,
                         products.name as product,
+                        product_categories.name as category,
                         uoms.name as uom,                    
                         product_transfers.transfer_number as reference,
                         rack_warehouses.name as rack,
                         bin_warehouses.name as bin
                     ");
                     $products->leftJoin('products','products.id','=','goods_issue_products.product_id');
+                    $products->leftJoin('product_categories','product_categories.id','=','products.product_category_id');
                     $products->leftJoin('uoms','uoms.id','=','goods_issue_products.uom_id');
                     $products->leftJoin('rack_warehouses', 'rack_warehouses.id', '=', 'goods_issue_products.rack_id');
                     $products->leftJoin('bin_warehouses', 'bin_warehouses.id', '=', 'goods_issue_products.bin_id');
@@ -546,6 +554,7 @@ class GoodsIssueController extends Controller
                     $newfile    = "assets/goodsissue/$issued_id/$type/$filename.$ext";
 
                     $rename = rename($oldfile, $newfile);
+
                     if ($rename) {
                         $query = GoodsIssueDocument::find($id);
                         $query->document_name = $row->docName;
@@ -620,13 +629,14 @@ class GoodsIssueController extends Controller
 
     public function consumableproducts(Request $request)
     {
-        $draw       = $request->draw;
-        $start      = $request->start;
-        $length     = $request->length;
-        $query      = $request->search['value'];
-        $sort       = $request->columns[$request->order[0]['column']]['data'];
-        $dir        = $request->order[0]['dir'];
-        $except     = $request->except;
+        $draw        = $request->draw;
+        $start       = $request->start;
+        $length      = $request->length;
+        $query       = $request->search['value'];
+        $sort        = $request->columns[$request->order[0]['column']]['data'];
+        $dir         = $request->order[0]['dir'];
+        $except      = $request->except;
+        $category_id = $request->category_id;
 
         $query = ProductConsumableDetail::selectRaw("
             product_consumables.consumable_number,
@@ -636,12 +646,17 @@ class GoodsIssueController extends Controller
             product_consumable_details.uom_id,
             product_consumable_details.qty_consume as qty,
             products.name as product,
+            product_categories.name as category,
             uoms.name as uom
         ");
         $query->leftJoin('product_consumables','product_consumables.id','=','product_consumable_details.product_consumable_id');
         $query->leftJoin('products','products.id','=','product_consumable_details.product_id');
+        $query->leftJoin('product_categories','product_categories.id','=','products.product_category_id');
         $query->leftJoin('uoms','uoms.id','=','product_consumable_details.uom_id');
         $query->where('product_consumables.status','approved');
+        if($category_id){
+            $query->where('product_categories.id',$category_id);
+        }
         if($except){
             $query->whereNotIn('product_consumable_details.product_id',$except);
         }
@@ -674,13 +689,14 @@ class GoodsIssueController extends Controller
 
     public function transferproducts(Request $request)
     {
-        $draw       = $request->draw;
-        $start      = $request->start;
-        $length     = $request->length;
-        $query      = $request->search['value'];
-        $sort       = $request->columns[$request->order[0]['column']]['data'];
-        $dir        = $request->order[0]['dir'];
-        $except     = $request->except;
+        $draw        = $request->draw;
+        $start       = $request->start;
+        $length      = $request->length;
+        $query       = $request->search['value'];
+        $sort        = $request->columns[$request->order[0]['column']]['data'];
+        $dir         = $request->order[0]['dir'];
+        $except      = $request->except;
+        $category_id = $request->category_id;
 
         $query = ProductTransferDetail::selectRaw("
             product_transfers.transfer_number,
@@ -690,12 +706,17 @@ class GoodsIssueController extends Controller
             product_transfer_details.uom_id,
             product_transfer_details.qty_requested as qty,
             products.name as product,
+            product_categories.name as category,
             uoms.name as uom
         ");
         $query->leftJoin('product_transfers','product_transfers.id','=','product_transfer_details.product_transfer_id');
         $query->leftJoin('products','products.id','=','product_transfer_details.product_id');
+        $query->leftJoin('product_categories','product_categories.id','=','products.product_category_id');
         $query->leftJoin('uoms','uoms.id','=','product_transfer_details.uom_id');
         $query->where('product_transfers.status','approved');
+        if($category_id){
+            $query->where('product_categories.id',$category_id);
+        }
         if($except){
             $query->whereNotIn('product_transfer_details.product_id',$except);
         }

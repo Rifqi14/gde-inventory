@@ -360,7 +360,7 @@
 
         $("#warehouse").select2({
             ajax: {
-                url: "{{route('productborrowing.selectwarehouse')}}",
+                url: "{{route('warehouse.select')}}",
                 type: 'GET',
                 dataType: 'json',
                 data: function(params) {
@@ -434,7 +434,7 @@
 
         $("#product").select2({
             ajax: {
-                url: "{{route('productborrowing.selectproduct')}}",
+                url: "{{route('product.select')}}",
                 type: 'GET',
                 dataType: 'json',
                 data: function(params) {

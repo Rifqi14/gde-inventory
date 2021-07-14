@@ -36,6 +36,7 @@
                 <h5 class="text-md text-dark text-uppercase">{{ $menu_name }} Information</h5>
               </span>
               <div class="row">
+              <!-- Receipt Number -->
                 <div class="col-sm-6">
                   <div class="form-group row">
                     <label for="receipt-number" class="col-md-12 col-xs-12 control-label">Receipt Number</label>
@@ -44,28 +45,60 @@
                     </div>
                   </div>
                 </div>
+                <!-- Issued By -->
+                <div class="col-sm-6">
+                  <div class="form-group row">
+                    <label class="col-md-12 col-xs-12 control-label" for="issued-by">Issued By</label>
+                    <div class="col-sm-12 controls">
+                      <input type="text" class="form-control" value="{{$data->issued}}" readonly>
+                      <input type="hidden" name="issuedby" value="{{$data->issued_by}}">
+                    </div>
+                  </div>
+                </div>
+                <!-- Receipt Date -->
                 <div class="col-sm-6">
                   <div class="form-group row">
                     <label for="receipt_date" class="col-md-12 col-xs-12 control-label">Receipt Date</label>
                     <div class="col-sm-12 controls">
-                      <input type="text" name="receipt_date" id="receipt-date" class="form-control datepicker text-right" placeholder="Enter receipt date">
+                      <div class="input-group">
+                        <input type="text" name="receipt_date" id="receipt-date" class="form-control datepicker text-right" placeholder="Enter receipt date">
+                        <div class="input-group-append">
+                            <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                        </div>
+                      </div>                      
                     </div>
                   </div>
                 </div>
+                 <!-- Product Category -->
+                 <div class="col-md-6">
+                  <label for="product-category" class="control-label">Product Category</label>
+                  <div class="controls">
+                      <select id="product-category" class="form-control select2" data-placeholder="Choose Product Category"></select>
+                  </div>
+                </div>
+                <!-- Site -->
                 <div class="col-sm-6">
                   <div class="form-group">
-                    <label for="unit">Unit</label>
+                    <label for="unit">Site</label>
                     <div class="controls">
                       <select name="unit" id="unit" class="form-control select2" data-placeholder="Choose site"></select>
                     </div>
                   </div>
                 </div>
+                <!-- Warehouse -->
                 <div class="col-sm-6">
                   <div class="form-group">
                     <label for="warehouse">Warehouse</label>
                     <div class="controls">
                       <select name="warehouse" id="warehouse" class="form-control select2" data-placeholder="Choose warehouse"></select>
                     </div>
+                  </div>
+                </div>
+                <!-- Status -->
+                <div class="col-sm-6">
+                  <div class="form-group form-status">
+                    <label for="state" class="control-label">Status</label>
+                    <div class="controls"></div>
                   </div>
                 </div>
               </div>
@@ -78,24 +111,13 @@
               <span class="title">
                 <hr>
                 <h5 class="text-md text-dark text-uppercase">Other Information</h5>
-              </span>
-              <div class="form-group row">
-                <label class="col-md-12 col-xs-12 control-label" for="issued-by">Issued By</label>
-                <div class="col-sm-12 controls">
-                  <input type="text" class="form-control" value="{{$data->issued}}" readonly>
-                  <input type="hidden" name="issuedby" value="{{$data->issued_by}}">
-                </div>
-              </div>
+              </span>              
               <div class="form-group row">
                 <label for="description" class="col-md-12 col-xs-12 control-label">Description</label>
                 <div class="col-sm-12 controls">
                   <textarea class="form-control summernote" name="description" id="description" rows="4" placeholder="Description">{{$data->description}}</textarea>
                 </div>
-              </div>
-              <div class="form-group form-status">
-                <label for="state" class="control-label">Status</label>
-                <div class="controls"></div>
-              </div>
+              </div>              
             </div>
           </div>
         </div>
@@ -116,6 +138,7 @@
                   <thead>
                     <tr>
                       <th width="100">Product Name</th>
+                      <th width="100">Product Category</th>
                       <th width="100">Reference</th>
                       <th width="30" class="text-center">Qty Order</th>
                       <th width="30" class="text-center">Qty Receipt</th>
@@ -126,7 +149,7 @@
                   </thead>
                   <tbody>
                     <tr class="no-available-data">
-                      <td colspan="7" class="text-center">No available data.</td>
+                      <td colspan="8" class="text-center">No available data.</td>
                     </tr>
                   </tbody>
                 </table>
@@ -222,7 +245,7 @@
 </section>
 
 <div class="modal fade" id="form-reference">
-  <div class="modal-dialog modal-lg">
+  <div class="modal-dialog modal-xl">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" style="text-transform: capitalize;">Add reference</h5>
@@ -250,8 +273,9 @@
                     <tr>
                       <th width="5%" class="text-center">No</th>
                       <th width="15%" class="text-center">Date</th>
-                      <th width="20%">Contract Number</th>
-                      <th width="20%">Produk</th>
+                      <th width="30%">Contract Number</th>
+                      <th width="30%">Product</th>
+                      <th width="30%">Product Category</th>
                       <th width="10%" class="text-center">Qty</th>
                       <th width="15%" class="text-center">UOM</th>
                       <th width="15%" class="text-center">Action</th>
@@ -264,10 +288,11 @@
                   <thead>
                     <tr>
                       <th width="5%" class="text-center">No</th>
-                      <th width="15%" class="text-center">Date</th>
-                      <th width="20%">Borrowing Number</th>
-                      <th width="20%">Produk</th>
-                      <th width="10%" class="text-center">Qty</th>
+                      <th width="10%" class="text-center">Date</th>
+                      <th width="30%">Borrowing Number</th>
+                      <th width="30%">Product</th>
+                      <th width="30%">Product Category</th>
+                      <th width="10%" class="text-right">Qty</th>
                       <th width="15%" class="text-center">UOM</th>
                       <th width="15%" class="text-center">Action</th>
                     </tr>
@@ -350,6 +375,8 @@
       ]
     });
 
+    $('#description').summernote('code',@json($data->description));
+
     $('.datepicker').daterangepicker({
       singleDatePicker: true,
       timePicker: false,
@@ -398,6 +425,8 @@
       }
     }).on('select2:clearing', function() {
       $('#warehouse').val(null).trigger('change');
+    }).on('change', function(){
+      $(this).focus();
     });
 
     $("#warehouse").select2({
@@ -441,8 +470,40 @@
             text: `${data.site}`
           }
         });
-      }
+      }      
+    }).on('change', function(){      
+      $(this).focus();
     });    
+
+    $("#product-category").select2({
+      ajax: {
+          url: "{{ route('productcategory.select') }}",
+          type: "GET",
+          dataType: "JSON",
+          data: function(params) {
+              return {
+                  name: params.term,
+                  page: params.page,
+                  limit: 30,
+              };
+          },
+          processResults: function(data, params) {
+              var more = (params.page * 30) < data.total;
+              var option = [];
+              $.each(data.rows, function(index, item) {
+                  option.push({
+                      id: item.id,
+                      text: item.name,
+                  });
+              });
+              return {
+                  results: option,
+                  more: more,
+              };
+          },
+      },
+      allowClear: true,
+    });
 
     if(receiptDate){
       var date = $('#receipt-date').data('daterangepicker');
@@ -487,15 +548,20 @@
         type: "GET",
         data: function(data) {
           data.except = receiptProduct;
+          data.category_id = $('#form').find('#product-category').find('option:selected').val();
         }
       },
       columnDefs: [{
           orderable: false,
-          targets: [0, 6]
+          targets: [0, 7]
         },
         {
           className: "text-center",
-          targets: [0, 1, 4, 5, 6]
+          targets: [0, 1, 6, 7]
+        },
+        {
+         className: "text-right",
+         targets: [5]
         },
         {
           render: function(data, type, row) {
@@ -508,15 +574,16 @@
             var referenceID = row.contract_id,
               reference = row.contract_number,
               productID = row.product_id,
-              product = row.product,
-              uomID = row.uom_id,
-              order = row.qty ? row.qty : 0;
+              product   = row.product,
+              category  = row.category,
+              uomID     = row.uom_id,
+              order     = row.qty ? row.qty : 0;
 
-            return `<button class="btn btn-md text-xs btn-success btn-flat legitRipple" onclick="addProduct($(this),'contract')" type="button" data-reference-id="${referenceID}" data-reference="${reference}" data-product-id="${productID}" data-product="${product}" data-uom-id="${uomID}" data-order="${order}">
+            return `<button class="btn btn-md text-xs btn-success btn-flat legitRipple" onclick="addProduct($(this),'contract')" type="button" data-reference-id="${referenceID}" data-reference="${reference}" data-product-id="${productID}" data-product="${product}" data-category="${category}" data-uom-id="${uomID}" data-order="${order}">
                       <i class="fas fa-plus"></i>
                     </button>`;
           },
-          targets: [6]
+          targets: [7]
         }
       ],
       columns: [{
@@ -530,6 +597,9 @@
         },
         {
           data: "product"
+        },
+        {
+          data: "category"
         },
         {
           data: "qty"
@@ -557,15 +627,22 @@
       ajax: {
         url: "{{route('goodsreceipt.borrowingproducts')}}",
         type: "GET",
-        data: function(data) {}
+        data: function(data) {
+          data.except      = receiptProduct;
+          data.category_id = data.category_id = $('#form').find('#product-category').find('option:selected').val();
+        }
       },
       columnDefs: [{
           orderable: false,
-          targets: [0, 6]
+          targets: [0, 7]
         },
         {
           className: "text-center",
-          targets: [0, 1, 4, 5, 6]
+          targets: [0, 1, 6, 7]
+        },
+        {
+          className: "text-right",
+          targets: [5]
         },
         {
           render: function(data, type, row) {
@@ -576,17 +653,18 @@
         {
           render: function(data, type, row) {
             var referenceID = row.product_borrowing_id,
-              reference = row.borrowing_number,
-              productID = row.product_id,
-              product = row.product,
-              uomID = row.uom_id,
-              order = row.qty ? row.qty : 0;
+                reference   = row.borrowing_number,
+                productID   = row.product_id,
+                product     = row.product,
+                category    = row.category,
+                uomID       = row.uom_id,
+                order       = row.qty ? row.qty : 0;
 
-            return `<button class="btn btn-md text-xs btn-success btn-flat legitRipple" onclick="addProduct($(this),'borrowing')" type="button" data-reference-id="${referenceID}" data-reference="${reference}" data-product-id="${productID}" data-product="${product}" data-uom-id="${uomID}" data-order="${order}">
+            return `<button class="btn btn-md text-xs btn-success btn-flat legitRipple" onclick="addProduct($(this),'borrowing')" type="button" data-reference-id="${referenceID}" data-reference="${reference}" data-product-id="${productID}" data-product="${product}" data-category="${category}" data-uom-id="${uomID}" data-order="${order}">
                       <i class="fas fa-plus"></i>
                     </button>`;
           },
-          targets: [6]
+          targets: [7]
         }
       ],
       columns: [{
@@ -600,6 +678,9 @@
         },
         {
           data: "product"
+        },
+        {
+          data: "category"
         },
         {
           data: "qty"
@@ -729,9 +810,7 @@
         data.append('products', JSON.stringify(products));
         data.append('documents',JSON.stringify(documents));
         data.append('undocuments',JSON.stringify(deletedDoc));
-        data.append('receiptdate', receiptDate);
-
-        // s
+        data.append('receiptdate', receiptDate);        
 
         $.ajax({
           url: $('#form').attr('action'),
@@ -813,6 +892,8 @@
       }
     }).on('select2:clear', function() {
       $(this).parents('.product-item').find('.bin-warehouse').val(null).trigger('change');
+    }).on('change',function(){
+      $(this).focus();
     }); 
   }
 
@@ -871,6 +952,8 @@
           }
         });
       }
+    }).on('change',function(){
+      $(this).focus();
     });
   }
   
@@ -889,7 +972,7 @@
   }
 
   const initData = () => {
-    var products = @json($data->contractref?$data->contractref:$data->borrowingref);
+    var products = @json(count($data->contractref)>0?$data->contractref:$data->borrowingref);
     var files    = @json($data->files);
     var images   = @json($data->images);    
 
@@ -899,6 +982,7 @@
             table   = $('#table-product > tbody');
         var productID    = value.product_id,
             product      = value.product,
+            category     = value.category,
             referenceID  = value.reference_id,
             reference    = value.reference,
             uomID        = value.uom_id,
@@ -913,6 +997,7 @@
             html = `<tr class="product-item">
                   <input type="hidden" class="item-product" value="${productID}" data-reference-id="${referenceID}" data-uom-id="${uomID}" data-qty-order="${order}" data-type="${type}">                        
                   <td width="100">${product}</td>
+                  <td width="100">${category}</td>
                   <td width="100"><b>${reference}</b></td>
                   <td class="text-center" width="30">${order}</td>
                   <td class="text-center" width="30">
@@ -921,7 +1006,7 @@
                   <td width="100">
                     <div class="form-group">
                       <div class="controls">
-                        <select name="rack class="form-control rack-warehouse" data-placeholder="Choose rack" style="width: 100%;" data-rack-id="${rackID}" data-rack="${rack}" required></select>
+                        <select name="rack" class="form-control rack-warehouse" data-placeholder="Choose rack" style="width: 100%;" data-rack-id="${rackID}" data-rack="${rack}" required></select>
                       </div>
                     </div>                    
                   </td>
@@ -941,11 +1026,11 @@
           receiptProduct.push(productID);
 
           table.find('.no-available-data').remove();
-          table.append(html);                         
-      }); 
-
-      initBin();
-      initRack();
+          table.append(html);          
+          
+          initBin();
+          initRack();
+      });       
 
       $.each($('#table-product > tbody').find('tr.product-item'), function (index, value) { 
          var rack     = $(this).find('.rack-warehouse'),
@@ -1056,17 +1141,19 @@
 
   const addProduct = (that, type) => {
     var referenceID = that.attr('data-reference-id'),
-        reference = that.attr('data-reference'),
-        productID = that.attr('data-product-id'),
-        product = that.attr('data-product'),
-        uomID = that.attr('data-uom-id'),
-        order = that.attr('data-order'),
-        table = $('#table-product > tbody');
+        reference   = that.attr('data-reference'),
+        productID   = that.attr('data-product-id'),
+        product     = that.attr('data-product'),
+        category    = that.attr('data-category'),
+        uomID       = that.attr('data-uom-id'),
+        order       = that.attr('data-order'),
+        table       = $('#table-product > tbody');
 
 
     var html = `<tr class="product-item">
                   <input type="hidden" class="item-product" value="${productID}" data-reference-id="${referenceID}" data-uom-id="${uomID}" data-qty-order="${order}" data-type="${type}">                        
                   <td width="100">${product}</td>
+                  <td width="100">${category}</td>
                   <td width="100"><b>${reference}</b></td>
                   <td class="text-center" width="30">${order}</td>
                   <td class="text-center" width="30">
@@ -1112,7 +1199,7 @@
     that.closest('.product-item').remove();
     if ($('#table-product > tbody > .product-item').length == 0) {
       var html = `<tr class="no-available-data">
-                    <td colspan="7" class="text-center">No available data.</td>
+                    <td colspan="8" class="text-center">No available data.</td>
                   </tr>`;
       $('#table-product > tbody').append(html);
 

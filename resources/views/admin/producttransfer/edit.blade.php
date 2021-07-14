@@ -1055,9 +1055,7 @@
         deletedDoc.push({
             id : id,            
             path : `assets/producttransfer/${transferID}/image/${file}`
-        });
-
-        console.log({ deleted : deletedDoc});
+        });        
     }   
 
     const onSubmit = (status) => {
