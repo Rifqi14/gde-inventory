@@ -93,7 +93,7 @@
                                 <div class="col-md-6">
                                     <div class="form-group row form-status">
                                         <label for="status" class="control-label col-md-12 col-xs-12">Status</label>
-                                        <div class="controls col-md-12">                                            
+                                        <div class="controls col-md-12">
                                         </div>
                                     </div>
                                 </div>
@@ -169,7 +169,7 @@
                                 <b><i class="fas fa-save"></i></b>
                                 Submit
                             </button>
-                            @else 
+                            @else
                             <button type="button" onclick="onSubmit('waiting')" class="btn bg-success btn-labeled legitRipple text-sm">
                                 <b><i class="fas fa-check-circle"></i></b>
                                 Submit
@@ -178,7 +178,7 @@
                                 <b><i class="fas fa-save"></i></b>
                                 Save
                             </button>
-                            @endif                                                        
+                            @endif
                             <a href="{{ route('stockadjustment.index') }}" class="btn btn-secondary color-palette btn-labeled legitRipple text-sm">
                                 <b><i class="fas fa-times"></i></b>
                                 Cancel
@@ -200,10 +200,10 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">                      
+            <div class="modal-body">
                 <div class="mb-3 text-right">
-                    <button type="button" class="btn btn-labeled  btn-success btn-sm btn-sm btn-flat legitRipple" onclick="addSerial()"><b><i class="fas fa-plus"></i></b> Add</button>                
-                </div>                                
+                    <button type="button" class="btn btn-labeled  btn-success btn-sm btn-sm btn-flat legitRipple" onclick="addSerial()"><b><i class="fas fa-plus"></i></b> Add</button>
+                </div>
                 <div class="table-responsive p-0">
                     <table class="table table-striped" id="table-serial" width="100%">
                         <thead>
@@ -222,7 +222,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-labeled  btn-danger btn-sm btn-sm btn-flat legitRipple" data-dismiss="modal"><b><i class="fas fa-times"></i></b> Close</button>                
+                <button type="button" class="btn btn-labeled  btn-danger btn-sm btn-sm btn-flat legitRipple" data-dismiss="modal"><b><i class="fas fa-times"></i></b> Close</button>
             </div>
         </div>
     </div>
@@ -406,6 +406,9 @@
                 },
             },
             allowClear: true,
+            escapeMarkup: function(text) {
+                return text;
+            },
         });
 
         $("#select-product").select2({
@@ -639,11 +642,11 @@
                     sku          = value.sku,
                     qtyBefore    = value.qty_before?parseInt(value.qty_before):0,
                     qtyAfter     = value.qty_after?parseInt(value.qty_after):qtyBefore,
-                    currentStock = qtyAfter,                    
+                    currentStock = qtyAfter ? qtyAfter : 0,
                     isSerial     = value.is_serial==1?true:false,
                     lastSerial   = value.key_serial,
                     qtyAdjusment = isSerial?qtyAfter:0,
-                    stockWarehouse = value.stock_warehouse,                    
+                    stockWarehouse = value.stock_warehouse ? value.stockWarehouse : 0,                    
                     serials         = value.product_serial,
                     serial       = '';                
 

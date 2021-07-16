@@ -329,7 +329,7 @@
                         _token: "{{ csrf_token() }}"
                     };
                     $.ajax({
-                        url: `{{route('attendancemachine.index')}}/${id}`,
+                        url: `{{route('attendance.index')}}/${id}`,
                         dataType: 'json',
                         data: data,
                         type: 'DELETE',

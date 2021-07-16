@@ -293,6 +293,11 @@ Route::group(['prefix' => 'admin'], function () {
         Route::resource('/contractdocument', 'Admin\ContractDocumentReceiptDetailController');
 
         // Contract Document Receipt Detail
+        Route::get('/salaryreport/read', 'Admin\SalaryReportController@read')->name('salaryreport.read');
         Route::resource('/salaryreport', 'Admin\SalaryReportController');
+
+        // Salary Report Detail
+        Route::get('/salarydetail/read', 'Admin\SalaryReportDetailController@read')->name('salarydetail.read');
+        Route::resource('/salarydetail', 'Admin\SalaryReportDetailController');
     });
 });
