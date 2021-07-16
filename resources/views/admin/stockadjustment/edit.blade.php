@@ -634,6 +634,7 @@
             var html = '';            
 
             $.each(products, function (index, value) { 
+                console.log(value);
                 var productID    = value.product_id,
                     product      = value.product,
                     category     = value.category,
