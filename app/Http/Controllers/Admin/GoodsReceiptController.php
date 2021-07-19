@@ -8,6 +8,12 @@ use App\Models\ContractProduct;
 use App\Models\ProductBorrowingDetail;
 use App\Models\GoodsReceiptProduct;
 use App\Models\GoodsReceiptAsset;
+use App\Models\Site;
+use App\Models\Warehouse;
+use App\Models\Product;
+use App\Models\ProductSerial;
+use App\Models\StockWarehouse;
+use App\Models\StockMovement;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -69,7 +75,10 @@ class GoodsReceiptController extends Controller
                     $product->selectRaw("
                         goods_receipt_products.*,
                         products.name as product,
-                        product_categories.name as category,
+                        products.sku,
+                        products.is_serial,            
+                        products.last_serial,
+                        product_categories.path as category,
                         uoms.name as uom,                    
                         contracts.number as reference,
                         rack_warehouses.name as rack,
@@ -87,7 +96,10 @@ class GoodsReceiptController extends Controller
                     $product->selectRaw("
                         goods_receipt_products.*,
                         products.name as product,
-                        product_categories.name as category,
+                        products.sku,
+                        products.is_serial,            
+                        products.last_serial,
+                        product_categories.path as category,
                         uoms.name as uom,                    
                         product_borrowings.borrowing_number as reference,
                         rack_warehouses.name as rack,
@@ -140,7 +152,8 @@ class GoodsReceiptController extends Controller
                     $product->selectRaw("
                     goods_receipt_products.*,
                     products.name as product,
-                    product_categories.name as category,
+                    products.is_serial,            
+                    product_categories.path as category,
                     uoms.name as uom,                    
                     contracts.number as reference,
                     rack_warehouses.name as rack,
@@ -269,11 +282,11 @@ class GoodsReceiptController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request)   
     {
         $validator = Validator::make($request->all(), [
             'receipt_date' => 'required',
-            'unit'         => 'required',
+            'site'         => 'required',
             'warehouse'    => 'required'
         ]);
 
@@ -285,6 +298,7 @@ class GoodsReceiptController extends Controller
         }
 
         $receiptdate = $request->receiptdate;
+        $site        = $request->site;
         $warehouse   = $request->warehouse;
         $description = $request->description;
         $status      = $request->status;
@@ -333,6 +347,11 @@ class GoodsReceiptController extends Controller
                             'status'    => false,
                             'message'   => 'Failed to create detail data.'
                         ], 400);
+                    }
+
+                    // Calculate and move stock warehouse                    
+                    if($status == 'approved'){
+                        $calculate = $this->calculateStock($getProducts);
                     }
                 }
             }
@@ -429,7 +448,7 @@ class GoodsReceiptController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'receipt_date' => 'required',
-            'unit'         => 'required',
+            'site'         => 'required',
             'warehouse'    => 'required'
         ]);
 
@@ -441,6 +460,7 @@ class GoodsReceiptController extends Controller
         }
 
         $receiptdate = $request->receiptdate;
+        $site        = $request->site;
         $warehouse   = $request->warehouse;
         $description = $request->description;
         $status      = $request->status;
@@ -489,6 +509,11 @@ class GoodsReceiptController extends Controller
                             'status'    => false,
                             'message'   => 'Failed to create detail data.'
                         ], 400);
+                    }
+
+                    // Calculate and move stock warehouse                    
+                    if($status == 'approved'){
+                        $calculate = $this->calculateStock($getProducts);
                     }
                 }
             }
@@ -648,7 +673,10 @@ class GoodsReceiptController extends Controller
             contract_products.uom_id,
             contract_products.qty,            
             products.name as product,
-            product_categories.name as category,
+            products.sku,
+            products.is_serial,            
+            products.last_serial,
+            product_categories.path as category,
             uoms.name as uom
         ");        
         $query->leftJoin('contracts', 'contracts.id', '=', 'contract_products.contract_id');
@@ -684,6 +712,7 @@ class GoodsReceiptController extends Controller
         $data = [];
         foreach ($queries as $key => $row) {
             $row->no = ++$start;
+            $row->category = str_replace('->',' <i class="fas fa-angle-right"></i> ',$row->category);                        
             $data[]  = $row;
         }
 
@@ -714,7 +743,10 @@ class GoodsReceiptController extends Controller
             product_borrowing_details.uom_id,
             product_borrowing_details.qty_requested as qty,
             products.name as product,
-            product_categories.name as category,
+            products.sku,
+            products.is_serial,            
+            products.last_serial,
+            product_categories.path as category,
             uoms.name as uom
         ");
         $query->leftJoin('product_borrowings', 'product_borrowings.id', '=', 'product_borrowing_details.product_borrowing_id');
@@ -749,7 +781,8 @@ class GoodsReceiptController extends Controller
 
         $data = [];
         foreach ($queries as $key => $row) {
-            $row->no = ++$start;
+            $row->no = ++$start;          
+            $row->category = str_replace('->',' <i class="fas fa-angle-right"></i> ',$row->category);                          
             $data[]  = $row;
         }
 
@@ -775,4 +808,113 @@ class GoodsReceiptController extends Controller
         $query->good_receipt_no = $number;
         $query->save();
     }
-}
+    
+    function calculateStock($products){
+        foreach (json_decode($products) as $key => $row) {
+            $site_id      = $row->site_id;
+            $warehouse_id = $row->warehouse_id;
+            $product_id   = $row->product_id;
+            $qty_receipt  = $row->qty_receipt;
+            $ref_type     = $row->type;
+            $now          = date('Y-m-d H:i:s');
+            
+            if($ref_type == 'contract'){
+                $virtual = $this->generateWarehouseVirtual($site_id);
+            }
+
+            $product = Product::find($product_id);
+
+            if($product->is_serial == '1'){
+                $serials = [];
+
+                foreach ($row->serials as $key => $num) {
+                    $serials[] = [
+                        'warehouse_id'  => $num->warehouse_id,
+                        'product_id'    => $num->product_id,
+                        'serial_number' => $num->serial_number,
+                        'status'        => 1,
+                        'created_at'    => $now,
+                        'updated_at'    => $now
+                    ];                    
+                }
+                
+                $query = ProductSerial::insert($serials);
+
+                if($query){
+                    $product->last_serial = $product->last_serial+$qty_receipt;
+                    $product->save();
+                }else{
+                    return response()->json([
+                        'status'    => false,
+                        'message'   => 'Failed to update data product serials.'
+                    ],400);
+                }
+            }
+
+            // Checking stock product on warehouse
+            $stock = StockWarehouse::where([
+                ['stock_warehouses.warehouse_id','=',$warehouse_id],
+                ['stock_warehouses.product_id','=',$product_id]
+            ])->first();
+            
+            if($stock){
+                $query = $stock;
+                $query->stock = $stock->stock + $qty_receipt;
+                $query->save();
+
+                if(!$query){
+                    return response()->json([
+                        'status'    => false,
+                        'message'   => 'Failed to update stock on warehouse.'
+                    ],400);
+                }
+            }else{
+                $query = StockWarehouse::create([
+                    'product_id'    => $product_id,
+                    'warehouse_id'  => $warehouse_id,
+                    'stock'         => $qty_receipt
+                ]);
+
+                if(!$query){
+                    return response()->json([
+                        'status'    => false,
+                        'message'   => 'Failed to update stock on warehouse.'
+                    ],400);
+                }
+            }
+
+        }
+    }
+
+    function generateWarehouseVirtual($site_id)
+    {
+        $query = Warehouse::where([
+            ['site_id','=',$site_id],
+            ['type','=','virtual']
+        ])->first();
+
+        if(!$query){
+            $site     = Site::find($site_id);
+            $sitecode = strtoupper($site->code);
+            $sitename = $site->name;
+
+            $query = Warehouse::create([
+                'code'          => "$sitecode - WV",
+                'name'          => "$sitename - Warehouse Virtual",
+                'type'          => 'virtual',
+                'site_id'       => $site_id,
+                'description'   => "Warehouse virtual of Unit or Site $sitename",
+                'postal_code'   => 0,
+                'address'       => '---',
+                'status'        => 'active'
+            ]);
+
+            if($query){
+                return true;
+            }else{
+                return false;
+            }
+        }
+
+    }
+}   
