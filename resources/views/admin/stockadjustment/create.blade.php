@@ -185,10 +185,10 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">                      
+            <div class="modal-body">
                 <div class="mb-3 text-right">
-                    <button type="button" class="btn btn-labeled  btn-success btn-sm btn-sm btn-flat legitRipple" onclick="addSerial()"><b><i class="fas fa-plus"></i></b> Add</button>                
-                </div>                                
+                    <button type="button" class="btn btn-labeled  btn-success btn-sm btn-sm btn-flat legitRipple" onclick="addSerial()"><b><i class="fas fa-plus"></i></b> Add</button>
+                </div>
                 <div class="table-responsive p-0">
                     <table class="table table-striped" id="table-serial" width="100%">
                         <thead>
@@ -207,7 +207,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-labeled  btn-danger btn-sm btn-sm btn-flat legitRipple" data-dismiss="modal"><b><i class="fas fa-times"></i></b> Close</button>                
+                <button type="button" class="btn btn-labeled  btn-danger btn-sm btn-sm btn-flat legitRipple" data-dismiss="modal"><b><i class="fas fa-times"></i></b> Close</button>
             </div>
         </div>
     </div>
@@ -390,6 +390,9 @@
                 },
             },
             allowClear: true,
+            escapeMarkup: function(text) {
+                return text;
+            },
         });
 
         $("#select-product").select2({

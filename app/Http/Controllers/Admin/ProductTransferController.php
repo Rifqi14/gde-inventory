@@ -374,6 +374,8 @@ class ProductTransferController extends Controller
         $issuedBy               = $request->issued_by;
         $description            = $request->description;
         $status                 = $request->status;
+        $vehicle_type           = $request->vehicle_type;
+        $police_number          = $request->police_number;
 
         $query = ProductTransfer::create([
             'origin_site_id'            => $origin_unit,
@@ -383,7 +385,9 @@ class ProductTransferController extends Controller
             'date_transfer'             => $transferdate,
             'issued_by'                 => $issuedBy,
             'description'               => $description,
-            'status'                    => $status
+            'status'                    => $status,
+            'vehicle_type'              => $vehicle_type,
+            'police_number'             => $police_number,
         ]);        
 
         if($query){            
@@ -539,6 +543,8 @@ class ProductTransferController extends Controller
         $issuedBy               = $request->issued_by;
         $description            = $request->description;
         $status                 = $request->status;
+        $vehicle_type           = $request->vehicle_type;
+        $police_number          = $request->police_number;
 
         $query = ProductTransfer::find($id);
         $query->date_transfer            = $transferdate;
@@ -549,6 +555,8 @@ class ProductTransferController extends Controller
         $query->issued_by                = $issuedBy;
         $query->description              = $description;
         $query->status                   = $status;
+        $query->vehicle_type             = $vehicle_type;
+        $query->police_number            = $police_number;
         $query->save();
 
         if($query){

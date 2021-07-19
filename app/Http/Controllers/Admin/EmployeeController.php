@@ -136,11 +136,15 @@ class EmployeeController extends Controller
     {
         $start = $request->page ? $request->page - 1 : 0;
         $length = $request->limit;
+        $isSalary = $request->salary;
         $name = strtoupper($request->name);
 
         $query = Employee::query();
         if($name){
             $query->whereRaw("upper(name) like '%$name%'");
+        }
+        if ($isSalary) {
+            $query->payrollYes();
         }
         $query->where('status',1);
         $query->orderBy('id');
