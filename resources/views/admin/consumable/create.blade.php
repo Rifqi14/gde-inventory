@@ -520,9 +520,7 @@
                 product_id      : product_id,
                 category_id     : categoryID,
                 uom_id          : uomID,
-                qty_system    
-                  <b><i class="fas fa-plus"></i></b>
-                    : qtySystem,
+                qty_system      : qtySystem,
                 qty_consume      : qtyConsume
             });
 
