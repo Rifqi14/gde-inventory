@@ -106,13 +106,13 @@
                 <table id="table-product" class="table table-striped datatable" width="100%">
                   <thead>
                     <tr>
-                      <th width="10%">Product Name</th>
-                      <th width="10%">Product Category</th>
-                      <th width="10%">Reference</th>
-                      <th width="10%" class="text-right">Qty Order</th>
-                      <th width="10%" class="text-right">Qty Receipt</th>
-                      <th width="10%">Rack</th>
-                      <th width="10%">Bin</th>
+                      <th width="150">Product</th>
+                      <th width="150" style="white-space: nowrap;">Product Category</th>
+                      <th width="20" class="text-center">Has Serial</th>                      
+                      <th width="20" class="text-right" style="white-space: nowrap;">Qty Order</th>
+                      <th width="20" class="text-right" style="white-space: nowrap;">Qty Receipt</th>
+                      <th width="40">Rack</th>
+                      <th width="100">Bin</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -376,6 +376,7 @@
             referenceID  = value.reference_id,
             reference    = value.reference,
             uomID        = value.uom_id,
+            isSerial     = value.is_serial,
             order        = value.qty_order,
             receipt      = value.qty_receipt?value.qty_receipt:0,
             rackID       = value.rack_id,
@@ -384,10 +385,22 @@
             bin          = value.bin,
             type         = value.type;
 
+            if (isSerial == '1') {
+              disable = type == 'contract'?'disabled':'';
+              icon    = 'fas fa-check';
+              badge   = 'badge-info';            
+
+            } else {
+              icon  = 'fas fa-times';
+              badge = 'bg-red';
+            }
+
+            var serial = `<span class="badge ${badge} text-md"><i class="${icon}" style="size: 1x;"></i></span>`;
+
             html += `<tr class="product-item">                   
-                      <td width="100">${product}</td>
+                      <td width="100"><p>${product}<br><b>${reference}</b></p></td>
                       <td width="100">${category}</td>
-                      <td width="100"><b>${reference}</b></td>
+                      <td width="30" class="text-center">${serial}</td>
                       <td class="text-right" width="30">${order}</td>
                       <td class="text-right" width="30">${receipt}</td>
                       <td width="100">${rack}</td>
