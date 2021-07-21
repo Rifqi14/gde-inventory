@@ -360,9 +360,9 @@
       $('#employee').select2('trigger', 'select', {
         data: {
           id: `{{ Auth::user()->employee->id }}`,
-          
+          text: `{{ Auth::user()->employee->name }}`,
         }
-      })
+      });
     @endif
 
     $(document).on('click', '.delete', function () {
