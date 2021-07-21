@@ -359,8 +359,8 @@
     @if (Auth::user()->employee_id)
       $('#employee').select2('trigger', 'select', {
         data: {
-          id: `{{ Auth::user()->employee->id }}`,
-          text: `{{ Auth::user()->employee->name }}`,
+          id: `{{ Auth::user()->employees->id }}`,
+          text: `{{ Auth::user()->employees->name }}`,
         }
       });
     @endif
