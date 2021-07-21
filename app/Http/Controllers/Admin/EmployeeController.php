@@ -333,7 +333,7 @@ class EmployeeController extends Controller
                 'account' => $user,
                 'point'   => 200
             ];
-            $this->storeEmployeeMachine($request, $employee->id);
+            // $this->storeEmployeeMachine($request, $employee->id);
         } else {
             $result = [
                 'status'  => false,
@@ -628,7 +628,7 @@ class EmployeeController extends Controller
                 ];
             }
 
-            $this->storeEmployeeMachine($request, $employee->id);
+            // $this->storeEmployeeMachine($request, $employee->id);
         } else {
             $result = [
                 'status' => false,
