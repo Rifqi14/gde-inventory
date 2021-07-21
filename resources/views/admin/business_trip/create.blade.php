@@ -343,10 +343,12 @@ Create {{ @$menu_name }} Request
                   <input type="text" class="form-control input-price text-right" id="rate" name="rate" placeholder="Enter rate" value="0" maxlength="14" readonly>
                 </div>
               </div>
-              <div class="form-group d-none">
+              <div class="form-group">
                 <label for="">Estimated Cost:</label>
                 @foreach ($currencies as $currency)
-                <div class="input-group mt-2">
+                <div class="input-group mt-2 @if ($currency->symbol != 'Rp.')
+                  d-none
+                @endif">
                   <div class="input-group-prepend">
                     <span class="input-group-text">{{ $currency->symbol }}</span>
                   </div>
