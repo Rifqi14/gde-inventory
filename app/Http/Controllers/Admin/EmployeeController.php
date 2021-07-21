@@ -6,9 +6,12 @@ use App\User;
 use App\Models\Employee;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Machine\AttEmployee;
 use App\Models\Menu;
+use App\Models\Machine\PersonelEmployee;
 use App\Models\RoleUser;
 use App\Models\SiteUser;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Validator;
@@ -137,6 +140,7 @@ class EmployeeController extends Controller
         $start = $request->page ? $request->page - 1 : 0;
         $length = $request->limit;
         $isSalary = $request->salary;
+        $id = $request->employee_id;
         $name = strtoupper($request->name);
 
         $query = Employee::query();
@@ -145,6 +149,9 @@ class EmployeeController extends Controller
         }
         if ($isSalary) {
             $query->payrollYes();
+        }
+        if ($id) {
+            $query->where('id', $id);
         }
         $query->where('status',1);
         $query->orderBy('id');
@@ -216,6 +223,7 @@ class EmployeeController extends Controller
         $payroll            = $request->payroll;
         $rate_business_trip = str_replace('.', '', $request->rate_business_trip);
 
+        DB::beginTransaction();
         $employee = Employee::create([
             'name'                  => $name,
             'email'                 => $email,
@@ -246,7 +254,13 @@ class EmployeeController extends Controller
 
         if ($as_user) {
             $usernameTaken = User::usernameTaken($request->username)->first();
-            dd($usernameTaken);
+            if ($usernameTaken) {
+                DB::rollBack();
+                return response()->json([
+                    'status'    => false,
+                    'message'   => "USername has been taken",
+                ], 400);
+            }
             $account = User::create([
                 'name'        => $employee->name,
                 'email'       => $employee->email,
@@ -287,6 +301,7 @@ class EmployeeController extends Controller
                         'user_id'       => $account->id,
                     ]);
                 } catch (\Illuminate\Database\QueryException $ex) {
+                    DB::rollBack();
                     return response()->json([
                         'status'    => false,
                         'message'   => "Cant create role user {$ex->errorInfo[2]}"
@@ -318,6 +333,7 @@ class EmployeeController extends Controller
                 'account' => $user,
                 'point'   => 200
             ];
+            $this->storeEmployeeMachine($request, $employee->id);
         } else {
             $result = [
                 'status'  => false,
@@ -326,10 +342,96 @@ class EmployeeController extends Controller
             ];
         }
 
+        if ($result['status'] == false) {
+            DB::rollBack();
+        } else {
+            DB::commit();
+        }
         return response()->json([
             'status'    => $result['status'],
             'message'   => $result['message'],
         ], $result['point']);
+    }
+
+    public function storeEmployeeMachine(Request $request, $employee_id)
+    {
+        $employee   = Employee::find($employee_id);
+
+        if ($employee) {
+            $exist = PersonelEmployee::where('emp_code', $employee->nid)->first();
+
+            if (!$exist) {
+                $personel   = PersonelEmployee::create([
+                    'create_time'               => Carbon::now(),
+                    'change_time'               => Carbon::now(),
+                    'status'                    => 0,
+                    'emp_code'                  => $employee->nid,
+                    'first_name'                => $employee->name,
+                    'last_name'                 => $employee->name,
+                    'driver_license_automobile' => $employee->phone,
+                    'self_password'             => Hash::make('123456'),
+                    'dev_privilege'             => 0,
+                    'acc_group'                 => '1',
+                    'acc_timezone'              => '0000000000000000',
+                    'address'                   => $employee->address,
+                    'mobile'                    => $employee->phone,
+                    'national'                  => 'Indonesia',
+                    'update_time'               => Carbon::now(),
+                    'hire_date'                 => $employee->join_date,
+                    'verify_mode'               => 0,
+                    'city'                      => $employee->region->name,
+                    'is_admin'                  => false,
+                    'emp_type'                  => 1,
+                    'enable_payroll'            => false,
+                    'deleted'                   => false,
+                    'reserved'                  => 0,
+                    'del_tag'                   => 0,
+                    'app_status'                => 0,
+                    'app_role'                  => 1,
+                    'email'                     => $employee->email,
+                    'is_active'                 => true,
+                    'department_id'             => 1,
+                    'position_id'               => 1,
+                ]);
+    
+                if (!$personel) {
+                    DB::rollBack();
+                    return response()->json([
+                        'status'    => true,
+                        'message'   => "Error create data {$personel}",
+                    ], 400);
+                } else {
+                    $att_employee   = AttEmployee::create([
+                        'status'            => 0,
+                        'enable_attendance' => true,
+                        'enable_schedule'   => true,
+                        'enable_overtime'   => true,
+                        'enable_holiday'    => true,
+                        'emp_id'            => $personel->id,
+                    ]);
+    
+                    if (!$att_employee) {
+                        DB::rollBack();
+                        return response()->json([
+                            'status'    => true,
+                            'message'   => "Error create data {$att_employee}",
+                        ], 400);
+                    }
+                }
+            } else {
+                $exist->first_name                  = $employee->name;
+                $exist->last_name                   = $employee->name;
+                $exist->driver_license_automobile   = $employee->phone;
+                $exist->address                     = $employee->address;
+                $exist->mobile                      = $employee->phone;
+                $exist->hire_date                   = $employee->join_date;
+                $exist->city                        = $employee->region->name;
+                $exist->email                       = $employee->email;
+                $exist->save();
+            }
+            
+            return true;
+        }
     }
 
     public function update(Request $request, $id)
@@ -525,6 +627,8 @@ class EmployeeController extends Controller
                     'point'     => 200
                 ];
             }
+
+            $this->storeEmployeeMachine($request, $employee->id);
         } else {
             $result = [
                 'status' => false,
