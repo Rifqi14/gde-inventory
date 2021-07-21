@@ -332,6 +332,7 @@
             dataType: "JSON",
             data: function(params) {
                 return {
+                    employee_id: `{{ Auth::user()->employee_id ? Auth::user()->employee_id : null }}`,
                     name: params.term,
                     page: params.page,
                     limit: 30,
@@ -355,15 +356,6 @@
         },
         allowClear: true,
     });
-    
-    @if (Auth::user()->employee_id)
-      $('#employee').select2('trigger', 'select', {
-        data: {
-          id: `{{ Auth::user()->employees->id }}`,
-          text: `{{ Auth::user()->employees->name }}`,
-        }
-      });
-    @endif
 
     $(document).on('click', '.delete', function () {
         var id = $(this).data('id');
