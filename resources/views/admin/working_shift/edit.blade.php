@@ -32,7 +32,7 @@ Edit {{ $menu_name }}
 		<div class="row">
 			<div class="col-12">
 				<div class="card">
-					<form class="form-horizontal no-margin" action="{{route('workingshift.update', ['id' => $user->id])}}" id="form" method="post" />
+					<form class="form-horizontal no-margin" action="{{route('workingshift.update', ['id' => $shift->id])}}" id="form" method="post" />
 					{{ csrf_field() }}
 					@method('PUT')
 					<div class="card-body">
@@ -44,9 +44,9 @@ Edit {{ $menu_name }}
 							<label class="col-md-2 col-xs-12 control-label" for="shift_type">Shift Type:</label>
 							<div class="col-sm-6 controls">
 								<select name="shift_type" class="select2 form-control">
-									<option value="shift" {{($user->shift_type == "shift")?'selected':''}}>Shift
+									<option value="shift" {{($shift->shift_type == "shift")?'selected':''}}>Shift
 									</option>
-									<option value="non_shift" {{($user->shift_type == "non_shift")?'selected':''}}>
+									<option value="non_shift" {{($shift->shift_type == "non_shift")?'selected':''}}>
 										Non Shift</option>
 								</select>
 							</div>
@@ -54,27 +54,33 @@ Edit {{ $menu_name }}
 						<div class="form-group row">
 							<label class="col-md-2 col-xs-12 control-label" for="shift_name">Shift Name:</label>
 							<div class="col-sm-6 controls">
-								<input type="text" class="form-control" name="shift_name" placeholder="Shift Name..." value="{{$user->shift_name}}" />
+								<input type="text" class="form-control" name="shift_name" placeholder="Shift Name..." value="{{$shift->shift_name}}" />
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="calendar_id" class="col-md-2 col-xs-12 control-label">Calendar</label>
+							<div class="col-sm-6 controls">
+								<select name="calendar_id" id="calendar_id" class="select2 form-control"></select>
 							</div>
 						</div>
 						<div class="form-group row">
 							<label class="col-md-2 col-xs-12 control-label" for="time_in">Time In</label>
 							<div class="col-sm-6 controls">
-								<input type="text" class="form-control time-in" name="time_in" placeholder="Time In..." value="{{$user->time_in}}" />
+								<input type="text" class="form-control time-in" name="time_in" placeholder="Time In..." value="{{$shift->time_in}}" />
 							</div>
 						</div>
 						<div class="form-group row">
 							<label class="col-md-2 col-xs-12 control-label" for="time_out">Time Out</label>
 							<div class="col-sm-6 controls">
-								<input type="text" class="form-control time-out" name="time_out" placeholder="Time Out..." value="{{$user->time_out}}" />
+								<input type="text" class="form-control time-out" name="time_out" placeholder="Time Out..." value="{{$shift->time_out}}" />
 							</div>
 						</div>
 						<div class="form-group row">
 							<label class="col-md-2 col-xs-12 control-label" for="status">Status:</label>
 							<div class="col-sm-6 controls">
 								<select name="status" class="select2 form-control">
-									<option value="active" {{($user->status == "active")?'selected':''}}>Active</option>
-									<option value="non_active" {{($user->status == "non_active")?'selected':''}}>Non
+									<option value="active" {{($shift->status == "active")?'selected':''}}>Active</option>
+									<option value="non_active" {{($shift->status == "non_active")?'selected':''}}>Non
 										Active</option>
 								</select>
 							</div>
@@ -133,6 +139,43 @@ Edit {{ $menu_name }}
 			}
 		});
 		$('.select2').select2();
+		$('#calendar_id').select2({
+			placeholder: "Select Calendar ...",
+			ajax: {
+				url: "{{ route('calendar.select') }}",
+				type: "GET",
+				dataType: "json",
+				data: function(params) {
+					return {
+						name: params.term,
+						page: params.page,
+						limit: 30,
+					};
+				},
+				processResults: function(data, params) {
+					params.page = params.page || 1;
+					var more		= (params.page * 30) < data.total;
+					var option	= [];
+					$.each(data.rows, function(index, item) {
+						option.push({
+							id: item.id,
+							text: item.name,
+						});
+					});
+					return { results: option, pagination: { more: more, }, };
+				},
+			},
+			allowClear: true,
+		});
+
+		@if ($shift->calendar_id)
+			$('#calendar_id').select2('trigger', 'select', {
+				data: {
+					id: `{{ $shift->calendar->id }}`,
+					text: `{{ $shift->calendar->name }}`,
+				},
+			});
+		@endif
 
 		$.validator.setDefaults({
 			submitHandler: function () {
