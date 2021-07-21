@@ -131,7 +131,7 @@
           width: 120,
           orderable: false,
           render: function(data, type, full, meta) {
-            return `<b>${full.name}</b><br><small>${full.code}</small>`;
+            return `<a href="javascript:void(0)" onclick="show(${full.id})"><b>${full.name}</b></a><br><small>${full.code}</small>`;
           },
         },
         { "data": "description", "name": "description", width: 120, orderable: false },
@@ -196,40 +196,99 @@
 
   function destroy(id)
 	{
-		Swal.fire({
-			title: 'Hapus',
-			text: "Apa Anda Yakin Akan Menghapus Data ?",
-			icon: 'error',
-			showCancelButton: true,
-			confirmButtonColor: '#3085d6',
-			cancelButtonColor: '#d33',
-			confirmButtonText: 'Hapus!',
-			cancelButtonText: 'Batal'
-		}).then((result) => {
-			if (result.value) {
+		bootbox.confirm({
+        buttons: {
+            confirm: {
+                label: '<i class="fa fa-check"></i>',
+                className: 'btn-primary btn-sm'
+            },
+            cancel: {
+                label: '<i class="fa fa-undo"></i>',
+                className: 'btn-default btn-sm'
+            },
+        },
+        title: 'Delete data?',
+        message: 'Are you sure want to delete this site?',
+        callback: function (result) {
+            if (result) {
                 var data = {
                     _token: "{{ csrf_token() }}"
                 };
-				$.ajax({
-					url: `{{url('admin/calendar')}}/${id}`,
-					dataType: 'json', 
-					data:data,
-					type:'DELETE',
-					success:function(response){
-						if(response.status){
-              dataTable.ajax.reload(null, false);
-						}
-						else{
-							Swal.fire(
-								'Error!',
-								'Data Gagal Di Hapus.',
-								'error'
-							)
-						}
-				}});
-				
-			}
-		});
+                $.ajax({
+                    url: `{{route('calendar.index')}}/${id}`,
+                    dataType: 'json',
+                    data: data,
+                    type: 'DELETE',
+                    beforeSend: function () {
+                        blockMessage('body', 'Loading', '#fff');
+                    }
+                }).done(function (response) {
+                    $('body').unblock();
+                    if (response.status) {
+                        toastr.options = {
+                            "closeButton": false,
+                            "debug": false,
+                            "newestOnTop": false,
+                            "progressBar": false,
+                            "positionClass": "toast-top-right",
+                            "preventDuplicates": false,
+                            "onclick": null,
+                            "showDuration": "300",
+                            "hideDuration": "1000",
+                            "timeOut": "5000",
+                            "extendedTimeOut": "1000",
+                            "showEasing": "swing",
+                            "hideEasing": "linear",
+                            "showMethod": "fadeIn",
+                            "hideMethod": "fadeOut"
+                        }
+                        toastr.success(response.message);
+                        dataTable.ajax.reload(null, false);
+                    }else {
+                        toastr.options = {
+                            "closeButton": false,
+                            "debug": false,
+                            "newestOnTop": false,
+                            "progressBar": false,
+                            "positionClass": "toast-top-right",
+                            "preventDuplicates": false,
+                            "onclick": null,
+                            "showDuration": "300",
+                            "hideDuration": "1000",
+                            "timeOut": "5000",
+                            "extendedTimeOut": "1000",
+                            "showEasing": "swing",
+                            "hideEasing": "linear",
+                            "showMethod": "fadeIn",
+                            "hideMethod": "fadeOut"
+                        }
+                        toastr.warning(response.message);
+                    }
+                }).fail(function (response) {
+                    var response = response.responseJSON;
+                    $('body').unblock();
+                    toastr.options = {
+                        "closeButton": false,
+                        "debug": false,
+                        "newestOnTop": false,
+                        "progressBar": false,
+                        "positionClass": "toast-top-right",
+                        "preventDuplicates": false,
+                        "onclick": null,
+                        "showDuration": "300",
+                        "hideDuration": "1000",
+                        "timeOut": "5000",
+                        "extendedTimeOut": "1000",
+                        "showEasing": "swing",
+                        "hideEasing": "linear",
+                        "showMethod": "fadeIn",
+                        "hideMethod": "fadeOut"
+                    }
+                    toastr.warning(response.message);
+                })
+            }
+        }
+    });
 	}
 </script>
 @endsection

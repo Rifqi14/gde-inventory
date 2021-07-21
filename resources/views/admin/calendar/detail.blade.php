@@ -101,7 +101,7 @@ Detail {{ $menu_name }}
             <li class="nav-item"><a href="#tab-calendar-exception" class="nav-link" id="calendar-exception" data-toggle="pill" role="tab" aria-controls="tab-calendar-exception" aria-selected="true">Calendar Exception</a></li>
           </ul>
           <div class="tab-content">
-            <div class="tab-pane" id="tab-list-exception">
+            <div class="tab-pane active" id="tab-list-exception">
               <div class="card-header">
                 <span class="title">
                   <hr />
@@ -125,7 +125,7 @@ Detail {{ $menu_name }}
                 </div>
               </div>
             </div>
-            <div class="tab-pane active" id="tab-calendar-exception">
+            <div class="tab-pane" id="tab-calendar-exception">
               <div class="card-header">
                 <span class="title">
                   <hr />
@@ -1086,39 +1086,99 @@ Detail {{ $menu_name }}
 
   function destroyException(id)
 	{
-		Swal.fire({
-			title: 'Hapus',
-			text: "Apa Anda Yakin Akan Menghapus Data ?",
-			icon: 'error',
-			showCancelButton: true,
-			confirmButtonColor: '#3085d6',
-			cancelButtonColor: '#d33',
-			confirmButtonText: 'Hapus!',
-			cancelButtonText: 'Batal'
-		}).then((result) => {
-			if (result.value) {
+		bootbox.confirm({
+        buttons: {
+            confirm: {
+                label: '<i class="fa fa-check"></i>',
+                className: 'btn-primary btn-sm'
+            },
+            cancel: {
+                label: '<i class="fa fa-undo"></i>',
+                className: 'btn-default btn-sm'
+            },
+        },
+        title: 'Delete data?',
+        message: 'Are you sure want to delete this site?',
+        callback: function (result) {
+            if (result) {
                 var data = {
                     _token: "{{ csrf_token() }}"
                 };
-				$.ajax({
-					url: `{{url('admin/calendarexception')}}/${id}`,
-					dataType: 'json', 
-					data:data,
-					type:'DELETE',
-					success:function(response){
-						if(response.status){
-              dataTableException.ajax.reload(null, false);
-						}
-						else{
-							Swal.fire(
-								'Error!',
-								'Data Gagal Di Hapus.',
-								'error'
-							)
-						}
-				}});
-			}
-		});
+                $.ajax({
+                    url: `{{route('calendarexception.index')}}/${id}`,
+                    dataType: 'json',
+                    data: data,
+                    type: 'DELETE',
+                    beforeSend: function () {
+                        blockMessage('body', 'Loading', '#fff');
+                    }
+                }).done(function (response) {
+                    $('body').unblock();
+                    if (response.status) {
+                        toastr.options = {
+                            "closeButton": false,
+                            "debug": false,
+                            "newestOnTop": false,
+                            "progressBar": false,
+                            "positionClass": "toast-top-right",
+                            "preventDuplicates": false,
+                            "onclick": null,
+                            "showDuration": "300",
+                            "hideDuration": "1000",
+                            "timeOut": "5000",
+                            "extendedTimeOut": "1000",
+                            "showEasing": "swing",
+                            "hideEasing": "linear",
+                            "showMethod": "fadeIn",
+                            "hideMethod": "fadeOut"
+                        }
+                        toastr.success(response.message);
+                        dataTableException.ajax.reload(null, false);
+                    }else {
+                        toastr.options = {
+                            "closeButton": false,
+                            "debug": false,
+                            "newestOnTop": false,
+                            "progressBar": false,
+                            "positionClass": "toast-top-right",
+                            "preventDuplicates": false,
+                            "onclick": null,
+                            "showDuration": "300",
+                            "hideDuration": "1000",
+                            "timeOut": "5000",
+                            "extendedTimeOut": "1000",
+                            "showEasing": "swing",
+                            "hideEasing": "linear",
+                            "showMethod": "fadeIn",
+                            "hideMethod": "fadeOut"
+                        }
+                        toastr.warning(response.message);
+                    }
+                }).fail(function (response) {
+                    var response = response.responseJSON;
+                    $('body').unblock();
+                    toastr.options = {
+                        "closeButton": false,
+                        "debug": false,
+                        "newestOnTop": false,
+                        "progressBar": false,
+                        "positionClass": "toast-top-right",
+                        "preventDuplicates": false,
+                        "onclick": null,
+                        "showDuration": "300",
+                        "hideDuration": "1000",
+                        "timeOut": "5000",
+                        "extendedTimeOut": "1000",
+                        "showEasing": "swing",
+                        "hideEasing": "linear",
+                        "showMethod": "fadeIn",
+                        "hideMethod": "fadeOut"
+                    }
+                    toastr.warning(response.message);
+                })
+            }
+        }
+    });
 	}
   
   function changeDateFormat(date) {
