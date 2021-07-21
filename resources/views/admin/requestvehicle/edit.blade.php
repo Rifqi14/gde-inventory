@@ -92,7 +92,7 @@
                             </div>
                         </div>
                         <div class="card-footer text-right">
-                            @if($data->status == 1 && in_array('approval', $actionmenu) && ($data->issuedbyrequest->spv_id == Auth::guard('admin')->user()->id))
+                            @if($data->status == 1 && in_array('approval', $actionmenu))
                             <button type="submit" class="btn bg-olive color-palette btn-labeled legitRipple text-sm btn-sm" data-update="2">
                                 <b><i class="fas fa-save"></i></b>
                                 Approve
@@ -108,7 +108,7 @@
                                 Save
                             </button>
                             @endif
-                            @if($data->status == 2 && in_array('approval', $actionmenu) && ($data->issuedbyrequest->spv_id == Auth::guard('admin')->user()->id))
+                            @if($data->status == 2 && in_array('approval', $actionmenu))
                             <button type="submit" class="btn bg-olive color-palette btn-labeled legitRipple text-sm btn-sm" data-update="3">
                                 <b><i class="fas fa-save"></i></b>
                                 Complete
