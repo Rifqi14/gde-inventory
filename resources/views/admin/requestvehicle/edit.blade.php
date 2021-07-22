@@ -38,8 +38,8 @@
                                         <!-- Vehicle -->
                                         <div class="form-group col-6">
                                             <label class="control-label" for="vehicle">Vehicle</label>
-                                            <select class="form-control" name="vehicle" id="vehicle" data-placeholder="Vehicle" @if ($data->revise_status == 'NO') disabled @endif required></select>
-                                            @if ($data->revise_status == 'NO')
+                                            <select class="form-control" name="vehicle" id="vehicle" data-placeholder="Vehicle" @if ($status['formLocked']) disabled @endif required></select>
+                                            @if ($status['formLocked'])
                                             <input type="hidden" name="vehicle_id" value="{{ $data->vehicle_id }}">
                                             @endif
                                         </div>
@@ -52,9 +52,7 @@
                                         <!-- Date Request -->
                                         <div class="form-group col-6">
                                             <label class="control-label" for="date-borrowed">Date</label>
-                                            <input class="form-control datepicker" type="datepicker" name="date_borrowed" id="date-borrowed" placeholder="Start Date - Finish Date" autocomplete="off" @if ($data->revise_status == 'NO')
-                                            disabled
-                                            @endif required>
+                                            <input class="form-control datepicker" type="datepicker" name="date_borrowed" id="date-borrowed" placeholder="Start Date - Finish Date" autocomplete="off" @if ($status['formLocked']) disabled @endif required>
                                         </div>
                                         <!-- Status -->
                                         <div class="form-group col-6">
@@ -389,7 +387,7 @@
                 ['misc', ['fullscreen', 'codeview', 'help']]
             ]
         });
-        @if ($data->revise_status == 'NO')
+        @if ($status['formLocked'])
         $('.summernote').summernote('disable');
         @endif
 
