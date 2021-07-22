@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\AttendanceLog;
@@ -11,6 +10,8 @@ use App\Models\Menu;
 use App\Models\WorkingShift;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
+use GuzzleHttp\Client;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -43,7 +44,7 @@ class AttendanceController extends Controller
         $query          = $request->search['value'];
         $sort           = $request->columns[$request->order[0]['column']]['data'];
         $dir            = $request->order[0]['dir'];
-        $date           = $request->date;
+        $date           = Carbon::parse($request->date);
         $employee       = $request->employee;
         $status         = $request->status;
 
@@ -53,10 +54,11 @@ class AttendanceController extends Controller
             $queryData->status($status);
         }
         if ($date) {
-            $queryData->date($date);
+            $queryData->whereMonth('attendance_date', $date);
+            $queryData->whereYear('attendance_date', $date);
         }
         if ($employee) {
-            $queryData->employee($employee);
+            $queryData->getByEmployee($employee);
         }
 
         $row            = clone $queryData;

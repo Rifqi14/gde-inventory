@@ -10,6 +10,7 @@ use App\Models\LogRevise;
 use App\Models\Menu;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Validator;
 
@@ -77,8 +78,12 @@ class RequestVehicleController extends Controller
             
             $data = $query;                   
                     
-
-            return view('admin.requestvehicle.edit',compact('data'));
+            if ($query->status == 'APPROVED' || $query->status == 'REJECTED') {
+                abort(403);
+            } else {
+                $status = config('enums.global_status')[$query->status];
+                return view('admin.requestvehicle.edit',compact('data', 'status'));
+            }
         }else{
             abort(404);
         }        
@@ -265,8 +270,8 @@ class RequestVehicleController extends Controller
     public function update(Request $request,$id)
     {
         $validator = Validator::make($request->all(), [
-            'startdate'  => 'required',
-            'finishdate' => 'required'
+            'startdate'  => 'required_unless:status,APPROVED,REJECTED',
+            'finishdate' => 'required_unless:status,APPROVED,REJECTED'
         ]);
 
         if ($validator->fails()) {
@@ -285,13 +290,14 @@ class RequestVehicleController extends Controller
         $status     = $request->status;
         $issued_by  = $request->issued_by;
 
-        $reqvehicle = RequestVehicle::find($id);   
-        $reqvehicle->vehicle_id     = $reqvehicle->revise_status == 'NO' ? $vehicle_id : $vehicle; 
-        $reqvehicle->start_request  = $startdate;
-        $reqvehicle->finish_request = $finishdate;        
-        $reqvehicle->remarks        = $notes;
+        $reqvehicle = RequestVehicle::find($id);
+        $vehicle_id = $reqvehicle->revise_status == 'NO' ? $vehicle_id : $vehicle;
+        $reqvehicle->vehicle_id     = $vehicle_id ? $vehicle_id : $reqvehicle->vehicle_id; 
+        $reqvehicle->start_request  = $startdate ? $startdate : $reqvehicle->start_request;
+        $reqvehicle->finish_request = $finishdate ? $finishdate : $reqvehicle->finish_request;        
+        $reqvehicle->remarks        = $notes ? $notes : $reqvehicle->remarks;
         $reqvehicle->status         = $status;
-        $reqvehicle->issued_by      = $issued_by;
+        $reqvehicle->issued_by      = $issued_by ? $issued_by : $reqvehicle->issued_by;
         $reqvehicle->revise_status  = 'NO';
         $reqvehicle->save();
         
@@ -304,6 +310,29 @@ class RequestVehicleController extends Controller
             //         'employee_id'        => $row->employee_id
             //     ]);
             // }
+
+            if ($request->file('reason_attachment')) {
+                $name       = ucwords(str_replace(' ', '-', $request->attachment_name));
+                $status     = ucwords($reqvehicle->status);
+                $now        = time();
+                $filename   = "$status-Attachment-$name-$now.".$request->file('reason_attachment')->getClientOriginalExtension();
+                if (file_exists($reqvehicle->reason_attachment)) {
+                    File::delete($reqvehicle->reason_attachment);
+                }
+                
+                $moveFile   = $this->reasonAttachment($request->file('reason_attachment'), $filename, 'requestvehicle', $reqvehicle->id);
+                if ($moveFile) {
+                    $reqvehicle->reason             = $request->reason;
+                    $reqvehicle->attachment_name    = $request->attachment_name;
+                    $reqvehicle->reason_attachment  = "assets/requestvehicle/$reqvehicle->id/$filename";
+                    $reqvehicle->save();
+                } else {
+                    return response()->json([
+                        'status'    => false,
+                        'message'   => "Error upload attachment",
+                    ], 400);
+                }
+            }
 
             $result = [
                 'status'  => true,
@@ -365,8 +394,8 @@ class RequestVehicleController extends Controller
     public function destroy($id)
     {
         try {
-            $reqvehicle = RequestVehicle::find($id);
-            $reqvehicle->delete();
+            $this->destroyLogRevise('requestvehicle', $id);
+            $reqvehicle = RequestVehicle::destroy($id);
 
             if ($reqvehicle) {
                 $result = [
@@ -410,6 +439,7 @@ class RequestVehicleController extends Controller
 
         DB::beginTransaction();
         $revise     = RequestVehicle::find($request->request_vehicle_id);
+        $revise->status             = 'REVISED';
         $revise->revise_status      = 'YES';
         $revise->revise_number      += 1;
         $revise->revise_reason      = $request->revise_reason;
@@ -436,6 +466,29 @@ class RequestVehicleController extends Controller
                 'status'    => false,
                 'message'   => "Cant create revise"
             ], 400);
+        }
+
+        if ($request->file('revise_attachment')) {
+            $name       = ucwords(str_replace(' ', '-', $request->revise_attachment_name));
+            $filename   = "Revise-Attachment-Revision-{$revise->revise_number}-{$name}.".$request->file('revise_attachment')->getClientOriginalExtension();
+            
+            $moveFile   = $this->reasonAttachment($request->file('revise_attachment'), $filename, 'requestvehicle', $revise->id);
+            if ($moveFile) {
+                $revise->revise_attachment_name = $request->revise_attachment_name;
+                $revise->revise_attachment      = "assets/requestvehicle/$revise->id/$filename";
+                $revise->save();
+
+                $log->attachment_name           = $request->revise_attachment_name;
+                $log->revise_attachment         = "assets/requestvehicle/$revise->id/$filename";
+                $log->save();
+            } else {
+                DB::rollBack();
+                return response()->json([
+                    'status'    => false,
+                    'message'   => "Error upload attachment",
+                ], 400);
+            }
+            
         }
 
         DB::commit();

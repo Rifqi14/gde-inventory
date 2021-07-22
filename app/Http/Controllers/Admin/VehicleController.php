@@ -146,6 +146,7 @@ class VehicleController extends Controller
             ], 200);
         }
 
+        DB::beginTransaction();
         $user = Vehicle::find($id);
         $user->police_number = $request->police_number;
         $user->vehicle_name = $request->vehicle_name;
@@ -155,12 +156,14 @@ class VehicleController extends Controller
         $user->save();
 
         if (!$user) {
+            DB::rollBack();
             return response()->json([
                 'status' => false,
                 'message'     => "Cant update vehicles"
             ], 400);
         }
-
+        
+        DB::commit();
         return response()->json([
             'status'     => true,
             'results'     => route('vehicle.index'),

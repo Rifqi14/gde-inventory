@@ -480,6 +480,7 @@
                 dataType: 'json',
                 data: function(params) {
                     return {
+                        type: $('#shift-type').val(),
                         name: params.term,
                         page: params.page,
                         limit: 30,

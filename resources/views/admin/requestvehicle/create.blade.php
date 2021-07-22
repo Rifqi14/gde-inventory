@@ -54,9 +54,9 @@
                                         <div class="form-group col-6">
                                             <label class="control-label" for="status-request">Status</label>
                                             <select class="form-control select2" name="status" id="status-request" disabled>
-                                                <option value="1" selected>Waiting</option>
-                                                <option value="2">Approved</option>
-                                                <option value="3">Completed</option>
+                                                @foreach (config('enums.global_status') as $key => $item)
+                                                <option value="{{ $key }}" @if ($key=='DRAFT' ) selected @endif>{{ $item['text'] }}</option>
+                                                @endforeach
                                             </select>
                                         </div>
                                     </div>

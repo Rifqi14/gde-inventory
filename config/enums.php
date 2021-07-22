@@ -78,4 +78,12 @@ return [
         'APPROVED'      => 'Approved',
         'REJECTED'      => 'Rejected',
     ],
+    'global_status'     => [
+        'DRAFT'         => ['text' => 'Draft', 'badge' => 'secondary', 'isShow' => true, 'isLocked' => false, 'approval' => false, 'formLocked' => false],
+        'WAITING'       => ['text' => 'Waiting', 'badge' => 'warning', 'isShow' => true, 'isLocked' => false, 'approval' => true, 'formLocked' => true],
+        'APPROVED'      => ['text' => 'Approved', 'badge' => 'success', 'isShow' => true, 'isLocked' => true, 'approval' => false, 'formLocked' => true],
+        'REJECTED'      => ['text' => 'Rejected', 'badge' => 'maroon', 'isShow' => true, 'isLocked' => true, 'approval' => false, 'formLocked' => true],
+        'ARCHIVED'      => ['text' => 'Archived', 'badge' => 'maroon', 'isShow' => false, 'isLocked' => true, 'approval' => false, 'formLocked' => true],
+        'REVISED'       => ['text' => 'Revised', 'badge' => 'info', 'isShow' => false, 'isLocked' => false, 'approval' => false, 'formLocked' => false],
+    ]
 ];

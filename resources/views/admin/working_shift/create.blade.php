@@ -55,6 +55,12 @@ Create Working Shift
 							</div>
 						</div>
 						<div class="form-group row">
+							<label for="calendar_id" class="col-md-2 col-xs-12 control-label">Calendar</label>
+							<div class="col-sm-6 controls">
+								<select name="calendar_id" id="calendar_id" class="select2 form-control"></select>
+							</div>
+						</div>
+						<div class="form-group row">
 							<label class="col-md-2 col-xs-12 control-label" for="time_in">Time In</label>
 							<div class="col-sm-6 controls">
 								<input type="text" class="form-control time-in" name="time_in" placeholder="Time In..." />
@@ -128,47 +134,35 @@ Create Working Shift
 			}
 		});
 		$('.select2').select2();
-
-		$.validator.setDefaults({
-			submitHandler: function () {
-				$.ajax({
-                        url: $('#form').attr('action'),
-                        method: 'post',
-                        data: new FormData($('#form')[0]),
-                        processData: false,
-                        contentType: false,
-                        dataType: 'json',
-						success:function(result){
-							$('#form').unblock();
-							 if(result.status){
-								document.location = "{{ route('workingshift.index') }}";
-							}else{
-								toastr.options = {
-									"closeButton": false,
-									"debug": false,
-									"newestOnTop": false,
-									"progressBar": false,
-									"positionClass": "toast-top-right",
-									"preventDuplicates": false,
-									"onclick": null,
-									"showDuration": "300",
-									"hideDuration": "1000",
-									"timeOut": "5000",
-									"extendedTimeOut": "1000",
-									"showEasing": "swing",
-									"hideEasing": "linear",
-									"showMethod": "fadeIn",
-									"hideMethod": "fadeOut"
-								}
-								toastr.warning(result.message);
-							}
-						},
-						beforeSend: function(){
-							blockMessage('#form', 'Loading', '#fff');
-						}
-				});
-			}
+		$('#calendar_id').select2({
+			placeholder: "Select Calendar ...",
+			ajax: {
+				url: "{{ route('calendar.select') }}",
+				type: "GET",
+				dataType: "json",
+				data: function(params) {
+					return {
+						name: params.term,
+						page: params.page,
+						limit: 30,
+					};
+				},
+				processResults: function(data, params) {
+					params.page = params.page || 1;
+					var more		= (params.page * 30) < data.total;
+					var option	= [];
+					$.each(data.rows, function(index, item) {
+						option.push({
+							id: item.id,
+							text: item.name,
+						});
+					});
+					return { results: option, pagination: { more: more, }, };
+				},
+			},
+			allowClear: true,
 		});
+		
 		$('#form').validate({
 			rules: {
 				shift_name:{
@@ -180,6 +174,9 @@ Create Working Shift
 				time_out:{
 					required:true,
 				},
+				calendar_id: {
+					required: true,
+				},
 			},
 			messages: {
 				shift_name:{
@@ -189,6 +186,9 @@ Create Working Shift
 					required: "This field is required.",
 				},
 				time_out:{
+					required: "This field is required.",
+				},
+				calendar_id: {
 					required: "This field is required.",
 				},
 			},
@@ -202,6 +202,65 @@ Create Working Shift
 			},
 			unhighlight: function (element, errorClass, validClass) {
 				$(element).removeClass('is-invalid');
+			},
+			submitHandler: function () {
+				$.ajax({
+					url: $('#form').attr('action'),
+					method: 'post',
+					data: new FormData($('#form')[0]),
+					processData: false,
+					contentType: false,
+					dataType: 'json',
+					beforeSend: function(){
+						blockMessage('#form', 'Loading', '#fff');
+					}
+				}).done(function(response){
+            $('#form').unblock();
+            if(response.status){
+                document.location = response.results;
+            }else{	
+                toastr.options = {
+                    "closeButton": false,
+                    "debug": false,
+                    "newestOnTop": false,
+                    "progressBar": false,
+                    "positionClass": "toast-top-right",
+                    "preventDuplicates": false,
+                    "onclick": null,
+                    "showDuration": "300",
+                    "hideDuration": "1000",
+                    "timeOut": "5000",
+                    "extendedTimeOut": "1000",
+                    "showEasing": "swing",
+                    "hideEasing": "linear",
+                    "showMethod": "fadeIn",
+                    "hideMethod": "fadeOut"
+                }
+                toastr.warning(response.message);
+            }
+            return;
+        }).fail(function(response){
+            $('#form').unblock();
+            var response = response.responseJSON;
+            toastr.options = {
+                "closeButton": false,
+                "debug": false,
+                "newestOnTop": false,
+                "progressBar": false,
+                "positionClass": "toast-top-right",
+                "preventDuplicates": false,
+                "onclick": null,
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "5000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            }
+            toastr.warning(response.message);
+        });
 			}
 		});
 

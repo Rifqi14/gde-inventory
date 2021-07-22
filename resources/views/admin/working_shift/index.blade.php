@@ -114,6 +114,7 @@
 
 @section('scripts')
 <script type="text/javascript">
+    var actionmenu = JSON.parse(`{!! json_encode($actionmenu) !!}`);
     $(function() {
         $('.select2').select2();
 		dataTable = $('#user-table').DataTable({
@@ -181,17 +182,23 @@
                     className: "text-center",
                     orderable: false,
                     render: function(data, type, full, meta) {
+                        var button = '';
+                        if (actionmenu.indexOf('update') > 0) {
+                            button += `<a class="dropdown-item" href="javascript:void(0);" onclick="edit(${full.id})">
+                                            <i class="far fa-edit"></i>Update Data
+                                        </a>`;
+                        }
+                        if (actionmenu.indexOf('delete') > 0) {
+                            button += `<a class="dropdown-item " href="javascript:void(0);" onclick="destroy(${full.id})">
+                                            <i class="far fa-trash-alt"></i> Delete Data
+                                        </a>`;
+                        }
                         return `<div class="btn-group">
                                     <button type="button" class="btn btn-flat btn-sm dropdown-toggle" data-toggle="dropdown">
                                         <i class="fas fa-bars"></i>
                                     </button>
                                     <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="javascript:void(0);" onclick="edit(${full.id})">
-                                            <i class="far fa-edit"></i>Update Data
-                                        </a>
-                                        <a class="dropdown-item " href="javascript:void(0);" onclick="destroy(${full.id})">
-                                            <i class="far fa-trash-alt"></i> Delete Data
-                                        </a>
+                                        ${button}
                                     </div>
                                 </div>`;
                     }
@@ -220,40 +227,99 @@
 
 	function destroy(id)
 	{
-		Swal.fire({
-			title: 'Hapus',
-			text: "Apa Anda Yakin Akan Menghapus Data ?",
-			icon: 'error',
-			showCancelButton: true,
-			confirmButtonColor: '#3085d6',
-			cancelButtonColor: '#d33',
-			confirmButtonText: 'Hapus!',
-			cancelButtonText: 'Batal'
-		}).then((result) => {
-			if (result.value) {
-                var data = {
-                    _token: "{{ csrf_token() }}"
-                };
-				$.ajax({
-					url: `{{url('admin/workingshift')}}/${id}`,
-					dataType: 'json', 
-					data:data,
-					type:'DELETE',
-					success:function(response){
-						if(response.status){
+		bootbox.confirm({
+            buttons: {
+                confirm: {
+                    label: '<i class="fa fa-check"></i>',
+                    className: 'btn-primary btn-sm'
+                },
+                cancel: {
+                    label: '<i class="fa fa-undo"></i>',
+                    className: 'btn-default btn-sm'
+                },
+            },
+            title: 'Delete data?',
+            message: 'Are you sure want to delete this site?',
+            callback: function (result) {
+                if (result) {
+                    var data = {
+                        _token: "{{ csrf_token() }}"
+                    };
+                    $.ajax({
+                        url: `{{route('workingshift.index')}}/${id}`,
+                        dataType: 'json',
+                        data: data,
+                        type: 'DELETE',
+                        beforeSend: function () {
+                            blockMessage('body', 'Loading', '#fff');
+                        }
+                    }).done(function (response) {
+                        $('body').unblock();
+                        if (response.status) {
+                            toastr.options = {
+                                "closeButton": false,
+                                "debug": false,
+                                "newestOnTop": false,
+                                "progressBar": false,
+                                "positionClass": "toast-top-right",
+                                "preventDuplicates": false,
+                                "onclick": null,
+                                "showDuration": "300",
+                                "hideDuration": "1000",
+                                "timeOut": "5000",
+                                "extendedTimeOut": "1000",
+                                "showEasing": "swing",
+                                "hideEasing": "linear",
+                                "showMethod": "fadeIn",
+                                "hideMethod": "fadeOut"
+                            }
+                            toastr.success(response.message);
                             dataTable.ajax.reload(null, false);
-						}
-						else{
-							Swal.fire(
-								'Error!',
-								'Data Gagal Di Hapus.',
-								'error'
-							)
-						}
-				}});
-				
-			}
-		});
+                        }else {
+                            toastr.options = {
+                                "closeButton": false,
+                                "debug": false,
+                                "newestOnTop": false,
+                                "progressBar": false,
+                                "positionClass": "toast-top-right",
+                                "preventDuplicates": false,
+                                "onclick": null,
+                                "showDuration": "300",
+                                "hideDuration": "1000",
+                                "timeOut": "5000",
+                                "extendedTimeOut": "1000",
+                                "showEasing": "swing",
+                                "hideEasing": "linear",
+                                "showMethod": "fadeIn",
+                                "hideMethod": "fadeOut"
+                            }
+                            toastr.warning(response.message);
+                        }
+                    }).fail(function (response) {
+                        var response = response.responseJSON;
+                        $('body').unblock();
+                        toastr.options = {
+                            "closeButton": false,
+                            "debug": false,
+                            "newestOnTop": false,
+                            "progressBar": false,
+                            "positionClass": "toast-top-right",
+                            "preventDuplicates": false,
+                            "onclick": null,
+                            "showDuration": "300",
+                            "hideDuration": "1000",
+                            "timeOut": "5000",
+                            "extendedTimeOut": "1000",
+                            "showEasing": "swing",
+                            "hideEasing": "linear",
+                            "showMethod": "fadeIn",
+                            "hideMethod": "fadeOut"
+                        }
+                        toastr.warning(response.message);
+                    })
+                }
+            }
+        });
 	}
 </script>
 @endsection

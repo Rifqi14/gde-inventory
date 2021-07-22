@@ -38,8 +38,8 @@
                                         <!-- Vehicle -->
                                         <div class="form-group col-6">
                                             <label class="control-label" for="vehicle">Vehicle</label>
-                                            <select class="form-control" name="vehicle" id="vehicle" data-placeholder="Vehicle" @if ($data->revise_status == 'NO') disabled @endif required></select>
-                                            @if ($data->revise_status == 'NO')
+                                            <select class="form-control" name="vehicle" id="vehicle" data-placeholder="Vehicle" @if ($status['formLocked']) disabled @endif required></select>
+                                            @if ($status['formLocked'])
                                             <input type="hidden" name="vehicle_id" value="{{ $data->vehicle_id }}">
                                             @endif
                                         </div>
@@ -52,9 +52,7 @@
                                         <!-- Date Request -->
                                         <div class="form-group col-6">
                                             <label class="control-label" for="date-borrowed">Date</label>
-                                            <input class="form-control datepicker" type="datepicker" name="date_borrowed" id="date-borrowed" placeholder="Start Date - Finish Date" autocomplete="off" @if ($data->revise_status == 'NO')
-                                            disabled
-                                            @endif required>
+                                            <input class="form-control datepicker" type="datepicker" name="date_borrowed" id="date-borrowed" placeholder="Start Date - Finish Date" autocomplete="off" @if ($status['formLocked']) disabled @endif required>
                                         </div>
                                         <!-- Status -->
                                         <div class="form-group col-6">
@@ -67,11 +65,6 @@
                                             </select>
                                         </div>
                                         <div class="form-group col-12 text-right">
-                                            @if ($data->revise_status == 'NO')
-                                            <a href="javascript:void(0)" onclick="revise()" class="btn btn-sm btn-warning color-palette legitRipple text-sm">
-                                                <b><i class="fas fa-eye"></i></b>
-                                            </a>
-                                            @endif
                                             <a href="javascript:void(0)" onclick="reviselist()" class="btn btn-sm btn-secondary color-palette legitRipple text-sm">
                                                 <b><i class="fas fa-list"></i></b>
                                             </a>
@@ -92,23 +85,31 @@
                             </div>
                         </div>
                         <div class="card-footer text-right">
-                            @if($data->status == 1 && in_array('approval', $actionmenu) && ($data->issuedbyrequest->spv_id == Auth::guard('admin')->user()->id))
-                            <button type="submit" class="btn bg-olive color-palette btn-labeled legitRipple text-sm btn-sm" data-update="2">
+                            @if($data->status == 'WAITING' && in_array('approval', $actionmenu))
+                            <button type="button" class="btn bg-olive color-palette btn-labeled legitRipple text-sm btn-sm" onclick="approval('APPROVED')">
                                 <b><i class="fas fa-save"></i></b>
                                 Approve
                             </button>
-                            <button type="button" class="btn bg-red color-palette btn-labeled legitRipple text-sm btn-sm" data-update="4" onclick="rejectStatus(this)">
+                            <button type="button" class="btn bg-red color-palette btn-labeled legitRipple text-sm btn-sm" onclick="approval('REJECTED')">
                                 <b><i class="fas fa-window-close"></i></b>
                                 Reject
                             </button>
+                            <button type="button" class="btn bg-info color-palette btn-labeled legitRipple text-sm btn-sm" data-update="REVISED" onclick="revise()">
+                                <b><i class="fas fa-pencil-alt"></i></b>
+                                Revised
+                            </button>
                             @endif
-                            @if($data->revise_status == 'YES')
-                            <button type="button" class="btn bg-success color-palette btn-labeled legitRipple text-sm btn-sm" data-update="1" onclick="rejectStatus(this)">
+                            @if($data->status == 'DRAFT' || $data->status == 'REVISED')
+                            <button type="button" class="btn bg-success color-palette btn-labeled legitRipple text-sm btn-sm" data-update="WAITING" onclick="rejectStatus(this)">
+                                <b><i class="fas fa-save"></i></b>
+                                Submit
+                            </button>
+                            <button type="button" class="btn bg-info color-palette btn-labeled legitRipple text-sm btn-sm" data-update="DRAFT" onclick="rejectStatus(this)">
                                 <b><i class="fas fa-save"></i></b>
                                 Save
                             </button>
                             @endif
-                            @if($data->status == 2 && in_array('approval', $actionmenu) && ($data->issuedbyrequest->spv_id == Auth::guard('admin')->user()->id))
+                            @if($data->status == 'APPROVED' && in_array('approval', $actionmenu))
                             <button type="submit" class="btn bg-olive color-palette btn-labeled legitRipple text-sm btn-sm" data-update="3">
                                 <b><i class="fas fa-save"></i></b>
                                 Complete
@@ -126,7 +127,7 @@
     </div>
 </section>
 <div id="add-revise" class="modal fade" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="revise-modal" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Revise</h5>
@@ -146,6 +147,21 @@
                                     <input type="text" name="revise_number" class="form-control" readonly value="{{ $data->revise_number }}" placeholder="Revise Number">
                                 </div>
                             </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="control-label" for="revise_attachment_name">Attachment Name</label>
+                                    <input type="text" class="form-control" name="revise_attachment_name">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="control-label" for="revise_attachment">Attachment Name</label>
+                                <div class="input-group">
+                                    <div class="custom-file">
+                                        <input type="file" class="custom-file-input" name="revise_attachment" id="revise_attachment">
+                                        <label class="custom-file-label" for="revise_attachment">Attach a file</label>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label class="control-label" for="revise_reason">Revise Reason</label>
@@ -163,8 +179,55 @@
         </div>
     </div>
 </div>
-<div id="list-revise" class="modal fade" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="revise-modal" aria-hidden="true">
+<div class="modal fade" id="approval-reason" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="reason-modal" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Reason</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ route('requestvehicle.update', ['id' => $data->id]) }}" id="form-reason" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <div class="container-fluid">
+                        <div class="row">
+                            <input type="hidden" name="request_vehicle_id" value="{{ $data->id }}">
+                            <input type="hidden" name="status">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="control-label" for="attachment_name">Attachment Name</label>
+                                    <input type="text" class="form-control" name="attachment_name">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="control-label" for="reason_attachment">Attachment Name</label>
+                                <div class="input-group">
+                                    <div class="custom-file">
+                                        <input type="file" class="custom-file-input" name="reason_attachment" id="reason_attachment">
+                                        <label class="custom-file-label" for="reason_attachment">Attach a file</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label class="control-label" for="reason">Reason</label>
+                                    <textarea class="form-control summernote" name="reason" id="reason" rows="4" placeholder="Revise Reason"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-labeled  btn-default btn-sm btn-sm btn-flat legitRipple" data-dismiss="modal"><b><i class="fas fa-times"></i></b> Cancel</button>
+                <button type="submit" form="form-reason" class="btn btn-labeled  btn-danger  btn-sm btn-flat legitRipple"><b><i class="fas fa-save"></i></b> Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="list-revise" class="modal fade" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="revise-modal" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Revise</h5>
@@ -178,7 +241,8 @@
                         <thead>
                             <tr>
                                 <th width="15%">Rev No.</th>
-                                <th width="85%">Revise Reason</th>
+                                <th width="65%">Revise Reason</th>
+                                <th width="20%">Attachment Name</th>
                             </tr>
                         </thead>
                     </table>
@@ -213,8 +277,28 @@
     }
     const revise = () => {
         $('#add-revise').modal('show');
+        initInputFile();
+    }
+    const approval = (e) => {
+        var title   = '';
+        if (e == 'APPROVED') {
+            title = 'Approve Reason';
+        } else {
+            title = 'Reject Reason';
+            
+        }
+        $('#approval-reason .modal-title').text(title);
+        $('#approval-reason input[name="status"]').val(e);
+        $('#approval-reason').modal('show');
+    }
+    const initInputFile = () => {
+        $('.custom-file-input').on('change', function() {
+          let fileName = $(this).val().split('\\').pop();
+          $(this).next('.custom-file-label').addClass("selected").html(fileName);
+        });
     }
     $(function() {        
+        initInputFile();
         var startDate = '{{$data->start_request}}',
             endDate    = '{{$data->finish_request}}';
         $('.select2').select2({
@@ -233,7 +317,7 @@
             filter: false,
             responsive: true,
             lengthChange: false,
-            order: [[ 0, "asc" ]],
+            orderable: false,
             ajax: {
                 url: "{{route('logrevise.read')}}",
                 type: "GET",
@@ -244,20 +328,26 @@
             },
             columnDefs:[
                 {
-                    orderable: false,targets:[1]
+                    orderable: false,targets:[0,1,2]
                 },
                 { className: "text-center", targets: [0] },
                 {
-                    width: "15%",
+                    width: "10%",
                     render: function(data, type, row) {
                         return row.revise_number;
                     }, targets: [0]
                 },
                 {
-                    width: "85%",
+                    width: "70%",
                     render: function(data, type, row) {
                         return row.revise_reason;
                     }, targets: [1]
+                },
+                {
+                    width: "20%",
+                    render: function(data, type, row) {
+                        return `<a href="${row.revise_attachment}"><b>${row.attachment_name}</b></a><br><small class="text-muted">Click name to download file</small>`;
+                    }, targets: [2]
                 },
             ],
             columns: [{
@@ -265,7 +355,10 @@
             },
             {
                 data: "revise_reason"
-            }]
+            },
+            {
+                data: "attachment_name"
+            },]
         });
 
         $('.datepicker').daterangepicker({
@@ -294,7 +387,7 @@
                 ['misc', ['fullscreen', 'codeview', 'help']]
             ]
         });
-        @if ($data->revise_status == 'NO')
+        @if ($status['formLocked'])
         $('.summernote').summernote('disable');
         @endif
 
@@ -550,6 +643,63 @@
                     });
                     if (response.status) {
                         $('#add-revise').modal('hide');
+                        toastr.success(`${response.message}`);
+                        location.reload();
+                    } else {
+                        toastr.warning(`${response.message}`);
+                    }
+                    return;
+                }).fail(function(response) {
+                    $('body').unblock();
+                    var response = response.responseJSON,
+                        message = response.message ? response.message : 'Failed to insert data.';
+
+                    toastr.warning(message);
+                    console.log({
+                        errorMessage: message
+                    });
+                })
+            }
+        });
+        $("#form-reason").validate({
+            errorElement: 'div',
+            errorPlacement: function(error, element) {
+                error.addClass('invalid-feedback');
+                element.closest('.form-group .controls').append(error);
+
+                if (element.is(':file')) {
+                    error.insertAfter(element.parent().parent().parent());
+                } else
+                if (element.parent('.input-group').length) {
+                    error.insertAfter(element.parent());
+                } else
+                if (element.attr('type') == 'checkbox') {
+                    error.insertAfter(element.parent());
+                } else {
+                    error.insertAfter(element);
+                }
+            },
+            highlight: function(element, errorClass, validClass) {
+                $(element).addClass('is-invalid');
+            },
+            unhighlight: function(element, errorClass, validClass) {
+                $(element).removeClass('is-invalid');
+            },
+            submitHandler: function() {
+                $.ajax({
+                    url: $('#form-reason').attr('action'),
+                    method: 'post',
+                    data: new FormData($('#form-reason')[0]),
+                    processData: false,
+                    contentType: false,
+                    dataType: 'json',
+                    beforeSend: function() {
+                        blockMessage('body', 'Please Wait . . . ', '#fff');
+                    }
+                }).done(function(response) {
+                    $('body').unblock();
+                    if (response.status) {
+                        $('#approval-reason').modal('hide');
                         toastr.success(`${response.message}`);
                         location.reload();
                     } else {
