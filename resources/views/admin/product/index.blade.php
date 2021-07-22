@@ -79,7 +79,7 @@
                         <div class="col-md-12">
                             <div class="form-group">
                                 <label class="control-label" for="name">Category</label>
-                                <select name="product_category_id" data-placeholder="Product Category" style="width: 100%;" required class="select2 form-control" id="product_category_id">
+                                <select name="product_category_id" data-placeholder="Product Category" style="width: 100%;" class="select2 form-control" id="product_category_id">
                                 </select>
                             </div>
                         </div>
