@@ -81,7 +81,8 @@ class RequestVehicleController extends Controller
             if ($query->status == 'APPROVED' || $query->status == 'REJECTED') {
                 abort(403);
             } else {
-                return view('admin.requestvehicle.edit',compact('data'));
+                $status = config('enums.global_status')[$query->status];
+                return view('admin.requestvehicle.edit',compact('data', 'status'));
             }
         }else{
             abort(404);
