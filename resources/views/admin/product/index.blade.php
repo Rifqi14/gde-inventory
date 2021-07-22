@@ -42,9 +42,8 @@
                         <table id="table-product" class="table table-striped datatable" width="100%">
                             <thead>
                                 <tr>
-                                    <th width="5" class="text-center">No.</th>
+                                    <th width="5" class="text-center"></th>
                                     <th width="100">Nama Product</th>
-                                    <th width="100">Category</th>
                                     <th width="20" class="text-right">Stock</th>
                                     <th width="20" class="text-center">#</th>
                                 </tr>
@@ -101,6 +100,7 @@
 @endsection
 
 @section('scripts')
+<script src='{{asset('assets/plugins/treegrid-datatable/dataTables.treeGrid.js')}}'></script>
 <script>
     function filter() {
         $('#form-filter').modal('show');
@@ -123,7 +123,8 @@
             filter: false,
             responsive: true,
             lengthChange: false,
-            order: [[ 1, "asc" ]],
+            orderable: false,
+            dom: "l",
             ajax: {
                 url: "{{route('product.read')}}",
                 type: "GET",
@@ -134,51 +135,71 @@
                     data.product_category_id = product_category_id;
                 }
             },
+            treeGrid: {
+                left: 10,
+                expandIcon: `<span><i class="fa fa-caret-square-down"></i></span>`,
+                collapseIcon: `<span><i class="fa fa-caret-square-up"></i></span>`,
+            },
             columnDefs:[
                 {
-                    orderable: false,targets:[0,2,3,4]
+                    orderable: false,targets:[0,1,2,]
                 },
-                { className: "text-right", targets: [] },
-                { className: "text-center", targets: [0,3,4] },
+                { className: "text-center", targets: [0,2,3] },
                 {
-                    width: "5%",
+                    width: "2%",
                     render: function ( data, type, row ) {
-                        return row.no;
+                        if (row.children && row.children.length > 0) {
+                            return `<span><i class="fa fa-caret-square-down"></i></span>`;
+                        }
+                        return ``;
                     },targets: [0]
                 },
                 {
                     render: function ( data, type, row ) {
-                        return row.category.path;
+                        if (row.isParent) {
+                            return `<b>${row.name}</b>`;
+                        }
+                        return `${row.name}`;
+                    },targets: [1]
+                },
+                {
+                    render: function ( data, type, row ) {
+                        if (row.isParent) {
+                            return ``;
+                        }
+                        return `${row.stock}`;
                     },targets: [2]
                 },
                 {   
                     width: "10%",
                     render: function ( data, type, row ) {
-                    return `<div class="btn-group">
-                    <button type="button" class="btn btn-flat btn-sm dropdown-toggle" data-toggle="dropdown">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <div class="dropdown-menu">
-                        <a class="dropdown-item" href="javascript:void(0);" onclick="view(${row.id})">
-                        <i class="far fa-eye"></i>View Data
-                        </a>
-                        <a class="dropdown-item" href="javascript:void(0);" onclick="edit(${row.id})">
-                        <i class="far fa-edit"></i>Update Data
-                        </a>
-                        <a class="dropdown-item delete" href="javascript:void(0);" data-id="${row.id}">
-                        <i class="fa fa-trash-alt"></i> Delete Data
-                        </a>
-                    </div>
-                    </div>`;
-                    },targets: [4]
+                        if (row.isParent) {
+                            return ``;
+                        }
+                        return `<div class="btn-group">
+                        <button type="button" class="btn btn-flat btn-sm dropdown-toggle" data-toggle="dropdown">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="javascript:void(0);" onclick="view(${row.id})">
+                            <i class="far fa-eye"></i>View Data
+                            </a>
+                            <a class="dropdown-item" href="javascript:void(0);" onclick="edit(${row.id})">
+                            <i class="far fa-edit"></i>Update Data
+                            </a>
+                            <a class="dropdown-item delete" href="javascript:void(0);" data-id="${row.id}">
+                            <i class="fa fa-trash-alt"></i> Delete Data
+                            </a>
+                        </div>
+                        </div>`;
+                    },targets: [3]
                 }
             ],
             columns: [
-                { data: "no" },
-                { data: "name" },
-                { data: "category" },
+                { data: "id", className: "treegrid-control" },
+                { data: "name", },
                 { data: "stock" },
-                { data: "no" },
+                { data: "id" },
             ]
         });
 

@@ -33,16 +33,17 @@ class ProductController extends Controller
         $start = $request->start;
         $length = $request->length;
         $query = $request->search['value'];
-        $sort = $request->columns[$request->order[0]['column']]['data'];
-        $dir = $request->order[0]['dir'];
+        // $sort = $request->columns[$request->order[0]['column']]['data'];
+        // $dir = $request->order[0]['dir'];
         $name = strtoupper($request->name);
         $product_category_id = $request->product_category_id;
 
         //Count Data
-        $query = Product::select('*')->with('category');
-        $query->whereRaw("upper(name) like '%$name%'");
+        $query = ProductCategory::with(['products' => function ($q) use ($name) {
+            $q->whereRaw("upper(name) like '%$name%'");
+        }]);
         if($product_category_id){
-            $query->where('product_category_id',$product_category_id);
+            $query->where('id',$product_category_id);
         }
 
         $row = clone $query;
@@ -50,19 +51,28 @@ class ProductController extends Controller
 
         $query->offset($start);
         $query->limit($length);
-        $query->orderBy($sort, $dir);
+        // $query->orderBy($sort, $dir);
         $products = $query->get();
 
         $data = [];
-        foreach ($products as $product) {
-            $product->no = ++$start;
-            if($product->category->parent_id != 0){
-                $product->category->name = $this->getParent($product->category->parent_id, $product->category->name);
-            }else{
-                $product->category->name = $product->category->name;
-            }
-            $product->stock = 0;
-            $data[] = $product;
+        foreach ($products as $keyProduct => $product) {
+            $data[]   = [
+                'id'        => $product->id,
+                'name'      => $product->path,
+                'stock'     => 0,
+                'isParent'  => true,
+                'children'  => [],
+            ];
+            foreach ($product->products()->get() as $key => $value) {
+                $data[$keyProduct]['children'][]   = [
+                    'id'        => $value->id,
+                    'name'      => $value->name,
+                    'isParent'  => false,
+                    'stock'     => 0,
+                    'children'  => [],
+                ];
+            };
+            // $data[] = $product;
         }
         return response()->json([
             'draw' => $request->draw,
