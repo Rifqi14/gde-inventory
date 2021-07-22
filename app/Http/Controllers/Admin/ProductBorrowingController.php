@@ -6,6 +6,9 @@ use App\Models\ProductBorrowing;
 use App\Models\ProductBorrowingLog; // Model for log action
 use App\Models\ProductBorrowingDetail; // Model for detail product
 use App\Models\ProductBorrowingDocument; // Model for supporting document
+use App\Models\ProductBorrowingSerial;
+use App\Models\ProductSerial;
+use App\Models\StockWarehouse;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -44,11 +47,78 @@ class ProductBorrowingController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
-        $url = route('productborrowing.store');
-        return view('admin.productborrowing.create',compact('url'));
-    }    
+        if(in_array('create',$request->actionmenu)){
+            $url = route('productborrowing.store');
+            return view('admin.productborrowing.create',compact('url'));
+        }else{
+            abort(403);
+        }     
+    }        
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit(Request $request,$id)
+    {        
+        if(in_array('update',$request->actionmenu)){
+            $data = ProductBorrowing::with([
+                    'files',
+                    'images',
+                    'products' => function($product){
+                        $product->with([
+                            'serials' => function($serial){
+                                $serial->selectRaw("
+                                    product_borrowing_serials.borrowing_detail_id,
+                                    product_borrowing_serials.serial_id,
+                                    product_serials.serial_number
+                                ");
+                                $serial->leftJoin('product_serials','product_serials.id','=','product_borrowing_serials.serial_id');
+                            }
+                        ]);
+                        $product->selectRaw("
+                            product_borrowing_details.*,
+                            products.name as product,
+                            products.is_serial,
+                            product_categories.path as category,
+                            uoms.name as uom
+                        ");                        
+                        $product->leftJoin('products','products.id','=','product_borrowing_details.product_id');
+                        $product->leftJoin('product_categories','product_categories.id','=','products.product_category_id');
+                        $product->leftJoin('product_uoms',function ($join)
+                        {
+                            $join->on('product_uoms.product_id','=','product_borrowing_details.product_id');
+                            $join->on('product_uoms.uom_id','=','product_borrowing_details.uom_id');
+                        });
+                        $product->leftJoin('uoms','uoms.id','=','product_uoms.uom_id');
+                    }
+                ])
+                ->selectRaw("
+                    product_borrowings.*,
+                    TO_CHAR(product_borrowings.borrowing_date,'DD/MM/YYYY') as date_borrowing,
+                    TO_CHAR(product_borrowings.return_date,'DD/MM/YYYY') as date_return,
+                    sites.name as site_name,
+                    warehouses.name as warehouse_name,
+                    users.name as issued_name
+                ")
+                ->leftJoin('sites','sites.id','=','product_borrowings.site_id')
+                ->leftJoin('warehouses','warehouses.id','=','product_borrowings.warehouse_id')
+                ->leftJoin('users','users.id','=','product_borrowings.issued_by')
+                ->find($id); 
+
+            if($data){
+                return view('admin.productborrowing.edit',compact('data'));
+            }else{
+                abort(404);
+            }
+        }else{
+            abort(403);
+        }
+    }
 
     /**
      * Display the specified resource.
@@ -62,12 +132,25 @@ class ProductBorrowingController extends Controller
                     'files',
                     'images',
                     'products' => function($product){
+                        $product->with([
+                            'serials' => function($serial){
+                                $serial->selectRaw("
+                                    product_borrowing_serials.borrowing_detail_id,
+                                    product_borrowing_serials.serial_id,
+                                    product_serials.serial_number
+                                ");
+                                $serial->leftJoin('product_serials','product_serials.id','=','product_borrowing_serials.serial_id');                                
+                            }
+                        ]);
                         $product->selectRaw("
                             product_borrowing_details.*,
-                            products.name as product_name,
-                            uoms.name as uom_name
+                            products.name as product,
+                            products.is_serial,
+                            product_categories.path as category,
+                            uoms.name as uom
                         ");
                         $product->leftJoin('products','products.id','=','product_borrowing_details.product_id');
+                        $product->leftJoin('product_categories','product_categories.id','=','products.product_category_id');
                         $product->leftJoin('product_uoms',function ($join)
                         {
                             $join->on('product_uoms.product_id','=','product_borrowing_details.product_id');
@@ -98,87 +181,55 @@ class ProductBorrowingController extends Controller
     public function archive($id)
     {
         $data = ProductBorrowing::with([
-                    'files',
-                    'images',
-                    'products' => function($product){
-                        $product->selectRaw("
-                            product_borrowing_details.*,
-                            products.name as product_name,
-                            uoms.name as uom_name
+            'files',
+            'images',
+            'products' => function($product){
+                $product->with([
+                    'serials' => function($serial){
+                        $serial->selectRaw("
+                            product_borrowing_serials.borrowing_detail_id,
+                            product_borrowing_serials.serial_id,
+                            product_serials.serial_number
                         ");
-                        $product->leftJoin('products','products.id','=','product_borrowing_details.product_id');
-                        $product->leftJoin('product_uoms',function ($join)
-                        {
-                            $join->on('product_uoms.product_id','=','product_borrowing_details.product_id');
-                            $join->on('product_uoms.uom_id','=','product_borrowing_details.uom_id');
-                        });
-                        $product->leftJoin('uoms','uoms.id','=','product_uoms.uom_id');
+                        $serial->leftJoin('product_serials','product_serials.id','=','product_borrowing_serials.serial_id');                                
                     }
-                ])
-                ->selectRaw("
-                    product_borrowings.*,
-                    TO_CHAR(product_borrowings.borrowing_date,'DD/MM/YYYY') as date_borrowing,
-                    TO_CHAR(product_borrowings.return_date,'DD/MM/YYYY') as date_return,
-                    sites.name as site_name,
-                    warehouses.name as warehouse_name,
-                    users.name as issued_name
-                ")
-                ->leftJoin('sites','sites.id','=','product_borrowings.site_id')
-                ->leftJoin('warehouses','warehouses.id','=','product_borrowings.warehouse_id')
-                ->leftJoin('users','users.id','=','product_borrowings.issued_by')
-                ->withTrashed()
-                ->find($id);                
+                ]);
+                $product->selectRaw("
+                    product_borrowing_details.*,
+                    products.name as product,
+                    products.is_serial,
+                    product_categories.path as category,
+                    uoms.name as uom
+                ");
+                $product->leftJoin('products','products.id','=','product_borrowing_details.product_id');
+                $product->leftJoin('product_categories','product_categories.id','=','products.product_category_id');
+                $product->leftJoin('product_uoms',function ($join)
+                {
+                    $join->on('product_uoms.product_id','=','product_borrowing_details.product_id');
+                    $join->on('product_uoms.uom_id','=','product_borrowing_details.uom_id');
+                });
+                $product->leftJoin('uoms','uoms.id','=','product_uoms.uom_id');
+            }
+        ])
+        ->selectRaw("
+            product_borrowings.*,
+            TO_CHAR(product_borrowings.borrowing_date,'DD/MM/YYYY') as date_borrowing,
+            TO_CHAR(product_borrowings.return_date,'DD/MM/YYYY') as date_return,
+            sites.name as site_name,
+            warehouses.name as warehouse_name,
+            users.name as issued_name
+        ")
+        ->leftJoin('sites','sites.id','=','product_borrowings.site_id')
+        ->leftJoin('warehouses','warehouses.id','=','product_borrowings.warehouse_id')
+        ->leftJoin('users','users.id','=','product_borrowings.issued_by')
+        ->withTrashed()
+        ->find($id);                
 
         if($data){
             return view('admin.productborrowing.detail',compact('data'));   
         }else{
             abort(404);
         }        
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {        
-        $data = ProductBorrowing::with([
-                    'files',
-                    'images',
-                    'products' => function($product){
-                        $product->selectRaw("
-                            product_borrowing_details.*,
-                            products.name as product_name,
-                            uoms.name as uom_name
-                        ");
-                        $product->leftJoin('products','products.id','=','product_borrowing_details.product_id');
-                        $product->leftJoin('product_uoms',function ($join)
-                        {
-                            $join->on('product_uoms.product_id','=','product_borrowing_details.product_id');
-                            $join->on('product_uoms.uom_id','=','product_borrowing_details.uom_id');
-                        });
-                        $product->leftJoin('uoms','uoms.id','=','product_uoms.uom_id');
-                    }
-                ])
-                ->selectRaw("
-                    product_borrowings.*,
-                    TO_CHAR(product_borrowings.borrowing_date,'DD/MM/YYYY') as date_borrowing,
-                    TO_CHAR(product_borrowings.return_date,'DD/MM/YYYY') as date_return,
-                    sites.name as site_name,
-                    warehouses.name as warehouse_name,
-                    users.name as issued_name
-                ")
-                ->leftJoin('sites','sites.id','=','product_borrowings.site_id')
-                ->leftJoin('warehouses','warehouses.id','=','product_borrowings.warehouse_id')
-                ->leftJoin('users','users.id','=','product_borrowings.issued_by')
-                ->find($id);        
-        if($data){
-            return view('admin.productborrowing.edit',compact('data'));
-        }else{
-            abort(404);
-        }
     }
 
     public function selectwarehouse(Request $request)
@@ -213,52 +264,7 @@ class ProductBorrowingController extends Controller
             'total' => $recordsTotal,
             'rows' => $data
         ], 200);
-    }
-
-    public function selectproduct(Request $request)
-    {
-        $start  = $request->page ? $request->page - 1 : 0;
-        $length = $request->limit;
-        $name   = strtoupper($request->name);
-        $product_category_id = $request->product_category_id;  
-        $products            = $request->products;
-    
-        $query = Product::selectRaw("
-            products.*,            
-            product_uoms.uom_id,
-            uoms.name as uom
-        ");        
-        $query->leftJoin('product_uoms','product_uoms.product_id','=','products.id');
-        $query->leftJoin('uoms','uoms.id','=','product_uoms.uom_id');
-        $query->leftJoin('uom_categories','uom_categories.id','=','uoms.uom_category_id');
-        if($name){
-            $query->whereRaw("
-                upper(products.name) like '%$name%'
-            ");
-        }
-        if ($products) {
-            $query->whereNotIn('products.id', $products);
-        }
-        $query->where('product_category_id',$product_category_id);
-    
-        $rows  = clone $query;
-        $total = $rows->count();
-    
-        $query->offset($start);
-        $query->limit($length);
-        $queries = $query->get();
-    
-        $data = [];
-        foreach ($queries as $key => $row) {
-            $row->qty_system = 10;            
-            $data[] = $row;
-        }
-    
-        return response()->json([
-            'total' => $total,
-            'rows'  => $data
-        ],200);
-    }
+    }    
 
     public function read(Request $request)
     {
@@ -400,15 +406,11 @@ class ProductBorrowingController extends Controller
             'return_date'           => $returndate,
             'description'           => $description,
             'status'                => $status
-        ]);
-
-        $code               = explode('-', $query->index_number);
-        $month              = date('m');
-        $borrowingNumber    = "$code[0]-$code[1]-$month-$code[2]";
-        $query->borrowing_number    = $borrowingNumber;
-        $query->save();
+        ]);                
         
-        if ($query) {
+        if ($query) {            
+            $this->borrowingNumber($query->id,$query->index_number);
+
             $now           = date('Y-m-d H:i:s');
             $borrowing_id  = $query->id;
             $getProducts   = $request->products;                        
@@ -416,28 +418,49 @@ class ProductBorrowingController extends Controller
             $photoNames    = $request->photo_name;       
             $documents     = [];             
 
-            if($getProducts){
-                $products = [];
-                foreach (json_decode($getProducts) as $key => $row) {
-                    $products[] = [
+            if($getProducts){                
+                foreach (json_decode($getProducts) as $key => $row) {                    
+                    $query = ProductBorrowingDetail::create([
                         'product_borrowing_id' => $borrowing_id,
                         'product_id'           => $row->product_id,
                         'product_category_id'  => $row->category_id,
                         'uom_id'               => $row->uom_id,
                         'qty_system'           => $row->qty_system,
-                        'qty_requested'        => $row->qty_requested,
-                        'created_at'           => $now,
-                        'updated_at'           => $now
-                    ];
-                }
+                        'qty_requested'        => $row->qty_requested                        
+                    ]);
 
-                $query = ProductBorrowingDetail::insert($products);
-                if(!$query){
-                    return response()->json([
-                        'status'  => false,
-                        'message' => 'Failed to create detail product of product borrowig.'
-                    ],400);
-                }
+                    if(!$query){
+                        return response()->json([
+                            'status'  => false,
+                            'message' => 'Failed to create detail product of product borrowing.'
+                        ],400);
+                    }
+
+                    $detail_id = $query->id;
+
+                    if($row->has_serial){
+                        $serials = [];
+
+                        foreach($row->serials as $index => $bar){
+                            $serials[] = [
+                                'borrowing_detail_id' => $detail_id,
+                                'serial_id'           => $bar->serial_id,
+                                'created_at'          => $now,
+                                'updated_at'          => $now
+                            ];
+                        }
+
+                        $query = ProductBorrowingSerial::insert($serials);
+
+                        if(!$query){
+                            return response()->json([
+                                'status'  => false,
+                                'message' => 'Failed to create detail product serial of product borrowing.'
+                            ],400);
+                        }
+
+                    }
+                }                                
             }            
     
             if(isset($documentNames)){                                
@@ -572,6 +595,7 @@ class ProductBorrowingController extends Controller
         if($query){
             $cleared = ProductBorrowingDetail::where('product_borrowing_id',$query->id);
             $cleared->delete();
+
             if(!$cleared){
                 return response()->json([
                     'status'  => false,
@@ -586,28 +610,53 @@ class ProductBorrowingController extends Controller
             $photoNames    = $request->photo_name;
             $updatedDoc    = $request->documents;
 
-            if($getProducts){
-                $products = [];
-                foreach (json_decode($getProducts) as $key => $row) {
-                    $products[] = [
+            if($getProducts){                
+                foreach (json_decode($getProducts) as $key => $row) {                    
+
+                    $query = ProductBorrowingDetail::create([
                         'product_borrowing_id' => $id,
                         'product_id'           => $row->product_id,
                         'product_category_id'  => $row->category_id,
                         'uom_id'               => $row->uom_id,
                         'qty_system'           => $row->qty_system,
-                        'qty_requested'        => $row->qty_requested,
-                        'created_at'           => $now,
-                        'updated_at'           => $now
-                    ];
-                }
+                        'qty_requested'        => $row->qty_requested
+                    ]);
 
-                $query = ProductBorrowingDetail::insert($products);
-                if(!$query){
-                    return response()->json([
-                        'status'  => false,
-                        'message' => 'Failed to create detail product of product borrowig.'
-                    ],400);
-                }
+                    if(!$query){
+                        return response()->json([
+                            'status'  => false,
+                            'message' => 'Failed to update detail product of product borrowig.'
+                        ],400);
+                    }
+
+                    $detail_id = $query->id;
+                    if($row->has_serial){
+                        $serials = [];
+                        foreach($row->serials as $inx => $bar){
+                            $serials[] = [
+                                'borrowing_detail_id' => $detail_id,
+                                'serial_id'           => $bar->serial_id,
+                                'created_at'          => $now,
+                                'updated_at'          => $now
+                            ];
+                        }
+
+                        $query = ProductBorrowingSerial::insert($serials);
+
+                        if(!$query){
+                            return response()->json([
+                                'status'  => false,
+                                'message' => 'Failed to update detail product serial of product borrowing.'
+                            ],400);
+                        }
+                    }
+                }                
+                
+            }
+
+            // Calculate and move stock warehouse                    
+            if($status == 'approved'){
+                $calculate = $this->calculateStock($getProducts);
             }
 
             $documents = [];
@@ -755,5 +804,164 @@ class ProductBorrowingController extends Controller
                 'message' => 'Failed to remove data.'
             ],400);
         }
-    }    
+    } 
+    
+    public function borrowingNumber($id,$index)
+    {
+        $code               = explode('-', $index);
+        $month              = date('m');
+        $borrowingNumber    = "$code[0]-$code[1]-$month-$code[2]";
+
+        $query = ProductBorrowing::find($id);
+        $query->borrowing_number    = $borrowingNumber;
+        $query->save();
+    }
+
+    public function selectproduct(Request $request)
+    {
+        $start               = $request->page ? $request->page - 1 : 0;
+        $length              = $request->limit;
+        $name                = strtoupper($request->name);
+        $product_category_id = $request->product_category_id;  
+        $products            = $request->products;
+        $warehouse_id        = $request->warehouse_id;
+    
+        $query = Product::selectRaw("
+            products.*,            
+            (case
+                when stock_warehouses.stock is not null then stock_warehouses.stock::INTEGER
+                else 0
+            end) as stock,
+            product_uoms.uom_id,
+            product_categories.path as category,
+            uoms.name as uom
+        ");                
+        $query->leftJoin('product_categories','product_categories.id','=','products.product_category_id');
+        $query->leftJoin('product_uoms','product_uoms.product_id','=','products.id');
+        $query->leftJoin('uoms','uoms.id','=','product_uoms.uom_id');                
+        $query->join('stock_warehouses','stock_warehouses.product_id','=','products.id');                
+        if($name){
+            $query->whereRaw("
+                upper(products.name) like '%$name%'
+            ");
+        }
+        if ($products) {
+            $query->whereNotIn('products.id', $products);
+        }
+        $query->where('stock_warehouses.warehouse_id',$warehouse_id);
+        if($product_category_id){
+            $query->where('product_category_id',$product_category_id);
+        }
+    
+        $rows  = clone $query;
+        $total = $rows->count();
+    
+        $query->offset($start);
+        $query->limit($length);
+        $queries = $query->get();
+    
+        $data = [];
+        foreach ($queries as $key => $row) {               
+            $row->category = str_replace('->',' <i class="fas fa-angle-right"></i> ',$row->category);
+            $data[] = $row;
+        }
+    
+        return response()->json([
+            'total' => $total,
+            'rows'  => $data
+        ],200);
+    }
+
+    public function readserial(Request $request)
+    {
+        $draw         = $request->draw;
+        $start        = $request->start;
+        $length       = $request->length;
+        $search       = $request->search['value'];
+        $sort         = $request->columns[$request->order[0]['column']]['data'];
+        $dir          = $request->order[0]['dir'];
+        $product_id   = $request->product_id;
+        $warehouse_id = $request->warehouse_id;
+        $except       = $request->except;
+
+        $query = ProductSerial::selectRaw("
+            product_serials.*,
+            products.name as product,
+            product_categories.path as category
+        ");
+        $query->leftJoin('products','products.id','=','product_serials.product_id');
+        $query->leftJoin('product_categories','product_categories.id','=','products.product_category_id');
+        $query->where([
+            ['product_serials.product_id','=',$product_id],
+            ['product_serials.warehouse_id','=',$warehouse_id],
+            ['product_serials.movement','=','in']
+        ]);
+        if($except){
+            $query->whereNotIn('product_serials.id',$except);
+        }
+
+        $rows  = clone $query;
+        $total = $rows->count();
+
+        $query->offset($start);
+        $query->limit($length);
+        $query->orderBy($sort, $dir);
+
+        $queries = $query->get();
+
+        $data = [];
+        foreach($queries as $key => $row){
+            $row->no = ++$start;
+            $data[]  = $row;
+        }
+
+        return response()->json([
+            'draw'              => $draw,
+            'recordsTotal'      => $total,
+            'recordsFiltered'   => $total,
+            'data'              => $data
+        ], 200);
+    }
+
+    function calculateStock($products){
+        foreach (json_decode($products) as $key => $row) {
+            $site_id      = $row->site_id;
+            $warehouse_id = $row->warehouse_id;
+            $product_id   = $row->product_id;
+            $qty_request  = $row->qty_requested;  
+            $has_serial   = $row->has_serial;
+            $serials      = $row->serials;
+
+            if($has_serial){
+                $serial_id = [];
+
+                foreach($serials as $inx => $bar){
+                    array_push($serial_id,$bar->serial_id);
+                }
+
+                // Update movement status of product serials as out
+                $query = ProductSerial::whereIn('id',$serial_id)->update(['movement' => 'out']);                               
+            }          
+
+            // Checking stock product on warehouse
+            $stock = StockWarehouse::where([
+                ['stock_warehouses.warehouse_id','=',$warehouse_id],
+                ['stock_warehouses.product_id','=',$product_id]
+            ])->first();            
+            
+            if($stock){
+                $query = $stock;
+                $query->stock = $stock->stock - $qty_request;
+                $query->save();
+
+                if(!$query){
+                    return response()->json([
+                        'status'    => false,
+                        'message'   => 'Failed to update stock on warehouse.'
+                    ],400);
+                }   
+            }
+
+        }
+    }
 }

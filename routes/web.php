@@ -242,6 +242,7 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/productborrowing/selectwarehouse','Admin\ProductBorrowingController@selectwarehouse')->name('productborrowing.selectwarehouse');        
         Route::get('/productborrowing/selectproduct','Admin\ProductBorrowingController@selectproduct')->name('productborrowing.selectproduct');        
         Route::get('/productborrowing/readarchived','Admin\ProductBorrowingController@readarchived')->name('productborrowing.readarchived');
+        Route::get('/productborrowing/readserial','Admin\ProductBorrowingController@readserial')->name('productborrowing.readserial');
         Route::get('/productborrowing/archive/{id}','Admin\ProductBorrowingController@archive');
         Route::get('/productborrowing/delete/{id}','Admin\ProductBorrowingController@destroy');                
         Route::resource('/productborrowing','Admin\ProductBorrowingController');

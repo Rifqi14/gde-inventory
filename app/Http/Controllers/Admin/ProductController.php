@@ -378,8 +378,7 @@ class ProductController extends Controller
         $queries = $query->get();
     
         $data = [];
-        foreach ($queries as $key => $row) {
-            $row->qty_system = 10;            
+        foreach ($queries as $key => $row) {                    
             $data[] = $row;
         }
     

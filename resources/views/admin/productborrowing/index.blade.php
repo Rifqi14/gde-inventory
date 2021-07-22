@@ -106,6 +106,7 @@
         </div>
     </div>
 </section>
+
 <div id="add-filter" class="modal fade" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="filter-modal" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -252,6 +253,10 @@
                     targets: [0, 2, 4]
                 },
                 {
+                    className: "text-bold",
+                    targets : [1]
+                },
+                {
                     render: function(data, type, row) {
                         var badge = '',
                             status = row.status;
@@ -351,7 +356,11 @@
                 },
                 {
                     className: "text-center",
-                    targets: [0, 2, 4]
+                    targets: [0, 2, 4, 5]
+                },
+                {
+                    className: "text-bold",
+                    targets : [1]
                 },
                 {
                     render: function(data, type, row) {
@@ -372,7 +381,7 @@
                 },
                 {
                     render: function(data, type, row) {
-                        var button = `<a class="dropdown-item" href="javascript:void(0);" onclick="archive(${row.id})">
+                        var button = `<a class="dropdown-item" href="javascript:void(0);" onclick="show(${row.id})">
                                         <i class="far fa-eye"></i>View Data
                                     </a>`;                     
                         return `<div class="btn-group">
@@ -432,7 +441,11 @@
                 },
                 {
                     className: "text-center",
-                    targets: [0, 2, 4]
+                    targets: [0, 2, 4, 5]
+                },
+                {
+                    className: "text-bold",
+                    targets : [1]
                 },
                 {
                     render: function(data, type, row) {
@@ -509,10 +522,10 @@
                         _token: "{{ csrf_token() }}"
                     };
                     $.ajax({
-                        url: `{{url('admin/productborrowing/delete')}}/${id}`,
+                        url: `{{route('productborrowing.index')}}/${id}`,
                         dataType: 'json',
                         data: data,
-                        type: 'GET',
+                        type: 'DELETE',
                         beforeSend: function() {
                             blockMessage('#content', 'Loading', '#fff');
                         }
