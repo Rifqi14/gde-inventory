@@ -39,9 +39,11 @@ class ProductController extends Controller
         $product_category_id = $request->product_category_id;
 
         //Count Data
-        $query = ProductCategory::with(['products' => function ($q) use ($name) {
-            $q->whereRaw("upper(name) like '%$name%'");
-        }]);
+        $query = ProductCategory::when($name, function ($q) use ($name) {
+            $q->whereHas('products', function($qy) use ($name){
+                $qy->whereRaw("upper(name) like '%$name%'");
+            });
+        });
         if($product_category_id){
             $query->where('id',$product_category_id);
         }
