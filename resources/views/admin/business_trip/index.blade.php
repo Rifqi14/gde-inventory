@@ -278,11 +278,13 @@
         },
         {
           render: function(data, type, row) {
-            if (row.rate) {
-              return accounting.formatMoney(row.total_cost, " ", 0, ".", "");
-            } else {
-              return 0;
-            }
+            total = ``
+            $.each(row.total, function(index, value) {
+              if (value.price > 0) {
+                total += `${value.symbol} ${accounting.formatMoney(value.price, " ", 0, ".", "")}<br>`;
+              }
+            });
+            return total;
           },
           targets: [3]
         },
@@ -340,7 +342,7 @@
           data: "schedule"
         },
         {
-          data: "total_cost"
+          data: "id"
         }, {
           data: "status"
         }

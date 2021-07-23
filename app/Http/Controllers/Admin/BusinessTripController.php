@@ -55,8 +55,8 @@ class BusinessTripController extends Controller
     public function edit(Request $request,$id)
     {        
         $businesstrip = BusinessTrip::with([
-            'departs',
-            'returns',
+            'departs.transportCurrency',
+            'returns.transportCurrency',
             'vehicles' => function($q){
                 $q->selectRaw("
                     business_trip_vehicles.*,                    
@@ -68,19 +68,51 @@ class BusinessTripController extends Controller
                 $q->leftJoin('request_vehicles','request_vehicles.id','=','business_trip_vehicles.request_vehicle_id');
                 $q->leftJoin('vehicles','vehicles.id','=','request_vehicles.vehicle_id');
             },
-            'lodgings',
-            'others'
+            'lodgings.lodgingCurrency',
+            'others.othersCurrency',
+            'issuedby.employees',
         ]);
         $businesstrip->selectRaw("
             business_trips.*,
             users.name as issued_name
         ");
         $businesstrip->leftJoin('users','users.id','=','business_trips.issued_by');
-        $businesstrip = $businesstrip->find($id);       
+        $businesstrip = $businesstrip->find($id); 
+        
+        $currencies = Currency::all();
+        $total  = [];
+        foreach ($currencies as $key => $currency) {
+            $total[$currency->id]  = 0;
+            foreach ($businesstrip->departs as $key => $depart) {
+                if ($currency->id == $depart->currency_id) {
+                    $total[$currency->id]    += $depart->price;
+                }
+            }
+            foreach ($businesstrip->returns as $key => $depart) {
+                if ($currency->id == $depart->currency_id) {
+                    $total[$currency->id]    += $depart->price;
+                }
+            }
+            foreach ($businesstrip->lodgings as $key => $depart) {
+                if ($currency->id == $depart->currency_id) {
+                    $total[$currency->id]    += $depart->price;
+                }
+            }
+            foreach ($businesstrip->others as $key => $depart) {
+                if ($currency->id == $depart->currency_id) {
+                    $total[$currency->id]    += $depart->price;
+                }
+            }
+            if ($businesstrip->issuedby->employees) {
+                if ($currency->id == $businesstrip->issuedby->employees->rate_currency_id) {
+                    $total[$currency->id]    += $businesstrip->issuedby->employees->rate_business_trip;
+                }
+            }
+        }
         
         if ($businesstrip) {
             $data = $businesstrip;
-            return view('admin.business_trip.edit', compact('data'));
+            return view('admin.business_trip.edit', compact('data', 'total', 'currencies'));
         } else {
             abort(404);
         }
@@ -178,8 +210,13 @@ class BusinessTripController extends Controller
         $total_cost         = str_replace('.','',$request->total_cost);
 
         //Count Data
-        $query = BusinessTrip::query();    
-        $query->selectRaw("business_trips.*");        
+        $query = BusinessTrip::with([
+            'departs.transportCurrency',
+            'returns.transportCurrency',
+            'lodgings.lodgingCurrency',
+            'others.othersCurrency',
+            'issuedby.employees',
+        ]);      
         if($businessTripNumber){
             $query->whereRaw("upper(business_trip_number) like '%$businessTripNumber%'");
         }
@@ -214,7 +251,7 @@ class BusinessTripController extends Controller
         
 
         $rows  = clone $query;
-        $total = $rows->count();
+        $recordsTotal = $rows->count();
 
         //Select Pagination
         $query->offset($start);
@@ -224,14 +261,46 @@ class BusinessTripController extends Controller
 
         $data = [];
         foreach ($businesstrips as $key => $row) {
+            $currencies = Currency::all();
+            $total  = [];
+            foreach ($currencies as $key => $currency) {
+                $total[$currency->id]['price']  = 0;
+                $total[$currency->id]['symbol']  = $currency->symbol;
+                foreach ($row->departs as $key => $depart) {
+                    if ($currency->id == $depart->currency_id) {
+                        $total[$currency->id]['price']    += $depart->price;
+                    }
+                }
+                foreach ($row->returns as $key => $depart) {
+                    if ($currency->id == $depart->currency_id) {
+                        $total[$currency->id]['price']    += $depart->price;
+                    }
+                }
+                foreach ($row->lodgings as $key => $depart) {
+                    if ($currency->id == $depart->currency_id) {
+                        $total[$currency->id]['price']    += $depart->price;
+                    }
+                }
+                foreach ($row->others as $key => $depart) {
+                    if ($currency->id == $depart->currency_id) {
+                        $total[$currency->id]['price']    += $depart->price;
+                    }
+                }
+                if ($row->issuedby->employees) {
+                    if ($currency->id == $row->issuedby->employees->rate_currency_id) {
+                        $total[$currency->id]['price']    += $row->issuedby->employees->rate_business_trip;
+                    }
+                }
+            }
             $row->no = ++$start;                      
-            $row->schedule = date('d/m/Y',strtotime($row->departure_date)).' - '.date('d/m/Y',strtotime($row->arrived_date));            
+            $row->schedule = date('d/m/Y',strtotime($row->departure_date)).' - '.date('d/m/Y',strtotime($row->arrived_date));
+            $row->total  = $total;
             $data[] = $row;
         }
         return response()->json([
             'draw' => $draw,
-            'recordsTotal' => $total,
-            'recordsFiltered' => $total,
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsTotal,
             'data' => $data
         ], 200);
     }
@@ -299,7 +368,8 @@ class BusinessTripController extends Controller
                         'description'         => $row->description,
                         'price'               => str_replace('.','',$row->price),
                         'created_at'          => $now,
-                        'updated_at'          => $now
+                        'updated_at'          => $now,
+                        'currency_id'         => $row->currency_id,
                     ];
                 }                               
 
@@ -311,7 +381,8 @@ class BusinessTripController extends Controller
                         'description'         => $row->description,
                         'price'               => str_replace('.','',$row->price),
                         'created_at'          => $now,
-                        'updated_at'          => $now
+                        'updated_at'          => $now,
+                        'currency_id'         => $row->currency_id,
                     ];
                 }
                 $query = BusinessTripTransportation::insert($transportation);
@@ -355,7 +426,8 @@ class BusinessTripController extends Controller
                         'price'            => intval(str_replace('.','',$row->price)),
                         'night'            => intval($row->days),
                         'created_at'       => $now,
-                        'updated_at'       => $now
+                        'updated_at'       => $now,
+                        'currency_id'      => $row->currency_id,
                     ];
                 }
 
@@ -377,7 +449,8 @@ class BusinessTripController extends Controller
                         'price'            => intval(str_replace('.','',$row->price)),
                         'qty'              => $row->qty,
                         'created_at'       => $now,
-                        'updated_at'       => $now
+                        'updated_at'       => $now,
+                        'currency_id'      => $row->currency_id,
                     ];
                 }
 
@@ -477,6 +550,7 @@ class BusinessTripController extends Controller
                         'type'                => $row->type,
                         'description'         => $row->description,
                         'price'               => str_replace('.','',$row->price),
+                        'currency_id'         => $row->currency_id,
                         'created_at'          => $now,
                         'updated_at'          => $now
                     ];
@@ -489,6 +563,7 @@ class BusinessTripController extends Controller
                         'type'                => $row->type,
                         'description'         => $row->description,
                         'price'               => str_replace('.','',$row->price),
+                        'currency_id'         => $row->currency_id,
                         'created_at'          => $now,
                         'updated_at'          => $now
                     ];
@@ -539,6 +614,7 @@ class BusinessTripController extends Controller
                         'business_trip_id' => $business_id,
                         'place'            => $row->place,
                         'price'            => str_replace('.','',$row->price),
+                        'currency_id'      => $row->currency_id,
                         'night'            => $row->days,
                         'created_at'       => $now,
                         'updated_at'       => $now
@@ -564,6 +640,7 @@ class BusinessTripController extends Controller
                         'business_trip_id' => $business_id,
                         'description'      => $row->description,
                         'price'            => str_replace('.','',$row->price),
+                        'currency_id'      => $row->currency_id,
                         'qty'              => $row->qty,
                         'created_at'       => $now,
                         'updated_at'       => $now

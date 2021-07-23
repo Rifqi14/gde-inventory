@@ -237,8 +237,7 @@ Edit {{ @$menu_name }} Request
 								<label>Rate:</label>
 								<div class="input-group">
 									<div class="input-group-prepend">
-										<span class="input-group-text">
-											Rp.
+										<span class="input-group-text currency_rate">
 										</span>
 									</div>
 									<input type="text" class="form-control input-price text-right" id="rate" name="rate" placeholder="Enter rate" value="{{$data->rate?$data->rate:0}}" maxlength="14" readonly>
@@ -246,12 +245,16 @@ Edit {{ @$menu_name }} Request
 							</div>
 							<div class="form-group">
 								<label for="total-cost">Estimated Cost:</label>
-								<div class="input-group">
+								@foreach ($currencies as $currency)
+								@if ($total[$currency->id] > 0)
+								<div class="input-group mt-2">
 									<div class="input-group-prepend">
-										<span class="input-group-text">Rp.</span>
+										<span class="input-group-text">{{ $currency->symbol }}</span>
 									</div>
-									<input type="text" class="form-control input-price text-right" id="total-cost" name="total_cost" placeholder="Enter total cost" value="{{$data->total_cost?$data->total_cost:0}}" readonly>
+									<input type="text" class="form-control input-price text-right" id="total-cost-{{ $currency->id }}" name="total_cost-{{ $currency->id }}" placeholder="Enter total cost" value="{{$total[$currency->id]}}" readonly>
 								</div>
+								@endif
+								@endforeach
 							</div>
 							<div class="form-group">
 								<label>Approval Status : </label>
@@ -300,8 +303,20 @@ Edit {{ @$menu_name }} Request
 		username = "{{Auth::guard('admin')->user()->name}}",
 		businesstrip = @json($data);
 
+	var currencies = @json($currencies);
+		
+	const formatCountry = (currency) => {
+		console.log(currency);
+		if (!currency.code) { return currency.text; }
+			var $currency = $(
+			'<span class="flag-icon flag-icon-'+ currency.code.toLowerCase() +' flag-icon-squared"></span>' +
+			'&nbsp;&nbsp;&nbsp;<span class="flag-text">'+ currency.text+"</span>"
+			);
+		return $currency;
+  }
+
 	$(function() {					
-		initData()		
+		initData();
 
 		$('.summernote').summernote({
 			height: 145,
@@ -369,6 +384,11 @@ Edit {{ @$menu_name }} Request
 			var type = $(this).val();
 			$(this).parents('.item-depart').find('input[class=depart]').attr('data-type', type);
 		});
+		$('#form-depart').on('change', '.depart-currency', function() {
+			var currency_id = $(this).val();
+			$(this).parents('.item-depart').find('input[class=depart]').attr('data-currency_id', currency_id);
+			sumRate();
+		});
 
 		$('#form-depart').on('keyup', '.depart-description', function() {
 			var description = $(this).val();
@@ -394,6 +414,11 @@ Edit {{ @$menu_name }} Request
 		$('#form-return').on('change', '.returning-type', function() {
 			var type = $(this).val();
 			$(this).parents('.item-return').find('input[class=returning]').attr('data-type', type);
+		});
+		$('#form-return').on('change', '.return-currency', function() {
+			var currency_id = $(this).val();
+			$(this).parents('.item-return').find('input[class=returning]').attr('data-currency_id', currency_id);
+			sumRate();
 		});
 
 		$('#form-return').on('keyup', '.returning-description', function() {
@@ -457,6 +482,11 @@ Edit {{ @$menu_name }} Request
 			$(this).parents('.item-lodging').find('input[class=lodging]').attr('data-days', days);
 			sumRate();
 		});
+		$('#form-lodging').on('change', '.lodging-currency', function() {
+			var currency_id = $(this).val();
+			$(this).parents('.item-lodging').find('input[class=lodging]').attr('data-currency_id', currency_id);
+			sumRate();
+		});
 
 		// FORM OTHERS METHOD
 
@@ -485,6 +515,11 @@ Edit {{ @$menu_name }} Request
 		$('#form-others').on('change', '.others-qty', function() {
 			var qty = $(this).val();
 			$(this).parents('.item-others').find('input[class=others-data]').attr('data-qty', qty);
+			sumRate();
+		});
+		$('#form-others').on('change', '.others-currency', function() {
+			var currency_id = $(this).val();
+			$(this).parents('.item-others').find('input[class=others-data]').attr('data-currency_id', currency_id);
 			sumRate();
 		});
 
@@ -559,24 +594,28 @@ Edit {{ @$menu_name }} Request
 				$.each($('#form-depart > .item-depart').find('input[class=depart]'), function(index, value) {
 					var type = $(this).attr('data-type'),
 						description = $(this).attr('data-description'),
-						price = $(this).attr('data-price');
+						price = $(this).attr('data-price'),
+						currency_id = $(this).attr('data-currency_id');
 
 					departure.push({
 						type: type,
 						description: description,
-						price: price
+						price: price,
+						currency_id: currency_id,
 					});
 				});
 
 				$.each($('#form-return > .item-return').find('input[class=returning]'), function(index, value) {
 					var type = $(this).attr('data-type'),
 						description = $(this).attr('data-description'),
-						price = $(this).attr('data-price');
+						price = $(this).attr('data-price'),
+						currency_id = $(this).attr('data-currency_id');
 
 					returning.push({
 						type: type,
 						description: description,
-						price: price
+						price: price,
+						currency_id: currency_id,
 					});
 				});
 
@@ -597,24 +636,28 @@ Edit {{ @$menu_name }} Request
 				$.each($('#form-lodging > .item-lodging').find('input[class=lodging]'), function(index, value) {
 					var place = $(this).attr('data-place'),
 						price = $(this).attr('data-price'),
-						days = $(this).attr('data-days');
+						days = $(this).attr('data-days'),
+						currency_id = $(this).attr('data-currency_id');
 
 					lodging.push({
 						place: place,
 						price: price,
-						days: days
+						days: days,
+						currency_id: currency_id,
 					});
 				});
 
 				$.each($('#form-others > .item-others').find('input[class=others-data]'), function(index, value) {
 					var description = $(this).attr('data-description'),
 						price = $(this).attr('data-price'),
-						qty = $(this).attr('data-qty');
+						qty = $(this).attr('data-qty'),
+						currency_id = $(this).attr('data-currency_id');
 
 					others.push({
 						description: description,
 						price: price,
-						qty: qty
+						qty: qty,
+						currency_id: currency_id,
 					});
 				});
 
@@ -687,9 +730,11 @@ Edit {{ @$menu_name }} Request
       success: function (response) {
         if(response.status){
           var data = response.data;          
-          employeeRate = data.rate_business_trip;
+          employeeRate = data.rate_business_trip
+					currency	= data.ratecurrency;
           
-          $('input[name=rate]').val(employeeRate * days);
+          $('input[name=rate]').val(employeeRate);
+					$('.currency_rate').text(currency.symbol);
           initInputPrice();
           $('input[name=rate]').trigger('change');
         }else{
@@ -709,8 +754,44 @@ Edit {{ @$menu_name }} Request
 
 	function initSelect2() {
 		$('.select2').select2({
-		allowClear: true
-		});		
+			allowClear: true
+		});
+		
+		$(".currency_id").select2({
+				placeholder: "Sym ...",
+        ajax: {
+            url: "{{route('currency.select')}}",
+            type: 'GET',
+            dataType: 'json',
+            data: function(params) {
+                return {
+                    name: params.term,
+                    page: params.page,
+                    limit: 30,
+                };
+            },
+            processResults: function(data, params) {
+                params.page = params.page || 1;
+                var more = (params.page * 30) < data.total;
+                var option = [];
+                $.each(data.rows, function(index, item) {
+                    option.push({
+                        id: item.id,
+                        text: item.symbol,
+                        code: item.country ? item.country.code : item.country_id,
+                    });
+                });
+                return {
+                    results: option,
+                    pagination: {
+                        more: more,
+                    }
+                };
+            },
+        },
+        templateResult: formatCountry,
+        allowClear: true,
+    });
 	}
 
 	function initRequestVehicle() {
@@ -786,10 +867,12 @@ Edit {{ @$menu_name }} Request
 				var type  = value.type,
 					desc  = value.description,
 					price = value.price?value.price:0,
+					currency_id = value.currency_id ? value.currency_id : null,
+					currency_symbol = value.transport_currency ? value.transport_currency.symbol : null
 					mt    = index>0?'mt-2':'';
 
 				html += `<div class="row ${mt} item-depart">
-                  <input type="hidden" class="depart" name="depart[]" data-type="${type}" data-description="${desc}" data-price="${price}"/>
+                  <input type="hidden" class="depart" name="depart[]" data-type="${type}" data-description="${desc}" data-price="${price}" data-currency_id="${currency_id}" data-currency_symbol="${currency_symbol}"/>
                   <div class="col-md-2">
                     <div class="form-group">                                          
                       <select class="form-control select2 depart-type" name="depart_type" id="depart-type" data-placeholder="Depart" ${disabled}>                        
@@ -807,19 +890,31 @@ Edit {{ @$menu_name }} Request
                     <div class="form-group">                      
                       <div class="input-group">
                         <div class="input-group-prepend">
-                          <span class="input-group-text">
-                            Rp.
-                          </span>
+                          <select name="transport_currency_id" class="form-control select2 currency_id depart-currency" aria-placeholder="Sym" data-currency_id="${currency_id}" data-currency_symbol="${currency_symbol}">
+														<option>Sym</option>
+                          </select>
                         </div>
                         <input type="text" name="depart_price" class="form-control input-price text-right depart-price" id="depart-price" placeholder="Enter price" value="${price}" maxlenght="14" required ${readonly}>
                       </div>
                     </div>
                   </div>                  
-				  ${remove}
+									${remove}
                 </div>`;
 			});			
 			$('#form-depart').append(html);
-			initSelect2();			
+			initSelect2();
+			$.each($('#form-depart > .item-depart').find('.depart-currency'), function(index, value) {
+				var currency_id			= $(this).attr('data-currency_id'),
+						currency_symbol	= $(this).attr('data-currency_symbol');
+				if (currency_id) {
+					$(this).select2('trigger', 'select', {
+						data: {
+							id: currency_id,
+							text: currency_symbol,
+						}
+					});
+				}
+			});
 		}else{
 			addDepart();
 		}		
@@ -836,9 +931,11 @@ Edit {{ @$menu_name }} Request
 				var type  = value.type,
 					desc  = value.description,
 					price = value.price?value.price:0,
+					currency_id = value.currency_id ? value.currency_id : null,
+					currency_symbol = value.transport_currency ? value.transport_currency.symbol : null
 					mt    = index>0?'mt-2':'';
 				html += `<div class="row ${mt} item-return">
-                  <input type="hidden" class="returning" name="returning[]" data-type="${type}" data-description="${desc}" data-price="${price}"/>
+                  <input type="hidden" class="returning" name="returning[]" data-type="${type}" data-description="${desc}" data-price="${price}" data-currency_id="${currency_id}" data-currency_symbol="${currency_symbol}"/>
                   <div class="col-md-2">
                     <div class="form-group">                                        
                       <select class="form-control select2 returning-type" id=returning-type"" name="returning_type[]" data-placeholder="Return" ${disabled}>
@@ -856,9 +953,9 @@ Edit {{ @$menu_name }} Request
                     <div class="form-group">                      
                       <div class="input-group">
                         <div class="input-group-prepend">
-                          <span class="input-group-text">
-                            Rp.
-                          </span>
+                          <select name="return_currency_id" class="form-control select2 currency_id return-currency" aria-placeholder="Sym" data-currency_id="${currency_id}" data-currency_symbol="${currency_symbol}">
+														<option>Sym</option>
+                          </select>
                         </div>
                         <input type="text" class="form-control input-price text-right returning-price" id="returning-price" name="returning_price[]" placeholder="Enter price" maxlength="14" value="${price}" required ${readonly}>
                       </div>
@@ -868,6 +965,19 @@ Edit {{ @$menu_name }} Request
                 </div>`;
 			});
 			$('#form-return').append(html);
+			initSelect2();
+			$.each($('#form-return > .item-return').find('.return-currency'), function(index, value) {
+				var currency_id			= $(this).attr('data-currency_id'),
+						currency_symbol	= $(this).attr('data-currency_symbol');
+				if (currency_id) {
+					$(this).select2('trigger', 'select', {
+						data: {
+							id: currency_id,
+							text: currency_symbol,
+						}
+					});
+				}
+			});
 		}else{
 			addReturn();
 		}
@@ -971,14 +1081,16 @@ Edit {{ @$menu_name }} Request
 								<button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
 							</div>
 						  </div>`;
-			$.each(lodgings, function (index, value) { 
+			$.each(lodgings, function (index, value) {
 				var place = value.place,
 					price = value.price?value.price:0,
 					days  = value.night?value.night:1,
+					currency_id = value.currency_id ? value.currency_id : null,
+					currency_symbol = value.lodging_currency ? value.lodging_currency.symbol : null
 					mt    = index>0?'mt-2':'';
 
 				html  += `<div class="row ${mt} item-lodging">
-                  <input type="hidden" class="lodging" name="lodging[]" data-place="${place}" data-price="${price}" data-days="${days}">
+                  <input type="hidden" class="lodging" name="lodging[]" data-place="${place}" data-price="${price}" data-days="${days}" data-currency_id="${currency_id}" data-currency_symbol="${currency_symbol}">
                   <div class="col-md-6">
                     <div class="form-group">                      
                     <input type="text" class="form-control place-lodging" id="place-loging" name="place_lodging" placeholder="Enter where lodging" value="${place}" required ${readonly}>
@@ -987,9 +1099,9 @@ Edit {{ @$menu_name }} Request
                   <div class="col-md-3">
                     <div class="input-group">
                       <div class="input-group-prepend">
-                        <span class="input-group-text">
-                          Rp.
-                        </span>
+												<select name="lodging_currency_id" class="form-control select2 currency_id lodging-currency" aria-placeholder="Sym" data-currency_id="${currency_id}" data-currency_symbol="${currency_symbol}">
+													<option>Sym</option>
+												</select>
                       </div>
                       <input type="text" class="form-control input-price text-right price-lodging" id="price-lodging" name="price_lodging" placeholder="Enter price" value="${price}" maxlength="14" required ${readonly}>
                     </div>
@@ -1001,6 +1113,19 @@ Edit {{ @$menu_name }} Request
                 </div>`;				
 			});
 			$('#form-lodging').append(html);
+			initSelect2();
+			$.each($('#form-lodging > .item-lodging').find('.lodging-currency'), function(index, value) {
+				var currency_id			= $(this).attr('data-currency_id'),
+						currency_symbol	= $(this).attr('data-currency_symbol');
+				if (currency_id) {
+					$(this).select2('trigger', 'select', {
+						data: {
+							id: currency_id,
+							text: currency_symbol,
+						}
+					});
+				}
+			});
 		}else{
 			addLodging();
 		}
@@ -1017,10 +1142,12 @@ Edit {{ @$menu_name }} Request
 				var desc   = value.description,
 					price  = value.price?value.price:0,
 					qty    = value.qty?value.qty:1,
+					currency_id = value.currency_id ? value.currency_id : null,
+					currency_symbol = value.others_currency ? value.others_currency.symbol : null
 					mt     = index>0?'mt-2':'';
 
 				 html += `<div class="row ${mt} item-others">
-                  <input type="hidden" class="others-data" name="others_data[]" data-description="${desc}" data-price="${price}" data-qty="${qty}">
+                  <input type="hidden" class="others-data" name="others_data[]" data-description="${desc}" data-price="${price}" data-qty="${qty}" data-currency_id="${currency_id}" data-currency_symbol="${currency_symbol}">
                   <div class="col-md-6">
                     <div class="form-group">
                       <input type="text" class="form-control others-description" id="others-description" name="others_description" placeholder="Enter description" value="${desc}" required ${readonly}>
@@ -1029,9 +1156,9 @@ Edit {{ @$menu_name }} Request
                   <div class="col-md-3">
                     <div class="input-group">
                       <div class="input-group-prepend">
-                        <span class="input-group-text">
-                          Rp.
-                        </span>
+												<select name="others_currency_id" class="form-control select2 currency_id others-currency" aria-placeholder="Sym" data-currency_id="${currency_id}" data-currency_symbol="${currency_symbol}">
+													<option>Sym</option>
+												</select>
                       </div>
                       <input type="text" class="form-control input-price text-right others-price" id="others-price" name="others_price" placeholder="Enter price" value="${price}" maxlength="14" required ${readonly}>
                     </div>
@@ -1042,7 +1169,22 @@ Edit {{ @$menu_name }} Request
                   ${remove}
                 </div>`;
 			});
-			$('#form-others').append(html)
+			$('#form-others').append(html);
+			initSelect2();
+			$.each($('#form-others > .item-others').find('.others-currency'), function(index, value) {
+				var currency_id			= $(this).attr('data-currency_id'),
+						currency_symbol	= $(this).attr('data-currency_symbol');
+				if (currency_id) {
+					$(this).select2('trigger', 'select', {
+						data: {
+							id: currency_id,
+							text: currency_symbol,
+						}
+					});
+				}
+			});
+		} else {
+			addOthers();
 		}
 	}
 
@@ -1066,7 +1208,7 @@ Edit {{ @$menu_name }} Request
 
 	function addDepart() {
 		var html = `<div class="row mt-2 item-depart">
-                  <input type="hidden" class="depart" name="depart[]" data-type="flight" data-description="" data-price="0"/>
+                  <input type="hidden" class="depart" name="depart[]" data-type="flight" data-description="" data-price="0" data-currency_id="" data-currency_symbol=""/>
                   <div class="col-md-2">
                     <div class="form-group">                                          
                       <select class="form-control select2 depart-type" name="depart_type" data-placeholder="Depart">                        
@@ -1084,9 +1226,9 @@ Edit {{ @$menu_name }} Request
                     <div class="form-group">                      
                       <div class="input-group">
                         <div class="input-group-prepend">
-                          <span class="input-group-text">
-                            Rp.
-                          </span>
+													<select name="depart_currency_id" class="form-control select2 currency_id depart-currency" aria-placeholder="Sym">
+														<option value="">Sym</option>
+													</select>
                         </div>
                         <input type="text" name="depart_price" class="form-control input-price text-right depart-price" placeholder="Enter price" value="0" maxlenght="14" required>
                       </div>
@@ -1103,9 +1245,47 @@ Edit {{ @$menu_name }} Request
 		initInputPrice();
 	}
 
+	function addLodging() {
+    var length = $('#form-lodging').find('.item-lodging').length,
+      mt = '';
+    if (length > 0) {
+      mt = 'mt-2'
+    }
+
+    var html = `<div class="row ${mt} item-lodging">
+                  <input type="hidden" class="lodging" name="lodging[]" data-place="" data-price="0" data-days="1" data-currency_id="" data-currency_symbol="">
+                  <div class="col-md-6">
+                    <div class="form-group">                      
+                    <input type="text" class="form-control place-lodging" id="place-loging" name="place_lodging" placeholder="Enter where lodging" required>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <select name="lodging_currency_id" class="form-control select2 currency_id lodging-currency" aria-placeholder="Sym">
+                          <option value="">Sym</option>
+                        </select>
+                      </div>
+                      <input type="text" class="form-control input-price text-right price-lodging" id="price-lodging" name="price_lodging" placeholder="Enter price" value="0" maxlength="14" required>
+                    </div>
+                  </div>
+                  <div class="col-md-2">
+                  <input type="number" class="form-control text-right days-lodging" id="days-lodging" name="days_lodging" placeholder="Enter qty" value="1">
+                  </div>
+                  <div class="col-md-1">
+                    <div class="form-group" style="margin-top: 2px;">
+                      <button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
+                    </div>
+                  </div>
+                </div>`;
+    $('#form-lodging').append(html);
+    initSelect2();
+    initInputPrice();
+  }
+
 	function addReturn() {
 		var html = `<div class="row mt-2 item-return">
-                  <input type="hidden" class="returning" name="returning[]" data-type="others" data-description="" data-price="0"/>
+                  <input type="hidden" class="returning" name="returning[]" data-type="others" data-description="" data-price="0" data-currency_id="" data-currency_symbol=""/>
                   <div class="col-md-2">
                     <div class="form-group">                                        
                       <select class="form-control select2 returning-type" name="returning_type" data-placeholder="Return">
@@ -1123,9 +1303,9 @@ Edit {{ @$menu_name }} Request
                     <div class="form-group">                      
                       <div class="input-group">
                         <div class="input-group-prepend">
-                          <span class="input-group-text">
-                            Rp.
-                          </span>
+													<select name="return_currency_id" class="form-control select2 currency_id return-currency" aria-placeholder="Sym">
+														<option value="">Sym</option>
+													</select>
                         </div>
                         <input type="text" class="form-control input-price text-right returning-price" name="returning_price" placeholder="Enter price" value="0" maxlength="14" required>
                       </div>
@@ -1208,9 +1388,9 @@ Edit {{ @$menu_name }} Request
 
 	}
 
-	function addLodging() {
+	function othersLodging() {
 		var html = `<div class="row mt-2 item-lodging">
-                  <input type="hidden" class="lodging" name="lodging[]" data-place="" data-price="0" data-days="1">
+                  <input type="hidden" class="lodging" name="lodging[]" data-place="" data-price="0" data-days="1" data-currency_id="" data-currency_symbol="">
                   <div class="col-md-6">
                     <div class="form-group">                      
                     <input type="text" class="form-control place-lodging" name="place_lodging" placeholder="Enter where lodging" required>
@@ -1219,9 +1399,9 @@ Edit {{ @$menu_name }} Request
                   <div class="col-md-3">
                     <div class="input-group">
                       <div class="input-group-prepend">
-                        <span class="input-group-text">
-                          Rp.
-                        </span>
+                        <select name="others_currency_id" class="form-control select2 currency_id others-currency" aria-placeholder="Sym">
+                          <option value="">Sym</option>
+                        </select>
                       </div>
                       <input type="text" class="form-control input-price text-right price-lodging" name="price_lodging" placeholder="Enter price" value="0" maxlength="14" required>
                     </div>
@@ -1246,7 +1426,7 @@ Edit {{ @$menu_name }} Request
 			mt = 'mt-2'
 		}
 		var html = `<div class="row ${mt} item-others">
-                  <input type="hidden" class="others-data" name="others_data[]" data-description="" data-price="0" data-qty="1">
+                  <input type="hidden" class="others-data" name="others_data[]" data-description="" data-price="0" data-qty="1" data-currency_id="" data-currency_symbol="">
                   <div class="col-md-6">
                     <div class="form-group">
                       <input type="text" class="form-control others-description" name="others_description" placeholder="Enter description" required>
@@ -1255,9 +1435,9 @@ Edit {{ @$menu_name }} Request
                   <div class="col-md-3">
                     <div class="input-group">
                       <div class="input-group-prepend">
-                        <span class="input-group-text">
-                          Rp.
-                        </span>
+                        <select name="others_currency_id" class="form-control select2 currency_id others-currency" aria-placeholder="Sym">
+                          <option value="">Sym</option>
+                        </select>
                       </div>
                       <input type="text" class="form-control input-price text-right others-price" name="others_price" placeholder="Enter price" value="0" maxlength="14" required>
                     </div>
@@ -1272,44 +1452,61 @@ Edit {{ @$menu_name }} Request
                   </div>
                 </div>`;
 		$('#form-others').append(html);
+		initSelect2();
 		initInputPrice();
 	}
 
 	function sumRate() {
-		var total 	  = 0,
+		var total 	  = [],
 			departure = 0,
 			returning = 0,
 			lodging   = 0,
 			others 	  = 0,
 			rate 	  = intCurrency($('input[name=rate]').val());
 
-		$.each($('#form-depart > .item-depart').find('input[class=depart]'), function(index, value) {
-			var price = intCurrency($(this).attr('data-price'));
-			departure += price;
+		$.each(currencies, function(index, value) {
+			total[value.id]	= 0;
+			$.each($('#form-depart > .item-depart').find('input[class=depart]'), function(indexDepart, valueDepart) {
+				var price = intCurrency($(this).attr('data-price'));
+				var currency_id = $(this).attr('data-currency_id');
+				if (value.id == currency_id) {
+					total[value.id]	+= price;
+				}
+			});
+	
+			$.each($('#form-return > .item-return').find('input[class=returning]'), function(indexReturn, valueReturn) {
+				var price = intCurrency($(this).attr('data-price'));
+				var currency_id = $(this).attr('data-currency_id');
+				if (value.id == currency_id) {
+					total[value.id]	+= price;
+				}
+			});
+	
+			$.each($('#form-lodging > .item-lodging').find('input[class=lodging]'), function(indexLodging, valueLodging) {
+				var price = intCurrency($(this).attr('data-price')),
+					days  = intCurrency($(this).attr('data-days')),
+					subs  = (price*days);	
+				var currency_id = $(this).attr('data-currency_id');
+				if (value.id == currency_id) {
+					total[value.id]	+= subs;
+				}
+			});
+	
+			$.each($('#form-others > .item-others').find('input[class=others-data]'), function(indexOthers, valueOthers) {
+				var price = intCurrency($(this).attr('data-price')),
+					qty   = intCurrency($(this).attr('data-qty')),
+					subs  = (price*qty);
+				others += subs;
+				var currency_id = $(this).attr('data-currency_id');
+				if (value.id == currency_id) {
+					total[value.id]	+= subs;
+				}
+			});
+			$(`input[name=total_cost-${value.id}]`).val(total[value.id]);
 		});
 
-		$.each($('#form-return > .item-return').find('input[class=returning]'), function(index, value) {
-			var price = intCurrency($(this).attr('data-price'));
-			returning += price;
-		});
+		// total = departure + returning + lodging + others + rate;
 
-		$.each($('#form-lodging > .item-lodging').find('input[class=lodging]'), function(index, value) {
-			var price = intCurrency($(this).attr('data-price')),
-				days  = intCurrency($(this).attr('data-days')),
-				subs  = (price*days);	
-			lodging += subs;				
-		});
-
-		$.each($('#form-others > .item-others').find('input[class=others-data]'), function(index, value) {
-			var price = intCurrency($(this).attr('data-price')),
-				qty   = intCurrency($(this).attr('data-qty')),
-				subs  = (price*qty);
-			others += subs;
-		});
-
-		total = departure + returning + lodging + others + rate;		
-
-		$('input[name=total_cost]').val(total);
 		initInputPrice();
 	}
 
