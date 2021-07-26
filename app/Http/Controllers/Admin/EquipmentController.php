@@ -4,21 +4,21 @@ namespace App\Http\Controllers\Admin;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Models\Area;
+use App\Models\Equipment;
 use App\Models\Menu;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
 
-class AreaController extends Controller
+class EquipmentController extends Controller
 {
-    protected $actionmenu;
     function __construct() {
-        $menu               = Menu::GetByRoute('area')->first();
+        $menu               = Menu::GetByRoute('equipment')->first();
         $parent             = Menu::parent($menu->parent_id)->first();
         View::share('menu_name', $menu->menu_name);
         View::share('parent_name', $parent->menu_name);
-        View::share('menu_active', url('admin/area'));
+        View::share('menu_active', url('admin/equipment'));
         $this->middleware('accessmenu', ['except' => ['select']]);
     }
     /**
@@ -29,26 +29,24 @@ class AreaController extends Controller
      */
     public function index(Request $request)
     {
-        $this->actionmenu   = $request->actionmenu;
         if (in_array('read', $request->actionmenu)) {
-            return view('admin.area.index');
-        } else {
-            abort(403);
+            return view('admin.equipment.index');
         }
+        abort(403);
     }
 
     /**
      * Show the form for creating a new resource.
      *
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function create(Request $request)
     {
         if (in_array('create', $request->actionmenu)) {
-            return view('admin.area.create');
-        } else {
-            abort(403);
+            return view('admin.equipment.create');
         }
+        abort(403);
     }
 
     /**
@@ -60,8 +58,8 @@ class AreaController extends Controller
     public function store(Request $request)
     {
         $validator      = Validator::make($request->all(), [
-            'site_id'   => 'required',
-            'area'      => 'required',
+            'area_id'       => 'required',
+            'equipment_name'=> 'required',
         ]);
 
         if ($validator->fails()) {
@@ -74,11 +72,11 @@ class AreaController extends Controller
         DB::beginTransaction();
         try {
             $data       = [
-                'name'      => $request->area,
-                'site_id'   => $request->site_id,
-                'remark'    => $request->remark,
+                'equipment_name'    => $request->equipment_name,
+                'area_id'           => $request->area_id,
+                'remark'            => $request->remark,
             ];
-            $area       = Area::create($data);
+            $area       = Equipment::create($data);
         } catch (\Illuminate\Database\QueryException $ex) {
             DB::rollBack();
             return response()->json([
@@ -90,7 +88,7 @@ class AreaController extends Controller
         return response()->json([
             'status'    => true,
             'message'   => "Success create data",
-            'results'   => route('area.index'),
+            'results'   => route('equipment.index'),
         ], 200);
     }
 
@@ -109,19 +107,19 @@ class AreaController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function edit(Request $request, $id)
     {
         if (in_array('update', $request->actionmenu)) {
-            $area       = Area::find($id);
-            if ($area) {
-                return view('admin.area.edit', compact('area'));
+            $equipment  = Equipment::with(['area', 'area.site'])->findOrFail($id);
+            if ($equipment) {
+                return view('admin.equipment.edit', compact('equipment'));
             }
             abort(404);
-        } else {
-            abort(403);
         }
+        abort(403);
     }
 
     /**
@@ -134,8 +132,8 @@ class AreaController extends Controller
     public function update(Request $request, $id)
     {
         $validator      = Validator::make($request->all(), [
-            'site_id'   => 'required',
-            'area'      => 'required',
+            'area_id'       => 'required',
+            'equipment_name'=> 'required',
         ]);
 
         if ($validator->fails()) {
@@ -147,11 +145,11 @@ class AreaController extends Controller
 
         DB::beginTransaction();
         try {
-            $area           = Area::findOrFail($id);
-            $area->name     = $request->area;
-            $area->site_id  = $request->site_id;
-            $area->remark   = $request->remark;
-            $area->save();
+            $equipment                  = Equipment::findOrFail($id);
+            $equipment->equipment_name  = $request->equipment_name;
+            $equipment->area_id         = $request->area_id;
+            $equipment->remark          = $request->remark;
+            $equipment->save();
         } catch (\Illuminate\Database\QueryException $th) {
             DB::rollBack();
             return response()->json([
@@ -163,7 +161,7 @@ class AreaController extends Controller
         return response()->json([
             'status'    => true,
             'message'   => "Success update data",
-            'results'   => route('area.index'),
+            'results'   => route('equipment.index'),
         ], 200);
     }
 
@@ -176,11 +174,11 @@ class AreaController extends Controller
     public function destroy($id)
     {
         try {
-            $area   = Area::destroy($id);
-        } catch (\Illuminate\Database\QueryException $th) {
+            $equipment  = Equipment::destroy($id);
+        } catch (\Illuminate\Database\QueryException $ex) {
             return response()->json([
                 'status'    => false,
-                'message'   => "Error delete data {$th->errorInfo[2]}",
+                'message'   => "Error delete data {$ex->errorInfo[2]}",
             ], 400);
         }
         return response()->json([
@@ -190,9 +188,9 @@ class AreaController extends Controller
     }
 
     /**
-     * Define method to get data and show in datatable
+     * The function to get data to show in datatable index
      *
-     * @param Request $request
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function read(Request $request)
@@ -202,13 +200,18 @@ class AreaController extends Controller
         $query          = $request->search['value'];
         $sort           = $request->columns[$request->order[0]['column']]['data'];
         $dir            = $request->order[0]['dir'];
-        $area           = strtoupper($request->area);
+        $equipment      = strtoupper($request->asset);
+        $area_id        = $request->area_id;
         $site_id        = $request->site_id;
 
-        // Query Data
-        $queryData      = Area::with(['site'])->whereRaw("upper(name) like '%$area%'");
+        $queryData      = Equipment::with(['area', 'area.site'])->whereRaw("upper(equipment_name) like '%$equipment%'");
+        if ($area_id) {
+            $queryData->where('area_id', $area_id);
+        }
         if ($site_id) {
-            $queryData->where('site_id', $site_id);
+            $queryData->whereHas('area', function (Builder $q) use ($site_id) {
+                $q->where('site_id', $site_id);
+            });
         }
 
         $row            = clone $queryData;
@@ -217,12 +220,12 @@ class AreaController extends Controller
         $queryData->offset($start);
         $queryData->limit($length);
         $queryData->orderBy($sort, $dir);
-        $areas          = $queryData->get();
+        $equipments     = $queryData->get();
 
         $data           = [];
-        foreach ($areas as $key => $area) {
-            $area->no       = ++$start;
-            $data[]         = $area;
+        foreach ($equipments as $key => $equipment) {
+            $equipment->no  = ++$start;
+            $data[]         = $equipment;
         }
         return response()->json([
             'draw'              => $request->draw,
@@ -233,39 +236,13 @@ class AreaController extends Controller
     }
 
     /**
-     * Define method to get data and show in select2
+     * The function to get data to select2
      *
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function select(Request $request)
     {
-        $start  = $request->page ? $request->page - 1 : 0;
-        $length = $request->limit;
-        $name   = strtoupper($request->name);
-        $site_id= $request->site_id;
-
-        // Count Data
-        $query  = Area::with(['site'])->whereRaw("upper(name) like '%$name%'");
-        if ($site_id) {
-            $query->where('site_id', $site_id);
-        }
-
-        $row    = clone $query;
-        $recordsTotal   = $row->count();
-
-        $query->offset($start);
-        $query->limit($length);
-        $areas  = $query->get();
-
-        $data = [];
-        foreach ($areas as $area) {
-            $area->no = ++$start;
-            $data[] = $area;
-        }
-        return response()->json([
-            'total'     => $recordsTotal,
-            'rows'      => $data,
-        ], 200);
+        # code...
     }
 }

@@ -305,5 +305,10 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/area/read', 'Admin\AreaController@read')->name('area.read');
         Route::get('/area/select', 'Admin\AreaController@select')->name('area.select');
         Route::resource('/area', 'Admin\AreaController');
+
+        // Equipment
+        Route::get('/equipment/read', 'Admin\EquipmentController@read')->name('equipment.read');
+        Route::get('/equipment/select', 'Admin\EquipmentController@select')->name('equipment.select');
+        Route::resource('/equipment', 'Admin\EquipmentController');
     });
 });

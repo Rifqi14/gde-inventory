@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
-class Area extends Model
+class Equipment extends Model
 {
     /**
      * The attributes that aren't mass assignable.
@@ -15,43 +15,33 @@ class Area extends Model
     protected $guarded = [];
 
     /**
-     * Indicates if the model should be timestamped.
+     * The table associated with the model.
      *
-     * @var bool
+     * @var string
      */
-    public $timestamps = true;
+    protected $table = 'equipment';
 
     /**
-     * The function to define relation with Equipment Model
+     * The function to define relation with Area Model.
      *
      * @return \Illuminate\Database\Query\Builder
      */
-    public function equipments()
+    public function area()
     {
-        return $this->hasMany('App\Models\Equipment', 'area_id', 'id');
-    }
-
-    /**
-     * The function to define relation with Site Model
-     *
-     * @return \Illuminate\Database\Query\Builder
-     */
-    public function site()
-    {
-        return $this->belongsTo('App\Models\Site', 'site_id', 'id');
+        return $this->belongsTo('App\Models\Area', 'area_id', 'id');
     }
 
     /**
      * The "booting" method of the model.
      *
-     * @return \Illuminate\Database\Query\Builder
+     * @return void
      */
     protected static function boot()
     {
         parent::boot();
         
         static::creating(function ($model) {
-            $model->create_user     = Auth::user()->id;
+            $model->created_user    = Auth::user()->id;
             $model->updated_user    = Auth::user()->id;
         });
 
