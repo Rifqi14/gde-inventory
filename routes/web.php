@@ -300,5 +300,10 @@ Route::group(['prefix' => 'admin'], function () {
         // Salary Report Detail
         Route::get('/salarydetail/read', 'Admin\SalaryReportDetailController@read')->name('salarydetail.read');
         Route::resource('/salarydetail', 'Admin\SalaryReportDetailController');
+
+        // Working Area
+        Route::get('/area/read', 'Admin\AreaController@read')->name('area.read');
+        Route::get('/area/select', 'Admin\AreaController@select')->name('area.select');
+        Route::resource('/area', 'Admin\AreaController');
     });
 });
