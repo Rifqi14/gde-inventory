@@ -4,20 +4,20 @@ namespace App\Http\Controllers\Admin;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Models\DocumentType;
 use App\Models\Menu;
+use App\Models\UnitCode;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
 
-class DocumentTypeController extends Controller
+class UnitCodeController extends Controller
 {
     function __construct() {
-        $menu       = Menu::GetByRoute('documenttype')->first();
+        $menu       = Menu::GetByRoute('unitcode')->first();
         $parent     = Menu::parent($menu->parent_id)->first();
         View::share('menu_name', $menu->menu_name);
         View::share('parent_name', $parent->menu_name);
-        View::share('menu_active', url('admin/documenttype'));
+        View::share('menu_active', url('admin/unitcode'));
         $this->middleware('accessmenu', ['except' => ['select']]);
     }
 
@@ -30,7 +30,7 @@ class DocumentTypeController extends Controller
     public function index(Request $request)
     {
         if (in_array('create', $request->actionmenu)) {
-            return view('admin.documenttype.index');
+            return view('admin.unitcode.index');
         }
         abort(403);
     }
@@ -44,7 +44,7 @@ class DocumentTypeController extends Controller
     public function create(Request $request)
     {
         if (in_array('create', $request->actionmenu)) {
-            return view('admin.documenttype.create');
+            return view('admin.unitcode.create');
         }
         abort(403);
     }
@@ -60,6 +60,7 @@ class DocumentTypeController extends Controller
         $validator      = Validator::make($request->all(), [
             'code'  => 'required',
             'name'  => 'required',
+            'organization_id'   => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -74,8 +75,9 @@ class DocumentTypeController extends Controller
             $data   = [
                 'code'  => $request->code,
                 'name'  => $request->name,
+                'organization_code_id'  => $request->organization_id,
             ];
-            $document   = DocumentType::create($data);
+            $unitcode   = UnitCode::create($data);
         } catch (\Illuminate\Database\QueryException $ex) {
             DB::rollBack();
             return response()->json([
@@ -87,7 +89,7 @@ class DocumentTypeController extends Controller
         return response()->json([
             'status'    => true,
             'message'   => "Success create data",
-            'results'   => route('documenttype.index'),
+            'results'   => route('unitcode.index'),
         ], 200);
     }
 
@@ -112,9 +114,9 @@ class DocumentTypeController extends Controller
     public function edit(Request $request, $id)
     {
         if (in_array('create', $request->actionmenu)) {
-            $document   = DocumentType::find($id);
-            if ($document) {
-                return view('admin.documenttype.edit', compact('document'));
+            $unitcode   = UnitCode::find($id);
+            if ($unitcode) {
+                return view('admin.unitcode.edit', compact('unitcode'));
             }
             abort(404);
         }
@@ -144,10 +146,11 @@ class DocumentTypeController extends Controller
 
         DB::beginTransaction();
         try {
-            $document   = DocumentType::findOrFail($id);
-            $document->code     = $request->code;
-            $document->name     = $request->name;
-            $document->save();
+            $unitcode   = UnitCode::findOrFail($id);
+            $unitcode->code     = $request->code;
+            $unitcode->name     = $request->name;
+            $unitcode->organization_code_id     = $request->organization_id;
+            $unitcode->save();
         } catch (\Illuminate\Database\QueryException $ex) {
             DB::rollBack();
             return response()->json([
@@ -159,7 +162,7 @@ class DocumentTypeController extends Controller
         return response()->json([
             'status'    => true,
             'message'   => "Success update data",
-            'results'   => route('documenttype.index'),
+            'results'   => route('unitcode.index'),
         ], 200);
     }
 
@@ -172,7 +175,7 @@ class DocumentTypeController extends Controller
     public function destroy($id)
     {
         try {
-            $document   = DocumentType::destroy($id);
+            $unitcode   = UnitCode::destroy($id);
         } catch (\Illuminate\Database\QueryException $ex) {
             return response()->json([
                 'status'    => false,
@@ -200,9 +203,13 @@ class DocumentTypeController extends Controller
         $dir            = $request->order[0]['dir'];
         $code           = strtoupper($request->code);
         $name           = strtoupper($request->name);
+        $organization_id= $request->organization_id;
 
         // Query Data
-        $queryData      = DocumentType::whereRaw("upper(code) like '%$code%'")->whereRaw("upper(name) like '%$name%'");
+        $queryData      = UnitCode::with(['organization'])->whereRaw("upper(code) like '%$code%'")->whereRaw("upper(name) like '%$name%'");
+        if ($organization_id) {
+            $queryData->where('organization_code_id', $organization_id);
+        }
 
         $row            = clone $queryData;
         $recordsTotal   = $row->count();
@@ -210,12 +217,12 @@ class DocumentTypeController extends Controller
         $queryData->offset($start);
         $queryData->limit($length);
         $queryData->orderBy($sort, $dir);
-        $documents      = $queryData->get();
+        $units      = $queryData->get();
 
         $data           = [];
-        foreach ($documents as $key => $document) {
-            $document->no   = ++$start;
-            $data[]         = $document;
+        foreach ($units as $key => $unit) {
+            $unit->no   = ++$start;
+            $data[]         = $unit;
         }
         return response()->json([
             'draw'              => $request->draw,
@@ -238,19 +245,19 @@ class DocumentTypeController extends Controller
         $name   = strtoupper($request->name);
 
         // Count Data
-        $query  = DocumentType::whereRaw("upper(name) like '%$name%'");
+        $query  = UnitCode::whereRaw("upper(name) like '%$name%'");
 
         $row    = clone $query;
         $recordsTotal   = $row->count();
 
         $query->offset($start);
         $query->limit($length);
-        $documents  = $query->get();
+        $organizations  = $query->get();
 
         $data = [];
-        foreach ($documents as $document) {
-            $document->no   = ++$start;
-            $data[]         = $document;
+        foreach ($organizations as $organization) {
+            $organization->no   = ++$start;
+            $data[]         = $organization;
         }
         return response()->json([
             'total'     => $recordsTotal,
