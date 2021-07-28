@@ -310,5 +310,30 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/equipment/read', 'Admin\EquipmentController@read')->name('equipment.read');
         Route::get('/equipment/select', 'Admin\EquipmentController@select')->name('equipment.select');
         Route::resource('/equipment', 'Admin\EquipmentController');
+
+        // Document Center
+        Route::get('/documentcenter/read', 'Admin\DocumentCenterController@read')->name('documentcenter.read');
+        Route::get('/documentcenter/select', 'Admin\DocumentCenterController@select')->name('documentcenter.select');
+        Route::get('/documentcenter/{page}/', 'Admin\DocumentCenterController@index')->name('documentcenter.index');
+        Route::get('/documentcenter/{page}/create/{category}', 'Admin\DocumentCenterController@create')->name('documentcenter.create');
+        Route::resource('/documentcenter', 'Admin\DocumentCenterController')->except([
+            'index',
+            'create',
+        ]);
+
+        // Document Type
+        Route::get('/documenttype/read', 'Admin\DocumentTypeController@read')->name('documenttype.read');
+        Route::get('/documenttype/select', 'Admin\DocumentTypeController@select')->name('documenttype.select');
+        Route::resource('/documenttype', 'Admin\DocumentTypeController');
+
+        // Organization Code
+        Route::get('/organization/read', 'Admin\OrganizationCodeController@read')->name('organization.read');
+        Route::get('/organization/select', 'Admin\OrganizationCodeController@select')->name('organization.select');
+        Route::resource('/organization', 'Admin\OrganizationCodeController');
+
+        // Unit Code
+        Route::get('/unitcode/read', 'Admin\UnitCodeController@read')->name('unitcode.read');
+        Route::get('/unitcode/select', 'Admin\UnitCodeController@select')->name('unitcode.select');
+        Route::resource('/unitcode', 'Admin\UnitCodeController');
     });
 });
