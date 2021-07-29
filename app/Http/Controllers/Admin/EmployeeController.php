@@ -677,7 +677,7 @@ class EmployeeController extends Controller
 
     public function dig(Request $request)
     {
-        $query = Employee::find($request->employee_id);
+        $query = Employee::with(['ratecurrency'])->find($request->employee_id);
 
         if($query){
             $result = [

@@ -10,6 +10,7 @@ use App\Models\BusinessTripLodging;
 use App\Models\BusinessTripOther;
 use App\Models\BusinessTripTransportation;
 use App\Models\BusinessTripVehicle;
+use App\Models\Currency;
 use App\Models\Menu;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -70,13 +71,19 @@ class BusinessTripDeclarationController extends Controller
         $totalCost          = str_replace('.','',$request->total_cost);
 
         // Count Data
-        $query      = BusinessTripDeclaration::with(['declarationbt']);
+        $query      = BusinessTripDeclaration::with([
+            'declarationbt.departs.transportCurrency',
+            'declarationbt.returns.transportCurrency',
+            'declarationbt.lodgings.lodgingCurrency',
+            'declarationbt.others.othersCurrency',
+            'declarationbt.issuedby.employees',
+        ]);
         if ($businessTripNumber) {
             $query->where('declaration_number', $businessTripNumber);
         }
 
         $rows       = clone $query;
-        $total      = $rows->count();
+        $recordsFiltered      = $rows->count();
 
         // Select Pagination
         $query->offset($start);
@@ -86,15 +93,47 @@ class BusinessTripDeclarationController extends Controller
 
         $data       = [];
         foreach ($declarations as $key => $declaration) {
+            $currencies = Currency::all();
+            $total  = [];
+            foreach ($currencies as $key => $currency) {
+                $total[$currency->id]['price']  = 0;
+                $total[$currency->id]['symbol']  = $currency->symbol;
+                foreach ($declaration->declarationbt->departs as $key => $depart) {
+                    if ($currency->id == $depart->currency_id) {
+                        $total[$currency->id]['price']    += $depart->price;
+                    }
+                }
+                foreach ($declaration->declarationbt->returns as $key => $depart) {
+                    if ($currency->id == $depart->currency_id) {
+                        $total[$currency->id]['price']    += $depart->price;
+                    }
+                }
+                foreach ($declaration->declarationbt->lodgings as $key => $depart) {
+                    if ($currency->id == $depart->currency_id) {
+                        $total[$currency->id]['price']    += $depart->price;
+                    }
+                }
+                foreach ($declaration->declarationbt->others as $key => $depart) {
+                    if ($currency->id == $depart->currency_id) {
+                        $total[$currency->id]['price']    += $depart->price;
+                    }
+                }
+                if ($declaration->declarationbt->issuedby->employees) {
+                    if ($currency->id == $declaration->declarationbt->issuedby->employees->rate_currency_id) {
+                        $total[$currency->id]['price']    += $declaration->declarationbt->issuedby->employees->rate_business_trip;
+                    }
+                }
+            }
             $declaration->no        = ++$start;
             $declaration->rate      = $declaration->declarationbt->total_cost;
+            $declaration->total     = $total;
             $declaration->schedule  = date('d/m/Y',strtotime($declaration->declarationbt->departure_date)).' - '.date('d/m/Y',strtotime($declaration->declarationbt->arrived_date));
             $data[]                 = $declaration;
         }
         return response()->json([
             'draw' => $draw,
-            'recordsTotal' => $total,
-            'recordsFiltered' => $total,
+            'recordsTotal' => $recordsFiltered,
+            'recordsFiltered' => $recordsFiltered,
             'data' => $data
         ], 200);
     }

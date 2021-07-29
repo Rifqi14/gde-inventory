@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class BusinessTripOther extends Model
+class DocumentType extends Model
 {
     /**
      * The attributes that aren't mass assignable.
@@ -12,9 +12,4 @@ class BusinessTripOther extends Model
      * @var array
      */
     protected $guarded = [];
-
-    public function othersCurrency()
-    {
-        return $this->belongsTo('App\Models\Currency', 'currency_id', 'id');
-    }
 }
