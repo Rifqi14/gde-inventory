@@ -12,8 +12,12 @@ use App\Models\Menu;
 use App\Models\GoodsIssue;
 use App\Models\GoodsIssueProduct;
 use App\Models\GoodsIssueDocument;
+use App\Models\GoodsIssueSerial;
+use App\Models\ProductBorrowing;
 use App\Models\ProductConsumableDetail;
 use App\Models\ProductTransferDetail;
+use App\Models\ProductBorrowingDetail;
+use App\Models\ProductSerial;
 
 class GoodsIssueController extends Controller
 {
@@ -70,7 +74,8 @@ class GoodsIssueController extends Controller
                     $products->selectRaw("
                         goods_issue_products.*,
                         products.name as product,
-                        product_categories.name as category,
+                        products.is_serial,
+                        product_categories.path as category,
                         uoms.name as uom,                    
                         product_consumables.consumable_number as reference,
                         rack_warehouses.name as rack,
@@ -87,7 +92,8 @@ class GoodsIssueController extends Controller
                     $products->selectRaw("
                         goods_issue_products.*,
                         products.name as product,
-                        product_categories.name as category,
+                        products.is_serial,
+                        product_categories.path as category,
                         uoms.name as uom,                    
                         product_transfers.transfer_number as reference,
                         rack_warehouses.name as rack,
@@ -99,6 +105,33 @@ class GoodsIssueController extends Controller
                     $products->leftJoin('rack_warehouses', 'rack_warehouses.id', '=', 'goods_issue_products.rack_id');
                     $products->leftJoin('bin_warehouses', 'bin_warehouses.id', '=', 'goods_issue_products.bin_id');
                     $products->leftJoin('product_transfers','product_transfers.id','=','goods_issue_products.reference_id');
+                },
+                'borrowingproducts' => function($products){
+                    $products->with([
+                        'serials' => function($serial){
+                            $serial->selectRaw("
+                                goods_issue_serials.*,
+                                product_serials.serial_number
+                            ");
+                            $serial->leftJoin('product_serials','product_serials.id','=','goods_issue_serials.serial_id');
+                        }
+                    ]);
+                    $products->selectRaw("
+                        goods_issue_products.*,
+                        products.name as product,
+                        products.is_serial,
+                        product_categories.path as category,
+                        uoms.name as uom,                    
+                        product_borrowings.borrowing_number as reference,
+                        rack_warehouses.name as rack,
+                        bin_warehouses.name as bin
+                    ");
+                    $products->leftJoin('products','products.id','=','goods_issue_products.product_id');
+                    $products->leftJoin('product_categories','product_categories.id','=','products.product_category_id');
+                    $products->leftJoin('uoms','uoms.id','=','goods_issue_products.uom_id');
+                    $products->leftJoin('rack_warehouses', 'rack_warehouses.id', '=', 'goods_issue_products.rack_id');
+                    $products->leftJoin('bin_warehouses', 'bin_warehouses.id', '=', 'goods_issue_products.bin_id');
+                    $products->leftJoin('product_borrowings','product_borrowings.id','=','goods_issue_products.reference_id');
                 },
                 'files',
                 'images'
@@ -118,10 +151,14 @@ class GoodsIssueController extends Controller
             $data = $query->first();                
 
             if($data){
+                if($data->status == 'approved'){
+                    abort(403);
+                }
                 return view('admin.goodsissue.edit',compact('data'));
             }else{
                 abort(404);
             }
+            
         } else {
             abort(403);
         }       
@@ -142,7 +179,8 @@ class GoodsIssueController extends Controller
                     $products->selectRaw("
                         goods_issue_products.*,
                         products.name as product,
-                        product_categories.name as category,
+                        products.is_serial,
+                        product_categories.path as category,
                         uoms.name as uom,                    
                         product_consumables.consumable_number as reference,
                         rack_warehouses.name as rack,
@@ -159,7 +197,8 @@ class GoodsIssueController extends Controller
                     $products->selectRaw("
                         goods_issue_products.*,
                         products.name as product,
-                        product_categories.name as category,
+                        products.is_serial,
+                        product_categories.path as category,
                         uoms.name as uom,                    
                         product_transfers.transfer_number as reference,
                         rack_warehouses.name as rack,
@@ -171,6 +210,33 @@ class GoodsIssueController extends Controller
                     $products->leftJoin('rack_warehouses', 'rack_warehouses.id', '=', 'goods_issue_products.rack_id');
                     $products->leftJoin('bin_warehouses', 'bin_warehouses.id', '=', 'goods_issue_products.bin_id');
                     $products->leftJoin('product_transfers','product_transfers.id','=','goods_issue_products.reference_id');
+                },
+                'borrowingproducts' => function($products){
+                    $products->with([
+                        'serials' => function($serial){
+                            $serial->selectRaw("
+                                goods_issue_serials.*,
+                                product_serials.serial_number
+                            ");
+                            $serial->leftJoin('product_serials','product_serials.id','=','goods_issue_serials.serial_id');
+                        }
+                    ]);
+                    $products->selectRaw("
+                        goods_issue_products.*,
+                        products.name as product,
+                        products.is_serial,
+                        product_categories.path as category,
+                        uoms.name as uom,                    
+                        product_borrowings.borrowing_number as reference,
+                        rack_warehouses.name as rack,
+                        bin_warehouses.name as bin
+                    ");
+                    $products->leftJoin('products','products.id','=','goods_issue_products.product_id');
+                    $products->leftJoin('product_categories','product_categories.id','=','products.product_category_id');
+                    $products->leftJoin('uoms','uoms.id','=','goods_issue_products.uom_id');
+                    $products->leftJoin('rack_warehouses', 'rack_warehouses.id', '=', 'goods_issue_products.rack_id');
+                    $products->leftJoin('bin_warehouses', 'bin_warehouses.id', '=', 'goods_issue_products.bin_id');
+                    $products->leftJoin('product_borrowings','product_borrowings.id','=','goods_issue_products.reference_id');
                 },
                 'files',
                 'images'
@@ -305,10 +371,9 @@ class GoodsIssueController extends Controller
 
             $this->issuedNumber($issued_id, $query->key_number, $query->created_at);
 
-            if ($getProducts) {
-                $products = [];
-                foreach (json_decode($getProducts) as $key => $row) {
-                    $products[] = [
+            if ($getProducts) {                
+                foreach (json_decode($getProducts) as $key => $row) {                                        
+                    $query = GoodsIssueProduct::create([
                         'goods_issue_id'   => $issued_id,
                         'reference_id'     => $row->reference_id,
                         'product_id'       => $row->product_id,
@@ -317,21 +382,31 @@ class GoodsIssueController extends Controller
                         'qty_receive'      => $row->qty_receive,
                         'rack_id'          => $row->rack_id,
                         'bin_id'           => $row->bin_id,
-                        'type'             => $row->type,
-                        'created_at'       => $now,
-                        'updated_at'       => $now
-                    ];
-                }
+                        'type'             => $row->type
+                    ]);
 
-                if (count($products)) {
-                    $query = GoodsIssueProduct::insert($products);
+                    if($row->has_serial && $row->type == 'borrowing'){
+                        $this->insertSerial($query->id,$row->serials,$status);
+
+                        if($status == 'approved'){
+                            $query = ProductBorrowing::where('id',$row->reference_id)->update(['status' => 'borrowed']);
+                            
+                            if(!$query){
+                                return response()->json([
+                                    'status'    => false,
+                                    'message'   => 'Failed to create detail data.'
+                                ], 400);
+                            }
+                        }                        
+                    }
+
                     if (!$query) {
                         return response()->json([
                             'status'    => false,
                             'message'   => 'Failed to create detail data.'
                         ], 400);
                     }
-                }
+                }               
             }
 
             if (isset($documentNames)) {
@@ -461,10 +536,9 @@ class GoodsIssueController extends Controller
 
             $cleared  = GoodsIssueProduct::where('goods_issue_id',$issued_id)->delete();
 
-            if ($getProducts) {
-                $products = [];
-                foreach (json_decode($getProducts) as $key => $row) {
-                    $products[] = [
+            if ($getProducts) {                
+                foreach (json_decode($getProducts) as $key => $row) {                    
+                    $query = GoodsIssueProduct::create([
                         'goods_issue_id'   => $issued_id,
                         'reference_id'     => $row->reference_id,
                         'product_id'       => $row->product_id,
@@ -473,21 +547,31 @@ class GoodsIssueController extends Controller
                         'qty_receive'      => $row->qty_receive,
                         'rack_id'          => $row->rack_id,
                         'bin_id'           => $row->bin_id,
-                        'type'             => $row->type,
-                        'created_at'       => $now,
-                        'updated_at'       => $now
-                    ];
-                }
-
-                if (count($products)) {
-                    $query = GoodsIssueProduct::insert($products);
+                        'type'             => $row->type
+                    ]);
+                    
                     if (!$query) {
                         return response()->json([
                             'status'    => false,
                             'message'   => 'Failed to create detail data.'
                         ], 400);
                     }
-                }
+
+                    if($row->has_serial && $row->type == 'borrowing'){
+                        $this->insertSerial($query->id,$row->serials,$status);
+
+                        if($status == 'approved'){
+                            $query = ProductBorrowing::where('id',$row->reference_id)->update(['status' => 'borrowed']);
+                            
+                            if(!$query){
+                                return response()->json([
+                                    'status'    => false,
+                                    'message'   => 'Failed to create detail data.'
+                                ], 400);
+                            }
+                        }                        
+                    }
+                }                
             }
 
             if (isset($documentNames)) {
@@ -646,7 +730,8 @@ class GoodsIssueController extends Controller
             product_consumable_details.uom_id,
             product_consumable_details.qty_consume as qty,
             products.name as product,
-            product_categories.name as category,
+            products.is_serial,
+            product_categories.path as category,
             uoms.name as uom
         ");
         $query->leftJoin('product_consumables','product_consumables.id','=','product_consumable_details.product_consumable_id');
@@ -676,6 +761,7 @@ class GoodsIssueController extends Controller
         $data = [];
         foreach ($queries as $key => $row) {
             $row->no = ++$start;
+            $row->category = str_replace('->',' <i class="fas fa-angle-right"></i> ',$row->category);                        
             $data[]  = $row;
         }
 
@@ -706,7 +792,8 @@ class GoodsIssueController extends Controller
             product_transfer_details.uom_id,
             product_transfer_details.qty_requested as qty,
             products.name as product,
-            product_categories.name as category,
+            products.is_serial,
+            product_categories.path as category,
             uoms.name as uom
         ");
         $query->leftJoin('product_transfers','product_transfers.id','=','product_transfer_details.product_transfer_id');
@@ -733,6 +820,7 @@ class GoodsIssueController extends Controller
         $data = [];
         foreach ($queries as $key => $row) {
             $row->no = ++$start;
+            $row->category = str_replace('->',' <i class="fas fa-angle-right"></i> ',$row->category);                        
             $data[]  = $row;
         }
 
@@ -742,6 +830,116 @@ class GoodsIssueController extends Controller
             'recordsFiltered'   => $total,
             'data'              => $data
         ], 200);        
+    }
+
+    public function borrowingproducts(Request $request)
+    {
+        $draw         = $request->draw;
+        $start        = $request->start;
+        $length       = $request->length;
+        $query        = $request->search['value'];
+        $sort         = $request->columns[$request->order[0]['column']]['data'];
+        $dir          = $request->order[0]['dir'];
+        $warehouse_id = $request->warehouse_id;
+        $except       = $request->except;
+        
+        $query = ProductBorrowingDetail::selectRaw("
+            product_borrowing_details.*,
+            TO_CHAR(product_borrowings.borrowing_date,'DD/MM/YYYY') as date_borrowing,
+            product_borrowings.borrowing_number,
+            products.name as product,
+            products.is_serial,
+            product_categories.path as category,
+            uoms.name as uom
+        ");
+        $query->leftJoin('product_borrowings','product_borrowings.id','=','product_borrowing_details.product_borrowing_id');
+        $query->leftJoin('products','products.id','=','product_borrowing_details.product_id');
+        $query->leftJoin('product_categories','product_categories.id','=','product_borrowing_details.product_category_id');
+        $query->leftJoin('uoms','uoms.id','=','product_borrowing_details.uom_id');
+        if($except){
+            $query->whereNotIn('product_borrowing_details.product_id',$except);
+        }
+        $query->where([
+            ['product_borrowings.warehouse_id','=',$warehouse_id],
+            ['product_borrowings.status','=','approved']
+        ]);        
+
+        $rows  = clone $query;
+        $total = $rows->count();
+
+        $query->offset($start);
+        $query->limit($length);
+        $query->orderBy($sort, $dir);
+
+        $queries = $query->get();
+
+        $data = [];
+        foreach ($queries as $key => $row) {
+            $row->no = ++$start;
+            $row->category = str_replace('->',' <i class="fas fa-angle-right"></i> ',$row->category);                        
+            $data[]  = $row;
+        }
+
+        return response()->json([
+            'draw'              => $draw,
+            'recordsTotal'      => $total,
+            'recordsFiltered'   => $total,
+            'data'              => $data
+        ], 200);        
+    }
+
+    public function readserial(Request $request)
+    {
+        $draw        = $request->draw;
+        $start       = $request->start;
+        $length      = $request->length;
+        $query       = $request->search['value'];
+        $sort        = $request->columns[$request->order[0]['column']]['data'];
+        $dir         = $request->order[0]['dir'];
+        $product_id  = $request->product_id;
+        $except      = $request->except;
+
+        $query = ProductSerial::selectRaw("
+            product_serials.*,
+            products.name as product,
+            product_categories.path as category
+        ");
+        $query->leftJoin('products','products.id','=','product_serials.product_id');
+        $query->leftJoin('product_categories','product_categories.id','=','products.product_category_id');
+        if($product_id){
+            $query->where('product_serials.product_id',$product_id);
+        }    
+        if($except){
+            $query->whereNotIn('product_serials.id',$except);
+        }
+        $query->where([
+            ['product_serials.movement','=','in'],
+            ['product_serials.status','=',1]
+        ]);                
+
+        $rows  = clone $query;
+        $total = $rows->count();      
+
+        $query->offset($start);
+        $query->limit($length);
+        $query->orderBy($sort, $dir);
+
+        $queries = $query->get();
+
+        $data = [];
+        foreach ($queries as $key => $row) {
+            $row->no = ++$start;
+            $row->category = str_replace('->',' <i class="fas fa-angle-right"></i> ',$row->category);                        
+            $data[]  = $row;
+        }
+
+        return response()->json([
+            'draw'              => $draw,
+            'recordsTotal'      => $total,
+            'recordsFiltered'   => $total,
+            'data'              => $data,
+            'exception'         => $except
+        ], 200);
     }
 
     public function issuedNumber($id, $key_number, $created_at)
@@ -757,5 +955,42 @@ class GoodsIssueController extends Controller
         $query = GoodsIssue::find($id);
         $query->issued_number = $number;
         $query->save();
+    }
+
+    public function insertSerial($primary_id, $serials, $status)
+    {
+        $now       = date('Y-m-d H:i:s');
+        $data      = [];
+        $serial_id = [];
+
+        foreach($serials as $key => $row){
+            $data[] = [
+                'goods_issue_product_id' => $primary_id,
+                'serial_id'              => $row->serial_id,
+                'created_at'             => $now,
+                'updated_at'             => $now
+            ];
+            
+            array_push($serial_id,intval($row->serial_id));
+        }        
+
+        $query = GoodsIssueSerial::insert($data);
+
+        if($query && $status == 'approved'){
+            $query = ProductSerial::whereIn('id',$serial_id)->update(['movement' => 'out']);
+
+            if(!$query){
+                return response()->json([
+                    'status'    => false,
+                    'message'   => 'Failed to update product serial status.'
+                ],400);
+            }
+
+        }else{
+            return response()->json([
+                'status'    => false,
+                'message'   => 'Failed to create data product serial.'
+            ],400);
+        }
     }
 }

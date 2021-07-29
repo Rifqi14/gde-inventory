@@ -225,6 +225,7 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/goodsreceipt/read','Admin\GoodsReceiptController@read')->name('goodsreceipt.read');
         Route::get('/goodsreceipt/contractproducts','Admin\GoodsReceiptController@contractproducts')->name('goodsreceipt.contractproducts');
         Route::get('/goodsreceipt/borrowingproducts','Admin\GoodsReceiptController@borrowingproducts')->name('goodsreceipt.borrowingproducts');
+        Route::get('/goodsreceipt/readserial','Admin\GoodsReceiptController@readserial')->name('goodsreceipt.readserial');
         Route::resource('/goodsreceipt', 'Admin\GoodsReceiptController');
 
         // Attendance
@@ -280,6 +281,8 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/goodsissue/read','Admin\GoodsIssueController@read')->name('goodsissue.read');
         Route::get('/goodsissue/consumableproducts','Admin\GoodsIssueController@consumableproducts')->name('goodsissue.consumableproducts');
         Route::get('/goodsissue/transferproducts','Admin\GoodsIssueController@transferproducts')->name('goodsissue.transferproducts');
+        Route::get('/goodsissue/borrowingprodutcs','Admin\GoodsIssueController@borrowingproducts')->name('goodsissue.borrowingproducts');
+        Route::get('/goodsissue/readserial','Admin\GoodsIssueController@readserial')->name('goodsissue.readserial');
         Route::resource('/goodsissue','Admin\GoodsIssueController');
 
         // Stock Movement

@@ -610,136 +610,7 @@
         });
 
         initInputFile();
-        initDocuments();
-
-        tableChooseSerial = $('#table-choose-serial').DataTable({            
-            language: {
-                loadingRecords: `<div class="p-2 text-center">
-                            <i class="fas fa-circle-notch fa-spin fa-fw"></i> Loading...
-                            </div>`
-            },
-            serverSide: true,
-            filter: false,
-            responsive: true,
-            lengthChange: false,
-            order: [
-                [0, "asc"]
-            ],
-            ajax: {
-                url: "{{route('productborrowing.readserial')}}",
-                type: "GET",
-                data: function(data) {                
-                    var serial  = [];
-                    $.each(dataSerial, function (index, value) { 
-                         $.each(value.serials, function (ind, val) { 
-                              serial.push(val.serial_id);
-                         });
-                    });
-                    
-                    data.warehouse_id = $('#warehouse').find('option:selected').val();
-                    data.product_id   = $('#table-choose-serial').attr('data-product-id');
-                    data.except       = serial;
-                }
-            },
-            columnDefs: [{
-                orderable: false,
-                    targets: [2]
-                },
-                {
-                    className: "text-center",
-                    targets: [2]
-                },
-                {
-                    render: function(data, type, row){
-                        return `<b>${row.product}</b><p style="margin-top: 1px;">${row.category}</p>`;
-                    }, 
-                    targets: [0]
-                },                                
-                {
-                    render: function(data, type, row) {
-                        return `<b>${row.serial_number}</b>`;
-                    },
-                    targets: [1]
-                },                                
-                {
-                render: function(data, type, row) {                   
-                        return `<button class="btn btn-sm text-xs btn-success btn-flat legitRipple" onclick="addSerialQty($(this))" data-product-id="${row.product_id}" data-serial-id="${row.id}" data-serial-number="${row.serial_number}" type="button">
-                                    <i class="fas fa-plus"></i>
-                                </button>`;
-                    },
-                    targets: [2]
-                }
-            ],
-            columns: [                
-                {
-                    data: "product",
-                    className : 'product'
-                },
-                {
-                    data: "serial_number"
-                }
-            ]
-        });
-
-        tableRemoveSerial = $('#table-already-serial').DataTable({
-            processing: true,
-            language: {
-                processing: `<div class="p-2 text-center">
-                            <i class="fas fa-circle-notch fa-spin fa-fw"></i> Loading...
-                            </div>`
-            },                 
-            destroy : true,       
-            filter: false,
-            responsive: true,
-            lengthChange: false,
-            order: [
-                [0, "asc"]
-            ],
-            data: setDataSerial,
-            columnDefs: [{
-                orderable: false,
-                    targets: [2]
-                },
-                {
-                    className: "text-center",  
-                    width : "45%",                  
-                    targets: [2]
-                },                                              
-                {                    
-                    render: function(data, type, row) {                        
-                        return `<b>${data}</b>`;
-                    },                    
-                    width : "45%",
-                    targets: [1]
-                },                                
-                {                    
-                    render: function(data, type, row) {        
-                            var productID = row[3],
-                                serialID  = row[2];
-
-                        return `<button class="btn btn-sm text-xs btn-danger btn-flat legitRipple" onclick="removeSerialQty($(this),${productID},${serialID})"type="button">
-                                    <i class="fas fa-trash"></i>
-                                </button>`;
-                    },                    
-                    width : "10%",
-                    targets: [2]
-                }
-            ],
-            columns: [
-                {
-                    title : "Product",
-                    width : "45%"
-                },
-                { 
-                    title: "Serial Number",
-                    width : "45%"
-                },
-                { 
-                    title: "Action",
-                    width : "10%"
-                 }
-            ]
-        });
+        initDocuments();        
 
         $('#table-products').on('change','.qty-request', function() {
             var qty     = $(this).val();
@@ -837,21 +708,14 @@
                          uomID        = product.attr('data-uom-id'),
                          isSerial     = product.attr('data-has-serial'),
                          qtySystem    = product.attr('data-qty-system'),
-                         qtyRequested = $(this).find('.qty-request').val(),
-                         serials      = null;
-
-                    if(isSerial == 'true'){
-                        serials = dataSerial.filter(param => param.product_id == product_id)[0].serials;                        
-                    }
+                         qtyRequested = $(this).find('.qty-request').val();
                                          
                     products.push({
                         site_id         : siteID,
                         warehouse_id    : warehouseID,
                         product_id      : product_id,
                         category_id     : categoryID,
-                        uom_id          : uomID,
-                        has_serial      : isSerial=='true'?true:false, 
-                        serials         : serials,                                               
+                        uom_id          : uomID,                                          
                         qty_system      : qtySystem,
                         qty_requested   : qtyRequested
                     });                    
@@ -974,27 +838,15 @@
                         <td class="text-center" width="15">${uom?uom:'-'}</td>
                         <td class="text-right" width="15">${qtySystem}</td>
                         <td class="text-center" width="15">
-                            <input type="number" name="qty_request" class="form-control numberfield text-right qty-request" placeholder="0" value="0" min="0" max="${qtySystem}" data-qty_system="${qtySystem}" required ${isSerial==true?'readonly':''}>
+                            <input type="number" name="qty_request" class="form-control numberfield text-right qty-request" placeholder="0" value="0" min="0" max="${qtySystem}" data-qty_system="${qtySystem}" required>
                         </td>
-                        <td class="text-center" width="15">
-                            <button class="btn btn-sm text-xs btn-warning btn-flat legitRipple ${isSerial==true?'':'disabled'}" type="button" onclick="showSerial(${id})"><i class="fas fa-bars"></i></button>
+                        <td class="text-center" width="15">                            
                             <button class="btn btn-sm text-xs btn-danger btn-flat legitRipple" onclick="removeProduct($(this),${id})" type="button"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>`;
 
         table.append(html);
-        $('#product').val(null).trigger('change');
-
-        if(isSerial == true){
-            var productName  = `<b>${productName}</b><p style="margin-top: 1px;">${category}</p>`;
-
-            dataSerial.push({
-                product_id : id,
-                product    : productName,
-                serials    : []  
-            });
-        }
-
+        $('#product').val(null).trigger('change');        
         selectedProducts.push(parseInt(id));        
     }
 
@@ -1007,8 +859,7 @@
                         </tr>`;
             $('#table-products > tbody').append(html);
         }
-        selectedProducts.splice($.inArray(productID, selectedProducts), 1);        
-        dataSerial = dataSerial.filter(param => param.product_id != productID);
+        selectedProducts.splice($.inArray(productID, selectedProducts), 1);                
     }
 
     function addDocument() {
@@ -1068,9 +919,7 @@
     function initDocuments() {
        var  dataProducts  = @json($data->products),
             dataFiles     = @json($data->files),
-            dataImages    = @json($data->images); 
-            
-        console.log({products : dataProducts});
+            dataImages    = @json($data->images);             
             
         // Init Products
         if(dataProducts.length > 0){
@@ -1108,39 +957,18 @@
                             <td class="text-center" width="15">${uom}</td>
                             <td class="text-right" width="15">${qtySystem}</td>
                             <td class="text-center" width="15">
-                                <input type="number" name="qty_request" class="form-control numberfield text-right qty-request" placeholder="0" min="0" max="${qtySystem}" value="${qtyRequest}" required ${isSerial==true?'readonly':''}>
+                                <input type="number" name="qty_request" class="form-control numberfield text-right qty-request" placeholder="0" min="0" max="${qtySystem}" value="${qtyRequest}" required>
                             </td>
-                            <td class="text-center" width="15">
-                                <button class="btn btn-sm text-xs btn-warning btn-flat legitRipple ${isSerial==true?'':'disabled'}" type="button" onclick="showSerial(${id})"><i class="fas fa-bars"></i></button>
+                            <td class="text-center" width="15">                                
                                 <button class="btn btn-sm text-xs btn-danger btn-flat legitRipple" onclick="removeProduct($(this),${id})" type="button"><i class="fas fa-trash"></i></button>
                             </td>
                         </tr>`;     
                         
-                selectedProducts.push(id);
-
-                if(isSerial == true){
-                    var productName  = `<b>${productName}</b><p style="margin-top: 1px;">${category}</p>`;
-                    var serials      = []; 
-                    
-                    $.each(value.serials, function (index, value) { 
-                         serials.push({
-                            serial_id     : value.serial_id,
-                            serial_number : value.serial_number
-                         });
-                    });
-                    
-                    dataSerial.push({
-                        product_id : id,
-                        product    : productName,
-                        serials    : serials 
-                    });
-                }
+                selectedProducts.push(id);                
             });
 
             table.find('.no-available-data').remove();
-            table.append(html);
-
-            console.log({dataSerial : dataSerial});
+            table.append(html);            
         }
         
         // Init Files
@@ -1270,82 +1098,6 @@
         docFiles.next().html(docFiles.val());
 
     }        
-
-    const showSerial = (productID) =>{        
-        $('#table-choose-serial').attr('data-product-id',productID?productID:'');
-        $('#table-already-serial').attr('data-product-id',productID?productID:'');
-        tableChooseSerial.draw();
-        drawRemoveSerial(productID);
-        $('#modal-serial').modal('show');
-    }
-
-    const addSerialQty = (that) => {
-        var product      = that.parents('tr').find('td.product').html(),
-            productID    = that.attr('data-product-id'),
-            serialID     = that.attr('data-serial-id'),
-            serialNumber = that.attr('data-serial-number');
-        
-        if(dataSerial.length == 0){
-            dataSerial.push({
-                product_id : productID,
-                product    : product,
-                serials    : [{
-                    serial_id     : serialID,
-                    serial_number : serialNumber
-                }]  
-            });
-        }else{
-            var serials  = dataSerial.filter(param => param.product_id == productID)[0].serials;            
-            var idSerial = serials.filter(param => param.serial_id == serialID);                    
-            
-            if(idSerial.length == 0){
-                serials.push({
-                    serial_id     : serialID,
-                    serial_number : serialNumber
-                });
-            }            
-        }                                
-        tableChooseSerial.ajax.reload(null, false);                
-        drawRemoveSerial(productID);                       
-        countQtySerial(productID); 
-    }
-
-    const removeSerialQty = (that,productID,serialID) =>{
-        $.each(dataSerial, function (index, data) { 
-             if(data.product_id == productID){                       
-                data.serials = data.serials.filter(param => param.serial_id != serialID);
-             }
-        });                        
-
-        drawRemoveSerial(productID);        
-        tableChooseSerial.draw();   
-        countQtySerial(productID);     
-    }
-
-    const countQtySerial = (productID) => {
-        var qtySerial = dataSerial.filter(param => param.product_id == productID)[0].serials.length;                
-        var product  = $('#table-products > tbody').find(`input[class=item-product][value=${productID}]`);        
-
-        product.parents('.product-item').find('.qty-request').val(qtySerial);                
-    }
-
-    const drawRemoveSerial = (productID) => {
-        setDataSerial = [];
-        
-        if(productID){
-            var product = dataSerial.filter(param => param.product_id == productID);    
-                                    
-            $.each(product[0].serials, function (ind, val) { 
-                setDataSerial.push([product[0].product,val.serial_number,val.serial_id,productID]);
-            });   
-        }
-        
-        tableRemoveSerial.clear().draw();
-        tableRemoveSerial.rows.add(setDataSerial); // Add new data
-        tableRemoveSerial.draw(); // Redraw the DataTable        
-
-        return true;
-    }
 
     function onSubmit(status) {
         $('#form').find('input[name=status]').val(status);

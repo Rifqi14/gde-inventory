@@ -135,13 +135,12 @@
                                             <th width="15" class="text-center">Has Serial</th>
                                             <th width="15" class="text-center">UOM</th>
                                             <th width="15" class="text-right">Current Stock</th>
-                                            <th width="10" class="text-right">Qty Borrowing</th>
-                                            <th width="10" class="text-center">Action</th>
+                                            <th width="10" class="text-right">Qty Borrowing</th>                                            
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr class="no-available-data">
-                                            <td colspan="7" class="text-center">No available data.</td>
+                                            <td colspan="6" class="text-center">No available data.</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -212,34 +211,6 @@
         </form>
     </div>
 </section>
-
-<div class="modal fade" id="modal-serial">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" style="text-transform: capitalize;">Product Serial</h5>
-        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <div class="table-responsive p-0">
-            <table id="table-serial" class="table table-striped datatable" data-product-id="" width="100%">
-                <thead>
-                    <tr>                            
-                        <th width="50%">Product</th>
-                        <th width="50%">Serial Number</th>                        
-                    </tr>
-                </thead>
-            </table>
-        </div>        
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-labeled  btn-danger btn-sm btn-sm btn-flat legitRipple" data-dismiss="modal"><b><i class="fas fa-times"></i></b> Close</button>
-      </div>
-    </div>
-  </div>
-</div>
 @endsection
 
 @section('scripts')
@@ -283,21 +254,30 @@
         switch (borrowingStatus) {
             case 'draft':
                 statusBadge = 'bg-gray';
+                status = borrowingStatus;
                 break;
             case 'waiting' : 
                 statusBadge = 'badge-warning';
+                status = 'waiting approval';
                 break;
             case 'approved' : 
                 statusBadge = 'badge-info';
+                status = borrowingStatus;
+                break;
+            case 'borrowed' : 
+                statusBadge = 'badge-info';
+                status      = 'approved';
                 break;                
             case 'archived' : 
                 statusBadge = 'bg-red';
+                status = borrowingStatus;
                 break;
             default:
                 statusBadge = '';
+                status = '';
         }
 
-        $('#form-status').append(`<span class="badge ${statusBadge} text-sm" style="text-transform: capitalize;">${borrowingStatus}</span>`);
+        $('#form-status').append(`<span class="badge ${statusBadge} text-sm" style="text-transform: capitalize;">${status}</span>`);
 
         $('.select2').select2({
             allowClear: true
@@ -463,43 +443,7 @@
         }
 
         initInputFile();
-        initDocuments();
-
-        tableSerial = $('#table-serial').DataTable({
-            processing: true,
-            language: {
-                processing: `<div class="p-2 text-center">
-                            <i class="fas fa-circle-notch fa-spin fa-fw"></i> Loading...
-                            </div>`
-            },                 
-            destroy : true,       
-            filter: false,
-            responsive: true,
-            lengthChange: false,
-            order: [
-                [0, "asc"]
-            ],
-            data: setDataSerial,
-            columnDefs: [                                                         
-                {                    
-                    render: function(data, type, row) {                        
-                        return `<b>${data}</b>`;
-                    },                    
-                    width : "50%",
-                    targets: [1]
-                }
-            ],
-            columns: [
-                {
-                    title : "Product",
-                    width : "45%"
-                },
-                { 
-                    title: "Serial Number",
-                    width : "45%"
-                }
-            ]
-        });                     
+        initDocuments();                            
     });
 
     function initInputFile(){
@@ -512,9 +456,7 @@
     function initDocuments() {
        var  dataProducts  = @json($data->products),
             dataFiles     = @json($data->files),
-            dataImages    = @json($data->images); 
-        
-        console.log({products : dataProducts});
+            dataImages    = @json($data->images);         
             
         // Init Products
         if(dataProducts.length > 0){
@@ -551,29 +493,8 @@
                             <td width="15" class="text-center"><span class="badge ${badge} text-md"><i class="${icon}" style="size: 2x;"></i></span></td>
                             <td class="text-center" width="15">${uom}</td>
                             <td class="text-right" width="15">${qtySystem}</td>
-                            <td class="text-right" width="15">${qtyRequest}</td>
-                            <td class="text-center" width="15">
-                                <button class="btn btn-sm text-xs btn-warning btn-flat legitRipple ${isSerial==true?'':'disabled'}" type="button" onclick="showSerial(${id})"><i class="fas fa-bars"></i></button>                                
-                            </td>
-                        </tr>`;             
-                
-                if(isSerial == true){
-                    var productName  = `<b>${productName}</b><p style="margin-top: 1px;">${category}</p>`;
-                    var serials      = []; 
-                        
-                    $.each(value.serials, function (index, value) { 
-                        serials.push({
-                            serial_id     : value.serial_id,
-                            serial_number : value.serial_number
-                        });
-                    });
-                        
-                    dataSerial.push({
-                        product_id : id,
-                        product    : productName,
-                        serials    : serials 
-                    });
-                }
+                            <td class="text-right" width="15">${qtyRequest}</td>                            
+                        </tr>`;                                         
             });            
 
             table.find('.no-available-data').remove();
@@ -640,30 +561,6 @@
         
         docFiles.next().html(docFiles.val());
 
-    }        
-
-    const showSerial = (productID) =>{                
-        $('#table-serial').attr('data-product-id',productID?productID:'');        
-        drawRemoveSerial(productID);
-        $('#modal-serial').modal('show');
-    }
-
-    const drawRemoveSerial = (productID) => {
-        setDataSerial = [];
-        
-        if(productID){
-            var product = dataSerial.filter(param => param.product_id == productID);    
-                                    
-            $.each(product[0].serials, function (ind, val) { 
-                setDataSerial.push([product[0].product,val.serial_number]);
-            });   
-        }
-        
-        tableSerial.clear().draw();
-        tableSerial.rows.add(setDataSerial); // Add new data
-        tableSerial.draw(); // Redraw the DataTable        
-
-        return true;
-    }    
+    }              
 </script>
 @endsection
