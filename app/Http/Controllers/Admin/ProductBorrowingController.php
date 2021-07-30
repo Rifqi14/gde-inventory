@@ -69,17 +69,7 @@ class ProductBorrowingController extends Controller
             $data = ProductBorrowing::with([
                     'files',
                     'images',
-                    'products' => function($product){
-                        $product->with([
-                            'serials' => function($serial){
-                                $serial->selectRaw("
-                                    product_borrowing_serials.borrowing_detail_id,
-                                    product_borrowing_serials.serial_id,
-                                    product_serials.serial_number
-                                ");
-                                $serial->leftJoin('product_serials','product_serials.id','=','product_borrowing_serials.serial_id');
-                            }
-                        ]);
+                    'products' => function($product){                        
                         $product->selectRaw("
                             product_borrowing_details.*,
                             products.name as product,
@@ -131,17 +121,7 @@ class ProductBorrowingController extends Controller
         $data = ProductBorrowing::with([
                     'files',
                     'images',
-                    'products' => function($product){
-                        $product->with([
-                            'serials' => function($serial){
-                                $serial->selectRaw("
-                                    product_borrowing_serials.borrowing_detail_id,
-                                    product_borrowing_serials.serial_id,
-                                    product_serials.serial_number
-                                ");
-                                $serial->leftJoin('product_serials','product_serials.id','=','product_borrowing_serials.serial_id');                                
-                            }
-                        ]);
+                    'products' => function($product){                        
                         $product->selectRaw("
                             product_borrowing_details.*,
                             products.name as product,
@@ -183,17 +163,7 @@ class ProductBorrowingController extends Controller
         $data = ProductBorrowing::with([
             'files',
             'images',
-            'products' => function($product){
-                $product->with([
-                    'serials' => function($serial){
-                        $serial->selectRaw("
-                            product_borrowing_serials.borrowing_detail_id,
-                            product_borrowing_serials.serial_id,
-                            product_serials.serial_number
-                        ");
-                        $serial->leftJoin('product_serials','product_serials.id','=','product_borrowing_serials.serial_id');                                
-                    }
-                ]);
+            'products' => function($product){               
                 $product->selectRaw("
                     product_borrowing_details.*,
                     products.name as product,
@@ -298,8 +268,11 @@ class ProductBorrowingController extends Controller
         }
         if($status){
             $query->where('status',$status);
+            if($status == 'approved'){
+                $query->orWhere('status','borrowed');
+            }
         }else{
-            $query->whereNotIn('status',['approved','archived']);
+            $query->whereNotIn('status',['approved','borrowed','archived']);
         }        
         
         $rows  = clone $query;
@@ -419,48 +392,28 @@ class ProductBorrowingController extends Controller
             $documents     = [];             
 
             if($getProducts){                
+                $products = [];
                 foreach (json_decode($getProducts) as $key => $row) {                    
-                    $query = ProductBorrowingDetail::create([
+                    $products[] = [
                         'product_borrowing_id' => $borrowing_id,
                         'product_id'           => $row->product_id,
                         'product_category_id'  => $row->category_id,
                         'uom_id'               => $row->uom_id,
                         'qty_system'           => $row->qty_system,
-                        'qty_requested'        => $row->qty_requested                        
-                    ]);
+                        'qty_requested'        => $row->qty_requested,
+                        'created_at'           => $now,
+                        'updated_at'           => $now
+                    ];                                    
+                }                         
 
-                    if(!$query){
-                        return response()->json([
-                            'status'  => false,
-                            'message' => 'Failed to create detail product of product borrowing.'
-                        ],400);
-                    }
-
-                    $detail_id = $query->id;
-
-                    if($row->has_serial){
-                        $serials = [];
-
-                        foreach($row->serials as $index => $bar){
-                            $serials[] = [
-                                'borrowing_detail_id' => $detail_id,
-                                'serial_id'           => $bar->serial_id,
-                                'created_at'          => $now,
-                                'updated_at'          => $now
-                            ];
-                        }
-
-                        $query = ProductBorrowingSerial::insert($serials);
-
-                        if(!$query){
-                            return response()->json([
-                                'status'  => false,
-                                'message' => 'Failed to create detail product serial of product borrowing.'
-                            ],400);
-                        }
-
-                    }
-                }                                
+                $query = ProductBorrowingDetail::insert($products);
+                
+                if(!$query){
+                    return response()->json([
+                        'status'  => false,
+                        'message' => 'Failed to create detail product of product borrowing.'
+                    ],400);
+                }
             }            
     
             if(isset($documentNames)){                                
@@ -610,47 +563,30 @@ class ProductBorrowingController extends Controller
             $photoNames    = $request->photo_name;
             $updatedDoc    = $request->documents;
 
-            if($getProducts){                
-                foreach (json_decode($getProducts) as $key => $row) {                    
+            if($getProducts){      
+                $products = []; 
 
-                    $query = ProductBorrowingDetail::create([
+                foreach (json_decode($getProducts) as $key => $row) {                    
+                    $products[] = [
                         'product_borrowing_id' => $id,
                         'product_id'           => $row->product_id,
                         'product_category_id'  => $row->category_id,
                         'uom_id'               => $row->uom_id,
                         'qty_system'           => $row->qty_system,
-                        'qty_requested'        => $row->qty_requested
-                    ]);
+                        'qty_requested'        => $row->qty_requested,
+                        'created_at'           => $now,
+                        'updated_at'           => $now
+                    ];
+                }     
 
-                    if(!$query){
-                        return response()->json([
-                            'status'  => false,
-                            'message' => 'Failed to update detail product of product borrowig.'
-                        ],400);
-                    }
-
-                    $detail_id = $query->id;
-                    if($row->has_serial){
-                        $serials = [];
-                        foreach($row->serials as $inx => $bar){
-                            $serials[] = [
-                                'borrowing_detail_id' => $detail_id,
-                                'serial_id'           => $bar->serial_id,
-                                'created_at'          => $now,
-                                'updated_at'          => $now
-                            ];
-                        }
-
-                        $query = ProductBorrowingSerial::insert($serials);
-
-                        if(!$query){
-                            return response()->json([
-                                'status'  => false,
-                                'message' => 'Failed to update detail product serial of product borrowing.'
-                            ],400);
-                        }
-                    }
-                }                
+                $query = ProductBorrowingDetail::insert($products);
+                
+                if(!$query){
+                    return response()->json([
+                        'status'  => false,
+                        'message' => 'Failed to update detail product serial of product borrowing.'
+                    ],400);
+                }
                 
             }
 
@@ -928,20 +864,7 @@ class ProductBorrowingController extends Controller
             $site_id      = $row->site_id;
             $warehouse_id = $row->warehouse_id;
             $product_id   = $row->product_id;
-            $qty_request  = $row->qty_requested;  
-            $has_serial   = $row->has_serial;
-            $serials      = $row->serials;
-
-            if($has_serial){
-                $serial_id = [];
-
-                foreach($serials as $inx => $bar){
-                    array_push($serial_id,$bar->serial_id);
-                }
-
-                // Update movement status of product serials as out
-                $query = ProductSerial::whereIn('id',$serial_id)->update(['movement' => 'out']);                               
-            }          
+            $qty_request  = $row->qty_requested;                    
 
             // Checking stock product on warehouse
             $stock = StockWarehouse::where([

@@ -195,6 +195,7 @@
         "showMethod": "fadeIn",
         "hideMethod": "fadeOut"
     };
+    
     $(function() {
         $('.select2').select2({
             allowClear: true
@@ -363,18 +364,8 @@
                     targets : [1]
                 },
                 {
-                    render: function(data, type, row) {
-                        var badge = '',
-                            status = row.status;
-                        if (status == 'draft') {
-                            badge = 'bg-gray';
-                        } else if (status == 'waiting') {
-                            badge = 'badge-warning';
-                        } else if (status == 'approved') {
-                            badge = 'badge-info';
-                        }
-
-                        return `<span class="badge ${badge} text-sm" style="text-transform: capitalize;">${status}</span>`;
+                    render: function(data, type, row) {                    
+                        return `<span class="badge badge-info text-sm" style="text-transform: capitalize;">approved</span>`;
 
                     },
                     targets: [4]

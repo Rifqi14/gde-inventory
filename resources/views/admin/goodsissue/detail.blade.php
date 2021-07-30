@@ -124,9 +124,9 @@
                                 <table id="table-product" class="table table-striped" width="100%">
                                     <thead>
                                         <tr>
-                                            <th width="100">Product Name</th>
-                                            <th width="100">Product Category</th>
-                                            <th width="100">Reference</th>
+                                            <th width="100">Product</th>
+                                            <th width="100">Product</th>
+                                            <th width="30" class="text-center">Has Serial</th>
                                             <th width="30" class="text-right">Qty Request</th>
                                             <th width="30" class="text-right">Qty Receive</th>
                                             <th width="100">Rack</th>
@@ -135,7 +135,7 @@
                                     </thead>
                                     <tbody>
                                         <tr class="no-available-data">
-                                            <td colspan="6" class="text-center">No available data.</td>
+                                            <td colspan="7" class="text-center">No available data.</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -248,9 +248,7 @@
                 break;
         }
 
-        $('.form-status').find('.controls').html(`<span class="badge ${badge} text-sm" style="text-transform: capitalize">${state}</span>`);
-
-        initData();
+        $('.form-status').find('.controls').html(`<span class="badge ${badge} text-sm" style="text-transform: capitalize">${state}</span>`);        
 
         $('.summernote').summernote({
             height: 145,
@@ -354,6 +352,8 @@
             }
         });
 
+        initData();
+
         if (siteID) {
             $('#site').select2('trigger','select',{
                 data : {
@@ -381,16 +381,30 @@
     });
 
     const initData = () => {
-        var products = @json(count($data->consumableproducts)>0?$data->consumableproducts:$data->transferproducts);
-        var files    = @json($data->files);
-        var images   = @json($data->images);
+        var consumables = @json($data->consumableproducts);
+        var transfers   = @json($data->transferproducts);
+        var borrowings  = @json($data->borrowingproducts);                
+        var files       = @json($data->files);
+        var images      = @json($data->images);
+        var products    = [];
+
+        if(consumables.length > 0){
+            products = consumables;
+        }else if(transfers.length > 0){
+            products = transfers;
+        }else if(borrowings.length > 0){
+            products = borrowings;
+        }        
 
         if(products.length > 0){      
             $.each(products, function (index, value) { 
                 var html  = '',
                     table   = $('#table-product > tbody');
+               
                 var productID    = value.product_id,
                     product      = value.product,
+                    isSerial     = value.is_serial,
+                    serials      = value.serials?value.serials:null,
                     category     = value.category,
                     referenceID  = value.reference_id,
                     reference    = value.reference,
@@ -403,10 +417,24 @@
                     bin          = value.bin,
                     type         = value.type;
 
+                    switch (isSerial) {
+                        case '1':
+                            icon     = 'fas fa-check';
+                            badge    = 'badge-info';            
+                            break;
+                    
+                        default:
+                            icon     = 'fas fa-times';
+                            badge    = 'bg-red';            
+                            break;
+                    }
+
+                    var serial = `<span class="badge ${badge} text-md"><i class="${icon}" style="size: 1x;"></i></span>`;
+
                     html = `<tr class="product-item">                        
-                                <td width="100">${product}</td>
+                                <td width="100"><p>${product}<br><b style="font-size: 10pt;">${reference}</b></p></td>
                                 <td width="100">${category}</td>
-                                <td width="100"><b>${reference}</b></td>
+                                <td width="30" class="text-center">${serial}</td>
                                 <td class="text-right" width="30">${qtyRequest}</td>
                                 <td class="text-right" width="30">${qtyReceive}</td>
                                 <td width="100">${rack}</td>

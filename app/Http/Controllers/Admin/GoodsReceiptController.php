@@ -6,6 +6,7 @@ use App\Models\Menu;
 use App\Models\GoodsReceipt;
 use App\Models\ContractProduct;
 use App\Models\ProductBorrowingDetail;
+use App\models\ProductBorrowingSerial;
 use App\Models\GoodsReceiptProduct;
 use App\Models\GoodsReceiptAsset;
 use App\Models\Site;
@@ -734,10 +735,12 @@ class GoodsReceiptController extends Controller
         $dir         = $request->order[0]['dir'];
         $except      = $request->except;
         $category_id = $request->category_id;
+        $warehouse_id = $request->warehouse_id; 
 
         $query = ProductBorrowingDetail::selectRaw("
             product_borrowings.borrowing_number,
             TO_CHAR(product_borrowings.borrowing_date,'DD/MM/YYYY') as date_borrowing,
+            product_borrowing_details.id as detail_id,
             product_borrowing_details.product_borrowing_id,
             product_borrowing_details.product_id,
             product_borrowing_details.uom_id,
@@ -763,7 +766,7 @@ class GoodsReceiptController extends Controller
                 ['goods_receipt_products.type','=','borrowing']
             ]);
         });  
-        if($category_id){
+        if($category_id){   
             $query->where('product_categories.id',$category_id);
         }
         if($except){
@@ -783,6 +786,58 @@ class GoodsReceiptController extends Controller
         foreach ($queries as $key => $row) {
             $row->no = ++$start;          
             $row->category = str_replace('->',' <i class="fas fa-angle-right"></i> ',$row->category);                          
+            $data[]  = $row;
+        }
+
+        return response()->json([
+            'draw'              => $draw,
+            'recordsTotal'      => $total,
+            'recordsFiltered'   => $total,
+            'data'              => $data
+        ], 200);
+    }
+
+    public function readserial(Request $request)
+    {
+        $draw        = $request->draw;
+        $start       = $request->start;
+        $length      = $request->length;
+        $query       = $request->search['value'];
+        $sort        = $request->columns[$request->order[0]['column']]['data'];
+        $dir         = $request->order[0]['dir'];
+        $detail_id   = $request->detail_id;
+        $except      = $request->except;
+
+        $query = ProductBorrowingDetail::selectRaw("
+            product_borrowing_details.id as detail_id,
+            product_borrowing_details.product_id,
+            products.name as product,   
+            product_serials.id as serial_id,
+            product_serials.serial_number,
+            product_categories.path as category
+        ");
+        $query->leftJoin('products','products.id','=','product_borrowing_details.product_id');
+        $query->leftJoin('product_categories','product_categories.id','=','product_borrowing_details.product_category_id');
+        $query->leftJoin('product_borrowing_serials','product_borrowing_serials.borrowing_detail_id','=','product_borrowing_details.id');
+        $query->leftJoin('product_serials','product_serials.id','=','product_borrowing_serials.serial_id');
+        $query->where('product_borrowing_details.id',$detail_id); 
+        if($except){
+            $query->whereNotIn('product_serials.id',$except);
+        }
+
+        $rows  = clone $query;
+        $total = $rows->count();
+
+        $query->offset($start);
+        $query->limit($length);
+        $query->orderBy($sort, $dir);
+
+        $queries = $query->get();
+
+        $data = [];
+        foreach ($queries as $key => $row) {
+            $row->no = ++$start;
+            $row->category = str_replace('->',' <i class="fas fa-angle-right"></i> ',$row->category);                        
             $data[]  = $row;
         }
 
