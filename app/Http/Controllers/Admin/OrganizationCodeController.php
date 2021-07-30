@@ -238,7 +238,7 @@ class OrganizationCodeController extends Controller
         $name   = strtoupper($request->name);
 
         // Count Data
-        $query  = OrganizationCode::whereRaw("upper(name) like '%$name%'");
+        $query  = OrganizationCode::with(['units'])->whereRaw("upper(name) like '%$name%'");
 
         $row    = clone $query;
         $recordsTotal   = $row->count();
