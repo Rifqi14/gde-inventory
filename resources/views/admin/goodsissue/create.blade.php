@@ -1069,10 +1069,11 @@
                 $(element).removeClass('is-invalid');
             },
             submitHandler: function() {
-                var data = new FormData($('#form')[0]),
-                    issuedDate = $('#form').find('#date').data('daterangepicker').startDate.format('YYYY-MM-DD'),
-                    products = [],
-                    zeroValue = false;
+                var data        = new FormData($('#form')[0]),
+                    warehouseID = $('#warehouse').find('option:selected').val();
+                    issuedDate  = $('#form').find('#date').data('daterangepicker').startDate.format('YYYY-MM-DD'),
+                    products    = [],
+                    zeroValue   = false;
 
                 $.each($('#table-product > tbody > .product-item'), function(index, value) {
                     var product     = $(this).find('.item-product'),
@@ -1080,7 +1081,7 @@
                         referenceID = product.attr('data-reference-id'),
                         uomID       = product.attr('data-uom-id'),
                         qtyRequest  = product.attr('data-qty-request'),
-                        qtyReceive  = $(this).find('.qty-receive').val(),
+                        qtyReceive  = $(this).find('.qty-receive').val(),                        
                         rackID      = product.parents('.product-item').find('.rack-warehouse > option:selected').val(),
                         binID       = product.parents('.product-item').find('.bin-warehouse > option:selected').val(),
                         type        = product.attr('data-type'),
@@ -1092,11 +1093,12 @@
                     }
 
                     products.push({
+                        warehouse_id : warehouseID,
                         product_id   : product_id,
                         reference_id : referenceID,
                         uom_id       : uomID,
                         qty_request  : qtyRequest,
-                        qty_receive  : qtyReceive ? qtyReceive : 0,
+                        qty_receive  : qtyReceive ? qtyReceive : 0,                        
                         rack_id      : rackID,
                         bin_id       : binID,
                         type         : type,
@@ -1104,7 +1106,10 @@
                         serials      : serials
                     });
 
-                });                
+                });      
+
+                // console.log({products : products});
+                // return false;
 
                 if (products.length == 0) {
                     toastr.warning('Select the product first. at least one product');
@@ -1328,7 +1333,7 @@
             product     = that.attr('data-product'),
             category    = that.parents('tr').find('td.category').html(),
             uomID       = that.attr('data-uom-id'),
-            qty         = that.attr('data-qty'),
+            qty         = that.attr('data-qty'),            
             isSerial    = that.attr('data-has-serial'),
             table       = $('#table-product > tbody');
 
@@ -1391,7 +1396,7 @@
                 bin_id       : null,                
                 reference_id : referenceID,
                 reference    : reference,
-                max_qty      : qty,
+                max_qty      : qty,                
                 has_serial   : isSerial=='1'?true:false,
                 serials      : isSerial=='1'?[]:null,
             });   

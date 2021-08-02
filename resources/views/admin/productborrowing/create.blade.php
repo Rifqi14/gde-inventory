@@ -93,7 +93,7 @@
                                         <div class="row ml-1">
                                             <div class="col-2">Submit</div>
                                             <div class="col-1">:</div>
-                                            <div class="col-7"><span class="badge badge-warning text-sm">Waiting</span></div>
+                                            <div class="col-7"><span class="badge badge-warning text-sm">Waiting Approval</span></div>
                                         </div>
                                         <div class="row mt-2 ml-1">
                                             <div class="col-2">Save</div>
@@ -487,7 +487,7 @@
                             category_id : item.product_category_id,
                             category    : item.category,
                             is_serial   : item.is_serial=='1'?true:false,
-                            stock       : item.stock?item.stock:0
+                            stock       : item.stock>=0?item.stock:0
                         });
                     });
                     return {
@@ -502,7 +502,9 @@
                     return data.text;
                 }
 
-                return `<b>${data.text}</b><p style="margin-top: 1px;">${data.category}</p>`;
+                return `<b>${data.text}</b>
+                        <span style="float: right;">Stock : ${data.stock}</span>
+                        <p style="margin-top: 1px;">${data.category}</p>`;
             },            
             allowClear: true,
         });       
@@ -850,14 +852,11 @@
                     </tr>`;
         $('#table-photo > tbody').append(html);
         initInputFile();
+    }      
+    
+    function onSubmit(status) {
+        $('#form').find('input[name=status]').val(status);
+        $('form').first().trigger('submit');
     }
-
-    const showSerial = (productID) =>{        
-        $('#table-choose-serial').attr('data-product-id',productID?productID:'');
-        $('#table-already-serial').attr('data-product-id',productID?productID:'');
-        tableChooseSerial.draw();
-        drawRemoveSerial(productID);
-        $('#modal-serial').modal('show');
-    }       
 </script>
 @endsection

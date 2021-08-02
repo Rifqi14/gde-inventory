@@ -888,6 +888,7 @@ class GoodsReceiptController extends Controller
                         'product_id'    => $num->product_id,
                         'serial_number' => $num->serial_number,
                         'status'        => 1,
+                        'movement'      => 'in',
                         'created_at'    => $now,
                         'updated_at'    => $now
                     ];                    

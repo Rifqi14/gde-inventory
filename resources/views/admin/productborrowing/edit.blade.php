@@ -346,10 +346,8 @@
                 break;
             case 'waiting' : 
                 statusBadge = 'badge-warning';
-                break;
-            case 'approved' : 
-                statusBadge = 'badge-info';
-                break;                
+                borrowingStatus = 'waiting approval';
+                break;              
             default:
                 statusBadge = '';
         }
@@ -604,7 +602,9 @@
                     return data.text;
                 }
 
-                return `<b>${data.text}</b><p style="margin-top: 1px;">${data.category}</p>`;
+                return `<b>${data.text}</b>
+                        <span style="float: right;">Stock : ${data.stock}</span>
+                        <p style="margin-top: 1px;">${data.category}</p>`;
             },            
             allowClear: true,
         });
@@ -717,6 +717,7 @@
                         category_id     : categoryID,
                         uom_id          : uomID,                                          
                         qty_system      : qtySystem,
+                        current_stock   : qtySystem-qtyRequested,
                         qty_requested   : qtyRequested
                     });                    
 
@@ -725,7 +726,10 @@
                         return false;
                     }
 
-                });                                  
+                });            
+
+                // console.log({products :products});
+                // return false;
 
                 $.each($('#table-document > tbody > .document-item').find('.doc-cell'), function (index, val) { 
                      var input    = $(this).parents('.document-item').find('.document-name'),

@@ -18,6 +18,7 @@ use App\Models\ProductConsumableDetail;
 use App\Models\ProductTransferDetail;
 use App\Models\ProductBorrowingDetail;
 use App\Models\ProductSerial;
+use App\Models\StockWarehouse;
 
 class GoodsIssueController extends Controller
 {
@@ -158,7 +159,7 @@ class GoodsIssueController extends Controller
             }else{
                 abort(404);
             }
-            
+
         } else {
             abort(403);
         }       
@@ -372,41 +373,7 @@ class GoodsIssueController extends Controller
             $this->issuedNumber($issued_id, $query->key_number, $query->created_at);
 
             if ($getProducts) {                
-                foreach (json_decode($getProducts) as $key => $row) {                                        
-                    $query = GoodsIssueProduct::create([
-                        'goods_issue_id'   => $issued_id,
-                        'reference_id'     => $row->reference_id,
-                        'product_id'       => $row->product_id,
-                        'uom_id'           => $row->uom_id,
-                        'qty_request'      => $row->qty_request,
-                        'qty_receive'      => $row->qty_receive,
-                        'rack_id'          => $row->rack_id,
-                        'bin_id'           => $row->bin_id,
-                        'type'             => $row->type
-                    ]);
-
-                    if($row->has_serial && $row->type == 'borrowing'){
-                        $this->insertSerial($query->id,$row->serials,$status);
-
-                        if($status == 'approved'){
-                            $query = ProductBorrowing::where('id',$row->reference_id)->update(['status' => 'borrowed']);
-                            
-                            if(!$query){
-                                return response()->json([
-                                    'status'    => false,
-                                    'message'   => 'Failed to create detail data.'
-                                ], 400);
-                            }
-                        }                        
-                    }
-
-                    if (!$query) {
-                        return response()->json([
-                            'status'    => false,
-                            'message'   => 'Failed to create detail data.'
-                        ], 400);
-                    }
-                }               
+                $this->approval($getProducts,$issued_id, $status);
             }
 
             if (isset($documentNames)) {
@@ -489,6 +456,73 @@ class GoodsIssueController extends Controller
             'message'   => $result['message']
         ],$result['point']);
     }       
+
+    // Data approval process
+    public function approval($products, $issued_id, $status)    
+    {        
+        $referenceID = [];
+        $type        = '';
+        $warehouseID = 0;
+
+        foreach (json_decode($products) as $key => $row) {                                        
+            $type        = $row->type;
+            $warehouseID = $row->warehouse_id;
+            array_push($referenceID, $row->reference_id);
+
+            $query = GoodsIssueProduct::create([
+                'goods_issue_id'   => $issued_id,
+                'reference_id'     => $row->reference_id,
+                'product_id'       => $row->product_id,
+                'uom_id'           => $row->uom_id,
+                'qty_request'      => $row->qty_request,
+                'qty_receive'      => $row->qty_receive,
+                'rack_id'          => $row->rack_id,
+                'bin_id'           => $row->bin_id,
+                'type'             => $row->type
+            ]);                                       
+
+            if($row->has_serial && $row->type == 'borrowing'){                
+                $this->insertSerial($query->id,$row->serials,$status);                                                
+
+                if(!$query){
+                    return response()->json([
+                        'status'    => false,
+                        'message'   => 'Failed to create detail data.'
+                    ], 400);
+                }
+            }
+
+            if (!$query) {
+                return response()->json([
+                    'status'    => false,
+                    'message'   => 'Failed to create detail data.'
+                ], 400);
+            }
+        }
+
+        if($type == 'borrowing' && $status == 'rejected'){                    
+            $item = ProductBorrowingDetail::whereIn('product_borrowing_details.product_borrowing_id', $referenceID)->get();
+            
+            foreach($item as $key => $row){
+                $warehouse = StockWarehouse::where([
+                    'warehouse_id' => $warehouseID,
+                    'product_id'   => $row->product_id
+                ])->first();                       
+
+                $warehouse->stock = $warehouse->stock + $row->qty_requested;
+                $warehouse->save();
+
+                if(!$warehouse){
+                    return response()->json([
+                        'status'    => false,
+                        'message'   => 'Failed to recalculate stock on warehouse.'
+                    ],400);
+                }
+            }            
+        };        
+
+        $query = ProductBorrowing::whereIn('id', $referenceID)->update(['status' => $status=='approved'?'borrowed':'rejected']);
+    }    
 
     /**
      * Update the specified resource in storage.
@@ -709,7 +743,7 @@ class GoodsIssueController extends Controller
                 'message'   => 'Failed to delete data.'
             ], 400);
         }
-    }    
+    }        
 
     public function consumableproducts(Request $request)
     {
@@ -855,14 +889,12 @@ class GoodsIssueController extends Controller
         $query->leftJoin('product_borrowings','product_borrowings.id','=','product_borrowing_details.product_borrowing_id');
         $query->leftJoin('products','products.id','=','product_borrowing_details.product_id');
         $query->leftJoin('product_categories','product_categories.id','=','product_borrowing_details.product_category_id');
-        $query->leftJoin('uoms','uoms.id','=','product_borrowing_details.uom_id');
+        $query->leftJoin('uoms','uoms.id','=','product_borrowing_details.uom_id');        
         if($except){
             $query->whereNotIn('product_borrowing_details.product_id',$except);
         }
-        $query->where([
-            ['product_borrowings.warehouse_id','=',$warehouse_id],
-            ['product_borrowings.status','=','approved']
-        ]);        
+        $query->where('product_borrowings.warehouse_id','=',$warehouse_id);        
+        $query->whereIn('product_borrowings.status',['waiting','approved']);
 
         $rows  = clone $query;
         $total = $rows->count();

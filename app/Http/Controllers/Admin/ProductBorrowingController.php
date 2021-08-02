@@ -100,6 +100,10 @@ class ProductBorrowingController extends Controller
                 ->leftJoin('users','users.id','=','product_borrowings.issued_by')
                 ->find($id); 
 
+            if($data->status != 'draft'){
+                abort(403);
+            }
+
             if($data){
                 return view('admin.productborrowing.edit',compact('data'));
             }else{
@@ -249,6 +253,7 @@ class ProductBorrowingController extends Controller
         $startDate          = $request->start_date;
         $finishDate         = $request->finish_date;
         $status             = $request->status;
+        $sort               = $sort=='borrowing_date'?'product_borrowings.borrowing_date':$sort;
 
         $query = ProductBorrowing::selectRaw("
             product_borrowings.*,
@@ -273,10 +278,10 @@ class ProductBorrowingController extends Controller
             }
         }else{
             $query->whereNotIn('status',['approved','borrowed','archived']);
-        }        
+        }                
         
         $rows  = clone $query;
-        $total = $rows->count();
+        $total = $rows->count();        
 
         $query->offset($start);
         $query->limit($length);
@@ -294,7 +299,9 @@ class ProductBorrowingController extends Controller
             'draw'              => $draw,
             'recordsTotal'      => $total,
             'recordsFiltered'   => $total,
-            'data'              => $data
+            'data'              => $data,
+            'dir'               => $dir,
+            'sort'              => $sort
         ],200);
     }
 
@@ -306,6 +313,7 @@ class ProductBorrowingController extends Controller
         $search             = $request->search['value'];
         $sort               = $request->columns[$request->order[0]['column']]['data'];
         $dir                = $request->order[0]['dir'];
+        $sort               = $sort=='borrowing_date'?'product_borrowings.borrowing_date':$sort;
 
         $query = ProductBorrowing::withTrashed();
         $query->selectRaw("
@@ -414,7 +422,10 @@ class ProductBorrowingController extends Controller
                         'message' => 'Failed to create detail product of product borrowing.'
                     ],400);
                 }
-            }            
+            }    
+            
+            // Calculate and move stock warehouse when status waiting or approved                
+            $calculate = $this->calculateStock($getProducts, $status);
     
             if(isset($documentNames)){                                
                 foreach ($documentNames as $key => $row) {
@@ -591,9 +602,7 @@ class ProductBorrowingController extends Controller
             }
 
             // Calculate and move stock warehouse                    
-            if($status == 'approved'){
-                $calculate = $this->calculateStock($getProducts);
-            }
+            $calculate = $this->calculateStock($getProducts,$status);
 
             $documents = [];
             if($documentNames){                
@@ -859,32 +868,34 @@ class ProductBorrowingController extends Controller
         ], 200);
     }
 
-    function calculateStock($products){
-        foreach (json_decode($products) as $key => $row) {
-            $site_id      = $row->site_id;
-            $warehouse_id = $row->warehouse_id;
-            $product_id   = $row->product_id;
-            $qty_request  = $row->qty_requested;                    
-
-            // Checking stock product on warehouse
-            $stock = StockWarehouse::where([
-                ['stock_warehouses.warehouse_id','=',$warehouse_id],
-                ['stock_warehouses.product_id','=',$product_id]
-            ])->first();            
-            
-            if($stock){
-                $query = $stock;
-                $query->stock = $stock->stock - $qty_request;
-                $query->save();
-
-                if(!$query){
-                    return response()->json([
-                        'status'    => false,
-                        'message'   => 'Failed to update stock on warehouse.'
-                    ],400);
-                }   
+    function calculateStock($products, $status){
+        if($status  == 'waiting' || $status == 'approved'){
+            foreach (json_decode($products) as $key => $row) {
+                $site_id        = $row->site_id;
+                $warehouse_id   = $row->warehouse_id;
+                $product_id     = $row->product_id;
+                $current_stock  = $row->current_stock;                    
+    
+                // Checking stock product on warehouse
+                $stock = StockWarehouse::where([
+                    ['stock_warehouses.warehouse_id','=',$warehouse_id],
+                    ['stock_warehouses.product_id','=',$product_id]
+                ])->first();            
+                
+                if($stock){                    
+                    $query = $stock;
+                    $query->stock = $current_stock;
+                    $query->save();
+    
+                    if(!$query){
+                        return response()->json([
+                            'status'    => false,
+                            'message'   => 'Failed to update stock on warehouse.'
+                        ],400);
+                    }   
+                }
+    
             }
-
         }
     }
 }
