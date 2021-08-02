@@ -243,6 +243,32 @@ class EquipmentController extends Controller
      */
     public function select(Request $request)
     {
-        # code...
+        $start  = $request->page ? $request->page - 1 : 0;
+        $length = $request->limit;
+        $name   = strtoupper($request->name);
+        $area_id= $request->area_id;
+
+        // Count Data
+        $query  = Equipment::with(['area', 'area.site'])->whereRaw("upper(equipment_name) like '%$name%'");
+        if ($area_id) {
+            $query->where('area_id', $area_id);
+        }
+
+        $row    = clone $query;
+        $recordsTotal   = $row->count();
+
+        $query->offset($start);
+        $query->limit($length);
+        $areas  = $query->get();
+
+        $data = [];
+        foreach ($areas as $area) {
+            $area->no = ++$start;
+            $data[] = $area;
+        }
+        return response()->json([
+            'total'     => $recordsTotal,
+            'rows'      => $data,
+        ], 200);
     }
 }

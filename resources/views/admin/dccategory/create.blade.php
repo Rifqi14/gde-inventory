@@ -15,7 +15,7 @@
         <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
             <li class="breadcrumb-item">Home</li>
             <li class="breadcrumb-item">Document Category</li>
-            <li class="breadcrumb-item">Create</li> 
+            <li class="breadcrumb-item">Create</li>
         </ol>
     </div>
 </div>
@@ -40,7 +40,7 @@
                                 <div class="col-sm-6 controls">
                                     <select name="type" id="type" class="select2 form-control" required>
                                         @foreach(config('enums.dc_type') as $key => $dc_type)
-                                            <option value="{{ $key }}">{{ $dc_type }}</option>
+                                        <option value="{{ $key }}">{{ $dc_type }}</option>
                                         @endforeach
                                     </select>
                                 </div>

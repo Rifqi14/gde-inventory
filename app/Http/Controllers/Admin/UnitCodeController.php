@@ -243,9 +243,13 @@ class UnitCodeController extends Controller
         $start  = $request->page ? $request->page - 1 : 0;
         $length = $request->limit;
         $name   = strtoupper($request->name);
+        $organization_id    = $request->organization_id;
 
         // Count Data
-        $query  = UnitCode::whereRaw("upper(name) like '%$name%'");
+        $query  = UnitCode::with(['organization'])->whereRaw("upper(name) like '%$name%'");
+        if ($organization_id) {
+            $query->where('organization_code_id', $organization_id);
+        }
 
         $row    = clone $query;
         $recordsTotal   = $row->count();

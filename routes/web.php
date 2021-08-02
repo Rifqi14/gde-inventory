@@ -317,11 +317,14 @@ Route::group(['prefix' => 'admin'], function () {
         // Document Center
         Route::get('/documentcenter/read', 'Admin\DocumentCenterController@read')->name('documentcenter.read');
         Route::get('/documentcenter/select', 'Admin\DocumentCenterController@select')->name('documentcenter.select');
+        Route::get('/documentcenter/data/{id}', 'Admin\DocumentCenterController@getDocumentCenterData')->name('documentcenter.data');
         Route::get('/documentcenter/{page}/', 'Admin\DocumentCenterController@index')->name('documentcenter.index');
         Route::get('/documentcenter/{page}/create/{category}', 'Admin\DocumentCenterController@create')->name('documentcenter.create');
+        Route::get('/documentcenter/{page}/{id}/edit', 'Admin\DocumentCenterController@edit')->name('documentcenter.edit');
         Route::resource('/documentcenter', 'Admin\DocumentCenterController')->except([
             'index',
             'create',
+            'edit'
         ]);
 
         // Document Type
@@ -338,5 +341,9 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/unitcode/read', 'Admin\UnitCodeController@read')->name('unitcode.read');
         Route::get('/unitcode/select', 'Admin\UnitCodeController@select')->name('unitcode.select');
         Route::resource('/unitcode', 'Admin\UnitCodeController');
+
+        // Document Center Document
+        Route::get('/centerdocument/read', 'Admin\DocumentCenterDocumentController@read')->name('centerdocument.read');
+        Route::resource('/centerdocument', 'Admin\DocumentCenterDocumentController');
     });
 });
