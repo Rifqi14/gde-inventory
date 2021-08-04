@@ -39,7 +39,7 @@
             <ul class="nav nav-tabs tabs-engineering" id="{{ $page }}-tab" role="tablist">
               @foreach ($categories as $key => $category)
               <li class="nav-item">
-                <a class="nav-link {{ $key == 0 ? 'active' : ''}} document" id="{{ $category->name }}-tab" data-toggle="pill" href="#{{ $page }}-tab" role="tab" aria-controls="{{ $page }}-tab" aria-selected="true" data-type="{{ $category->name }}" data-category="{{ $category->id }}" data-page="{{ $page }}" onClick="changeTab('{{ $category }}')">{{ $category->name }}</a>
+                <a class="nav-link {{ $key == 0 ? 'active' : ''}} document" id="{{ $category->doctype->code }}-tab" data-toggle="pill" href="#{{ $page }}-tab" role="tab" aria-controls="{{ $page }}-tab" aria-selected="true" data-type="{{ $category->doctype->code }}" data-category="{{ $category->id }}" data-page="{{ $page }}" onClick="changeTab('{{ $category }}')">{{ $category->doctype->code }}</a>
               </li>
               @endforeach
             </ul>

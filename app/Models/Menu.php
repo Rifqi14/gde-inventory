@@ -32,8 +32,18 @@ class Menu extends Model
      * @param integer $parent_id
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeParent($query, $parent_id)
+    public static function scopeParent($query, $parent_id)
     {
         return $query->where('id', $parent_id);
+    }
+
+    public function child()
+    {
+        return $this->hasMany('App\Models\Menu', 'parent_id', 'id')->orderBy('menu_sort', 'asc');
+    }
+
+    public function parentMenu()
+    {
+        return $this->belongsTo('App\Models\Menu', 'parent_id', 'id');
     }
 }

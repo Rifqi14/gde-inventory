@@ -105,4 +105,24 @@ class DocumentCenterDocument extends Model
             'updated_at',
         ]);
     }
+
+    public function docdetail()
+    {
+        return $this->hasMany('App\Models\DocumentCenterDocumentDetail', 'document_center_document_id', 'id');
+    }
+
+    public function log()
+    {
+        return $this->hasMany('App\Models\DocumentCenterLog', 'document_center_document_id', 'id');
+    }
+
+    public function supersede()
+    {
+        return $this->hasOne('App\Models\DocumentCenterSupersede', 'document_center_document_id', 'id');
+    }
+
+    public function void()
+    {
+        return $this->hasOne('App\Models\DocumentCenterVoid', 'document_center_document_id', 'id');
+    }
 }

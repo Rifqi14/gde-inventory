@@ -345,5 +345,11 @@ Route::group(['prefix' => 'admin'], function () {
         // Document Center Document
         Route::get('/centerdocument/read', 'Admin\DocumentCenterDocumentController@read')->name('centerdocument.read');
         Route::resource('/centerdocument', 'Admin\DocumentCenterDocumentController');
+
+        // Document Center Document Detail
+        Route::resource('/documentdetail', 'Admin\DocumentCenterDocumentDetailController');
+
+        // Document Center Log
+        Route::resource('/documentlog', 'Admin\DocumentCenterLogController');
     });
 });

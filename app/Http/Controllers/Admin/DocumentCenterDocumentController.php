@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\DocumentCenterSupersede;
+use App\Models\DocumentCenterVoid;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\DocumentCenterDocument;
@@ -59,31 +61,50 @@ class DocumentCenterDocumentController extends Controller
                 'document_center_id'    => $request->document_id,
                 'issued_by'             => Auth::guard('admin')->user()->id,
                 'revision'              => $request->revision_number,
-                'status'                => 'DRAFT',
+                'status'                => $request->status,
                 'remark'                => $request->revision_remark,
                 'issue_purpose'         => $request->issue_purpose,
             ];
             $document   = DocumentCenterDocument::create($data);
-            if ($document && $request->file('document_upload')) {
-                $filename       = "$document->transmittal_no.".$request->file('document_upload')->getClientOriginalExtension();
-                $categorymenu   = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $request->category_menu)));
-                $documentnumber = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $request->document_number)));
-                
-                $src    = "assets/documentcenter/$request->menu/$categorymenu/$documentnumber";
-                if (!file_exists($src)) {
-                    mkdir($src, 0777, true);
+            if ($document && $request->document_upload) {
+                $dataDocument   = [];
+                $no             = 1;
+                foreach ($request->document_upload as $key => $detail) {
+                    $transNo        = str_replace('.', '-', $document->transmittal_no) . "#" . $no;
+                    $filename       = "$transNo.".$request->file('document_upload')[$key]->getClientOriginalExtension();
+                    $categorymenu   = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $request->category_menu)));
+                    $documentnumber = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $request->document_number)));
+                    
+                    $src    = "assets/documentcenter/$request->menu/$categorymenu/$documentnumber";
+                    if (!file_exists($src)) {
+                        mkdir($src, 0777, true);
+                    }
+                    $move = $detail->move($src, $filename);
+    
+                    if (!$move) {
+                        DB::rollBack();
+                        return response()->json([
+                            'status'    => false,
+                            'message'   => "Error upload document",
+                        ], 400);
+                    }
+                    $dataDocument[] = [
+                        'document_center_document_id'   => $document->id,
+                        'document_path'                 => "$src/$filename",
+                        'document_name'                 => $filename,
+                        'file_size'                     => File::size("$src/$filename"),
+                    ];
+                    $no++;
                 }
-                $move = $request->file('document_upload')->move($src, $filename);
 
-                if (!$move) {
+                $createDetail   = $document->docdetail()->createMany($dataDocument);
+                if (!$createDetail) {
                     DB::rollBack();
                     return response()->json([
                         'status'    => false,
-                        'message'   => "Error upload document",
+                        'message'   => "Error create revise document detail",
                     ], 400);
                 }
-                $document->document_path    = "$src/$filename";
-                $document->save();
             }
         } catch (\Illuminate\Database\QueryException $ex) {
             DB::rollBack();
@@ -118,7 +139,7 @@ class DocumentCenterDocumentController extends Controller
      */
     public function edit($id)
     {
-        $center     = DocumentCenterDocument::with(['createdBy', 'updatedBy'])->find($id);
+        $center     = DocumentCenterDocument::with(['createdBy', 'updatedBy', 'docdetail', 'supersede', 'void', 'supersede.docno'])->find($id);
         $center->created_date   = date('d/m/Y', strtotime($center->created_at));
         $center->last_modified  = date('d/m/Y', strtotime($center->updated_at));
         if ($center) {
@@ -157,36 +178,107 @@ class DocumentCenterDocumentController extends Controller
         DB::beginTransaction();
         try {
             $document       = DocumentCenterDocument::find($id);
-            $document->document_center_id   = $request->document_id;
+            $document->document_center_id   = $request->document_id ? $request->document_id : $document->document_center_id;
             $document->issued_by            = Auth::guard('admin')->user()->id;
-            $document->revision             = $request->revision_number;
-            $document->status               = 'DRAFT';
-            $document->remark               = $request->revision_remark;
-            $document->issue_purpose        = $request->issue_purpose;
+            $document->revision             = $request->revision_number ? $request->revision_number : $document->revision;
+            $document->status               = $request->status ? $request->status : $document->status;
+            $document->remark               = $request->revision_remark ? $request->revision_remark : $document->remark;
+            $document->issue_purpose        = $request->issue_purpose ? $request->issue_purpose : $document->issue_purpose;
+            $document->transmittal_status   = $document->status == 'DRAFT' || $document->status == 'WAITING' ? 'Waiting for Issue' : 'Issued';
             $saveDoc                        = $document->save();
-            if ($saveDoc && $request->file('document_upload')) {
-                $filename       = "$document->transmittal_no.".$request->file('document_upload')->getClientOriginalExtension();
-                $categorymenu   = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $request->category_menu)));
-                $documentnumber = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $request->document_number)));
-
-                if (file_exists($document->document_path)) {
-                    File::delete($document->document_path);
+            if ($saveDoc && $request->document_upload) {
+                $dataDocument   = [];
+                $no             = 1;
+                foreach ($request->document_upload as $key => $detail) {
+                    $transNo        = str_replace('.', '-', $document->transmittal_no) . "#" . $no;
+                    $filename       = "$transNo.".$request->file('document_upload')[$key]->getClientOriginalExtension();
+                    $categorymenu   = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $request->category_menu)));
+                    $documentnumber = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $request->document_number)));
+                    
+                    $src    = "assets/documentcenter/$request->menu/$categorymenu/$documentnumber";
+                    if (!file_exists($src)) {
+                        mkdir($src, 0777, true);
+                    }
+                    $move = $detail->move($src, $filename);
+    
+                    if (!$move) {
+                        DB::rollBack();
+                        return response()->json([
+                            'status'    => false,
+                            'message'   => "Error upload document",
+                        ], 400);
+                    }
+                    $dataDocument[] = [
+                        'document_center_document_id'   => $document->id,
+                        'document_path'                 => "$src/$filename",
+                        'document_name'                 => $filename,
+                        'file_size'                     => File::size("$src/$filename"),
+                    ];
+                    $no++;
                 }
-
-                $src    = "assets/documentcenter/$request->menu/$categorymenu/$documentnumber";
-                if (!file_exists($src)) {
-                    mkdir($src, 0777, true);
-                }
-                $move = $request->file('document_upload')->move($src, $filename);
-
-                if (!$move) {
+                $createDetail   = $document->docdetail()->createMany($dataDocument);
+                if (!$createDetail) {
                     DB::rollBack();
                     return response()->json([
                         'status'    => false,
                         'message'   => "Error upload document",
                     ], 400);
                 }
-                $document->document_path    = "$src/$filename";
+            }
+
+            if ($saveDoc && $request->document_type_supersede) {
+                if ($request->document_type_supersede == 'VOID') {
+                    try {
+                        $data       = [
+                            'document_center_document_id'   => $document->id,
+                            'void_remark'                   => $request->void_remark,
+                        ];
+                        if ($document->void) {
+                            $document->void()->delete();
+                        }
+                        DocumentCenterVoid::create($data);
+
+                        if ($document->supersede) {
+                            $document->supersede()->delete();
+                        }
+                    } catch (\Illuminate\Database\QueryException $ex) {
+                        DB::rollBack();
+                        return response()->json([
+                            'status'    => false,
+                            'message'   => "Error update document: {$ex->errorInfo[2]}",
+                        ], 400);
+                    }
+                } else {
+                    try {
+                        $data       = [
+                            'document_center_document_id'   => $document->id,
+                            'document_center_id'            => $request->document_center_id_supersede,
+                            'supersede_remark'              => $request->supersede_remark,
+                        ];
+                        if ($document->supersede) {
+                            $document->supersede()->delete();
+                        }
+                        DocumentCenterSupersede::create($data);
+
+                        if ($document->void) {
+                            $document->void()->delete();
+                        }
+                    } catch (\Illuminate\Database\QueryException $ex) {
+                        DB::rollBack();
+                        return response()->json([
+                            'status'    => false,
+                            'message'   => "Error update document: {$ex->errorInfo[2]}",
+                        ], 400);
+                    }
+                }
+                $document->document_type    = $request->document_type_supersede;
+                $document->save();
+            }
+
+            if ($request->undo == "UNDO") {
+                $document->void()->delete();
+                $document->supersede()->delete();
+                $document->document_type    = null;
                 $document->save();
             }
         } catch (\Illuminate\Database\QueryException $ex) {
@@ -230,7 +322,7 @@ class DocumentCenterDocumentController extends Controller
         $document_id    = $request->document_id;
 
         // Query Data
-        $query          = DocumentCenterDocument::with(['createdBy', 'updatedBy'])->where('document_center_id', $document_id);
+        $query          = DocumentCenterDocument::with(['createdBy', 'updatedBy', 'docdetail'])->where('document_center_id', $document_id);
 
         $row            = clone $query;
         $recordsTotal   = $row->count();
@@ -243,6 +335,10 @@ class DocumentCenterDocumentController extends Controller
         $data           = [];
         foreach ($documents as $key => $document) {
             $document->no   = ++$start;
+            $document->test = '';
+            foreach ($document->docdetail() as $keyDetail => $detail) {
+                $document->file_size    = $this->formatBytes($document->file_size, 2);
+            }
             $document->last_modified   = date('d/m/Y', strtotime($document->updated_at));
             $data[]         = $document;
         }
@@ -253,4 +349,18 @@ class DocumentCenterDocumentController extends Controller
             'data'              => $data,
         ], 200);
     }
+
+    function formatBytes($bytes, $precision = 2) { 
+        $units = array('B', 'KB', 'MB', 'GB', 'TB'); 
+    
+        $bytes = max($bytes, 0); 
+        $pow = floor(($bytes ? log($bytes) : 0) / log(1024)); 
+        $pow = min($pow, count($units) - 1); 
+    
+        // Uncomment one of the following alternatives
+        // $bytes /= pow(1024, $pow);
+        // $bytes /= (1 << (10 * $pow)); 
+    
+        return round($bytes, $precision) . ' ' . $units[$pow]; 
+    } 
 }

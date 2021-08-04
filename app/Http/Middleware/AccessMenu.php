@@ -23,6 +23,7 @@ class AccessMenu
     {
         if(Auth::guard('admin')->check()){
             $route = explode('.',Route::currentRouteName());
+            $route[0] = $request->page ? "{$route[0]}/$request->page" : $route[0];
             $accessmenu = [];
             $user_id = Auth::guard('admin')->user()->id;
             $role_user = RoleUser::where("user_id", $user_id)->first();
@@ -36,7 +37,7 @@ class AccessMenu
             ->get();
             foreach($rolemenus as $rolemenu){
                 $accessmenu[] = $rolemenu->menu_route;
-            } 
+            }
 
             if(!in_array($route[0],$accessmenu)){
                 abort(403);

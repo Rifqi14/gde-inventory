@@ -17,4 +17,12 @@ class Role extends Model
     {
         return $this->users()->wherePivot('employee_id');
     }
+
+    public function documentCenters()
+    {
+        return $this->belongsToMany('App\Models\DocumentCenter')->using('App\Models\DocumentCenterInformed')->withPivot([
+            'created_by',
+            'updated_by',
+        ]);
+    }
 }
