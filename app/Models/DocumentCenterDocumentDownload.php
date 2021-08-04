@@ -12,4 +12,9 @@ class DocumentCenterDocumentDownload extends Pivot
      * @var array
      */
     protected $guarded = [];
+
+    public function docdetail()
+    {
+        return $this->belongsTo('App\Models\DocumentCenterDocumentDetail', 'document_id', 'id');
+    }
 }

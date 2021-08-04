@@ -46,23 +46,38 @@
                   </div>
                   <div class="form-group row">
                     <label for="document_type_id" class="control-label col-md-3">Document Type:</label>
-                    <select name="document_type_id" id="document_type_id" class="form-control select2 col-md-8" data-placeholder="Choose Document Type...">
-                    </select>
+                    <div class="col-md-3 pl-0">
+                      <select name="document_type_id" id="document_type_id" class="form-control select2" data-placeholder="Choose Document Type...">
+                      </select>
+                    </div>
+                    <div class="col-md-5 pr-0">
+                      <input type="text" name="doctype_label" id="doctype_label" class="form-control" placeholder="Document Type..." readonly>
+                    </div>
                   </div>
                   <div class="form-group row">
                     <label for="organization_code_id" class="control-label col-md-3">Organization Code:</label>
-                    <select name="organization_code_id" id="organization_code_id" class="form-control select2 col-md-8" data-placeholder="Choose Organization Code...">
-                    </select>
+                    <div class="col-md-3 pl-0">
+                      <select name="organization_code_id" id="organization_code_id" class="form-control select2" data-placeholder="Choose Organization Code...">
+                      </select>
+                    </div>
+                    <div class="col-md-5 pr-0">
+                      <input type="text" id="orgcode_label" class="form-control" placeholder="Organization Code..." readonly>
+                    </div>
                   </div>
                   <div class="form-group row">
                     <label for="unit_code_id" class="control-label col-md-3">Unit Code:</label>
-                    <select name="unit_code_id" id="unit_code_id" class="form-control select2 col-md-8" data-placeholder="Choose Unit Code...">
-                    </select>
+                    <div class="col-md-3 pl-0">
+                      <select name="unit_code_id" id="unit_code_id" class="form-control select2" data-placeholder="Choose Unit Code...">
+                      </select>
+                    </div>
+                    <div class="col-md-5 pr-0">
+                      <input type="text" id="unitcode_label" class="form-control" placeholder="Unit Code..." readonly>
+                    </div>
                   </div>
                   <div class="form-group row">
-                    <label for="role_id" class="control-label col-md-3">Originator:</label>
+                    <label for="originator_id" class="control-label col-md-3">Originator:</label>
                     <input type="hidden" name="category" value="{{ $request->category }}">
-                    <select name="role_id[]" multiple="multiple" id="role_id" class="form-control select2 col-md-8">
+                    <select name="originator_id" id="originator_id" class="form-control select2 col-md-8">
                     </select>
                   </div>
                 </div>
@@ -115,7 +130,7 @@
                     </div>
                   </div>
                   <div class="form-group row">
-                    <label for="remark" class="control-label col-md-3">Remark</label>
+                    <label for="remark" class="control-label col-md-3">Document Remark</label>
                     <textarea class="form-control summernote col-md-8 d-none" name="remark" id="remark" rows="4" placeholder="Remark..."></textarea>
                   </div>
                 </div>
@@ -237,7 +252,7 @@
       }
     });
 
-    $('#role_id').select2({
+    $('#originator_id').select2({
       placeholder: "Choose Group...",
       ajax: {
         url: "{{ route('role.select') }}",
@@ -264,7 +279,6 @@
         },
       },
       allowClear: true,
-      tags: true,
     });
 
     $('#document_type_id').select2({
@@ -286,13 +300,18 @@
           $.each(data.rows, function(index, item) {
             option.push({
               id: item.id,
-              text: `${item.code} - ${item.name}`,
+              text: `${item.code}`,
+              name: `${item.name}`,
             });
           });
           return { results: option, more: more, };
         },
       },
       allowClear: true,
+    }).on('select2:select', function(e) {
+      $('#doctype_label').val($(this).select2('data')[0].name);
+    }).on('select2:clear', function(e) {
+      $('#doctype_label').val(null);
     });
 
     $('#organization_code_id').select2({
@@ -314,7 +333,8 @@
           $.each(data.rows, function(index, item) {
             option.push({
               id: item.id,
-              text: `${item.code} - ${item.name}`,
+              text: `${item.code}`,
+              name: `${item.name}`,
             });
           });
           return { results: option, more: more, };
@@ -323,6 +343,8 @@
       allowClear: true,
     }).on('select2:clear', function(e) {
       $('#unit_code_id').val(null).trigger('change');
+      $('#orgcode_label').val(null);
+      $('#unitcode_label').val(null);
     }).on('select2:close', function(e) {
       var data    = $(this).find('option:selected').val();
       var unit_code_id = $('#unit_code_id').select2('data');
@@ -330,6 +352,8 @@
       if (unit_code_id[0] && unit_code_id[0].organization.id != data) {
         $('#unit_code_id').val(null).trigger('change');
       }
+    }).on('select2:select', function(e) {
+      $('#orgcode_label').val($(this).select2('data')[0].name);
     });
 
     $('#unit_code_id').select2({
@@ -352,7 +376,8 @@
           $.each(data.rows, function(index, item) {
             option.push({
               id: item.id,
-              text: `${item.code} - ${item.name}`,
+              text: `${item.code}`,
+              name: `${item.name}`,
               organization: item.organization,
             });
           });
@@ -363,15 +388,21 @@
     }).on('select2:select', function(e) {
       var data    = e.params.data;
 
+      $('#unitcode_label').val(data.name);
+
       if (data.organization) {
-        var label = `${data.organization.code} - ${data.organization.name}`;
+        $('#orgcode_label').val(data.organization.name);
+        var label = `${data.organization.code}`;
         $('#organization_code_id').select2('trigger', 'select', {
           data: {
             id: `${data.organization ? data.organization.id : null}`,
             text: `${data.organization ? label : ''}`,
+            name: `${data.organization.name}`,
           }
         });
       }
+    }).on('select2:clear', function(e) {
+      $('#unitcode_label').val(null);
     });
 
     $('#contract_id').select2({

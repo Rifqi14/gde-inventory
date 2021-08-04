@@ -18,11 +18,13 @@ class DocumentCenterController extends Controller
 {
     protected $page = "";
     protected $type = "";
+    protected $menu_id = "";
     function __construct(Request $request) {
         $this->page = Route::current()->parameter('page');
         $this->page = $this->page ? $this->page : $request->menu;
         $page   = $this->page;
         $menu   = Menu::GetByRoute("documentcenter/$this->page")->first();
+        $this->menu_id  = $menu->id;
         $parent = Menu::parent($menu->parent_id)->first();
         View::share('menu_name', $menu->menu_name);
         View::share('parent_name', $parent->menu_name);
@@ -38,7 +40,7 @@ class DocumentCenterController extends Controller
      */
     public function index(Request $request)
     {
-        $categories = DcCategory::where('type', ucwords($this->page))->get();
+        $categories = DcCategory::with(['menu', 'doctype'])->where('menu_id', $this->menu_id)->get();
         if (in_array('create', $request->actionmenu)) {
             return view('admin.documentcenter.index', compact('categories'));
         }
@@ -93,28 +95,9 @@ class DocumentCenterController extends Controller
                 'organization_code_id'  => $request->organization_code_id,
                 'unit_code_id'          => $request->unit_code_id,
                 'remark'                => $request->remark,
+                'originator_id'         => $request->originator_id,
             ];
             $documentCenter     = DocumentCenter::create($data);
-            if ($documentCenter) {
-                if ($request->role_id) {
-                    $dataRole   = [];
-                    foreach ($request->role_id as $keyRole => $role) {
-                        $dataRole[]   = [
-                            'document_center_id'    => $documentCenter->id,
-                            'role_id'               => $role,
-                        ];
-                    }
-                    try {
-                        $dataInformed   = $documentCenter->informeds()->createMany($dataRole);
-                    } catch (\Illuminate\Database\QueryException $ex) {
-                        DB::rollBack();
-                        return response()->json([
-                            'status'    => false,
-                            'message'   => "Error create data: {$ex->errorInfo[2]}",
-                        ], 400);
-                    }
-                }
-            }
         } catch (\Illuminate\Database\QueryException $th) {
             DB::rollBack();
             return response()->json([
@@ -126,7 +109,7 @@ class DocumentCenterController extends Controller
         return response()->json([
             'status'    => true,
             'message'   => "Success create data",
-            'results'   => route('documentcenter.index', ['page' => $request->menu]),
+            'results'   => route('documentcenter.edit', ['page' => $request->menu, 'id' => $documentCenter->id]),
         ], 200);
     }
 
@@ -194,28 +177,8 @@ class DocumentCenterController extends Controller
             $documentCenter->organization_code_id   = $request->organization_code_id;
             $documentCenter->unit_code_id           = $request->unit_code_id;
             $documentCenter->remark                 = $request->remark;
+            $documentCenter->originator_id          = $request->originator_id;
             $documentCenter->save();
-
-            if ($documentCenter) {
-                if ($request->role_id) {
-                    $dataRole   = [];
-                    foreach ($request->role_id as $key => $role) {
-                        $dataRole[] = [
-                            'document_center_id'    => $documentCenter->id,
-                            'role_id'               => $role,
-                        ];
-                    }
-                    try {
-                        $dataInformed   = $documentCenter->informeds()->createMany($dataRole);
-                    } catch (\Illuminate\Database\QueryException $ex) {
-                        DB::rollBack();
-                        return response()->json([
-                            'status'    => false,
-                            'message'   => "Error create originator data: {$ex->errorInfo[2]}"
-                        ], 400);
-                    }
-                }
-            }
         } catch (\Illuminate\Database\QueryException $ex) {
             DB::rollBack();
             return response()->json([
@@ -288,17 +251,22 @@ class DocumentCenterController extends Controller
             $revision       = 0;
             $purpose        = '';
             $revisionDate   = '';
-            foreach ($document->documents()->get() as $key => $doc) {
-                $revision   += $doc->revision;
-            }
+            $issue_purpose  = '';
+            $issue_status   = '';
             if ($document->documents()->count() > 0) {
                 $revisionDate       = date('d/m/Y', strtotime($document->documents()->latest()->first()->created_at));
                 $purpose            = $document->documents()->latest()->first()->remark;
+                $issue_purpose      = $document->documents()->latest()->first()->issue_purpose;
+                $issue_status       = $document->documents()->latest()->first()->status;
+                $revision           = $document->documents()->latest()->first()->revision;
+                $document->document_type    = $document->documents()->latest()->first()->document_type;
                 $document->status   = $document->documents()->first()->status;
             }
             $document->no   = ++$start;
             $document->revision = $revision;
             $document->purpose  = $purpose ? $purpose : "";
+            $document->issue_purpose= $issue_purpose;
+            $document->issue_status = $issue_status;
             $document->discipline   = ucwords($document->discipline);
             $document->revision_date= $revisionDate;
             $document->first_issue  = date('d/m/Y', strtotime($document->first_issue));
@@ -339,5 +307,50 @@ class DocumentCenterController extends Controller
             'status'    => false,
             'message'   => "Data not found",
         ], 400);
+    }
+
+    /**
+     * Method to get data to show in select2
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function select(Request $request)
+    {
+        $start  = $request->page ? $request->page - 1 : 0;
+        $length = $request->limit;
+        $name   = strtoupper($request->name);
+        $document_type_id       = $request->document_type_id;
+        $organization_code_id   = $request->organization_code_id;
+        $unit_code_id           = $request->unit_code_id;
+
+        // Count Data
+        $query  = DocumentCenter::whereRaw("upper(document_number) like '%$name%'");
+        if ($document_type_id) {
+            $query->where('document_type_id', $document_type_id);
+        }
+        if ($organization_code_id) {
+            $query->where('organization_code_id', $organization_code_id);
+        }
+        if ($unit_code_id) {
+            $query->where('unit_code_id', $unit_code_id);
+        }
+
+        $row    = clone $query;
+        $recordsTotal   = $row->count();
+
+        $query->offset($start);
+        $query->limit($length);
+        $documents  = $query->get();
+
+        $data = [];
+        foreach ($documents as $document) {
+            $document->no   = ++$start;
+            $data[]         = $document;
+        }
+        return response()->json([
+            'total'     => $recordsTotal,
+            'rows'      => $data,
+        ], 200);
     }
 }

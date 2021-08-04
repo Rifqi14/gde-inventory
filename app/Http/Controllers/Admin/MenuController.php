@@ -45,15 +45,20 @@ class MenuController extends Controller
         $start      = $request->page ? $request->page - 1 : 0;
         $length     = $request->limit;
         $name       = strtoupper($request->name);
+        $route      = $request->route;
 
         // Count Data
-        $query          = Menu::whereRaw("upper(menu_name) like '%$name%'");
-        $recordsTotal   = $query->count();
+        $query          = Menu::with(['child'])->whereRaw("upper(menu_name) like '%$name%'");
+        if ($route) {
+            $query->where('menu_route', $route);
+        }
+        $row            = clone $query;
+        $recordsTotal   = $row->count();
         
         // Select Pagination
-        $query      = Menu::whereRaw("upper(menu_name) like '%$name%'");
         $query->offset($start*$length);
         $query->limit($length);
+        $query->orderBy('menu_sort', 'asc');
         $menus      = $query->get();
 
         $data       = [];

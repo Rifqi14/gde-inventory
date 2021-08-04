@@ -135,4 +135,9 @@ class DocumentCenter extends Model
     {
         return $this->belongsToMany('App\Models\Role', 'document_center_informeds', 'document_center_id', 'role_id')->withPivot(['created_by', 'updated_by']);
     }
+
+    public function originator()
+    {
+        return $this->belongsTo('App\Models\Role', 'originator_id', 'id');
+    }
 }

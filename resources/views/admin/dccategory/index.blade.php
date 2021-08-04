@@ -36,15 +36,15 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
-                        
+
                     </div>
                     <div class="card-body table-responsive p-0">
                         <table id="table-dccategory" class="table table-striped datatable" width="100%">
                             <thead>
                                 <tr>
                                     <th width="5">No.</th>
-                                    <th width="100">Type</th>
-                                    <th width="100">Category Name</th>
+                                    <th width="100">Sub Menu</th>
+                                    <th width="100">Document Type</th>
                                     <th width="20" class="text-center">#</th>
                                 </tr>
                             </thead>
@@ -62,7 +62,7 @@
             <div class="modal-header">
                 <h5 class="modal-title text-bold">Filter Doc Category</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
+                    <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
@@ -72,18 +72,16 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
-                                <label class="control-label" for="name">Type</label>
-                                <select name="type" id="type" class="select2 form-control">
-                                    @foreach(config('enums.dc_type') as $key => $dc_type)
-                                        <option value="{{ $key }}">{{ $dc_type }}</option>
-                                    @endforeach
+                                <label class="control-label" for="menu_id">Sub Menu</label>
+                                <select name="menu_id" id="menu_id" class="select2 form-control">
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-12">
                             <div class="form-group">
-                                <label class="control-label" for="name">Name</label>
-                                <input type="text" class="form-control" id="name" name="name" placeholder="Name" aria-required="true">
+                                <label class="control-label" for="document_type_id">Document Type</label>
+                                <select name="document_type_id" id="document_type_id" class="select2 form-control">
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -104,6 +102,8 @@
 
 @section('scripts')
 <script>
+    var actionmenu  = @json(json_encode($actionmenu));
+
     function filter() {
         $('#form-filter').modal('show');
     }
@@ -131,10 +131,10 @@
                 url: "{{route('documentcategory.read')}}",
                 type: "GET",
                 data:function(data){
-                    var type = $('#form-search').find('select[name=type]').val();
-                    var name = $('#form-search').find('input[name=name]').val();
-                    data.type = type;
-                    data.name = name;
+                    var menu_id             = $('#form-search').find('select[name=menu_id]').val();
+                    var document_type_id    = $('#form-search').find('select[name=document_type_id]').val();
+                    data.menu_id            = menu_id;
+                    data.document_type_id   = document_type_id;
                 }
             },
             columnDefs:[
@@ -149,23 +149,36 @@
                         return row.no;
                     },targets: [0]
                 },
+                {
+                    render: function ( data, type, row ) {
+                        return row.menu ? row.menu.menu_name : '';
+                    },targets: [1]
+                },
+                {
+                    render: function ( data, type, row ) {
+                        return row.doctype ? row.doctype.code : '';
+                    },targets: [2]
+                },
                 {   
                     width: "10%",
                     render: function ( data, type, row ) {
+                        var button  = '';
+                        if (actionmenu.indexOf('update') > 0) {
+                            button += `<a class="dropdown-item" href="javascript:void(0);" onclick="edit(${row.id})">
+                                        <i class="far fa-edit"></i>Update Data
+                                       </a>`;
+                        }
+                        if (actionmenu.indexOf('delete') > 0) {
+                            button += `<a class="dropdown-item delete" href="javascript:void(0);" data-id="${row.id}">
+                                        <i class="fa fa-trash-alt"></i> Delete Data
+                                       </a>`;
+                        }
                     return `<div class="btn-group">
                     <button type="button" class="btn btn-flat btn-sm dropdown-toggle" data-toggle="dropdown">
                         <i class="fas fa-bars"></i>
                     </button>
                     <div class="dropdown-menu">
-                        <a class="dropdown-item" href="javascript:void(0);" onclick="view(${row.id})">
-                        <i class="far fa-eye"></i>View Data
-                        </a>
-                        <a class="dropdown-item" href="javascript:void(0);" onclick="edit(${row.id})">
-                        <i class="far fa-edit"></i>Update Data
-                        </a>
-                        <a class="dropdown-item delete" href="javascript:void(0);" data-id="${row.id}">
-                        <i class="fa fa-trash-alt"></i> Delete Data
-                        </a>
+                        ${button}
                     </div>
                     </div>`;
                     },targets: [3]
@@ -173,9 +186,9 @@
             ],
             columns: [
                 { data: "no" },
-                { data: "type" },
-                { data: "name" },
-                { data: "no" },
+                { data: "menu_id" },
+                { data: "document_type_id" },
+                { data: "id" },
             ]
         });
 
@@ -183,6 +196,70 @@
             e.preventDefault();
             dataTable.draw();
             $('#form-filter').modal('hide');
+        });
+
+        $('#menu_id').select2({
+            placeholder: "Choose Sub Menu ...",
+            ajax: {
+                url: "{{ route('menu.select') }}",
+                type: 'GET',
+                dataType: 'json',
+                data: function(params) {
+                    return {
+                        route: 'documentcenter',
+                        name: params.term,
+                        page: params.page,
+                        limit: 30,
+                    };
+                },
+                processResults: function(data, params) {
+                    params.page = params.page || 1;
+                    var more    = (params.page * 30) < data.total;
+                    var option  = [];
+                    $.each(data.rows, function(index, item) {
+                        if (item.child) {
+                            $.each(item.child, function(indexChild, child) {
+                                option.push({
+                                    id: child.id,
+                                    text: `${child.menu_name}`,
+                                });
+                            })
+                        }
+                    });
+                    return { results: option, more: more };
+                },
+            },
+            allowClear: true,
+        });
+
+        $('#document_type_id').select2({
+            placeholder: "Choose Document Type ...",
+            ajax: {
+                url: "{{ route('documenttype.select') }}",
+                type: 'GET',
+                dataType: 'json',
+                data: function(params) {
+                    return {
+                        name: params.term,
+                        page: params.page,
+                        limit: 30,
+                    };
+                },
+                processResults: function(data, params) {
+                    params.page = params.page || 1;
+                    var more    = (params.page * 30) < data.total;
+                    var option  = [];
+                    $.each(data.rows, function(index, item) {
+                        option.push({
+                            id: item.id,
+                            text: `${item.code}`,
+                            name: `${item.name}`,
+                        });
+                    });
+                    return { results: option, more: more };
+                },
+            },
+            allowClear: true,
         });
 
         $(document).on('click', '.delete', function () {
