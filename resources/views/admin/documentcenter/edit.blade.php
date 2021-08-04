@@ -1229,7 +1229,7 @@
                       });
                   }
 
-                  if (row.supersede.docno) {
+                  if (row.supersede) {
                     docRef  = `<a href="javascript:void(0);" onclick="documentReference(${row.supersede.docno.id})"><div class="text-md text-info text-bold">${row.supersede.docno.document_number}</div></a>`
                   }
 
