@@ -1219,6 +1219,11 @@
                   text    = 'Issued';
                 }
 
+                if (status == 'REJECT') {
+                  label   = 'maroon';
+                  text    = 'Rejected';
+                }
+
                 if (row.document_type) {
                   label   = 'info';
                   String.prototype.ucwords = function() {
