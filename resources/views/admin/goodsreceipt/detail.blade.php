@@ -106,13 +106,13 @@
                 <table id="table-product" class="table table-striped datatable" width="100%">
                   <thead>
                     <tr>
-                      <th width="150">Product</th>
-                      <th width="150" style="white-space: nowrap;">Product Category</th>
-                      <th width="20" class="text-center">Has Serial</th>                      
-                      <th width="20" class="text-right" style="white-space: nowrap;">Qty Order</th>
-                      <th width="20" class="text-right" style="white-space: nowrap;">Qty Receipt</th>
-                      <th width="40">Rack</th>
-                      <th width="100">Bin</th>
+                      <th width="100">Product</th>
+                      <th width="100">Category</th>
+                      <th width="30" class="text-center">Has Serial</th>                      
+                      <th width="40" class="text-center" style="white-space: nowrap;">Qty Order</th>
+                      <th width="40" class="text-center" style="white-space: nowrap;">Qty Receipt</th>
+                      <th width="100">Rack</th>
+                      <th width="100">Bin</th>                      
                     </tr>
                   </thead>
                   <tbody>
@@ -404,7 +404,7 @@
                       <td class="text-right" width="30">${order}</td>
                       <td class="text-right" width="30">${receipt}</td>
                       <td width="100">${rack}</td>
-                      <td width="100">${bin}</td>                       
+                      <td width="100">${bin}</td>                                             
                     </tr>`;
          
       });
@@ -468,66 +468,6 @@
       contractref :files,
       images    : images
     });
-  }
-
-  const addProduct = () => {
-    $('#form-reference').modal('show');
-  }
-
-  const addDocument = () => {
-    var number = $('#table-document').find('tr:last').data('number') ? $('#table-document').find('tr:last').data('number') + 1 : 1;
-    var html = `
-    <tr data-number="${number}">
-      <td><input type="text" class="form-control" id="document_name_${number}" name="document_name[]" placeholder="Document Name" aria-required="true"></td>
-      <td>
-        <div class="input-group">
-          <div class="custom-file">
-            <input type="file" class="custom-file-input" name="image" accept="image/*" onchange="changePath(this)">
-            <label class="custom-file-label" for="exampleInputFile">Attach Image</label>
-          </div>
-        </div>
-      </td>
-      <td>
-        <button type="button" class="btn btn-transparent text-md" onclick="removeDocument($(this))" data-document=${number}>
-          <i class="fas fa-trash text-maroon color-palette"></i>
-        </button>
-      </td>
-    </tr>
-    `;
-    $("#table-document tbody").append(html);
-  }
-
-  const removeDocument = (a) => {
-    var number = a.attr('data-document');
-    $("#table-document tbody").find("tr[data-number=" + number + "]").remove();
-  }
-
-  const addPhoto = () => {
-    var number = $('#table-photo').find('tr:last').data('number') ? $('#table-photo').find('tr:last').data('number') + 1 : 1;
-    var html = `
-    <tr data-number="${number}">
-      <td><input type="text" class="form-control" id="photo_name_${number}" name="photo_name[]" placeholder="Photo Name" aria-required="true"></td>
-      <td>
-        <div class="input-group">
-          <div class="custom-file">
-            <input type="file" class="custom-file-input" name="image" accept="image/*" onchange="changePath(this)">
-            <label class="custom-file-label" for="exampleInputFile">Attach Image</label>
-          </div>
-        </div>
-      </td>
-      <td>
-        <button type="button" class="btn btn-transparent text-md" onclick="removePhoto($(this))" data-photo=${number}>
-          <i class="fas fa-trash text-maroon color-palette"></i>
-        </button>
-      </td>
-    </tr>
-    `;
-    $("#table-photo tbody").append(html);
-  }
-
-  const removePhoto = (a) => {
-    var number = a.attr('data-photo');
-    $("#table-photo tbody").find("tr[data-number=" + number + "]").remove();
-  }
+  }  
 </script>
 @endsection

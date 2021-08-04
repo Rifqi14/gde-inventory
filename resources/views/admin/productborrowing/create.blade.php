@@ -648,6 +648,8 @@
             submitHandler: function() {                
                 var data          = new FormData($('#form')[0]),
                     issuedBy      = $('#form').find('#issued-by').select2('val'),
+                    siteID        = $('#form').find('#site').find('option:selected').val(),
+                    warehouseID   = $('#form').find('#warehouse').find('option:selected').val(),
                     borrowingDate = $('#form').find('#borrowing-date').data('daterangepicker').startDate.format('YYYY-MM-DD'),
                     returnDate    = $('#form').find('#return-date').data('daterangepicker').startDate.format('YYYY-MM-DD'),
                     products      = [],
@@ -663,9 +665,12 @@
                          qtyRequested = $(this).find('.qty-request').val();                    
                                          
                     products.push({
+                        site_id         : siteID,
+                        warehouse_id    : warehouseID,
                         product_id      : product_id,
                         category_id     : categoryID,
-                        uom_id          : uomID,                        
+                        uom_id          : uomID,            
+                        current_stock   : qtySystem - qtyRequested,            
                         qty_system      : qtySystem,
                         qty_requested   : qtyRequested
                     });                    
@@ -675,8 +680,7 @@
                         return false;
                     }
 
-                });
-
+                });                
 
                 if(products.length == 0){
                     toastr.warning('Select product first.');

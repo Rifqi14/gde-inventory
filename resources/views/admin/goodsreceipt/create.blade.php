@@ -139,7 +139,7 @@
                   <thead>
                     <tr>
                       <th width="100">Product</th>
-                      <th width="100" style="white-space: nowrap;">Product Category</th>
+                      <th width="100">Category</th>
                       <th width="30" class="text-center">Has Serial</th>                      
                       <th width="40" class="text-center" style="white-space: nowrap;">Qty Order</th>
                       <th width="40" class="text-center" style="white-space: nowrap;">Qty Receipt</th>
@@ -486,10 +486,10 @@
           var option = [];
           $.each(data.rows, function(index, item) {
             option.push({
-              id: item.id,
-              text: item.name,
-              site_id: item.site_id,
-              site: item.site
+              id      : item.id,
+              text    : item.name,
+              site_id : item.site_id,
+              site    : item.site
             });
           });
           return {
@@ -560,7 +560,14 @@
         url: "{{route('goodsreceipt.contractproducts')}}",
         type: "GET",
         data: function(data) {
-          data.except      = receiptProduct;
+          var exception = [];
+          var item      = receiptProduct.filter(param => param.type == 'contract');
+
+          $.each(item, function (index, value) { 
+             exception.push(value.product_id);
+          });
+          
+          data.except      = exception;
           data.category_id = $('#form').find('#product-category').find('option:selected').val();
         }
       },
@@ -604,13 +611,14 @@
                 reference     = row.contract_number,
                 productID     = row.product_id,
                 product       = row.product,  
+                detailID      = row.detail_id,
                 sku           = row.sku,            
                 isSerial      = row.is_serial,   
                 last_key      = row.last_serial,           
                 uomID         = row.uom_id,
                 order         = row.qty ? row.qty : 0;            
 
-            return `<button class="btn btn-sm text-xs btn-success btn-flat legitRipple" onclick="addProduct($(this),'contract')" type="button" data-reference-id="${referenceID}" data-reference="${reference}" data-product-id="${productID}" data-product="${product}" data-sku="${sku}" data-serial="${isSerial}" data-uom-id="${uomID}" data-order="${order}" data-last-key="${last_key}">
+            return `<button class="btn btn-sm text-xs btn-success btn-flat legitRipple btn-add-product" onclick="addProduct($(this),'contract')" type="button" data-reference-id="${referenceID}" data-reference="${reference}" data-product-id="${productID}" data-product="${product}" data-sku="${sku}" data-serial="${isSerial}" data-uom-id="${uomID}" data-detail-id="${detailID}" data-order="${order}" data-last-key="${last_key}">
                       <i class="fas fa-plus"></i>
                     </button>`;
           },
@@ -659,8 +667,15 @@
       ajax: {
         url: "{{route('goodsreceipt.borrowingproducts')}}",
         type: "GET",
-        data: function(data) {          
-          data.except       = receiptProduct;          
+        data: function(data) {                    
+          var exception = [];
+          var item      = receiptProduct.filter(param => param.type == 'borrowing');
+
+          $.each(item, function (index, value) { 
+             exception.push(value.detail_id);
+          });
+          
+          data.except       = exception;
           data.category_id  = $('#form').find('#product-category').find('option:selected').val();
         }
       },
@@ -700,7 +715,7 @@
         },
         {
           render: function(data, type, row) {
-            var referenceID   = row.product_borrowing_id,
+            var referenceID   = row.reference_id,
                 reference     = row.borrowing_number,
                 detailID      = row.detail_id,
                 productID     = row.product_id,
@@ -708,9 +723,9 @@
                 category      = row.category,
                 isSerial      = row.is_serial,
                 uomID         = row.uom_id,
-                order         = row.qty ? row.qty : 0;
+                order         = row.qty ? row.qty : 0;                
 
-            return `<button class="btn btn-sm text-xs btn-success btn-flat legitRipple" onclick="addProduct($(this),'borrowing')" type="button" data-reference-id="${referenceID}" data-detail-id="${detailID}" data-reference="${reference}" data-product-id="${productID}" data-product="${product}" data-serial="${isSerial}" data-uom-id="${uomID}" data-order="${order}">
+            return `<button class="btn btn-sm text-xs btn-success btn-flat legitRipple btn-add-product" onclick="addProduct($(this),'borrowing')" type="button" data-reference-id="${referenceID}" data-detail-id="${detailID}" data-reference="${reference}" data-product-id="${productID}" data-product="${product}" data-serial="${isSerial}" data-uom-id="${uomID}" data-order="${order}">
                       <i class="fas fa-plus"></i>
                     </button>`;
           },
@@ -763,19 +778,17 @@
                 var productID  =  $('#table-select-serial').attr('data-product-id');                                             
                 var except     = [];
 
-                if(dataSerials.length > 0){
-                  var serials = dataSerials.filter(param => param.detail_id == detailID && param.product_id == productID)[0].serials;
-                  $.each(serials, function (index, value) { 
-                     except.push(value.serial_id);
-                  });
-                }
+                var product = receiptProduct.filter(param => param.detail_id == detailID && param.product_id == productID);                
 
+                if(product.length > 0 && product[0].serials.length > 0){
+                  $.each(product[0].serials, function (index, value) { 
+                    except.push(value.serial_id);
+                  });
+                }                
 
                 data.detail_id  = detailID;
                 data.product_id = productID;
-                if(except.length > 0) {
-                  data.except     = except;         
-                }
+                data.except     = except;         
             }
         },
         columnDefs: [{
@@ -840,19 +853,26 @@
               {
                   className: "text-center",                                      
                   targets: [2]
-              },                
+              },      
+              {
+                render: function(data, type, row){
+                    return `<b>${data}</b><p style="margin-top: 1px;">${row[1]}</p>`;
+                }, 
+                targets: [0]
+              },          
               {                    
                   render: function(data, type, row) {                        
-                      return `<b>${data}</b>`;
+                      return `<b>${row[2]}</b>`;
                   },                                        
                   targets: [1]
               },                                
               {                    
                   render: function(data, type, row) {                              
                 
-                        var productID = row[3],
-                            serialID  = row[2];
-                    return `<button class="btn btn-sm text-xs btn-danger btn-flat legitRipple" onclick="removeSerialQty($(this),${productID},${serialID})"type="button">
+                    var serialID = row[3],
+                        detailID = row[4];                                                        
+
+                    return `<button class="btn btn-sm text-xs btn-danger btn-flat legitRipple" onclick="removeSerial($(this),${serialID},${detailID})" type="button">
                                 <i class="fas fa-trash"></i>
                             </button>`;
                 },                                        
@@ -880,7 +900,7 @@
         receipt_date: {
           required: true
         },
-        unit: {
+        site: {
           required: true
         },
         warehouse: {
@@ -897,7 +917,7 @@
         receipt_date: {
           required: 'This field is required.'
         },
-        unit: {
+        site: {
           required: 'This field is required.'
         },
         warehouse: {
@@ -947,7 +967,8 @@
 
         $.each($('#table-product > tbody > .product-item'), function(index, value) {
           var product     = $(this).find('.item-product'),
-              product_id  = product.val(),
+              productID   = product.val(),
+              detailID    = product.parents('.product-item').attr('data-detail-id'),
               referenceID = product.attr('data-reference-id'),
               reference   = product.attr('data-reference'),
               uomID       = product.attr('data-uom-id'),
@@ -957,24 +978,27 @@
               rackID      = product.parents('.product-item').find('.rack-warehouse > option:selected').val(),
               binID       = product.parents('.product-item').find('.bin-warehouse > option:selected').val(),
               type        = product.attr('data-type'),
-              hasSerial   = product.attr('data-has-serial')=='1'?true:false,              
+              hasSerial   = product.attr('data-has-serial')=='true'?true:false,              
               lastKey     = parseInt(product.attr('data-last-key')),
               serials     = null;
 
-            if(type == 'contract' && hasSerial == true){
+            if(type == 'contract' && hasSerial){
               var dataSerial = {
                 warehouse_id : warehouseID,
-                product_id   : product_id, 
+                product_id   : productID, 
                 sku          : sku,
                 qty          : parseInt(qtyReceipt),
                 lastkey      : lastKey                
               };
 
               serials = addSerial(dataSerial);
+            }else if(type == 'borrowing' && hasSerial){
+
+              serials  = receiptProduct.filter(param => param.detail_id == detailID && param.product_id == productID)[0].serials;                            
             }
 
           products.push({
-            product_id    : product_id,
+            product_id    : productID,
             site_id       : siteID,
             warehouse_id  : warehouseID,
             reference_id  : referenceID,
@@ -991,10 +1015,7 @@
             last_key      : lastKey
           });
 
-        });
-
-        console.log({products : products});
-        // return false;
+        });        
 
         if (products.length == 0) {
           toastr.warning('Select the product first. at least one product');
@@ -1203,66 +1224,126 @@
     $('#form-reference').modal('show');
   }
 
-  const addProduct = (that, type) => {    
-    var referenceID = that.attr('data-reference-id'),
-        reference   = that.attr('data-reference'),
-        productID   = that.attr('data-product-id'),
-        product     = that.attr('data-product'),
-        category    = that.parents('tr').find('td.product-category').html(),
-        sku         = that.attr('data-sku'),
-        isSerial    = that.attr('data-serial'),
-        lastKey     = that.attr('data-last-key'),
-        uomID       = that.attr('data-uom-id'),      
-        order       = that.attr('data-order'),
-        table       = $('#table-product > tbody'),
-        disable     = 'disabled',
-        readonly    = '';
+  const addProduct = (that, type) => {        
+    var reference = that.attr('data-reference');    
 
-        if (isSerial == '1') {
-            disable  = type == 'contract'?'disabled':'';
-            readonly = type == 'borrowing'?'readonly':'';
-            icon     = 'fas fa-check';
-            badge    = 'badge-info';            
+    if(type ==  'borrowing'){
+      origin = $('#table-borrowing > tbody');
+    }else{
+      origin = $('#table-contract > tbody');
+    }
+    
+    $.each(origin.find(`button.btn-add-product[data-reference='${reference}']`), function (index, element) { 
+      var button      = $(this);
+      var reference   = button.attr('data-reference'),
+          idReference = button.attr('data-reference-id'),
+          productID   = button.attr('data-product-id'),
+          product     = button.attr('data-product'),
+          category    = button.parents('tr').find('td.product-category').html(),
+          sku         = button.attr('data-sku'),
+          isSerial    = button.attr('data-serial'),
+          lastKey     = button.attr('data-last-key'),
+          uomID       = button.attr('data-uom-id'),      
+          order       = button.attr('data-order'),
+          detailID    = button.attr('data-detail-id');          
+          
+      var obj = receiptProduct.filter(param  =>  param.detail_id == detailID && param.product_id == productID);
 
-        } else {
-            icon  = 'fas fa-times';
-            badge = 'bg-red';
-        }
+      if(obj.length == 0){
+        receiptProduct.push({
+          reference_id : idReference,
+          reference    : reference,
+          product_id   : productID,
+          product      : product,
+          category     : category,
+          sku          : sku,
+          is_serial    : isSerial=='1'?true:false,
+          serials      : isSerial=='1'?[]:null,
+          lastkey      : lastKey,
+          uom_id       : uomID,
+          order        : order,
+          type         : type,
+          detail_id    : detailID
+        });
+      }          
 
-    var serial = `<span class="badge ${badge} text-md"><i class="${icon}" style="size: 1x;"></i></span>`;
+    });               
+    drawProduct(type);        
+  }
 
-    var html = `<tr class="product-item">
-                  <input type="hidden" class="item-product" value="${productID}" data-reference-id="${referenceID}" data-reference="${reference}" data-sku="${sku}" data-uom-id="${uomID}" data-qty-order="${order}" data-type="${type}" data-has-serial="${isSerial}" data-last-key="${lastKey}">                        
-                  <td width="100"><p>${product}<br><b style="font-size: 10px;">${reference}</b></p></td>
-                  <td width="100">${category}</td>
-                  <td width="30" class="text-center">${serial}</td>                  
-                  <td class="text-center" width="30">${order}</td>
-                  <td class="text-center" width="30">
-                    <input type="number" class="form-control numberfield text-right qty-receipt" placeholder="0" min="1" max="${order}" ${readonly}>
-                  </td>
-                  <td width="40">
-                    <div class="form-group">
-                      <div class="controls">
-                        <select name="rack" class="form-control rack-warehouse" data-placeholder="Choose rack" style="width: 100%;" required></select>
-                      </div>
-                    </div>                    
-                  </td>
-                  <td width="40">
-                    <div class="form-group">
-                      <div class="controls">
-                        <select name="bin" class="form-control bin-warehouse" data-placeholder="Choose bin" style="width: 100%;" required></select>
-                      </div>
-                    </div>                    
-                  </td>
-                  <td class="text-center" width="15" style="white-space: nowrap;">
-                      <button class="btn btn-sm text-xs btn-warning btn-flat legitRipple ${disable}" type="button" onclick="showSerial($(this),${productID},${that.attr('data-detail-id')})"><i class="fas fa-bars"></i></button>
-                      <button class="btn btn-sm text-xs btn-danger btn-flat legitRipple" type="button" onclick="removeProduct($(this),${productID})"><i class="fas fa-trash"></i></button>
-                  </td>
-                </tr>`;
+  const drawProduct = (type) => {
+    var html = '';
+    var item = receiptProduct.filter(param => param.type == type);
+    var tableProduct = $('#table-product > tbody');
+    
+    $.each(item, function (index, value) {     
+      var reference   = value.reference,
+          referenceID = value.reference_id,
+          productID   = value.product_id,
+          product     = value.product,
+          category    = value.category,
+          sku         = value.sku,
+          isSerial    = value.is_serial,
+          lastKey     = value.lastkey,
+          uomID       = value.uom_id,      
+          order       = value.order,
+          detailID    = value.detail_id,
+          readonly    = '',
+          disable     = 'disabled';             
 
-    table.find('.no-available-data').remove();
-    table.append(html);
-    receiptProduct.push(parseInt(productID));
+      if (isSerial == true) {
+        disable  = type == 'contract'?'disabled':'';
+        readonly = type == 'borrowing'?'readonly':'';
+        icon     = 'fas fa-check';
+        badge    = 'badge-info';          
+      } else {
+          icon  = 'fas fa-times';
+          badge = 'bg-red';
+      }   
+
+      var serial = `<span class="badge ${badge} text-md"><i class="${icon}" style="size: 1x;"></i></span>`;
+
+      html += `<tr class="product-item" data-detail-id="${detailID}">
+                <input type="hidden" class="item-product" value="${productID}" data-reference-id="${referenceID}" data-reference="${reference}" data-sku="${sku}" data-uom-id="${uomID}" data-qty-order="${order}" data-type="${type}" data-has-serial="${isSerial}" data-last-key="${lastKey}">                        
+                <td width="100"><p>${product}<br><b style="font-size: 10pt;">${reference}</b></p></td>
+                <td width="100">${category}</td>
+                <td width="30" class="text-center">${serial}</td>                  
+                <td class="text-center" width="30">${order}</td>
+                <td class="text-center" width="30">
+                  <input type="number" class="form-control numberfield text-right qty-receipt" placeholder="0" min="1" max="${order}" ${readonly}>
+                </td>
+                <td width="40">
+                  <div class="form-group">
+                    <div class="controls">
+                      <select name="rack" class="form-control rack-warehouse" data-placeholder="Choose rack" style="width: 100%;" required></select>
+                    </div>
+                  </div>                    
+                </td>
+                <td width="40">
+                  <div class="form-group">
+                    <div class="controls">
+                      <select name="bin" class="form-control bin-warehouse" data-placeholder="Choose bin" style="width: 100%;" required></select>
+                    </div>
+                  </div>                    
+                </td>
+                <td class="text-center" width="15" style="white-space: nowrap;">
+                    <button class="btn btn-sm text-xs btn-warning btn-flat legitRipple ${disable}" type="button" onclick="showSerial($(this),${productID},${detailID})" ${disable}><i class="fas fa-bars"></i></button>
+                    <button class="btn btn-sm text-xs btn-danger btn-flat legitRipple" type="button" onclick="removeProduct(${detailID},${productID},'${type}')"><i class="fas fa-trash"></i></button>
+                </td>
+              </tr>`;
+    });    
+      
+    if(item.length > 0){
+      tableProduct.find('.no-available-data').remove();
+    }else{
+      html = `<tr class="no-available-data">
+                <td colspan="8" class="text-center">No available data.</td>
+              </tr>`;
+      type = '';
+    }
+
+    tableProduct.html(html);   
+    
 
     initBin();
     initRack();
@@ -1270,24 +1351,24 @@
     productRole = type;
     if (productRole == 'contract') {
       $('li.borrowing-reference').hide();
+      $('li.contract-reference').show();      
       contractTable.ajax.reload(null, false);
     } else if (productRole == 'borrowing') {
-      $('li.contract-reference').hide();
+      $('li.borrowing-reference').show();
+      $('li.contract-reference').hide();      
       borrowingTable.ajax.reload(null, false);
-    }
+    }else{
+      $('li.borrowing-reference').show();
+      $('li.contract-reference').show();
+      contractTable.ajax.reload(null, false);
+      borrowingTable.ajax.reload(null, false);
+    }    
+
   }
 
-  const removeProduct = (that,productID) => {
-    that.closest('.product-item').remove();
-    if ($('#table-product > tbody > .product-item').length == 0) {
-      var html = `<tr class="no-available-data">
-                    <td colspan="9" class="text-center">No available data.</td>
-                  </tr>`;
-      $('#table-product > tbody').append(html);
-
-      productRole = '';
-    }
-    receiptProduct.splice($.inArray(productID, receiptProduct), 1);
+  const removeProduct = (detailID, productID, type) => {
+    receiptProduct = receiptProduct.filter(param => param.detail_id != detailID && param.product_id != productID);
+    drawProduct(type);    
   }
 
   const addDocument = () => {
@@ -1387,18 +1468,14 @@
         serialID     = that.attr('data-serial-id'),
         serialNumber = that.attr('data-serial-number');
 
-    if(dataSerials.length == 0){
-      dataSerials.push({
-          detail_id  : detailID,
-          product_id : productID,
-          product    : product,
-          serials    : [{
-              serial_id     : serialID,
-              serial_number : serialNumber
-          }]  
+    var serials  = receiptProduct.filter(param => param.detail_id == detailID && param.product_id == productID)[0].serials;              
+
+    if(serials.length == 0){
+      serials.push({
+        serial_id     : serialID,
+        serial_number : serialNumber  
       });
-    }else{
-      var serials  = dataSerials.filter(param => param.detail_id == detailID)[0].serials;            
+    }else{      
       var idSerial = serials.filter(param => param.serial_id == serialID);                    
         
       if(idSerial.length == 0){
@@ -1407,22 +1484,37 @@
               serial_number : serialNumber
           });
       }            
-    }  
-    
-    tableSelecedSerial.draw();     
-    drawSelectedSerial(detailID,productID);
-    // countQtySerial(productID);       
+    }        
+
+    countQtyReceipt(detailID,productID);
+
+    tableSelectSerial.draw();     
+    drawSelectedSerial(detailID,productID);    
+  }
+
+  const removeSerial = (that, serialID, detailID) => {
+    var product   = receiptProduct.filter(param => param.detail_id == detailID);
+    var productID = product[0].product_id;
+    var serials   = product[0].serials;
+
+    serials = serials.filter(param => param.serial_id != serialID);
+    product[0].serials = serials;    
+
+    countQtyReceipt(detailID, productID);
+
+    drawSelectedSerial(detailID, productID); 
+    tableSelectSerial.draw();
   }
 
   const drawSelectedSerial = (detailID,productID) => {      
       setDataSerial = [];
-      var product   =  dataSerials.filter(param => param.detail_id == detailID && param.product_id == productID)[0];
-
-      console.log({product : product});
-                                  
-      $.each(product.serials, function (ind, val) { 
-          setDataSerial.push([product.product,val.serial_number,val.serial_id,productID]);
-      });   
+      var product   =  receiptProduct.filter(param => param.detail_id == detailID && param.product_id == productID)[0];                
+      
+      if(product.serials.length > 0){
+        $.each(product.serials, function (ind, val) { 
+          setDataSerial.push([product.product, product.category,val.serial_number,val.serial_id, product.detail_id]);
+        });
+      }
       
       tableSelecedSerial.clear().draw();
       tableSelecedSerial.rows.add(setDataSerial); // Add new data
@@ -1459,7 +1551,24 @@
     $('#table-select-serial').attr('data-product-id',productID).attr('data-detail-id',detailID);
     $('#table-selected-serial').attr('data-product-id',productID).attr('data-detail-id',detailID);
     tableSelectSerial.draw();
+    drawSelectedSerial(detailID, productID);
     $('#modal-serial').modal('show');    
+  }
+
+  const countQtyReceipt = (detailID, productID) => {
+    var product  = receiptProduct.filter(param => param.detail_id == detailID && param.product_id == productID)[0];              
+    var serials  = product.serials;
+    var row      = $("#table-product > tbody").find(`tr[data-detail-id=${detailID}]`);
+
+    if(row){
+      row.find('.qty-receipt').val(serials.length);
+    }
+
+
+    console.log({
+      product : product,
+      serials : serials
+    });
   }
 
   const onSubmit = (status) => {

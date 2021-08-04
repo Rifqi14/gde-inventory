@@ -156,7 +156,7 @@
       responsive: true,
       lengthChange: false,
       order: [
-        [1, "asc"]
+        [2, "desc"]
       ],
       ajax: {
         url: "{{route('goodsreceipt.read')}}",

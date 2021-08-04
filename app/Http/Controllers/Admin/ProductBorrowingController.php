@@ -870,8 +870,7 @@ class ProductBorrowingController extends Controller
 
     function calculateStock($products, $status){
         if($status  == 'waiting' || $status == 'approved'){
-            foreach (json_decode($products) as $key => $row) {
-                $site_id        = $row->site_id;
+            foreach (json_decode($products) as $key => $row) {                
                 $warehouse_id   = $row->warehouse_id;
                 $product_id     = $row->product_id;
                 $current_stock  = $row->current_stock;                    

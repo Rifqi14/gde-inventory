@@ -6,7 +6,6 @@ use App\Models\Menu;
 use App\Models\GoodsReceipt;
 use App\Models\ContractProduct;
 use App\Models\ProductBorrowingDetail;
-use App\models\ProductBorrowingSerial;
 use App\Models\GoodsReceiptProduct;
 use App\Models\GoodsReceiptAsset;
 use App\Models\Site;
@@ -15,6 +14,8 @@ use App\Models\Product;
 use App\Models\ProductSerial;
 use App\Models\StockWarehouse;
 use App\Models\StockMovement;
+use App\Models\GoodsIssueProduct;
+use App\Models\GoodsIssueSerial;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -172,18 +173,19 @@ class GoodsReceiptController extends Controller
                     $product->selectRaw("
                     goods_receipt_products.*,
                     products.name as product,
-                    product_categories.name as category,
+                    products.is_serial,
+                    product_categories.path as category,
                     uoms.name as uom,                    
                     product_borrowings.borrowing_number as reference,
                     rack_warehouses.name as rack,
                     bin_warehouses.name as bin
                 ");
+                $product->leftJoin('product_borrowings', 'product_borrowings.id', '=', 'goods_receipt_products.reference_id');
                 $product->leftJoin('products', 'products.id', '=', 'goods_receipt_products.product_id');
                 $product->leftJoin('product_categories','product_categories.id','=','products.product_category_id');
                 $product->leftJoin('uoms', 'uoms.id', '=', 'goods_receipt_products.uom_id');
                 $product->leftJoin('rack_warehouses', 'rack_warehouses.id', '=', 'goods_receipt_products.rack_id');
-                $product->leftJoin('bin_warehouses', 'bin_warehouses.id', '=', 'goods_receipt_products.bin_id');
-                $product->leftJoin('product_borrowings', 'product_borrowings.id', '=', 'goods_receipt_products.reference_id');
+                $product->leftJoin('bin_warehouses', 'bin_warehouses.id', '=', 'goods_receipt_products.bin_id');                
                 $product->where('goods_receipt_products.type', 'borrowing');
             },
             'files',
@@ -341,19 +343,17 @@ class GoodsReceiptController extends Controller
                     ];
                 }
 
-                if (count($products)) {
-                    $query = GoodsReceiptProduct::insert($products);
-                    if (!$query) {
-                        return response()->json([
-                            'status'    => false,
-                            'message'   => 'Failed to create detail data.'
-                        ], 400);
-                    }
+                $query = GoodsReceiptProduct::insert($products);
+                if (!$query) {
+                    return response()->json([
+                        'status'    => false,
+                        'message'   => 'Failed to create detail data.'
+                    ], 400);
+                }
 
-                    // Calculate and move stock warehouse                    
-                    if($status == 'approved'){
-                        $calculate = $this->calculateStock($getProducts);
-                    }
+                // Calculate and move stock warehouse                    
+                if($status == 'approved'){
+                    $calculate = $this->calculateStock($getProducts, $site);
                 }
             }
 
@@ -666,9 +666,10 @@ class GoodsReceiptController extends Controller
         $except      = $request->except;
         $category_id = $request->category_id;
 
-        $query = ContractProduct::selectRaw("
+        $query = ContractProduct::selectRaw("            
             contracts.number as contract_number,
             TO_CHAR(contracts.contract_signing_date,'DD/MM/YYYY') as signing_date,
+            contract_products.id as detail_id,
             contract_products.contract_id,
             contract_products.product_id,
             contract_products.uom_id,
@@ -737,40 +738,40 @@ class GoodsReceiptController extends Controller
         $category_id = $request->category_id;
         $warehouse_id = $request->warehouse_id; 
 
-        $query = ProductBorrowingDetail::selectRaw("
+        $query = GoodsIssueProduct::selectRaw("                        
+            goods_issue_products.id as detail_id,
+            goods_issue_products.product_id,
+            goods_issue_products.goods_issue_id,
+            goods_issue_products.qty_receive as qty,
+            goods_issue_products.uom_id,      
+            product_borrowings.id as reference_id,
             product_borrowings.borrowing_number,
             TO_CHAR(product_borrowings.borrowing_date,'DD/MM/YYYY') as date_borrowing,
-            product_borrowing_details.id as detail_id,
-            product_borrowing_details.product_borrowing_id,
-            product_borrowing_details.product_id,
-            product_borrowing_details.uom_id,
-            product_borrowing_details.qty_requested as qty,
             products.name as product,
             products.sku,
             products.is_serial,            
             products.last_serial,
             product_categories.path as category,
             uoms.name as uom
-        ");
-        $query->leftJoin('product_borrowings', 'product_borrowings.id', '=', 'product_borrowing_details.product_borrowing_id');
-        $query->leftJoin('products', 'products.id', '=', 'product_borrowing_details.product_id');
-        $query->leftJoin('uoms', 'uoms.id', '=', 'product_borrowing_details.uom_id');
+        ");        
+        $query->join('goods_issues','goods_issues.id','=','goods_issue_products.goods_issue_id');
+        $query->leftJoin('product_borrowing_details',function($join){
+            $join->on('product_borrowing_details.product_borrowing_id','=','goods_issue_products.reference_id');
+            $join->on('product_borrowing_details.product_id','=','goods_issue_products.product_id');
+        });
+        $query->leftJoin('product_borrowings','product_borrowings.id','=','goods_issue_products.reference_id');
+        $query->join('products','products.id','=','goods_issue_products.product_id');
         $query->leftJoin('product_categories','product_categories.id','=','products.product_category_id');
-        $query->where('product_borrowings.status', 'approved');    
-        $query->whereNotIn('product_borrowing_details.product_id',function($que){
-            $que->selectRaw("goods_receipt_products.product_id");
-            $que->from('goods_receipt_products');
-            $que->leftJoin('goods_receipts','goods_receipts.id','=','goods_receipt_products.goods_receipt_id');
-            $que->where([
-                ['goods_receipts.status','=','approved'],
-                ['goods_receipt_products.type','=','borrowing']
-            ]);
-        });  
-        if($category_id){   
-            $query->where('product_categories.id',$category_id);
+        $query->leftJoin('uoms','uoms.id','=','goods_issue_products.uom_id');
+        $query->where([
+           ['goods_issue_products.type','=','borrowing'],
+           ['goods_issues.status','=','approved']
+        ]);
+        if($category_id){
+            $query->where('products.product_category_id',$category_id);
         }
         if($except){
-            $query->whereNotIn('product_borrowing_details.product_id',$except);
+            $query->whereNotIn('goods_issue_products.id',$except);
         }
 
         $rows  = clone $query;
@@ -808,22 +809,22 @@ class GoodsReceiptController extends Controller
         $detail_id   = $request->detail_id;
         $except      = $request->except;
 
-        $query = ProductBorrowingDetail::selectRaw("
-            product_borrowing_details.id as detail_id,
-            product_borrowing_details.product_id,
-            products.name as product,   
+        $query = GoodsIssueSerial::selectRaw("
+            goods_issue_serials.goods_issue_product_id as detail_id,
+            goods_issue_products.product_id,
+            products.name as product,
             product_serials.id as serial_id,
             product_serials.serial_number,
             product_categories.path as category
         ");
-        $query->leftJoin('products','products.id','=','product_borrowing_details.product_id');
-        $query->leftJoin('product_categories','product_categories.id','=','product_borrowing_details.product_category_id');
-        $query->leftJoin('product_borrowing_serials','product_borrowing_serials.borrowing_detail_id','=','product_borrowing_details.id');
-        $query->leftJoin('product_serials','product_serials.id','=','product_borrowing_serials.serial_id');
-        $query->where('product_borrowing_details.id',$detail_id); 
+        $query->leftJoin('product_serials','product_serials.id','=','goods_issue_serials.serial_id');
+        $query->leftJoin('goods_issue_products','goods_issue_products.id','=','goods_issue_serials.goods_issue_product_id');
+        $query->join('products','products.id','=','goods_issue_products.product_id');
+        $query->leftJoin('product_categories','product_categories.id','=','products.product_category_id');
         if($except){
             $query->whereNotIn('product_serials.id',$except);
         }
+        $query->where('goods_issue_products.id', $detail_id);
 
         $rows  = clone $query;
         $total = $rows->count();
@@ -847,7 +848,7 @@ class GoodsReceiptController extends Controller
             'recordsFiltered'   => $total,
             'data'              => $data
         ], 200);
-    }
+    }    
 
     function receiptNumber($id, $key_number, $created_at)
     {
@@ -864,47 +865,61 @@ class GoodsReceiptController extends Controller
         $query->save();
     }
     
-    function calculateStock($products){
-        foreach (json_decode($products) as $key => $row) {
-            $site_id      = $row->site_id;
+    function calculateStock($products, $site){
+        $this->generateWarehouseVirtual($site); // Check and generate warehouse virtual
+
+        foreach (json_decode($products) as $key => $row) {            
             $warehouse_id = $row->warehouse_id;
             $product_id   = $row->product_id;
             $qty_receipt  = $row->qty_receipt;
             $ref_type     = $row->type;
-            $now          = date('Y-m-d H:i:s');
-            
-            if($ref_type == 'contract'){
-                $virtual = $this->generateWarehouseVirtual($site_id);
-            }
+            $now          = date('Y-m-d H:i:s');            
 
             $product = Product::find($product_id);
 
             if($product->is_serial == '1'){
-                $serials = [];
+                $serials   = [];
+                $serial_id = [];
 
                 foreach ($row->serials as $key => $num) {
-                    $serials[] = [
-                        'warehouse_id'  => $num->warehouse_id,
-                        'product_id'    => $num->product_id,
-                        'serial_number' => $num->serial_number,
-                        'status'        => 1,
-                        'movement'      => 'in',
-                        'created_at'    => $now,
-                        'updated_at'    => $now
-                    ];                    
+                    if($ref_type == 'contract'){
+                        $serials[] = [
+                            'warehouse_id'  => $num->warehouse_id,
+                            'product_id'    => $num->product_id,
+                            'serial_number' => $num->serial_number,
+                            'status'        => 1,
+                            'movement'      => 'in',
+                            'created_at'    => $now,
+                            'updated_at'    => $now
+                        ];
+                    }else if($ref_type  == 'borrowing'){
+                        array_push($serial_id, $num->serial_id);
+                    }
                 }
-                
-                $query = ProductSerial::insert($serials);
 
-                if($query){
+                if($ref_type == 'contract'){
+                    $query = ProductSerial::insert($serials);
+
+                    if(!$query){
+                        return response()->json([
+                            'status'    => false,
+                            'message'   => 'Failed to update stock product on warehouse.'
+                        ],400);                        
+                    }
+
                     $product->last_serial = $product->last_serial+$qty_receipt;
-                    $product->save();
-                }else{
-                    return response()->json([
-                        'status'    => false,
-                        'message'   => 'Failed to update data product serials.'
-                    ],400);
+                    $product->save();                    
+                }else if($ref_type == 'borrowing'){
+                    $query = ProductSerial::whereIn('id',$serial_id)->update(['movement' => 'in']);
+
+                    if(!$query){
+                        return response()->json([
+                            'status'    => false,
+                            'message'   => 'Failed to update stock product on warehouse.'
+                        ],400);                        
+                    }
                 }
+                                
             }
 
             // Checking stock product on warehouse
@@ -940,6 +955,10 @@ class GoodsReceiptController extends Controller
             }
 
         }
+    }
+
+    function insertOrUpdateSerial(){ 
+
     }
 
     function generateWarehouseVirtual($site_id)
