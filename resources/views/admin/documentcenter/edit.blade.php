@@ -1256,7 +1256,7 @@
                 status  = 'Issued';
                 label   = 'bg-success';
               }
-          return `<font class="text-md text-bold">${row.transmittal_no}</font><div class="text-sm text-semibold"><span class="badge ${label}">${row.transmittal_status}</span></div>`;
+          return `<font class="text-md text-bold">${row.transmittal_no}</font><div class="text-sm text-semibold"><span class="badge ${label}">${status}</span></div>`;
         }, targets: [3] },
         { render: function (data, type, row) {
           var html  = '';
