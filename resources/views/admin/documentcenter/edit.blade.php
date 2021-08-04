@@ -1249,7 +1249,7 @@
           var status  = '',
               label   = '';
               
-              if (row.transmittal_status == 'Waiting for Issue') {
+              if (row.status == 'DRAFT' || row.status == 'REVISED') {
                 status  = 'Waiting for Issue';
                 label   = 'bg-info';
               } else {
