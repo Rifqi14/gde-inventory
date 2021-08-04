@@ -251,17 +251,22 @@ class DocumentCenterController extends Controller
             $revision       = 0;
             $purpose        = '';
             $revisionDate   = '';
-            foreach ($document->documents()->get() as $key => $doc) {
-                $revision   += $doc->revision;
-            }
+            $issue_purpose  = '';
+            $issue_status   = '';
             if ($document->documents()->count() > 0) {
                 $revisionDate       = date('d/m/Y', strtotime($document->documents()->latest()->first()->created_at));
                 $purpose            = $document->documents()->latest()->first()->remark;
+                $issue_purpose      = $document->documents()->latest()->first()->issue_purpose;
+                $issue_status       = $document->documents()->latest()->first()->status;
+                $revision           = $document->documents()->latest()->first()->revision;
+                $document->document_type    = $document->documents()->latest()->first()->document_type;
                 $document->status   = $document->documents()->first()->status;
             }
             $document->no   = ++$start;
             $document->revision = $revision;
             $document->purpose  = $purpose ? $purpose : "";
+            $document->issue_purpose= $issue_purpose;
+            $document->issue_status = $issue_status;
             $document->discipline   = ucwords($document->discipline);
             $document->revision_date= $revisionDate;
             $document->first_issue  = date('d/m/Y', strtotime($document->first_issue));

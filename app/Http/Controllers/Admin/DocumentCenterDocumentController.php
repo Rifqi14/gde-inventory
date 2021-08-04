@@ -70,7 +70,7 @@ class DocumentCenterDocumentController extends Controller
                 $dataDocument   = [];
                 $no             = 1;
                 foreach ($request->document_upload as $key => $detail) {
-                    $transNo        = str_replace('.', '-', $document->transmittal_no) . "#" . $no;
+                    $transNo        = "{$request->document_name[$key]}-$no";
                     $filename       = "$transNo.".$request->file('document_upload')[$key]->getClientOriginalExtension();
                     $categorymenu   = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $request->category_menu)));
                     $documentnumber = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $request->document_number)));
@@ -322,7 +322,7 @@ class DocumentCenterDocumentController extends Controller
         $document_id    = $request->document_id;
 
         // Query Data
-        $query          = DocumentCenterDocument::with(['createdBy', 'updatedBy', 'docdetail'])->where('document_center_id', $document_id);
+        $query          = DocumentCenterDocument::with(['createdBy', 'updatedBy', 'docdetail', 'supersede.docno', 'void'])->where('document_center_id', $document_id);
 
         $row            = clone $query;
         $recordsTotal   = $row->count();

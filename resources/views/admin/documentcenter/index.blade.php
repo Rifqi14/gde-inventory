@@ -77,6 +77,7 @@
   var page      = `{{ $page }}`;
   var typeData  = '';
   var category  = $(`.nav-link.active.document`).data('category');
+  var global_status = JSON.parse(`{!! json_encode(config('enums.global_status')) !!}`);
   var actionmenu= @json(json_encode($actionmenu));
 
   const changeTab = (type) => {
@@ -102,6 +103,51 @@
 
   const edit = (id) => {
     document.location = `{{ url('admin/documentcenter') }}/${page}/${id}/edit`;
+  }
+
+  const destroy = (id) => {
+    bootbox.confirm({
+      buttons: {
+        confirm: {
+          label: '<i class="fa fa-check"></i>',
+          className: 'btn-primary btn-sm'
+        },
+        cancel: {
+          label: '<i class="fa fa-undo"></i>',
+          className: 'btn-default btn-sm'
+        },
+      },
+      title: 'Delete data?',
+      message: 'Are you sure want to delete this data?',
+      callback: function (result) {
+        if (result) {
+          var data = {
+            _token: "{{ csrf_token() }}"
+          };
+          $.ajax({
+            url: `{{url('admin/documentcenter')}}/${page}/${id}`,
+            dataType: 'json',
+            data: data,
+            type: 'DELETE',
+            beforeSend: function () {
+              blockMessage('body', 'Loading', '#fff');
+            }
+          }).done(function (response) {
+            $('body').unblock();
+            if (response.status) {
+              toastr.success(response.message);
+              dataTable.ajax.reload(null, false);
+            }else {
+              toastr.warning(response.message);
+            }
+          }).fail(function (response) {
+            var response = response.responseJSON;
+            $('body').unblock();
+            toastr.warning(response.message);
+          });
+        }
+      }
+    });
   }
 
   $(function() {
@@ -141,7 +187,43 @@
           return html;
         }, targets: [3] },
         { render: function (data, type, row) {
-          return row.created_by ? row.created_by.name : '';
+          return `For ${row.issue_purpose}`;
+        }, targets: [4] },
+        { render: function (data, type, row) {
+          var label     = '',
+              text      = '',
+              status    = row.issue_status;
+
+          $.each(global_status, function(index, value) {
+            if (index == status) {
+              label   = value.badge;
+              text    = value.text;
+            }
+            if (status == 'REVISED') {
+              label   = 'secondary';
+              text    = 'Draft';
+            }
+
+            if (status == 'APPROVED') {
+              label   = value.badge;
+              text    = 'Issued';
+            }
+
+            if (row.document_type) {
+              label   = 'info';
+              String.prototype.ucwords = function() {
+                str = this.toLowerCase();
+                return str.replace(/(^([a-zA-Z\p{M}]))|([ -][a-zA-Z\p{M}])/g,
+                  function($1){
+                      return $1.toUpperCase();
+                  });
+              }
+
+              var document_type = row.document_type;
+              text    = document_type.ucwords();
+            }
+          });
+          return row.created_by ? `${row.created_by.name}<br><span class="badge bg-${label} text-sm">${text}</span>` : '';
         }, targets: [5] },
         { render: function (data, type, row) {
           var button = '';
@@ -170,7 +252,7 @@
         { data: "document_number" },
         { data: "title", className: "text-md text-bold" },
         { data: "revision" },
-        { data: "purpose" },
+        { data: "issue_purpose" },
         { data: "created_user" },
         { data: "id" },
       ]

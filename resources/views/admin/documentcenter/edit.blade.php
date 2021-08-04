@@ -268,7 +268,8 @@
                 <div class="init-data"></div>
                 <div class="initInput">
                   <div class="input-group">
-                    <div class="custom-file">
+                    <input type="text" name="document_name[]" class="form-control" placeholder="Document Name">
+                    <div class="custom-file ml-3">
                       <input type="file" class="custom-file-input lock-revision" name="document_upload[]" onchange="initInputFile()">
                       <label class="custom-file-label form-control" for="document_upload">Attach a document</label>
                     </div>
@@ -353,7 +354,7 @@
               <div class="form-group row">
                 <label for="document_type_id_supersede" class="control-label col-md-3">Document Type:</label>
                 <div class="col-md-3 pl-0">
-                  <select name="document_type_id_supersede" id="document_type_id_supersede" class="form-control select2" data-placeholder="Choose Document Type...">
+                  <select name="document_type_id_supersede" id="document_type_id_supersede" class="form-control select2 lock-supersede" data-placeholder="Choose Document Type...">
                   </select>
                 </div>
                 <div class="col-md-5 pr-0">
@@ -363,7 +364,7 @@
               <div class="form-group row">
                 <label for="organization_code_id_supersede" class="control-label col-md-3">Organization Code:</label>
                 <div class="col-md-3 pl-0">
-                  <select name="organization_code_id_supersede" id="organization_code_id_supersede" class="form-control select2" data-placeholder="Choose Organization Code...">
+                  <select name="organization_code_id_supersede" id="organization_code_id_supersede" class="form-control select2 lock-supersede" data-placeholder="Choose Organization Code...">
                   </select>
                 </div>
                 <div class="col-md-5 pr-0">
@@ -373,7 +374,7 @@
               <div class="form-group row">
                 <label for="unit_code_id_supersede" class="control-label col-md-3">Unit Code:</label>
                 <div class="col-md-3 pl-0">
-                  <select name="unit_code_id_supersede" id="unit_code_id_supersede" class="form-control select2" data-placeholder="Choose Unit Code...">
+                  <select name="unit_code_id_supersede" id="unit_code_id_supersede" class="form-control select2 lock-supersede" data-placeholder="Choose Unit Code...">
                   </select>
                 </div>
                 <div class="col-md-5 pr-0">
@@ -383,12 +384,12 @@
               <div class="form-group row">
                 <label for="document_center_id_supersede" class="col-form-label col-md-3">Document Number</label>
                 <div class="col-md-9 pl-0">
-                  <select name="document_center_id_supersede" id="document_center_id_supersede" class="form-control select2" data-placeholder="Choose Document Number"></select>
+                  <select name="document_center_id_supersede" id="document_center_id_supersede" class="form-control select2 lock-supersede" data-placeholder="Choose Document Number"></select>
                 </div>
               </div>
               <div class="form-group">
                 <label for="remark" class="col-form-label">Supersede Remark</label>
-                <textarea class="form-control summernote-supersede d-none" name="supersede_remark" id="supersede_remark" rows="4" placeholder="Supersede Remark..."></textarea>
+                <textarea class="form-control summernote-supersede d-none lock-supersede" name="supersede_remark" id="supersede_remark" rows="4" placeholder="Supersede Remark..."></textarea>
               </div>
             </div>
             <div class="col-md-12 void-form d-none">
@@ -401,7 +402,7 @@
               <input type="hidden" name="void_id" id="void_id">
               <div class="form-group">
                 <label for="remark" class="col-form-label">Void Remark</label>
-                <textarea class="form-control summernote-void d-none" name="void_remark" id="void_remark" rows="4" placeholder="Void Remark..."></textarea>
+                <textarea class="form-control summernote-void d-none lock-supersede" name="void_remark" id="void_remark" rows="4" placeholder="Void Remark..."></textarea>
               </div>
             </div>
           </div>
@@ -434,7 +435,7 @@
           <button class="btn btn-labeled text-md btn-md btn-success btn-flat legitRipple" onclick="supersedeButton('VOID')">
             <b><i class="fas fa-save"></i></b> Void
           </button>
-          <button type="button" class="btn btn-labeled text-md btn-md bg-red btn-flat legitRipple" onclick="supersedeButton('EDIT')">
+          <button type="button" class="btn btn-labeled text-md btn-md bg-red btn-flat legitRipple d-none" onclick="supersedeButton('EDIT')">
             <b><i class="fas fa-pencil-alt"></i></b> Edit
           </button>
         </div>
@@ -611,6 +612,7 @@
   }
 </script>
 <script>
+  var page          = `{{ $page }}`;
   var actionmenu    = @json(json_encode($actionmenu));
   var global_status = JSON.parse(`{!! json_encode(config('enums.global_status')) !!}`);
   var status        = `{{ $document->status }}`;
@@ -654,6 +656,7 @@
         format: 'DD/MM/YYYY'
       }
     });
+    lockRevisionProperties('DRAFT');
   }
 
   const addFormUpload = (e) => {
@@ -661,7 +664,8 @@
     if (number <= 3) { 
       var html = `
                   <div class="input-group mt-2 add-on">
-                    <div class="custom-file">
+                    <input type="text" name="document_name[]" class="form-control" placeholder="Document Name">
+                    <div class="custom-file ml-3">
                       <input type="file" class="custom-file-input" name="document_upload[]" onchange="initInputFile()">
                       <label class="custom-file-label form-control" for="document_upload">Attach a document</label>
                     </div>
@@ -771,7 +775,14 @@
       } else {
         $('#void_id').val(e.data.void.id);
       }
+      $('.lock-supersede').prop('disabled', true);
+      $('.summernote-supersede').summernote('disable');
+      $('.summernote-void').summernote('disable');
       fillEditSupersedeForm(e.data);
+    } else {
+      $('.lock-supersede').prop('disabled', false);
+      $('.summernote-supersede').summernote('enable');
+      $('.summernote-void').summernote('enable');
     }
     supersedeButton(e.data.document_type, e.data.status);
     summernoteDocument();
@@ -823,7 +834,7 @@
       if (response.status) {
         toastr.success(response.message);
         dataTable.draw();
-        $('#form-document').modal('hide');
+        location.reload();
       } else {
         toastr.warning(response.message);
       }
@@ -949,6 +960,7 @@
   const lockRevisionProperties = (status) => {
     if (status == 'DRAFT' || status == 'REVISED') {
       $('.lock-revision').prop('disabled', false);
+      $('.summernote-revise').summernote('enable');
       summernoteRevise();
     } else {
       $('.summernote-revise').summernote('disable');
@@ -999,6 +1011,10 @@
       initApprovalButton(status_document);
     }
   }
+
+  const documentReference = (id) => {
+    document.location = `{{ url('admin/documentcenter') }}/${page}/${id}/edit`;
+  }
   
   $(function() {
     summernote();
@@ -1008,10 +1024,6 @@
     initApprovalButton(status);
     $('.select2').select2({
       allowClear: true,
-    });
-
-    $('#form-reason').on('hidden.bs.modal', function() {
-      $('#form-document').modal('show');
     });
     
     $('#form').validate({
@@ -1150,7 +1162,7 @@
           $('body').unblock();
           if (response.status) {
             toastr.success(response.message);
-            $('#form-document').modal('hide');
+            location.reload();
           } else {
             toastr.warning(response.message);
           }
@@ -1189,6 +1201,7 @@
         { render: function (data, type, row) {
           var label     = '',
               text      = '',
+              docRef    = '',
               status    = row.status;
 
               $.each(global_status, function(index, value) {
@@ -1201,6 +1214,11 @@
                   text    = 'Draft';
                 }
 
+                if (status == 'APPROVED') {
+                  label   = value.badge;
+                  text    = 'Issued';
+                }
+
                 if (row.document_type) {
                   label   = 'info';
                   String.prototype.ucwords = function() {
@@ -1211,12 +1229,16 @@
                       });
                   }
 
+                  if (row.supersede.docno) {
+                    docRef  = `<a href="javascript:void(0);" onclick="documentReference(${row.supersede.docno.id})"><div class="text-md text-info text-bold">${row.supersede.docno.document_number}</div></a>`
+                  }
+
                   var document_type = row.document_type;
                   text    = document_type.ucwords();
                 }
               });
           
-          return `<span class="badge bg-${label} text-sm">${text}</span>`;
+          return `${docRef}<span class="badge bg-${label} text-sm">${text}</span>`;
         }, targets: [2] },
         { render: function (data, type, row) {
           var status  = '',
@@ -1235,7 +1257,7 @@
           var html  = '';
 
           $.each(row.docdetail, function(index, value) {
-            html += `<a href="${value.document_path}" class="text-md text-info text-bold">${value.document_name}</a><br>`
+            html += `<a href="${value.document_path}" target="_blank" class="text-md text-info text-bold">${value.document_name}</a><br>`
           });
           return html;
         }, targets: [4] },
