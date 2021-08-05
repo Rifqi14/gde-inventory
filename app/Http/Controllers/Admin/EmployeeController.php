@@ -62,7 +62,7 @@ class EmployeeController extends Controller
                 $q->whereMonth('date_exception', Carbon::now())->whereYear('date_exception', Carbon::now());
             }
         ])->find($id);
-        $employee->workday  = Carbon::now()->daysInMonth - $employee->calendar->exceptions->count();
+        $employee->workday  = $employee->calendar ? Carbon::now()->daysInMonth - $employee->calendar->exceptions->count() : null;
         if ($employee) {
             $data = $employee;
             return view('admin.employee.edit', compact('data'));
