@@ -23,6 +23,7 @@ Auth::routes();
 
 Route::get('/test', 'Admin\TestController@test')->name('test');
 Route::get('/businesstrip/rateprocess', 'Admin\BusinessTripController@rateprocess')->name('businesstrip.rateprocess');
+Route::get('/reimbursement/rateprocess', 'Admin\ReimbursementController@rateprocess')->name('reimbursement.rateprocess');
 
 Route::get('/home', 'HomeController@index')->name('home');
 Route::group(['prefix' => 'admin'], function () {
@@ -351,5 +352,10 @@ Route::group(['prefix' => 'admin'], function () {
 
         // Document Center Log
         Route::resource('/documentlog', 'Admin\DocumentCenterLogController');
+
+        // Reimbursement
+        Route::get('/reimbursement/read', 'Admin\ReimbursementController@read')->name('reimbursement.read');
+        Route::get('/reimbursement/select', 'Admin\ReimbursementController@select')->name('reimbursement.select');
+        Route::resource('/reimbursement', 'Admin\ReimbursementController');
     });
 });
