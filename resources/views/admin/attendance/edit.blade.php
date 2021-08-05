@@ -572,6 +572,7 @@
     $("form").first().trigger("submit");
   }
   $(function() {
+    $('input[name="shift_type"]').val() == 'Hourly' ? $('#shift').parent().parent().addClass('d-none') : $('#shift').parent().parent().removeClass('d-none')
     summernote();
     $('#type_request').trigger('change');
     $('.spv-access').prop('disabled', true)

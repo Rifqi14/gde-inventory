@@ -53,7 +53,7 @@
                     <input type="text" name="shift_type" class="form-control" placeholder="Shift Type" disabled value="{{ ucwords(str_replace('_', ' ', @$employee->shift_type)) }}">
                   </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-6 d-none">
                   <div class="form-group row">
                     <label class="col-md-12 col-xs-12 control-label" for="shift">Shift</label>
                     <div class="col-sm-12 controls">
@@ -136,22 +136,27 @@
     return Math.abs(Math.round(diff));
   }
   const changeShift = (a) => {
-    var currentDate = new Date();
-    var data = $(a).select2('data')[0];
-    var timeIn = data.time_in.split(':');
-    var timeOut = data.time_out.split(':');
-    var dateIn = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), timeIn[0], timeIn[1], timeIn[2]);
-    var dateOut = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), timeOut[0], timeOut[1], timeOut[2]);
-
-    var timeDiffIn = timeDiff(currentDate, dateIn);
-    var timeDiffOut= timeDiff(currentDate, dateOut);
-
-    if (timeDiffIn < timeDiffOut) {
+    if ($('input[name="shift_type"]').val() != 'Hourly') {
+      var currentDate = new Date();
+      var data = $(a).select2('data')[0];
+      var timeIn = data.time_in.split(':');
+      var timeOut = data.time_out.split(':');
+      var dateIn = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), timeIn[0], timeIn[1], timeIn[2]);
+      var dateOut = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), timeOut[0], timeOut[1], timeOut[2]);
+  
+      var timeDiffIn = timeDiff(currentDate, dateIn);
+      var timeDiffOut= timeDiff(currentDate, dateOut);
+  
+      if (timeDiffIn < timeDiffOut) {
+        $('.checkin').removeClass('d-none');
+        $('.checkout').addClass('d-none');
+      } else {
+        $('.checkout').removeClass('d-none');
+        $('.checkin').addClass('d-none');
+      }
+    } else {
       $('.checkin').removeClass('d-none');
       $('.checkout').addClass('d-none');
-    } else {
-      $('.checkout').removeClass('d-none');
-      $('.checkin').addClass('d-none');
     }
   }
 
@@ -235,7 +240,9 @@
     });
   }
   $(function() {
+    $('input[name="shift_type"]').val() == 'Hourly' ? $('#shift').parent().parent().addClass('d-none') : $('#shift').parent().parent().removeClass('d-none')
     summernote();
+    changeShift();
     $("#shift").select2({
         ajax: {
             url: "{{route('workingshift.select')}}",
