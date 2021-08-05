@@ -149,18 +149,33 @@
                                             </div>
                                         </div>
                                         <!-- Shift Type -->
-                                        <div class="col-md-6">
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label class="control-label" for="calendar_id">Calendar</label>
+                                                <select class="form-control select2" name="calendar_id" id="calendar_id" data-placeholder="Choose Calendar...">
+                                                    <option value=""></option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
                                             <div class="form-group">
                                                 <label class="control-label" for="shift-type">Shift Type</label>
                                                 <select class="form-control select2" name="shift_type" id="shift-type" data-placeholder="Shift Type">
                                                     <option value=""></option>
                                                     <option value="shift" data-type="shift" {{$data->shift_type=='shift'?'selected':''}}>Shift</option>
                                                     <option value="non_shift" data-type="non_shift" {{$data->shift_type=='non_shift'?'selected':''}}>Non-Shift</option>
+                                                    <option value="hourly" data-type="hourly" {{$data->shift_type=='hourly'?'selected':''}}>Hourly</option>
                                                 </select>
                                             </div>
                                         </div>
+                                        <div class="col-md-6 {{ $data->shift_type == 'hourly' ? '' : 'd-none' }}">
+                                            <div class="form-group">
+                                                <label for="hourly_rate" class="control-label">Hourly Rate</label>
+                                                <input type="text" name="hourly_rate" id="hourly_rate" class="form-control input-price text-right" placeholder="0" readonly>
+                                            </div>
+                                        </div>
                                         <!-- Shift -->
-                                        <div class="col-md-6">
+                                        <div class="col-md-6 {{ $data->shift_type != 'hourly' ? '' : 'd-none' }}">
                                             <div class="form-group">
                                                 <label class="control-label" for="shift">Shift</label>
                                                 <select class="form-control" name="shift" id="shift" data-placeholder="Shift" {{$data->shift_type=='shift'?'disabled':''}}>
@@ -322,6 +337,18 @@
         return $currency;
     }
     
+	const intCurrency = (value) => {
+		var newCurrency = '';
+		if(value){
+			var currency = value.split('.');			
+			$.each(currency, function (index,value) { 
+				 newCurrency += value;
+			});
+		}
+		
+		return parseInt(newCurrency);
+	}	
+    
     $(function() {
         $('#user').trigger('change');
         $('.select2').select2({
@@ -388,6 +415,69 @@
             if (elementId == 'resign-date') {
                 employeeStatus(elementId);
             }
+        });
+
+        $("#calendar_id").select2({
+            ajax: {
+                url: "{{route('calendar.select')}}",
+                type: 'GET',
+                dataType: 'json',
+                data: function(params) {
+                    return {
+                        workday: true,
+                        name: params.term,
+                        page: params.page,
+                        limit: 30,
+                    };
+                },
+                processResults: function(data, params) {
+                    var more = (params.page * 30) < data.total;
+                    var option = [];
+                    $.each(data.rows, function(index, item) {
+                        option.push({
+                            id: item.id,
+                            text: item.name,
+                            workday: item.workday,
+                        });
+                    });
+                    return {
+                        results: option,
+                        more: more,
+                    };
+                },
+            },
+            allowClear: true,
+        }).on('select2:select', function(e){
+            var data    = e.params.data;
+            var base_salary = $('#base-salary').val();
+            var hourly_rate = Math.round(intCurrency(base_salary) / data.workday / 8);
+
+            $('#hourly_rate').val(hourly_rate);
+            
+
+            $(".input-price").priceFormat({
+                prefix: '',
+                centsSeparator: ',',
+                thousandsSeparator: '.',
+                centsLimit: 0,
+                clearOnEmpty: false
+            });
+        });
+        
+        $('#base-salary').keyup(function() {
+            var data    = $('#calendar_id').select2('data');
+            var base_salary = $('#base-salary').val();
+            var hourly_rate = Math.round(intCurrency(base_salary) / data[0].workday / 8);
+
+            $('#hourly_rate').val(hourly_rate);
+
+            $(".input-price").priceFormat({
+                prefix: '',
+                centsSeparator: ',',
+                thousandsSeparator: '.',
+                centsLimit: 0,
+                clearOnEmpty: false
+            });
         });
 
         $("#city").select2({
@@ -713,6 +803,16 @@
             @endif
         @endif
 
+        @if ($data->calendar)
+            $('#calendar_id').select2('trigger', 'select', {
+                data: {
+                    id: {{ $data->calendar->id }},
+                    text: `{{ $data->calendar->name }}`,
+                    workday: {{ $data->workday }},
+                },
+            });
+        @endif
+
         @if($data->region)
         $('#city').select2('trigger', 'select', {
             data: {
@@ -743,12 +843,19 @@
         @endif
 
         $('#shift-type').on('select2:select', function(e) {
-            var type = $(this).find('option:selected').data('type');
+            var type = $(this).find('option:selected').val();
             if (type == 'shift') {
                 $('#shift').attr('disabled', true);
                 $('#shift').val(null).trigger('change');
-            } else {
+                $('#shift').parent().parent().removeClass('d-none');
+                $('#hourly_rate').parent().parent().addClass('d-none');
+            } else if (type == 'non_shift') {
                 $('#shift').removeAttr('disabled');
+                $('#shift').parent().parent().removeClass('d-none');
+                $('#hourly_rate').parent().parent().addClass('d-none');
+            } else {
+                $('#shift').parent().parent().addClass('d-none');
+                $('#hourly_rate').parent().parent().removeClass('d-none');
             }
         });
 

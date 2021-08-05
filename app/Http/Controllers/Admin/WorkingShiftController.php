@@ -73,7 +73,6 @@ class WorkingShiftController extends Controller
                 'time_out'              => $request->time_out,
                 'status'                => $request->status,
                 'total_working_time'    => Carbon::parse($request->time_in)->diffInHours(Carbon::parse($request->time_out)),
-                'calendar_id'           => $request->calendar_id,
             ]);
         } catch (\Illuminate\Database\QueryException $ex) {
             DB::rollBack();
@@ -154,7 +153,6 @@ class WorkingShiftController extends Controller
             $user->time_out             = $request->time_out;
             $user->status               = $request->status;
             $user->total_working_time   = Carbon::parse($user->time_in)->diffInHours(Carbon::parse($user->time_out));
-            $user->calendar_id          = $request->calendar_id;
             $user->save();
         } catch (\Illuminate\Database\QueryException $ex) {
             DB::rollBack();

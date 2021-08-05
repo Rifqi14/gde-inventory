@@ -41,6 +41,7 @@
                     <th>No.</th>
                     <th>Name</th>
                     <th>Description</th>
+                    <th class="workday">Workday this month</th>
                     <th>Action</th>
                   </tr>
                 </thead>
@@ -81,6 +82,12 @@
                   <textarea name="description" id="description" class="form-control" rows="4" style="resize: none;" placeholder="Description..."></textarea>
                 </div>
               </div>
+              <div class="col-md-12">
+                <div class="form-group">
+                  <label for="period" class="control-label">Period</label>
+                  <input type="text" name="period" id="period" class="form-control datepicker" placeholder="Period">
+                </div>
+              </div>
             </div>
           </div>
         </form>
@@ -99,6 +106,23 @@
   var actionmenu = JSON.parse('{!! json_encode($actionmenu) !!}');
   $(function() {
     $('.select2').select2();
+    $('.datepicker').daterangepicker({
+      singleDatePicker: true,
+      timePicker: false,
+      timePickerIncrement: 1,
+      timePicker24Hour: false,
+      timePickerSeconds: false,
+      autoUpdateInput: false,
+      drops: 'auto',
+      opens: 'center',
+      locale: {
+        format: 'YYYY-MM'
+      }
+    }).on('apply.daterangepicker', function(ev, picker) {
+      $(this).val(picker.startDate.format('YYYY-MM'));
+    }).on('cancel.daterangepicker', function(ev, picker) {
+      $(this).val('');
+    });
     dataTable   = $('#calendar-table').DataTable({
       processing: true,
       language: {
@@ -119,6 +143,8 @@
           var name        = $('#form-search').find('#name').val();
           var code        = $('#form-search').find('#code').val();
           var description = $('#form-search').find('#description').val();
+          var period      = $('#form-search').find('#period').val();
+          data.period     = period;
           data.name       = name;
           data.code       = code;
           data.description= description;
@@ -135,6 +161,7 @@
           },
         },
         { "data": "description", "name": "description", width: 120, orderable: false },
+        { "data": "workday", "name": "workday", width: 50, orderable: false, render: function(data, type, full, meta) { return `${full.workday} days` } },
         {
             width: 50,
             className: "text-center",
@@ -171,6 +198,7 @@
     $("#form-search").submit(function(e) {
       e.preventDefault();
       dataTable.draw();
+      $('.workday').append(` (${$(this).find('#period').val()})`);
       $("#add-filter").modal('hide');
     });
   });

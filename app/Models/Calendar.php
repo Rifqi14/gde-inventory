@@ -28,9 +28,9 @@ class Calendar extends Model
      *
      * @return \Illuminate\Database\Eloquent\Model
      */
-    public function shifts()
+    public function employees()
     {
-        return $this->hasMany('App\Models\WorkingShift', 'calendar_id', 'id');
+        return $this->hasMany('App\Models\Employee', 'calendar_id', 'id');
     }
 
     /**
