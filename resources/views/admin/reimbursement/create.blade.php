@@ -306,7 +306,7 @@ Create {{ @$menu_name }} Request
               </div>
               <div class="form-group row">
                 <div class="col-md-12">
-                  <label>Departure Date:</label>
+                  <label>Reimbursement Date:</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">
