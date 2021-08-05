@@ -58,7 +58,11 @@ class EmployeeController extends Controller
             'workingshift' => function ($q) {
                 $q->selectRaw('working_shifts.id,working_shifts.shift_name');
             },
+            'calendar.exceptions' => function ($q) {
+                $q->whereMonth('date_exception', Carbon::now())->whereYear('date_exception', Carbon::now());
+            }
         ])->find($id);
+        $employee->workday  = Carbon::now()->daysInMonth - $employee->calendar->exceptions->count();
         if ($employee) {
             $data = $employee;
             return view('admin.employee.edit', compact('data'));
@@ -248,6 +252,7 @@ class EmployeeController extends Controller
             'rate_business_trip'    => $rate_business_trip,
             'rate_currency_id'      => $curr_rate,
             'salary_currency_id'    => $curr_salary,
+            'calendar_id'           => $request->calendar_id,
         ]);
 
         $user = ['status' => false, 'message' => 'Employee without user account.'];
@@ -509,6 +514,7 @@ class EmployeeController extends Controller
         $employee->rate_business_trip   = $rate_business_trip;
         $employee->rate_currency_id     = $rate_currency_id;
         $employee->salary_currency_id   = $salary_currency_id;
+        $employee->calendar_id          = $request->calendar_id;
         $employee->save();
 
         DB::beginTransaction();

@@ -55,12 +55,6 @@ Create Working Shift
 							</div>
 						</div>
 						<div class="form-group row">
-							<label for="calendar_id" class="col-md-2 col-xs-12 control-label">Calendar</label>
-							<div class="col-sm-6 controls">
-								<select name="calendar_id" id="calendar_id" class="select2 form-control"></select>
-							</div>
-						</div>
-						<div class="form-group row">
 							<label class="col-md-2 col-xs-12 control-label" for="time_in">Time In</label>
 							<div class="col-sm-6 controls">
 								<input type="text" class="form-control time-in" name="time_in" placeholder="Time In..." />
@@ -134,34 +128,6 @@ Create Working Shift
 			}
 		});
 		$('.select2').select2();
-		$('#calendar_id').select2({
-			placeholder: "Select Calendar ...",
-			ajax: {
-				url: "{{ route('calendar.select') }}",
-				type: "GET",
-				dataType: "json",
-				data: function(params) {
-					return {
-						name: params.term,
-						page: params.page,
-						limit: 30,
-					};
-				},
-				processResults: function(data, params) {
-					params.page = params.page || 1;
-					var more		= (params.page * 30) < data.total;
-					var option	= [];
-					$.each(data.rows, function(index, item) {
-						option.push({
-							id: item.id,
-							text: item.name,
-						});
-					});
-					return { results: option, pagination: { more: more, }, };
-				},
-			},
-			allowClear: true,
-		});
 		
 		$('#form').validate({
 			rules: {

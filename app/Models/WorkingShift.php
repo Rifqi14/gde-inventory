@@ -6,15 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class WorkingShift extends Model
 {
-    protected $guarded = [];
-
     /**
-     * Define relation with calendars table
+     * The attributes that aren't mass assignable.
      *
-     * @return \Illuminate\Database\Eloquent\Model
+     * @var array
      */
-    public function calendar()
-    {
-        return $this->belongsTo('App\Models\Calendar', 'calendar_id', 'id');
-    }
+    protected $guarded = [];
 }
