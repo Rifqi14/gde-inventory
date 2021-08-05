@@ -365,6 +365,10 @@
     var files    = @json($data->files);
     var images   = @json($data->images);
 
+    console.log({
+      products :  products
+    });
+
     if(products.length > 0){
       var html  = '',
           table = $('#table-product > tbody');
@@ -461,13 +465,7 @@
 
         table.find('.no-available-data').remove();
         table.append(html);
-    }
-
-    console.log({
-      products :  products,
-      contractref :files,
-      images    : images
-    });
+    }    
   }  
 </script>
 @endsection

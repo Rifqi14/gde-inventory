@@ -22,6 +22,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 
 class GoodsReceiptController extends Controller
 {
@@ -102,7 +103,7 @@ class GoodsReceiptController extends Controller
                         products.is_serial,            
                         products.last_serial,
                         product_categories.path as category,
-                        uoms.name as uom,                    
+                        uoms.name as uom,                                            
                         product_borrowings.borrowing_number as reference,
                         rack_warehouses.name as rack,
                         bin_warehouses.name as bin
@@ -112,7 +113,8 @@ class GoodsReceiptController extends Controller
                     $product->leftJoin('uoms', 'uoms.id', '=', 'goods_receipt_products.uom_id');
                     $product->leftJoin('rack_warehouses', 'rack_warehouses.id', '=', 'goods_receipt_products.rack_id');
                     $product->leftJoin('bin_warehouses', 'bin_warehouses.id', '=', 'goods_receipt_products.bin_id');
-                    $product->leftJoin('product_borrowings', 'product_borrowings.id', '=', 'goods_receipt_products.reference_id');
+                    $product->leftJoin('goods_issue_products', 'goods_issue_products.id', '=', 'goods_receipt_products.reference_id');
+                    $product->leftJoin('product_borrowings','product_borrowings.id','=','goods_issue_products.reference_id');
                     $product->where('goods_receipt_products.type', 'borrowing');
                 },
                 'files',
@@ -129,7 +131,12 @@ class GoodsReceiptController extends Controller
             $query->leftJoin('warehouses', 'warehouses.id', '=', 'goods_receipts.warehouse_id');
             $query->leftJoin('sites', 'sites.id', '=', 'warehouses.site_id');
             $query->leftJoin('users', 'users.id', '=', 'goods_receipts.issued_by');
-            $data  = $query->find($id);    
+            $data  = $query->find($id);   
+            
+            if($data->status == 'approved' || $data->status == 'rejected'){
+                abort(403);
+                return;
+            }
     
             if ($data) {
                 return view('admin.goodsreceipt.edit', compact('data'));
@@ -180,7 +187,8 @@ class GoodsReceiptController extends Controller
                     rack_warehouses.name as rack,
                     bin_warehouses.name as bin
                 ");
-                $product->leftJoin('product_borrowings', 'product_borrowings.id', '=', 'goods_receipt_products.reference_id');
+                $product->leftJoin('goods_issue_products', 'goods_issue_products.id', '=', 'goods_receipt_products.reference_id');
+                $product->leftJoin('product_borrowings','product_borrowings.id','=','goods_issue_products.reference_id');
                 $product->leftJoin('products', 'products.id', '=', 'goods_receipt_products.product_id');
                 $product->leftJoin('product_categories','product_categories.id','=','products.product_category_id');
                 $product->leftJoin('uoms', 'uoms.id', '=', 'goods_receipt_products.uom_id');
@@ -736,7 +744,7 @@ class GoodsReceiptController extends Controller
         $dir         = $request->order[0]['dir'];
         $except      = $request->except;
         $category_id = $request->category_id;
-        $warehouse_id = $request->warehouse_id; 
+        $warehouse_id = $request->warehouse_id;         
 
         $query = GoodsIssueProduct::selectRaw("                        
             goods_issue_products.id as detail_id,
@@ -744,7 +752,7 @@ class GoodsReceiptController extends Controller
             goods_issue_products.goods_issue_id,
             goods_issue_products.qty_receive as qty,
             goods_issue_products.uom_id,      
-            product_borrowings.id as reference_id,
+            product_borrowings.id as reference_id,  
             product_borrowings.borrowing_number,
             TO_CHAR(product_borrowings.borrowing_date,'DD/MM/YYYY') as date_borrowing,
             products.name as product,
@@ -754,7 +762,7 @@ class GoodsReceiptController extends Controller
             product_categories.path as category,
             uoms.name as uom
         ");        
-        $query->join('goods_issues','goods_issues.id','=','goods_issue_products.goods_issue_id');
+        $query->join('goods_issues','goods_issues.id','=','goods_issue_products.goods_issue_id');                
         $query->leftJoin('product_borrowing_details',function($join){
             $join->on('product_borrowing_details.product_borrowing_id','=','goods_issue_products.reference_id');
             $join->on('product_borrowing_details.product_id','=','goods_issue_products.product_id');
@@ -762,10 +770,17 @@ class GoodsReceiptController extends Controller
         $query->leftJoin('product_borrowings','product_borrowings.id','=','goods_issue_products.reference_id');
         $query->join('products','products.id','=','goods_issue_products.product_id');
         $query->leftJoin('product_categories','product_categories.id','=','products.product_category_id');
-        $query->leftJoin('uoms','uoms.id','=','goods_issue_products.uom_id');
+        $query->leftJoin('uoms','uoms.id','=','goods_issue_products.uom_id');        
         $query->where([
            ['goods_issue_products.type','=','borrowing'],
            ['goods_issues.status','=','approved']
+        ]);
+        $query->whereNotIn('goods_issue_products.id',[
+            DB::Raw("
+                select reference_id from goods_receipt_products
+                left join goods_receipts on goods_receipts.id = goods_receipt_products.goods_receipt_id
+                where goods_receipts.status = 'approved'
+            ")
         ]);
         if($category_id){
             $query->where('products.product_category_id',$category_id);
@@ -794,7 +809,7 @@ class GoodsReceiptController extends Controller
             'draw'              => $draw,
             'recordsTotal'      => $total,
             'recordsFiltered'   => $total,
-            'data'              => $data
+            'data'              => $data            
         ], 200);
     }
 

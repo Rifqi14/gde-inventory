@@ -1001,7 +1001,7 @@
             product_id    : productID,
             site_id       : siteID,
             warehouse_id  : warehouseID,
-            reference_id  : referenceID,
+            reference_id  : detailID,
             reference     : reference,
             uom_id        : uomID,
             has_serial    : hasSerial,
@@ -1015,7 +1015,7 @@
             last_key      : lastKey
           });
 
-        });        
+        });         
 
         if (products.length == 0) {
           toastr.warning('Select the product first. at least one product');
