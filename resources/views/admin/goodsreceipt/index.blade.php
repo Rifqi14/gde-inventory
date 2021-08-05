@@ -226,18 +226,18 @@
             button += `<a class="dropdown-item" href="javascript:void(0);" onclick="detail(${row.id})">
                                         <i class="far fa-eye"></i>View Data
                                     </a>`;
-            // update
-            if (actionmenu.indexOf('update') >= 0 && row.status != 'approved') {
-              button += `<a class="dropdown-item" href="javascript:void(0);" onclick="edit(${row.id})">
-                                        <i class="far fa-edit"></i>Update Data
-                                    </a>`;
-            }
-            // delete
-            if (actionmenu.indexOf('delete') >= 0 && row.status != 'approved') {
-              button += `<a class="dropdown-item" href="javascript:void(0);" onclick="destroy(${row.id})">
-                                        <i class="fa fa-trash-alt"></i> Delete Data
-                                    </a>`;
-            }
+            // // update
+            // if (actionmenu.indexOf('update') >= 0 && row.status != 'approved') {
+            //   button += `<a class="dropdown-item" href="javascript:void(0);" onclick="edit(${row.id})">
+            //                             <i class="far fa-edit"></i>Update Data
+            //                         </a>`;
+            // }
+            // // delete
+            // if (actionmenu.indexOf('delete') >= 0 && row.status != 'approved') {
+            //   button += `<a class="dropdown-item" href="javascript:void(0);" onclick="destroy(${row.id})">
+            //                             <i class="fa fa-trash-alt"></i> Delete Data
+            //                         </a>`;
+            // }
             return `<div class="btn-group">
                         <button type="button" class="btn btn-flat btn-sm dropdown-toggle" data-toggle="dropdown">
                             <i class="fas fa-bars"></i>
