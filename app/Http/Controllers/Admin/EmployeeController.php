@@ -477,7 +477,7 @@ class EmployeeController extends Controller
         $accountnumber      = $request->account_number;
         $accountname        = $request->account_name;
         $shifttype          = $request->shift_type;
-        $workingshift       = $request->shift;
+        $workingshift       = $shifttype == 'non_shift' ? $request->shift : null;
         $status             = $request->status ? 1 : 0;
         $joindate           = $request->date_join;
         $resigndate         = $request->date_resign;

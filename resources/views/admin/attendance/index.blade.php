@@ -212,7 +212,7 @@
                     html = `<b>${row.attendance_in}</b><br><small class="text-success">${row.diff_in.diff_format}</small>`;
                   }
                 } else {
-                  html  = `<b>${row.attendance_in}</b>`;
+                  html  = `<b>${row.attendance_in ? row.attendance_in : '-'}</b>`;
                 }
                 return html
               }, targets: [3]
@@ -228,7 +228,7 @@
                     html = `<b>${row.attendance_out}</b><br><small class="text-success">${row.diff_out.diff_format}</small>`;
                   }
                 } else {
-                  html  = `<b>${row.attendance_out}</b>`;
+                  html  = `<b>${row.attendance_out ? row.attendance_out : '-'}</b>`;
                 }
                 return html;
               }, targets: [4]

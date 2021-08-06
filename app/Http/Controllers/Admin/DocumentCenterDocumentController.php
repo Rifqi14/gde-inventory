@@ -172,7 +172,6 @@ class DocumentCenterDocumentController extends Controller
     {
         $validator      = Validator::make($request->all(), [
             'document_number'   => 'required',
-            'issue_purpose'     => 'required',
         ]);
 
         if ($validator->fails()) {

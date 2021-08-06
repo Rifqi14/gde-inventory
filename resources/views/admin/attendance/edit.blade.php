@@ -183,7 +183,7 @@
                 Save
               </button>
               @endif
-              @if (($attendance->attendance_date == date('Y-m-d')) && ($attendance->employee->user->id == Auth::guard('admin')->user()->id)) <button type="submit" class="btn bg-olive color-palette btn-labeled legitRipple text-sm btn-sm checkout">
+              @if (($attendance->attendance_date == date('Y-m-d')) && ($attendance->employee->user->id == Auth::guard('admin')->user()->id || $attendance->employee->user->spv_id == Auth::guard('admin')->user()->id) && ($attendance->status != 'APPROVED')) <button type="submit" class="btn bg-olive color-palette btn-labeled legitRipple text-sm btn-sm checkout">
                 <b><i class="fas fa-save"></i></b> Check Out
               </button>
               @endif

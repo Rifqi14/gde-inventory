@@ -241,6 +241,7 @@
   }
   $(function() {
     $('input[name="shift_type"]').val() == 'Hourly' ? $('#shift').parent().parent().parent().addClass('d-none') : $('#shift').parent().parent().parent().removeClass('d-none');
+    $('input[name="shift_type"]').val() == 'Hourly' ? $('.checkin').removeClass('d-none') : $('.checkout').addClass('d-none');
     summernote();
     $("#shift").select2({
         ajax: {
