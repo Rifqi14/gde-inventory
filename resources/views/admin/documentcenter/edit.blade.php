@@ -162,9 +162,9 @@
       <div class="card">
         <div class="card-header text-right">
           @php
-          $status = $document->documents()->latest()->first() ? !in_array($document->documents()->latest()->first()->status, ['DRAFT', 'WAITING', 'REVISED']) : null;
+          $status = $document->documents()->first() ? $document->documents()->latest()->first()->status : null;
           @endphp
-          @if ($document->documents()->get()->count() >= 0 || $status)
+          @if (!in_array($status, ['DRAFT', 'WAITING', 'REVISED']) || !$status)
           <button type="button" class="btn btn-labeled text-md btn-md btn-success btn-flat legitRipple" onclick="documentModal('create')">
             <b><i class="fas fa-plus"></i></b> Create
           </button>
@@ -269,11 +269,11 @@
             </div>
             <div class="col-md-8">
               <div class="form-group">
-                <label for="document_upload" class="col-form-label">Document</label>
+                <label for="document_upload" class="col-form-label">File</label>
                 <div class="init-data"></div>
                 <div class="initInput">
                   <div class="input-group">
-                    <input type="text" name="document_name[]" class="form-control" placeholder="Document Name">
+                    <input type="text" name="document_name[]" class="form-control" placeholder="File Name">
                     <div class="custom-file ml-3">
                       <input type="file" class="custom-file-input lock-revision" name="document_upload[]" onchange="initInputFile()">
                       <label class="custom-file-label form-control" for="document_upload">Attach a document</label>
@@ -813,6 +813,11 @@
       $('.initInput').removeClass('d-none');
     } else {
       $('.initInput').addClass('d-none');
+    }
+    if (data_total >= 4) {
+      $('.initInput').addClass('d-none');
+    } else {
+      $('.initInput').removeClass('d-none');
     }
     if (e.data.document_type) {
       if (e.data.document_type == 'SUPERSEDE') {
