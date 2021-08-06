@@ -64,7 +64,7 @@ class DocumentCenterLogController extends Controller
             if ($create) {
                 if ($request->file('attachment')) {
                     $name       = ucwords(str_replace(' ', '-', $request->attachment_name));
-                    $filename   = "$name#$create->revise_number.{$request->file('attachment')->getClientOriginalExtension()}";
+                    $filename   = "$name-$create->revise_number.{$request->file('attachment')->getClientOriginalExtension()}";
                     $categorymenu   = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $request->category_menu)));
     
                     $moveFile   = $this->reasonAttachment($request->file('attachment'), $filename, "documentcenter/$request->menu/$categorymenu/revise", $create->document_center_document_id);
@@ -141,5 +141,38 @@ class DocumentCenterLogController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function read(\Illuminate\Http\Request $request)
+    {
+        $start          = $request->start;
+        $length         = $request->length;
+        $query          = $request->search['value'];
+        $sort           = $request->columns[$request->order[0]['column']]['data'];
+        $dir            = $request->order[0]['dir'];
+        $document_id    = $request->document_id;
+
+        // Query Data
+        $query          = DocumentCenterLog::where('document_center_document_id', $document_id);
+
+        $row            = clone $query;
+        $recordsTotal   = $row->count();
+
+        $query->paginate($length);
+        $query->orderBy($sort, $dir);
+        $documents      = $query->get();
+
+        $data           = [];
+        foreach ($documents as $key => $document) {
+            $document->no       = ++$start;
+            $data[]             = $document;
+        }
+        
+        return response()->json([
+            'draw'              => $request->draw,
+            'recordsTotal'      => $recordsTotal,
+            'recordsFiltered'   => $recordsTotal,
+            'data'              => $data,
+        ], 200);
     }
 }

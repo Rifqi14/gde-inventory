@@ -351,6 +351,7 @@ Route::group(['prefix' => 'admin'], function () {
         Route::resource('/documentdetail', 'Admin\DocumentCenterDocumentDetailController');
 
         // Document Center Log
+        Route::get('/documentlog/read', 'Admin\DocumentCenterLogController@read')->name('documentlog.read');
         Route::resource('/documentlog', 'Admin\DocumentCenterLogController');
 
         // Reimbursement

@@ -173,7 +173,7 @@
             <div class="card-footer text-right">
               <input type="hidden" name="status">
               <input type="hidden" name="type">
-              @if (in_array('approval', $actionmenu) && ($attendance->employee->user->spv_id == Auth::guard('admin')->user()->id))
+              @if (in_array('approval', $actionmenu) && ($attendance->employee->user->spv_id == Auth::guard('admin')->user()->id) && $attendance->status == 'WAITING')
               <button type="button" onclick="submitTest(`approved`)" class="btn btn-success btn-labeled legitRipple btn-sm text-sm" data-type="approved">
                 <b><i class="fas fa-check-circle"></i></b>
                 Approved

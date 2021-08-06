@@ -46,6 +46,12 @@ class DocumentCenterDocumentController extends Controller
     {
         $validator      = Validator::make($request->all(), [
             'document_number'   => 'required',
+            'document_name.*'   => 'required',
+            'document_upload.*' => 'required',
+            'issue_purpose'     => 'required',
+        ], [
+            'document_name.*.required'    => 'Document name field is required',
+            'document_upload.*.required'  => 'Upload document field is required',
         ]);
 
         if ($validator->fails()) {
@@ -70,7 +76,7 @@ class DocumentCenterDocumentController extends Controller
                 $dataDocument   = [];
                 $no             = 1;
                 foreach ($request->document_upload as $key => $detail) {
-                    $transNo        = "{$request->document_name[$key]}-$no";
+                    $transNo        = "{$request->document_name[$key]}";
                     $filename       = "$transNo.".$request->file('document_upload')[$key]->getClientOriginalExtension();
                     $categorymenu   = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $request->category_menu)));
                     $documentnumber = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $request->document_number)));
@@ -166,6 +172,7 @@ class DocumentCenterDocumentController extends Controller
     {
         $validator      = Validator::make($request->all(), [
             'document_number'   => 'required',
+            'issue_purpose'     => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -190,7 +197,7 @@ class DocumentCenterDocumentController extends Controller
                 $dataDocument   = [];
                 $no             = 1;
                 foreach ($request->document_upload as $key => $detail) {
-                    $transNo        = str_replace('.', '-', $document->transmittal_no) . "#" . $no;
+                    $transNo        = "{$request->document_name[$key]}";
                     $filename       = "$transNo.".$request->file('document_upload')[$key]->getClientOriginalExtension();
                     $categorymenu   = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $request->category_menu)));
                     $documentnumber = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $request->document_number)));
@@ -303,7 +310,18 @@ class DocumentCenterDocumentController extends Controller
      */
     public function destroy($id)
     {
-        //
+        try {
+            DocumentCenterDocument::destroy($id);
+        } catch (\Illuminate\Database\QueryException $ex) {
+            return response()->json([
+                'status'    => false,
+                'message'   => "Error delete data: {$ex->errorInfo[2]}"
+            ], 400);
+        }
+        return response()->json([
+            'status'    => true,
+            'message'   => "Success delete data!",
+        ], 200);
     }
     
     /**
@@ -335,7 +353,6 @@ class DocumentCenterDocumentController extends Controller
         $data           = [];
         foreach ($documents as $key => $document) {
             $document->no   = ++$start;
-            $document->test = '';
             foreach ($document->docdetail() as $keyDetail => $detail) {
                 $document->file_size    = $this->formatBytes($document->file_size, 2);
             }
