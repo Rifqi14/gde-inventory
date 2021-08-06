@@ -161,10 +161,12 @@
       </div>
       <div class="card">
         <div class="card-header text-right">
+          @if ($document->documents()->get()->count() > 0)
           @if (!in_array($document->documents()->latest()->first()->status, ['DRAFT', 'WAITING', 'REVISED']))
           <button type="button" class="btn btn-labeled text-md btn-md btn-success btn-flat legitRipple" onclick="documentModal('create')">
             <b><i class="fas fa-plus"></i></b> Create
           </button>
+          @endif
           @endif
         </div>
         <div class="card-body table-responsive p-0">
