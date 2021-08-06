@@ -204,14 +204,17 @@
               width: "10%",
               render: function(data, type, row) {
                 html  = '';
-                if (row.diff_in) {
+                hourly  = '';
+                if (row.diff_in != null) {
                   if (row.diff_in.diff_type == 'late') {
                     html = `<b>${row.attendance_in}</b><br><small class="text-danger">${row.diff_in.diff_format}</small>`;
                   } else {
                     html = `<b>${row.attendance_in}</b><br><small class="text-success">${row.diff_in.diff_format}</small>`;
                   }
+                } else {
+                  html  = `<b>${row.attendance_in}</b>`;
                 }
-                return row.diff_in ? html : '-'
+                return html
               }, targets: [3]
             },
             {
@@ -224,8 +227,10 @@
                   } else {
                     html = `<b>${row.attendance_out}</b><br><small class="text-success">${row.diff_out.diff_format}</small>`;
                   }
+                } else {
+                  html  = `<b>${row.attendance_out}</b>`;
                 }
-                return row.diff_out ? html : '-'
+                return html;
               }, targets: [4]
             },
             {

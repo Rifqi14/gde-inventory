@@ -240,9 +240,8 @@
     });
   }
   $(function() {
-    $('input[name="shift_type"]').val() == 'Hourly' ? $('#shift').parent().parent().addClass('d-none') : $('#shift').parent().parent().removeClass('d-none')
+    $('input[name="shift_type"]').val() == 'Hourly' ? $('#shift').parent().parent().parent().addClass('d-none') : $('#shift').parent().parent().parent().removeClass('d-none');
     summernote();
-    changeShift();
     $("#shift").select2({
         ajax: {
             url: "{{route('workingshift.select')}}",
