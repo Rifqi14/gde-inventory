@@ -284,6 +284,8 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/goodsissue/transferproducts','Admin\GoodsIssueController@transferproducts')->name('goodsissue.transferproducts');
         Route::get('/goodsissue/borrowingprodutcs','Admin\GoodsIssueController@borrowingproducts')->name('goodsissue.borrowingproducts');
         Route::get('/goodsissue/readserial','Admin\GoodsIssueController@readserial')->name('goodsissue.readserial');
+        Route::get('/goodsissue/print','Admin\GoodsIssueController@print')->name('goodsissue.print');
+        Route::get('/goodsissue/export','Admin\GoodsIssueController@export')->name('goodsissue.export');
         Route::resource('/goodsissue','Admin\GoodsIssueController');
 
         // Stock Movement

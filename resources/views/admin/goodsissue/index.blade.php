@@ -58,6 +58,7 @@
         </div>
     </div>
 </section>
+<!-- Modal Filter -->
 <div class="modal fade" id="form-filter">
     <div class="modal-dialog modal-md">
         <div class="modal-content">
@@ -117,6 +118,10 @@
         </div>
     </div>
 </div>
+
+<div style="display: none;">
+	<iframe id="bodyReplace" scrolling="no" allowtransparency="true" style="width: 69%; border-width: 0px; position: relative; margin: 0 auto; display: block;" onload="this.style.height=(this.contentDocument.body.scrollHeight+45) +'px';"></iframe>
+</div>
 @endsection
 
 @section('scripts')
@@ -141,7 +146,7 @@
         "hideMethod": "fadeOut"
     };
 
-    $(function() {
+    $(function() {        
         $('.select2').select2({
             allowClear: true
         });
@@ -170,7 +175,7 @@
             responsive: true,
             lengthChange: false,
             order: [
-                [1, "asc"]
+                [2, "desc"]
             ],
             ajax: {
                 url: "{{route('goodsissue.read')}}",
@@ -251,6 +256,13 @@
                         //                 <i class="fa fa-trash-alt"></i> Delete Data
                         //             </a>`;
                         // }
+
+                        // print
+                        if (actionmenu.indexOf('print') >= 0 && row.status == 'approved') {
+                            button +=   `<a class="dropdown-item" href="javascript:void(0);" onclick="print(${row.id})">
+                                            <i class="fas fa-print"></i>Print Data                                        
+                                        </a>`;
+                        }
                         return `<div class="btn-group">
                         <button type="button" class="btn btn-flat btn-sm dropdown-toggle" data-toggle="dropdown">
                             <i class="fas fa-bars"></i>
@@ -358,6 +370,30 @@
             search.find('#status').val(null).trigger('change');        
         
             dataTable.draw();
+    }
+
+    const print = (id) => {
+        $.ajax({
+            type: "GET",
+            url: `{{route('goodsissue.export')}}`,
+            data: {
+                _token: "{{ csrf_token() }}",
+                id : id
+            },
+            dataType: "JSON",
+            success: function (response) {
+                console.log({response : response});
+
+                if (response.status) {
+                    let download = document.createElement("a");
+                    download.href = response.file;
+                    document.body.appendChild(download);
+                    download.download = response.document;
+                    download.click();
+                    download.remove();
+                }                
+            }
+        });
     }
 </script>
 @endsection
