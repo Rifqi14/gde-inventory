@@ -25,4 +25,9 @@ class Role extends Model
             'updated_by',
         ]);
     }
+
+    public function contractors()
+    {
+        return $this->hasMany('App\Models\DocExternal\DocumentExternal', 'role_id', 'id');
+    }
 }
