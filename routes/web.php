@@ -373,9 +373,9 @@ Route::group(['prefix' => 'admin'], function () {
         Route::resource('/docexternalproperties/disciplinecode', 'Admin\ExternalProperties\DisciplineCodeController');
 
         // Document External Document Type
-        Route::get('/docexternalproperties/documenttype/read', 'Admin\ExternalProperties\DocumentTypeController@read')->name('documenttype.read');
-        Route::get('/docexternalproperties/documenttype/select', 'Admin\ExternalProperties\DocumentTypeController@select')->name('documenttype.select');
-        Route::resource('/docexternalproperties/documenttype', 'Admin\ExternalProperties\DocumentTypeController');
+        Route::get('/docexternalproperties/documenttypeext/read', 'Admin\ExternalProperties\DocumentTypeController@read')->name('documenttypeext.read');
+        Route::get('/docexternalproperties/documenttypeext/select', 'Admin\ExternalProperties\DocumentTypeController@select')->name('documenttypeext.select');
+        Route::resource('/docexternalproperties/documenttypeext', 'Admin\ExternalProperties\DocumentTypeController');
 
         // Document External Originator Code
         Route::get('/docexternalproperties/originatorcode/read', 'Admin\ExternalProperties\OriginatorCodeController@read')->name('originatorcode.read');

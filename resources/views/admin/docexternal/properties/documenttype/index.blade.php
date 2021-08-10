@@ -1,6 +1,6 @@
-<div class="tab-pane fade show" id="documenttype" role="tabpanel" aria-labelledby="documenttype-tab">
+<div class="tab-pane fade show" id="documenttypeext" role="tabpanel" aria-labelledby="documenttypeext-tab">
   <div class="table-responsive">
-    <table class="table table-striped" id="table-documenttype" style="width: 100%">
+    <table class="table table-striped" id="table-documenttypeext" style="width: 100%">
       <thead>
         <tr>
           <th width="2%">No.</th>
@@ -14,7 +14,7 @@
 </div>
 
 @push('filter')
-<div class="modal fade" id="form-filter-documenttype">
+<div class="modal fade" id="form-filter-documenttypeext">
   <div class="modal-dialog modal-md">
     <div class="modal-content">
       <div class="modal-header">
@@ -24,7 +24,7 @@
         </button>
       </div>
       <div class="modal-body">
-        <form id="form-search-documenttype" method="POST" autocomplete="off">
+        <form id="form-search-documenttypeext" method="POST" autocomplete="off">
           @csrf
           <input type="hidden" name="_method">
           <div class="row">
@@ -44,7 +44,7 @@
         </form>
       </div>
       <div class="modal-footer text-right">
-        <button type="submit" form="form-search-documenttype" class="btn btn-labeled text-sm btn-default btn-flat legitRipple">
+        <button type="submit" form="form-search-documenttypeext" class="btn btn-labeled text-sm btn-default btn-flat legitRipple">
           <b><i class="fas fa-search"></i></b>
           Filter
         </button>
@@ -57,10 +57,10 @@
 @section('scripts')
 @parent
 <script>
-  const editdocumenttype = (id) => {
-    document.location = `{{ route('documenttype.index') }}/${id}/edit`;
+  const editdocumenttypeext = (id) => {
+    document.location = `{{ route('documenttypeext.index') }}/${id}/edit`;
   }
-  const destroydocumenttype = (id) => {
+  const destroydocumenttypeext = (id) => {
     bootbox.confirm({
       buttons: {
         confirm: {
@@ -80,7 +80,7 @@
             _token: "{{ csrf_token() }}"
           };
           $.ajax({
-            url: `{{route('documenttype.index')}}/${id}`,
+            url: `{{route('documenttypeext.index')}}/${id}`,
             dataType: 'json',
             data: data,
             type: 'DELETE',
@@ -91,7 +91,7 @@
             $('body').unblock();
             if (response.status) {
               toastr.success(response.message);
-              dataTabledocumenttype.ajax.reload(null, false);
+              dataTabledocumenttypeext.ajax.reload(null, false);
             }else {
               toastr.warning(response.message);
             }
@@ -106,7 +106,7 @@
   }
 
   $(function() {
-    dataTabledocumenttype = $('#table-documenttype').DataTable({
+    dataTabledocumenttypeext = $('#table-documenttypeext').DataTable({
       processing: true,
       language: {
         processing: `<div class="p-2 text-center"><i class="fas fa-circle-notch fa-spin fa-fw"></i> Loading...</div>`
@@ -117,11 +117,11 @@
       lengthChange: false,
       order: [[1, "asc"]],
       ajax: {
-        url: "{{ route('documenttype.read') }}",
+        url: "{{ route('documenttypeext.read') }}",
         type: "GET",
         data: function(data){
-          data.code   = $('#form-search-documenttype').find('input[name=code]').val();
-          data.name   = $('#form-search-documenttype').find('input[name=name]').val();
+          data.code   = $('#form-search-documenttypeext').find('input[name=code]').val();
+          data.name   = $('#form-search-documenttypeext').find('input[name=name]').val();
         }
       },
       columnDefs: [
@@ -132,12 +132,12 @@
           render: function ( data, type, row ) {
             var button = '';
             if (actionmenu.indexOf('update') > 0) {
-              button += `<a class="dropdown-item" href="javascript:void(0);" onclick="editdocumenttype(${row.id})">
+              button += `<a class="dropdown-item" href="javascript:void(0);" onclick="editdocumenttypeext(${row.id})">
               <i class="far fa-edit"></i>Update Data
               </a>`;
             }
             if (actionmenu.indexOf('delete') > 0) {
-              button += `<a class="dropdown-item delete" href="javascript:void(0);" onclick="destroydocumenttype(${row.id})">
+              button += `<a class="dropdown-item delete" href="javascript:void(0);" onclick="destroydocumenttypeext(${row.id})">
               <i class="fa fa-trash-alt"></i> Delete Data
               </a>`;
             }
@@ -160,10 +160,10 @@
       ]
     });
 
-    $('#form-search-documenttype').submit(function(e) {
+    $('#form-search-documenttypeext').submit(function(e) {
       e.preventDefault();
-      dataTabledocumenttype.draw();
-      $('#form-filter-documenttype').modal('hide');
+      dataTabledocumenttypeext.draw();
+      $('#form-filter-documenttypeext').modal('hide');
     });
   });
 </script>

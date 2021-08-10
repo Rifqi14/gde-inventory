@@ -22,7 +22,7 @@
 @section('content')
 <section class="content" id="content">
   <div class="container-fluid">
-    <form action="{{ route('documenttype.update', ['id' => $documenttype->id]) }}" method="post" role="form" enctype="multipart/form-data" autocomplete="off" id="form">
+    <form action="{{ route('documenttypeext.update', ['id' => $documenttype->id]) }}" method="post" role="form" enctype="multipart/form-data" autocomplete="off" id="form">
       @csrf
       @method('PUT')
       <div class="card">

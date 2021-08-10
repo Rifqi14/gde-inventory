@@ -22,7 +22,7 @@
 @section('content')
 <section class="content" id="content">
   <div class="container-fluid">
-    <form action="{{ route('documenttype.store') }}" method="post" role="form" enctype="multipart/form-data" autocomplete="off" id="form">
+    <form action="{{ route('documenttypeext.store') }}" method="post" role="form" enctype="multipart/form-data" autocomplete="off" id="form">
       @csrf
       <div class="card">
         <div class="card-body">

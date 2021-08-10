@@ -44,7 +44,7 @@
                 <button type="button" onclick="activeTab('disciplinecode')" class="nav-link pl-4 pr-4" id="disciplinecode-tab" data-toggle="tab" data-target="#disciplinecode" role="tab" aria-controls="document" aria-selected="false"><b>Discipline Code</b></button>
               </li>
               <li class="nav-item">
-                <button type="button" onclick="activeTab('documenttype')" class="nav-link pl-4 pr-4" id="documenttype-tab" data-toggle="tab" data-target="#documenttype" role="tab" aria-controls="document" aria-selected="false"><b>Document Type</b></button>
+                <button type="button" onclick="activeTab('documenttypeext')" class="nav-link pl-4 pr-4" id="documenttypeext-tab" data-toggle="tab" data-target="#documenttypeext" role="tab" aria-controls="document" aria-selected="false"><b>Document Type</b></button>
               </li>
               <li class="nav-item">
                 <button type="button" onclick="activeTab('originatorcode')" class="nav-link pl-4 pr-4" id="originatorcode-tab" data-toggle="tab" data-target="#originatorcode" role="tab" aria-controls="document" aria-selected="false"><b>Originator Code</b></button>
