@@ -163,7 +163,7 @@
           { data: "no" },
           { data: "code" },
           { data: "name" },
-          { data: "kks_category_id" },
+          { data: "document_external_kks_category_id" },
           { data: "id" },
       ]
     });

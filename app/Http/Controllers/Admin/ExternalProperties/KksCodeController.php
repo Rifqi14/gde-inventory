@@ -62,7 +62,7 @@ class KksCodeController extends Controller
                 $data   = [
                     'code'  => strtoupper($request->code),
                     'name'  => $request->name,
-                    'document_external_kks_categories_id'   => $request->kks_category_id,
+                    'document_external_kks_category_id'   => $request->kks_category_id,
                 ];
                 DocumentExternalKksCode::create($data);
             } catch (\Illuminate\Database\QueryException $ex) {
@@ -115,7 +115,7 @@ class KksCodeController extends Controller
                 $documenttype   = DocumentExternalKksCode::find($id);
                 $documenttype->code     = strtoupper($request->code);
                 $documenttype->name     = $request->name;
-                $documenttype->document_external_kks_categories_id     = $request->kks_category_id;
+                $documenttype->document_external_kks_category_id     = $request->kks_category_id;
                 $documenttype->save();
             } catch (\Illuminate\Database\QueryException $ex) {
                 throw new PropertyException("Error update data: {$ex->errorInfo[2]}", 400);
