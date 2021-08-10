@@ -1125,6 +1125,13 @@ class GoodsIssueController extends Controller
         $query->leftJoin('sites','sites.id','=','warehouses.site_id');
         $query->leftJoin('users','users.id','=','goods_issues.issued_by');
         $data = $query->find($id);
+
+        if(!$data){
+            return response()->json([
+                'status'    => false,
+                'message'   => 'Failed to collect data.'
+            ],400);
+        }
         
         $dateIssued = $data->date_issued;
         $sender     = $data->issued;
@@ -1322,60 +1329,52 @@ class GoodsIssueController extends Controller
             ['label' => 'Nama Supir']
         ];
 
+        $expeditionRow = $lastRow+1;
+
         // Expedition Information
-        foreach($expedition as $key => $param){
+        foreach($expedition as $key => $param){            
             $lastRow = $lastRow+1;
 
             if($key == 0){
-                $activesheet->mergeCells("$firstCol$lastRow:C$lastRow")->setCellValue("$firstCol$lastRow",$param['label']);                
-                // Signature
-                for ($i=4; $i <=6 ; $i++) { 
-                    $column = $thead[$i]['column'][0];
-                    $label  = $thead[$i]['signature'];
-                    
-                    $activesheet->setCellValue("$column$lastRow", $label);
-                    $activesheet->getStyle("$column$lastRow")->applyFromArray([
-                        'alignment' => [
-                            'horizontal' => Alignment::HORIZONTAL_CENTER,
-                            'vertical'   => Alignment::VERTICAL_TOP
-                        ]
-                    ]);
-                }
+                $activesheet->mergeCells("$firstCol$lastRow:C$lastRow")->setCellValue("$firstCol$lastRow",$param['label']);                                
 
                 $activesheet->getStyle("$firstCol$lastRow:D$lastRow")->applyFromArray([
-                    'font' => ['bold' => true],
-                    'alignment' => [
-                        'vertical'   => Alignment::VERTICAL_TOP,                        
-                    ]
-                ]);
-                $activesheet->getStyle("$firstCol$lastRow:$lastCol$lastRow")->applyFromArray([
-                    'alignment' => [
-                        'vertical'   => Alignment::VERTICAL_TOP,                        
-                    ]
-                ]);                
+                    'font' => ['bold' => true],                   
+                ]);                                
             }else{                
                 $activesheet->setCellValue("$firstCol$lastRow",$param['label']);
                 $activesheet->mergeCells("B$lastRow:D$lastRow")->setCellValue("B$lastRow",':');                               
-            }     
+            }                                      
+        }  
 
-            for ($i=4; $i <=6 ; $i++) { 
-                $column = $thead[$i]['column'][0];
-                $activesheet->getStyle("$column$lastRow")->applyFromArray([
-                    'borders' => [
-                        'left'   => ['borderStyle' => Border::BORDER_THIN]
-                    ]
-                ]);
-            }
-                    
-        }      
+        // Signature
+        for ($i=4; $i <=6 ; $i++) { 
+            $column = $thead[$i]['column'][0];            
+            $label  = $thead[$i]['signature'];            
 
-        $activesheet->setCellValue("$lastCol$lastRow",$sender);
-        $activesheet->getStyle("$lastCol")->applyFromArray([
+            $activesheet->setCellValue("$column$expeditionRow",$label);        
+            $activesheet->getStyle("$column$expeditionRow:$lastCol$lastRow")->applyFromArray([
+                'borders'   => [
+                    'left'  => ['borderStyle' => Border::BORDER_THIN]
+                ],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER
+                ]
+            ]);
+        }     
+
+        $activesheet->setCellValue("$lastCol$lastRow",$sender);        
+        $activesheet->getStyle("$firstCol$expeditionRow:D$lastRow")->applyFromArray([
+            'alignment' => [                
+                'vertical'   => Alignment::VERTICAL_TOP
+            ]
+        ]);
+        $activesheet->getStyle("$lastCol$lastRow")->applyFromArray([
             'alignment' => [
                 'horizontal' => Alignment::HORIZONTAL_CENTER,
                 'vertical'   => Alignment::VERTICAL_BOTTOM
             ]
-        ]);
+        ]);               
 
         // Outline Data Table
         $activesheet->getStyle("$firstCol$firstRow:$lastCol$lastRow")->applyFromArray([
@@ -1386,8 +1385,7 @@ class GoodsIssueController extends Controller
 
         // Page Setting (Orientation, Papersize, etc)
         $pageSetup    = $activesheet->getPageSetup();
-
-        $pageSetup->setPrintArea("A1:$lastCol".($lastRow+25));
+        
         $pageSetup->setOrientation(PageSetup::PAPERSIZE_A4);   
         $pageSetup->setOrientation(PageSetup::ORIENTATION_LANDSCAPE);                        
         $pageSetup->setFitToWidth(1);

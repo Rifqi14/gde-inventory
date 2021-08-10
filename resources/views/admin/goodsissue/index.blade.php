@@ -58,6 +58,7 @@
         </div>
     </div>
 </section>
+
 <!-- Modal Filter -->
 <div class="modal fade" id="form-filter">
     <div class="modal-dialog modal-md">
@@ -258,9 +259,9 @@
                         // }
 
                         // print
-                        if (actionmenu.indexOf('print') >= 0 && row.status == 'approved') {
-                            button +=   `<a class="dropdown-item" href="javascript:void(0);" onclick="print(${row.id})">
-                                            <i class="fas fa-print"></i>Print Data                                        
+                        if (actionmenu.indexOf('export') >= 0 && row.status == 'approved') {
+                            button +=   `<a class="dropdown-item" href="javascript:void(0);" onclick="ekspor(${row.id})">
+                                            <i class="fas fa-file-export"></i>Export Data                                        
                                         </a>`;
                         }
                         return `<div class="btn-group">
@@ -372,7 +373,7 @@
             dataTable.draw();
     }
 
-    const print = (id) => {
+    const ekspor = (id) => {
         $.ajax({
             type: "GET",
             url: `{{route('goodsissue.export')}}`,
@@ -382,8 +383,6 @@
             },
             dataType: "JSON",
             success: function (response) {
-                console.log({response : response});
-
                 if (response.status) {
                     let download = document.createElement("a");
                     download.href = response.file;
@@ -391,7 +390,9 @@
                     download.download = response.document;
                     download.click();
                     download.remove();
-                }                
+                }else{
+                    toastr.warning(response.message);
+                }             
             }
         });
     }
