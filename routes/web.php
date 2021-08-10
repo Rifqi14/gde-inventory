@@ -353,11 +353,60 @@ Route::group(['prefix' => 'admin'], function () {
         Route::resource('/documentdetail', 'Admin\DocumentCenterDocumentDetailController');
 
         // Document Center Log
+        Route::get('/documentlog/read', 'Admin\DocumentCenterLogController@read')->name('documentlog.read');
         Route::resource('/documentlog', 'Admin\DocumentCenterLogController');
 
         // Reimbursement
         Route::get('/reimbursement/read', 'Admin\ReimbursementController@read')->name('reimbursement.read');
         Route::get('/reimbursement/select', 'Admin\ReimbursementController@select')->name('reimbursement.select');
         Route::resource('/reimbursement', 'Admin\ReimbursementController');
+
+        // Document External Properties
+        Route::resource('/docexternalproperties', 'Admin\ExternalPropertiesController');
+
+        // Document External Site Code
+        Route::get('/docexternalproperties/sitecode/read', 'Admin\ExternalProperties\SiteCodeController@read')->name('sitecode.read');
+        Route::get('/docexternalproperties/sitecode/select', 'Admin\ExternalProperties\SiteCodeController@select')->name('sitecode.select');
+        Route::resource('/docexternalproperties/sitecode', 'Admin\ExternalProperties\SiteCodeController');
+
+        // Document External Discipline Code
+        Route::get('/docexternalproperties/disciplinecode/read', 'Admin\ExternalProperties\DisciplineCodeController@read')->name('disciplinecode.read');
+        Route::get('/docexternalproperties/disciplinecode/select', 'Admin\ExternalProperties\DisciplineCodeController@select')->name('disciplinecode.select');
+        Route::resource('/docexternalproperties/disciplinecode', 'Admin\ExternalProperties\DisciplineCodeController');
+
+        // Document External Document Type
+        Route::get('/docexternalproperties/documenttypeext/read', 'Admin\ExternalProperties\DocumentTypeController@read')->name('documenttypeext.read');
+        Route::get('/docexternalproperties/documenttypeext/select', 'Admin\ExternalProperties\DocumentTypeController@select')->name('documenttypeext.select');
+        Route::resource('/docexternalproperties/documenttypeext', 'Admin\ExternalProperties\DocumentTypeController');
+
+        // Document External Originator Code
+        Route::get('/docexternalproperties/originatorcode/read', 'Admin\ExternalProperties\OriginatorCodeController@read')->name('originatorcode.read');
+        Route::get('/docexternalproperties/originatorcode/select', 'Admin\ExternalProperties\OriginatorCodeController@select')->name('originatorcode.select');
+        Route::resource('/docexternalproperties/originatorcode', 'Admin\ExternalProperties\OriginatorCodeController');
+
+        // Document External Phase Code
+        Route::get('/docexternalproperties/phasecode/read', 'Admin\ExternalProperties\PhaseCodeController@read')->name('phasecode.read');
+        Route::get('/docexternalproperties/phasecode/select', 'Admin\ExternalProperties\PhaseCodeController@select')->name('phasecode.select');
+        Route::resource('/docexternalproperties/phasecode', 'Admin\ExternalProperties\PhaseCodeController');
+
+        // Document External Sheet Size
+        Route::get('/docexternalproperties/sheetsize/read', 'Admin\ExternalProperties\SheetSizeController@read')->name('sheetsize.read');
+        Route::get('/docexternalproperties/sheetsize/select', 'Admin\ExternalProperties\SheetSizeController@select')->name('sheetsize.select');
+        Route::resource('/docexternalproperties/sheetsize', 'Admin\ExternalProperties\SheetSizeController');
+
+        // Document External KKS Category
+        Route::get('/docexternalproperties/kkscategory/read', 'Admin\ExternalProperties\KksCategoryController@read')->name('kkscategory.read');
+        Route::get('/docexternalproperties/kkscategory/select', 'Admin\ExternalProperties\KksCategoryController@select')->name('kkscategory.select');
+        Route::resource('/docexternalproperties/kkscategory', 'Admin\ExternalProperties\KksCategoryController');
+
+        // Document External KKS Code
+        Route::get('/docexternalproperties/kkscode/read', 'Admin\ExternalProperties\KksCodeController@read')->name('kkscode.read');
+        Route::get('/docexternalproperties/kkscode/select', 'Admin\ExternalProperties\KksCodeController@select')->name('kkscode.select');
+        Route::resource('/docexternalproperties/kkscode', 'Admin\ExternalProperties\KksCodeController');
+
+        // Document External Contractor Name
+        Route::get('/docexternalproperties/contractorname/read', 'Admin\ExternalProperties\ContractorNameController@read')->name('contractorname.read');
+        Route::get('/docexternalproperties/contractorname/select', 'Admin\ExternalProperties\ContractorNameController@select')->name('contractorname.select');
+        Route::resource('/docexternalproperties/contractorname', 'Admin\ExternalProperties\ContractorNameController');
     });
 });

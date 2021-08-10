@@ -72,8 +72,9 @@ class DocumentCenterController extends Controller
     public function store(Request $request)
     {
         $validator      = Validator::make($request->all(), [
-            'number'        => 'required',
-            'title'         => 'required',
+            'number'            => 'required',
+            'title'             => 'required',
+            'document_type_id'  => 'required',
         ]);
 
         if ($validator->fails()) {

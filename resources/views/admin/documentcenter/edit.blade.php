@@ -161,9 +161,14 @@
       </div>
       <div class="card">
         <div class="card-header text-right">
+          @php
+          $status = $document->documents()->first() ? $document->documents()->latest()->first()->status : null;
+          @endphp
+          @if (!in_array($status, ['DRAFT', 'WAITING', 'REVISED']) || !$status)
           <button type="button" class="btn btn-labeled text-md btn-md btn-success btn-flat legitRipple" onclick="documentModal('create')">
             <b><i class="fas fa-plus"></i></b> Create
           </button>
+          @endif
         </div>
         <div class="card-body table-responsive p-0">
           <table id="table-document" class="table table-striped datatable" width="100%">
@@ -264,11 +269,11 @@
             </div>
             <div class="col-md-8">
               <div class="form-group">
-                <label for="document_upload" class="col-form-label">Document</label>
+                <label for="document_upload" class="col-form-label">File</label>
                 <div class="init-data"></div>
                 <div class="initInput">
                   <div class="input-group">
-                    <input type="text" name="document_name[]" class="form-control" placeholder="Document Name">
+                    <input type="text" name="document_name[]" class="form-control" placeholder="File Name">
                     <div class="custom-file ml-3">
                       <input type="file" class="custom-file-input lock-revision" name="document_upload[]" onchange="initInputFile()">
                       <label class="custom-file-label form-control" for="document_upload">Attach a document</label>
@@ -505,6 +510,34 @@
     </div>
   </div>
 </div>
+
+<div class="modal fade" id="comment-modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="comment-modal" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-bold">Comment List</h5>
+        <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body table-responsive">
+        <input type="hidden" name="document_comment_id">
+        <table id="table-comment" class="table table-striped datatable" width="100%">
+          <thead>
+            <tr>
+              <th width="15%">Rev No.</th>
+              <th width="65%">Revise Reason</th>
+              <th width="20%">Attachment Name</th>
+            </tr>
+          </thead>
+        </table>
+      </div>
+      <div class="modal-footer text-right">
+        <button type="button" class="btn btn-labeled text-md btn-md btn-secondary btn-flat legitRipple" data-dismiss="modal">
+          <b><i class="fas fa-times"></i></b> Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 @endsection
 
 @section('scripts')
@@ -657,6 +690,13 @@
       }
     });
     lockRevisionProperties('DRAFT');
+    $('.initInput').removeClass('d-none');
+  }
+
+  const commentModal = (id) => {
+    $('#comment-modal').modal('show');
+    $('input[name="document_comment_id"]').val(id);
+    dataTableComment.draw();
   }
 
   const addFormUpload = (e) => {
@@ -686,7 +726,7 @@
     var html = ``;
 
     $.each(e, function(index, value) {
-      html += `<div class="input-group d-flex justify-content-between mt-2"><a href="${value.document_path}" class="text-md text-info text-bold mt-1">${value.document_name}</a><button class="btn btn-transparent text-md lock-revision" type="button" onclick="destroyDocument($(this), ${value.id})"><i class="fas fa-trash text-maroon color-palette"></i></button></div>`
+      html += `<div class="input-group d-flex justify-content-between ${index > 0 ? 'mt-2' : ''}"><a href="${value.document_path}" class="text-md text-info text-bold mt-1">${value.document_name}</a><button class="btn btn-transparent text-md lock-revision" type="button" onclick="destroyDocument($(this), ${value.id})"><i class="fas fa-trash text-maroon color-palette"></i></button></div>`
     });
 
     return html;
@@ -769,6 +809,16 @@
     $('#form-upload').find('input[name="updated_at"]').val(e.data.last_modified);
     lockRevisionProperties(e.data.status);
     initApprovalButton(e.data.status);
+    if (e.data.status == 'DRAFT' || e.data.status == 'REVISED') {
+      $('.initInput').removeClass('d-none');
+    } else {
+      $('.initInput').addClass('d-none');
+    }
+    if (data_total >= 4) {
+      $('.initInput').addClass('d-none');
+    } else {
+      $('.initInput').removeClass('d-none');
+    }
     if (e.data.document_type) {
       if (e.data.document_type == 'SUPERSEDE') {
         $('#supersede_id').val(e.data.supersede.id);
@@ -820,7 +870,7 @@
     var formData  = new FormData(e[0]);
     formData.append('status', status);
     $.ajax({
-      url: e.attr('action'),
+      url: $('#form-upload').attr('action'),
       method: 'post',
       data: formData,
       processData: false,
@@ -922,6 +972,51 @@
             $('#form-document').modal('show');
             if (response.status) {
               removeFormUpload(e);
+              dataTable.draw();
+            }else {
+              toastr.warning(response.message);
+            }
+          }).fail(function (response) {
+            var response = response.responseJSON;
+            $('body').unblock();
+            $('#form-document').modal('show');
+            toastr.warning(response.message);
+          });
+        }
+      }
+    });
+  }
+
+  const destroy = (id) => {
+    bootbox.confirm({
+      buttons: {
+        confirm: {
+          label: '<i class="fa fa-check"></i>',
+          className: 'btn-primary btn-sm'
+        },
+        cancel: {
+          label: '<i class="fa fa-undo"></i>',
+          className: 'btn-default btn-sm'
+        },
+      },
+      title: 'Delete data?',
+      message: 'Are you sure want to delete this data?',
+      callback: function (result) {
+        if (result) {
+          var data = {
+            _token: "{{ csrf_token() }}"
+          };
+          $.ajax({
+            url: `{{route('centerdocument.index')}}/${id}`,
+            dataType: 'json',
+            data: data,
+            type: 'DELETE',
+            beforeSend: function () {
+              blockMessage('body', 'Loading', '#fff');
+            }
+          }).done(function (response) {
+            $('body').unblock();
+            if (response.status) {
               dataTable.draw();
             }else {
               toastr.warning(response.message);
@@ -1062,7 +1157,7 @@
         }).done(function(response) {
           $('body').unblock();
           if (response.status) {
-            document.location = response.results;
+            location.reload();
           } else {
             toastr.warning(response.message);
           }
@@ -1113,6 +1208,7 @@
           if (response.status) {
             $('#form-reason').modal('hide');
             dataTable.draw();
+            location.reload();
           } else {
             toastr.warning(response.message);
           }
@@ -1279,8 +1375,8 @@
         }, targets: [6] },
         { render: function (data, type, row) {
           var button = '';
-          if (actionmenu.indexOf('read') > 0 && row.document_path) {
-            button += `<a class="dropdown-item" href="${row.document_path}"><i class="fas fa-download"></i> Download</a>`
+          if (actionmenu.indexOf('read') > 0) {
+            button += `<a class="dropdown-item" href="javascript:void(0);" onclick="commentModal(${row.id})"><i class="fas fa-stream"></i> Comment List</a>`
           }
           if (actionmenu.indexOf('update') > 0) {
             button += `<a class="dropdown-item" href="javascript:void(0);" onclick="edit(${row.id})">
@@ -1312,6 +1408,55 @@
         { data: "created_by" },
         { data: "id" },
       ]
+    });
+
+    dataTableComment  = $('#table-comment').DataTable({
+      processing: true,
+      language: {
+        processing: `<div class="p-2 text-center"><i class="fas fa-circle-notch fa-spin fa-fw"></i> Loading...</div>`
+      },
+      serverSide: true,
+      filter: false,
+      responsive: true,
+      lengthChange: false,
+      order: [[1, "asc"]],
+      ajax: {
+        url: `{{ route('documentlog.read') }}`,
+        type: 'GET',
+        data:function(data){
+            data.document_id = $('input[name="document_comment_id"]').val();
+        }
+      },
+      columnDefs:[
+        { orderable: false,targets:[0,1,2] },
+        { className: "text-center", targets: [0] },
+          { width: "10%",
+            render: function(data, type, row) {
+              return row.revise_number;
+            }, targets: [0]
+          },
+          {
+            width: "70%",
+            render: function(data, type, row) {
+              return row.reason;
+            }, targets: [1]
+          },
+          {
+            width: "20%",
+            render: function(data, type, row) {
+              return row.attachment && row.attachment_name ? `<a href="${row.attachment}" target="_blank"><b>${row.attachment_name}</b></a><br><small class="text-muted">Click name to download file</small>` : '';
+            }, targets: [2]
+          },
+      ],
+      columns: [{
+        data: "revise_number"
+      },
+      {
+        data: "reason"
+      },
+      {
+        data: "attachment_name"
+      },]
     });
 
     $('.datepicker').daterangepicker({

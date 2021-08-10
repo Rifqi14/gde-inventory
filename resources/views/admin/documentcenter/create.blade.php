@@ -38,11 +38,15 @@
                   <input type="hidden" name="menu" value="{{ $page }}">
                   <div class="form-group row">
                     <label for="number" class="control-label col-md-3">Document No:</label>
-                    <input type="text" name="number" id="number" class="form-control col-md-8" placeholder="Document No...">
+                    <div class="col-md-8 p-0">
+                      <input type="text" name="number" id="number" class="form-control" placeholder="Document No...">
+                    </div>
                   </div>
                   <div class="form-group row">
                     <label for="title" class="control-label col-md-3">Document Title:</label>
-                    <textarea name="title" id="title" class="form-control col-md-8" cols="30" rows="4" placeholder="Document Title..."></textarea>
+                    <div class="col-md-8 p-0">
+                      <textarea name="title" id="title" class="form-control" cols="30" rows="4" placeholder="Document Title..."></textarea>
+                    </div>
                   </div>
                   <div class="form-group row">
                     <label for="document_type_id" class="control-label col-md-3">Document Type:</label>
@@ -195,14 +199,27 @@
     $('.select2').select2();
     
     $('#form').validate({
+      rules: {
+        number: {
+          required: true,
+        },
+        title: {
+          required: true,
+        },
+        document_type_id: {
+          required: true,
+        },
+      },
       errorElement: 'span',
-      errorClass: 'help-block',
+      errorClass: 'help-block text-maroon',
       focusInvalid: false,
       highlight: function (e) {
-        $(e).closest('.form-group').removeClass('has-success').addClass('has-error');
+        $(e).removeClass('has-success').addClass('has-error');
+      },
+      unhighlight: function(e) {
+        $(e).removeClass('has-error').addClass('has-success');
       },
       success: function (e) {
-        $(e).closest('.form-group').removeClass('has-error').addClass('has-success');
         $(e).remove();
       },
       errorPlacement: function (error, element) {
@@ -212,7 +229,9 @@
           error.insertAfter(element.parent());
         }else if (element.attr('type') == 'checkbox') {
           error.insertAfter(element.parent());
-        }else{
+        }else if(element.hasClass('select2') && element.next('.select2-container').length) {
+          error.insertAfter(element.next('.select2-container'));
+        }else {
           error.insertAfter(element);
         }
       },
@@ -310,6 +329,7 @@
       allowClear: true,
     }).on('select2:select', function(e) {
       $('#doctype_label').val($(this).select2('data')[0].name);
+      $('#document_type_id-error').remove();
     }).on('select2:clear', function(e) {
       $('#doctype_label').val(null);
     });

@@ -245,12 +245,13 @@ class AttendanceController extends Controller
             try {
                 $attendance     = Attendance::find($id);
                 $shift          = WorkingShift::find($request->shift);
-                $daywork        = 0;
+                $dayWork        = 0;
 
                 $attendance->attendance_in      = $request->check_in;
                 $attendance->attendance_out     = $request->check_out;
                 $attendance->working_time       = $this->countWorkingTime($attendance->attendance_in, $attendance->attendance_out);
                 $attendance->over_time          = $this->countOvertime($attendance->working_time, $attendance->working_shift_id);
+                $attendance->working_shift_id   = $attendance->employee->shift_type == 'hourly' ? null : $attendance->working_shift_id;
                 $attendance->remarks            = $request->description;
                 if ($shift) {
                     if ($attendance->working_time >= $shift->total_working_time) {
@@ -295,29 +296,25 @@ class AttendanceController extends Controller
             }
         } else {
             try {
-                if (!$request->shift) {
-                    DB::rollBack();
-                    return response()->json([
-                        'status'    => false,
-                        'message'   => "Shift not set, please set shift first or create attendance request and wait for approval",
-                    ], 400);
-                }
                 $time           = Carbon::now();
                 $attendance     = Attendance::find($id);
                 $shift          = WorkingShift::find($attendance->working_shift_id);
                 $dayWork        = 0;
                 if ($shift) {
-                    if ($attendance->working_time >= $shift->total_working_time) {
-                        $dayWork        = 1;
-                    } else {
-                        $dayWork        = 0.5;
-                    }
+                    
                 }
                 
                 $attendance->attendance_out = $time->toDateTime();
-                $attendance->working_time   = $this->countWorkingTime($attendance->attendance_in, $attendance->attendance_out);
-                $attendance->over_time      = $this->countOvertime($attendance->working_time, $attendance->working_shift_id);
+                $attendance->working_time   = $this->countWorkingTime($attendance->attendance_in, $attendance->attendance_out) >= 8 ? 8 : $this->countWorkingTime($attendance->attendance_in, $attendance->attendance_out);
+                $attendance->over_time      = ($this->countWorkingTime($attendance->attendance_in, $attendance->attendance_out) - 8) >= 0 ? $this->countWorkingTime($attendance->attendance_in, $attendance->attendance_out) - 8 : 0;
+                $attendance->working_shift_id   = $attendance->employee->shift_type == 'hourly' ? null : $attendance->working_shift_id;
                 $attendance->remarks        = $request->description;
+                $attendance->status         = 'APPROVED';
+                if ($attendance->working_time >= 8) {
+                    $dayWork        = 1;
+                } else {
+                    $dayWork        = 0.5;
+                }
                 $attendance->day_work       = $dayWork;
                 $attendance->save();
     
