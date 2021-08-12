@@ -1047,8 +1047,7 @@ class GoodsIssueController extends Controller
     }
 
     public function export(Request $request)
-    {
-        $now = date('Y-m-d');
+    {        
         $id  = $request->id;
 
         $query = GoodsIssue::with([
@@ -1409,9 +1408,5 @@ class GoodsIssueController extends Controller
             'file'      => "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64," . base64_encode($export)
         ],200);
                 
-    }
-
-    function dataExport($param){
-
     }
 }
