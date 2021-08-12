@@ -22,6 +22,7 @@ use App\Models\ProductSerial;
 use App\Models\StockWarehouse;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use Phpoffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadSheet\Worksheet\HeaderFooter;
 use PhpOffice\PhpSpreadsheet\Worksheet\HeaderFooterDrawing;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
@@ -1154,10 +1155,8 @@ class GoodsIssueController extends Controller
 
         $headerFooter->setOddHeader('&B&U&"Arial" SURAT BARANG KELUAR');
         $headerFooter->addImage($logo,HeaderFooter::IMAGE_HEADER_LEFT);
-                
-        $startRow     = $activesheet->getHighestRow();
-        $lastRow      = $activesheet->getHighestRow();
-        $lastColumn   = $activesheet->getHighestColumn();
+                        
+        $lastRow      = $activesheet->getHighestRow();        
 
         $thead = [
             ['column' => ['A'], 'label' => 'NOMOR REFERENSI','width' => 20, 'uom' => 'pt'],
@@ -1320,7 +1319,7 @@ class GoodsIssueController extends Controller
             ]
         ]);           
 
-        $expedition = [
+        $tfoot = [
             ['label' => 'DIISI OLEH BAGIAN EKSPEDISI :'],
             ['label' => 'Terima'],
             ['label' => 'Nomor Urut'],
@@ -1332,7 +1331,7 @@ class GoodsIssueController extends Controller
         $expeditionRow = $lastRow+1;
 
         // Expedition Information
-        foreach($expedition as $key => $param){            
+        foreach($tfoot as $key => $param){            
             $lastRow = $lastRow+1;
 
             if($key == 0){
@@ -1383,6 +1382,10 @@ class GoodsIssueController extends Controller
             ]
         ]);      
 
+        // Page Break;
+        $activesheet->setBreak("$firstCol$lastRow",Worksheet::BREAK_ROW);
+        $activesheet->setBreak("$lastCol$lastRow",Worksheet::BREAK_COLUMN);
+
         // Page Setting (Orientation, Papersize, etc)
         $pageSetup    = $activesheet->getPageSetup();
         
@@ -1406,5 +1409,9 @@ class GoodsIssueController extends Controller
             'file'      => "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64," . base64_encode($export)
         ],200);
                 
+    }
+
+    function dataExport($param){
+
     }
 }
