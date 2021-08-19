@@ -22,4 +22,14 @@ class Product extends Model
     {
         return $this->hasOne('App\Models\ProductCategory', 'id', 'product_category_id');
     }
+
+    public function issues()
+    {
+        return $this->hasMany('App\Models\GoodsIssueProduct','product_id','id');
+    }
+
+    public function receipts()
+    {
+        return $this->hasMany('App\Models\GoodsReceiptProduct','product_id','id');
+    }
 }

@@ -269,13 +269,17 @@ class ProductCategoryController extends Controller
     }
 
     public function select(Request $request){
-        $start = $request->page ? $request->page - 1 : 0;
-        $length = $request->limit;
-        $name = strtoupper($request->name);
+        $start      = $request->page ? $request->page - 1 : 0;
+        $length     = $request->limit;
+        $name       = strtoupper($request->name);
+        $parent_only  = $request->parent_only;
 
         //Count Data
         $query = ProductCategory::select('id','name','parent_id');
-        $query->whereRaw("upper(name) like '%$name%'");
+        if($parent_only){
+            $query->where('parent_id', 0);
+        }
+        $query->whereRaw("upper(name) like '%$name%'");        
 
         $row = clone $query;
         $recordsTotal = $row->count();
@@ -299,7 +303,7 @@ class ProductCategoryController extends Controller
         
         return response()->json([
             'total' => $recordsTotal,
-            'rows' => $data
+            'rows'  => $data
         ], 200);
     }
 

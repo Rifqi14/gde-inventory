@@ -142,6 +142,7 @@ Route::group(['prefix' => 'admin'], function () {
         // Route Product
         Route::get('/product/read', 'Admin\ProductController@read')->name('product.read');
         Route::get('/product/select','Admin\ProductController@select')->name('product.select');
+        Route::get('/product/export','Admin\ProductController@export')->name('product.export');
         Route::resource('/product','Admin\ProductController');
         // Route Province
         Route::get('/province/select', 'Admin\ProvinceController@select')->name('province.select');
