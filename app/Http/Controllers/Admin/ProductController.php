@@ -436,6 +436,15 @@ class ProductController extends Controller
                             products.name as product
                         ");                        
                         $product->with([
+                            'minmax' =>  function($qty){
+                                $qty->selectRaw("
+                                    min_max_products.product_id,
+                                    min_max_products.minimum,
+                                    min_max_products.maximum,
+                                    sites.name as site
+                                ");
+                                $qty->join('sites', 'sites.id','=','min_max_products.site_id');
+                            },
                             'receipts' => function($movein){
                                 $movein->selectRaw("
                                     goods_receipts.receipt_date as date_movement,
@@ -464,7 +473,7 @@ class ProductController extends Controller
                                 $moveout->join('sites','sites.id','=','warehouses.site_id');
                                 $moveout->whereIn('goods_issues.status',['approved','borrowed']);
                             }
-                        ]);
+                        ]);                        
                     }
                 ]);                
             }
@@ -486,32 +495,8 @@ class ProductController extends Controller
                 'status'    => false,
                 'message'   => 'Failed to collect data.'
             ],400);    
-        }
-
-        $categories = [];
-        foreach($queries as $row){                          
-            $products = [];
-            foreach($row->subcategories as $sub){
-                foreach($sub->products as $product){
-                    if(count($product->receipts) == 0 && count($product->issues) == 0){
-                        continue;
-                    }
-                    $products[] = [
-                        'product'   => $product->product,
-                        'receipts'  => $product->receipts,
-                        'issues'    => $product->issues
-                    ];
-                }
-            }            
-            if(count($row->subcategories) > 0 && count($products) > 0){                                                                  
-                $categories[] = [
-                    'category' => $row->category,
-                    'products' => $products
-                ];                                
-            }
-        }
-        
-        
+        }        
+                
         $build  = new Spreadsheet();         
         // Default Style
         $build->getDefaultStyle()->getFont()->setName('Arial');       
@@ -532,7 +517,53 @@ class ProductController extends Controller
             ]
         ];            
 
-        foreach ($ranges as $key => $range) {        
+        foreach ($ranges as $key => $range) {   
+            
+            $categories = [];
+            foreach($queries as $row){                          
+                $products = [];
+                                
+                foreach($row->subcategories as $sub){                    
+                    foreach($sub->products as $product){                       
+                        $receipts = [];
+                        $issues   = [];
+
+                        foreach($product->receipts as $receipt){
+                            $date = date('F Y', strtotime($receipt->date_movement));
+                            if($date == $range){
+                                $receipt->date = date('j', strtotime($receipt->date_movement));
+                                $receipts[] = $receipt;
+                            }
+                        }
+
+                        foreach($product->issues as $issue){
+                            $date = date('F Y', strtotime($issue->date_movement));
+                            if($date == $range){
+                                $issue->date = date('j', strtotime($issue->date_movement));
+                                $issues[] = $issue;
+                            }
+                        }
+
+                        if(count($receipts) == 0 && count($issues) == 0){
+                            continue;
+                        }
+
+                        $products[] = [                            
+                            'product'   => $product->product,
+                            'receipts'  => $receipts,
+                            'issues'    => $issues,
+                            'minmax'    => $product['minmax']
+                        ];
+                    }
+                }            
+                if(count($row->subcategories) > 0 && count($products) > 0){                                                                  
+                    $categories[] = [
+                        'category' => $row->category,
+                        'products' => $products
+                    ];                                
+                }
+            }
+
             $sheetname = strtoupper($range);
             $worksheet = new \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet($build, "SOH $sheetname");
             $build->addSheet($worksheet,$key);
@@ -547,8 +578,8 @@ class ProductController extends Controller
                 ['index' => 1, 'width' => 80],
                 ['index' => 2, 'width' => 20],
                 ['index' => 3, 'width' => 15],
-                ['index' => 4, 'width' => 15],
-                ['index' => 5, 'width' => 15],
+                ['index' => 4, 'width' => 13],
+                ['index' => 5, 'width' => 13],
                 ['index' => 6, 'width' => 10],
                 ['index' => 7, 'width' => 20],
                 ['index' => [9, 70], 'width' => 5],
@@ -948,7 +979,7 @@ class ProductController extends Controller
 
             $indexCategory = 1;
             $indexProduct  = 1;            
-            foreach($categories as $item){
+            foreach($categories as $item){            
                 $category = $item['category'];
                 $sheet->setCellValue("A$highestRow","$indexCategory. $category"); $indexCategory++;                
                 $sheet->getStyle("A$highestRow:CE$highestRow")->applyFromArray([
@@ -962,62 +993,343 @@ class ProductController extends Controller
 
                 foreach($item['products'] as $product){                                           
                     $uom = '';                    
-                    $qtyDieng   = 0;
-                    $qtyPatuha  = 0;
-                                        
+                    $qtyDieng   = ['in' => 0, 'out' => 0];
+                    $qtyPatuha  = ['in' => 0, 'out' => 0];
+                    $qtyMinMax  = ['min' => ['dieng' => 0, 'patuha' => 0], 'max' => 0];
+                    $dateSchema = ['in' => [], 'out' => []];                      
 
+                    foreach($product['minmax'] as $minmax){
+                        $site = strtolower($minmax['site']);                        
+                        $qtyMinMax['max']  = $qtyMinMax['max'] + $minmax['maximum'];
+
+                        if($site == 'dieng'){
+                            $qtyMinMax['min']['dieng'] = $qtyMinMax['min']['dieng'] + $minmax['minimum'];
+                        }else if($site == 'patuha'){
+                            $qtyMinMax['min']['patuha'] = $qtyMinMax['min']['patuha'] + $minmax['minimum'];
+                        }                        
+                    }
+                                    
                     foreach($product['issues'] as $issue){
                         $unit = strtolower($issue['site']);
                         $qty  = $issue['qty'];
-                        if($unit == 'dieng'){
-                            $qtyDieng   = $qtyDieng + $qty;
-                            $qtyDieng   = $qtyDieng<0?0:$qtyDieng;
-                        }else if($unit == 'patuha'){
-                            $qtyPatuha   = $qtyPatuha + $qty;
-                            $qtyPatuha   = $qtyPatuha<0?0:$qtyPatuha;
-                        }
+                        $uom  = $issue['uom'];
 
-                        $uom = $issue['uom'];
+                        if($unit == 'dieng'){
+                            $qtyDieng['out']   = $qtyDieng['out'] + $qty;
+                            $qtyDieng['out']   = $qtyDieng['out']<0?0:$qtyDieng['out'];
+                        }else if($unit == 'patuha'){
+                            $qtyPatuha['out']   = $qtyPatuha['out'] + $qty;
+                            $qtyPatuha['out']   = $qtyPatuha['out']<0?0:$qtyPatuha['out'];
+                        }                          
+
+                        for($dg = 9,$pa = 10, $d = 1; $d <= 31, $dg <= 70 , $pa <= 70; $dg+=2, $pa+=2, $d++){                            
+                            $date = intval($issue['date']);                            
+
+                            if($date == $d){
+                                $columnIndex = $unit=='dieng'?$dg:$pa;
+                                $column      =  $this->getColumnFromNumber($columnIndex);
+                                array_push($dateSchema['out'], [
+                                    'column' => $column,
+                                    'data'   => $qty
+                                ]);
+                            }else{
+                                continue;
+                            }
+            
+                        }
                     }
          
                     foreach($product['receipts'] as $receipt){
                         $unit = strtolower($receipt['site']);
-                        $qty = $receipt['qty'];
+                        $qty  = $receipt['qty'];
+                        $uom  = $receipt['uom'];
+                        
                         if($unit == 'dieng'){
-                            $qtyDieng   = $qtyDieng + $qty;
+                            $qtyDieng['in']   = $qtyDieng['in'] + $qty;
                         }else if($unit == 'patuha'){
-                            $qtyPatuha   = $qtyPatuha + $qty;
+                            $qtyPatuha['in']   = $qtyPatuha['in'] + $qty;
                         }
 
-                        $uom = $receipt['uom'];
-                    }      
-                                    
+                        for($dg = 9,$pa = 10, $d = 1; $d <= 31, $dg <= 70 , $pa <= 70; $dg+=2, $pa+=2, $d++){                            
+                            $date = intval($receipt['date']);                                                    
 
-                    $sheet->setCellValue("A$highestRow",$indexProduct); $indexProduct++;
-                    $sheet->setCellValue("B$highestRow",$product['product']);
-                    $sheet->setCellValue("E$highestRow",$qtyDieng);
-                    $sheet->setCellValue("F$highestRow",$qtyPatuha);
-                    $sheet->setCellValue("G$highestRow",$uom);
-                    $sheet->setCellValue("I$highestRow",'In');
+                            if($date == $d){                                
+                                $columnIndex = $unit=='dieng'?$dg:$pa;
+                                $column      =  $this->getColumnFromNumber($columnIndex);
+                                array_push($dateSchema['in'], [
+                                    'column' => $column,
+                                    'data'   => $qty
+                                ]);
+                            }else{
+                                continue;
+                            }
+            
+                        }                        
+                    }     
+                                                            
+                    
+                    $items = [                        
+                        [
+                            'columns' => [
+                                ['column' => 'A', 'data' => $indexProduct],
+                                ['column' => 'B', 'data' => $product['product']],
+                                ['column' => 'E', 'data' => $qtyDieng['in']],
+                                ['column' => 'F', 'data' => $qtyPatuha['in']],
+                                ['column' => 'G', 'data' => $uom],
+                                ['column' => 'I', 'data' => 'In'],                                
+                                ['column' => 'BT', 'data' => $qtyDieng['in']],
+                                ['column' => 'BU', 'data' => $qtyPatuha['in']],
+                                ['column' => 'BX', 'data' => $uom],
+                                ['column' => 'BY', 'data' => $qtyMinMax['min']['dieng']],
+                                ['column' => 'BZ', 'data' => $qtyMinMax['min']['dieng']],
+                                ['column' => 'CA', 'data' => $qtyMinMax['max']],
+                            ]
+                        ],
+                        [
+                            'columns' => [
+                                ['column' => 'E', 'data' => $qtyDieng['out']],
+                                ['column' => 'F', 'data' => $qtyPatuha['out']],
+                                ['column' => 'I', 'data' => 'Out'],
+                                ['column' => 'BT', 'data' => $qtyDieng['out']],
+                                ['column' => 'BU', 'data' => $qtyPatuha['out']]
+                            ]
+                        ]
+                    ];                    
 
-                    $sheet->getStyle("A$highestRow")->applyFromArray([
-                        'alignment' => ['vertical' => Alignment::VERTICAL_CENTER, 'horizontal' => Alignment::HORIZONTAL_CENTER],
-                        'borders'   => ['outline' => ['borderStyle' => Border::BORDER_THIN]]
-                    ]);
-                    $sheet->getStyle("B$highestRow:CE$highestRow")->applyFromArray([
-                        'borders'   => [
-                            'allBorders' => ['borderStyle' => Border::BORDER_THIN]]
-                    ]);  
-                    $sheet->getStyle("E$highestRow:F$highestRow")->applyFromArray([
-                        'font' => ['bold' => true, 'color' => ['argb' => '0000ff']]
-                    ]);                 
-                    $sheet->getStyle("G$highestRow")->applyFromArray([
-                        'font' => ['color' => ['argb' => '0000ff']],
-                        'alignment' => ['vertical' => Alignment::VERTICAL_CENTER, 'horizontal' => Alignment::HORIZONTAL_CENTER]
-                    ]); 
+                    if(count($dateSchema['in']) > 0 || count($dateSchema['out']) > 0){
+                        foreach($dateSchema['in'] as $schema){
+                            array_push($items[0]['columns'], $schema);
+                        }                      
 
-                    $highestRow = $highestRow + 1;
+                        foreach($dateSchema['out'] as $schema){
+                            array_push($items[1]['columns'], $schema);
+                        }                        
+                    }
 
+                    $itemStyle = [
+                        [
+                            'columns' => [
+                                [
+                                    'column' => ['A','CE'], 
+                                    'style'  => [                                        
+                                        'borders' => [
+                                                'allBorders' => ['borderStyle' => Border::BORDER_THIN]
+                                            ]
+                                        ]
+                                ],
+                                [
+                                    'column' => 'A',
+                                    'style'  => [
+                                        'alignment' => [
+                                                'vertical' => Alignment::VERTICAL_CENTER, 
+                                                'horizontal' => Alignment::HORIZONTAL_CENTER
+                                            ]
+                                    ]
+                                ],
+                                [
+                                    'column' => 'E',
+                                    'style'  => [
+                                        'font' => ['bold' => true, 'size' => 13, 'color' => ['argb' => '894742']]                                        
+                                    ]
+                                ],
+                                [
+                                    'column' => 'F',
+                                    'style'  => [
+                                        'font' => ['bold' => true, 'size' => 13, 'color' => ['argb' => '0000ff']]                                        
+                                    ]
+                                ],
+                                [
+                                    'column' => 'G',
+                                    'style'  => [
+                                        'font' => ['size' => 13, 'color' => ['argb' => '0000ff']],
+                                        'alignment' => [
+                                            'vertical'   => Alignment::VERTICAL_CENTER,
+                                            'horizontal' => Alignment::HORIZONTAL_CENTER
+                                        ]                                        
+                                    ]
+                                ],
+                                [
+                                    'column' => ['I','BU'], 
+                                    'style'  => [
+                                        'font' => ['bold' => true, 'color' => ['argb' => '0000ff']],
+                                        'alignment' => [
+                                            'vertical' => Alignment::VERTICAL_CENTER, 
+                                            'horizontal' => Alignment::HORIZONTAL_CENTER
+                                        ],
+                                        'fill' => ['fillType' => Fill::FILL_SOLID, 'color' => ['argb' => 'c4d79b']],
+                                        'borders' => [
+                                                'allBorders' => ['borderStyle' => Border::BORDER_THIN]
+                                            ]
+                                        ]
+                                ],
+                                [
+                                    'column' => ['BT','BU'], 
+                                    'style'  => [
+                                        'font' => ['bold' => true, 'size' => 13, 'color' => ['argb' => '0000FF']],
+                                        'alignment' => [
+                                            'vertical' => Alignment::VERTICAL_CENTER
+                                        ],
+                                        'fill' => ['fillType' => Fill::FILL_SOLID, 'color' => ['argb' => 'c4d79b']],
+                                        'borders' => [
+                                                'allBorders' => ['borderStyle' => Border::BORDER_THIN]
+                                            ]
+                                        ]
+                                ],    
+                                [
+                                    'column' => 'BX',
+                                    'style'  => [
+                                        'font' => ['size' => 13, 'color' => ['argb' => '0000ff']],
+                                        'alignment' => [
+                                            'vertical'   => Alignment::VERTICAL_CENTER,
+                                            'horizontal' => Alignment::HORIZONTAL_CENTER
+                                        ]                                        
+                                    ]
+                                ],  
+                                [
+                                    'column' => ['BY','BZ'],
+                                    'style'  => [
+                                        'font' => ['bold' => true, 'size' => 13, 'color' => ['argb' => 'ff0000']],
+                                        'alignment' => [
+                                            'vertical'      => Alignment::VERTICAL_CENTER,
+                                            'horizontal'    => Alignment::HORIZONTAL_CENTER
+                                        ]
+                                    ]
+                                ],
+                                [
+                                    'column' => 'CA',
+                                    'style'  => [
+                                        'font' => ['bold' => true, 'size' => 13, 'color' => ['argb' => '00b050']],
+                                        'alignment' => [
+                                            'vertical'      => Alignment::VERTICAL_CENTER,
+                                            'horizontal'    => Alignment::HORIZONTAL_CENTER
+                                        ]
+                                    ]
+                                ],
+                                [
+                                    'column' => 'CD',
+                                    'style'  => [
+                                        'fill' => ['fillType' => Fill::FILL_SOLID, 'color' => ['argb' => 'ffff66']],
+                                    ]
+                                ] 
+                            ]
+                        ],
+                        [                            
+                            'columns' => [
+                                [
+                                    'column' => ['A','CE'], 
+                                    'style'  => [                                        
+                                        'borders' => [
+                                                'allBorders' => ['borderStyle' => Border::BORDER_THIN]
+                                            ]
+                                        ]
+                                ],
+                                [
+                                    'column' => ['A','H'], 
+                                    'style'  => [
+                                        'fill' => ['fillType' => Fill::FILL_SOLID, 'color' => ['argb' => 'bfbfbf']],
+                                        'borders' => [
+                                                'allBorders' => ['borderStyle' => Border::BORDER_THIN]
+                                            ]
+                                        ]
+                                ],
+                                [
+                                    'column' => 'E',
+                                    'style'  => [
+                                        'font' => ['bold' => true, 'size' => 13, 'color' => ['argb' => '894742']]                                        
+                                    ]
+                                ],
+                                [
+                                    'column' => 'F',
+                                    'style'  => [
+                                        'font' => ['bold' => true, 'size' => 13, 'color' => ['argb' => '0000ff']]                                        
+                                    ]
+                                ],
+                                [
+                                    'column' => ['I','BU'], 
+                                    'style'  => [
+                                        'font' => ['bold' => true, 'color' => ['argb' => 'ff0000']],
+                                        'alignment' => [
+                                            'vertical' => Alignment::VERTICAL_CENTER, 
+                                            'horizontal' => Alignment::HORIZONTAL_CENTER
+                                        ],
+                                        'fill' => ['fillType' => Fill::FILL_SOLID, 'color' => ['argb' => 'ffff66']],
+                                        'borders' => [
+                                                'allBorders' => ['borderStyle' => Border::BORDER_THIN]
+                                            ]
+                                        ]
+                                ],
+                                [
+                                    'column' => ['BT','BU'], 
+                                    'style'  => [
+                                        'font' => ['bold' => true, 'size' => 13, 'color' => ['argb' => 'FF0000']],
+                                        'alignment' => [
+                                            'vertical' => Alignment::VERTICAL_CENTER
+                                        ],
+                                        'fill' => ['fillType' => Fill::FILL_SOLID, 'color' => ['argb' => 'ffff66']],
+                                        'borders' => [
+                                                'allBorders' => ['borderStyle' => Border::BORDER_THIN]
+                                            ]
+                                        ]
+                                ],
+                                [
+                                    'column' => 'BX',
+                                    'style'  => [
+                                        'font' => ['size' => 13, 'color' => ['argb' => '0000ff']],
+                                        'alignment' => [
+                                            'vertical'   => Alignment::VERTICAL_CENTER,
+                                            'horizontal' => Alignment::HORIZONTAL_CENTER
+                                        ]                                        
+                                    ]
+                                ],
+                                [
+                                    'column' => ['BV','CE'], 
+                                    'style'  => [
+                                        'fill' => ['fillType' => Fill::FILL_SOLID, 'color' => ['argb' => 'bfbfbf']],
+                                        'borders' => [
+                                                'allBorders' => ['borderStyle' => Border::BORDER_THIN]
+                                            ]
+                                        ]
+                                ],
+                                [
+                                    'column' => 'CD',
+                                    'style'  => [
+                                        'fill' => ['fillType' => Fill::FILL_SOLID, 'color' => ['argb' => 'ffff66']],
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ];
+
+                    $indexProduct++;
+                    
+                    foreach($items as $key => $param){                                                     
+                        $column  = $param['columns'];                                                                           
+
+                        foreach($column as $col){
+                            $column = $col['column'];
+                            $data   = $col['data'];
+
+                            $sheet->setCellValue("$column$highestRow",$data);                            
+                        }                                            
+
+                        $styles = $itemStyle[$key]['columns'];                                             
+                        
+                        foreach($styles as $style){                                                               
+                            $columns = $style['column'];                            
+
+                            if(is_array($columns)){
+                                $column1 = current($columns);
+                                $column2 = end($columns);
+                                $cell    = "$column1$highestRow:$column2$highestRow";
+                            }else{
+                                $cell = "$columns$highestRow";
+                            }
+
+                            $sheet->getStyle($cell)->applyFromArray($style['style']);
+                        }
+
+                        $highestRow = $highestRow+1;
+                    }                                         
                 }                                
             }
         }                        
@@ -1037,7 +1349,7 @@ class ProductController extends Controller
         return response()->json([
             'status'    => true,
             'document'  => "$filename", 
-            'data'      => $categories,
+            'data'      => $queries,
             'logo'      => public_path("assets/logo.png"),
             'file'      => "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64," . base64_encode($export)
         ],200);
