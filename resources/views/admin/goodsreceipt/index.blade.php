@@ -238,6 +238,12 @@
             //                             <i class="fa fa-trash-alt"></i> Delete Data
             //                         </a>`;
             // }
+
+            if (actionmenu.indexOf('export') >= 0 && row.status == 'approved') {
+              button += `<a class="dropdown-item" href="javascript:void(0);" onclick="ekspor(${row.id})">
+                            <i class="fas fa-file-export"></i>Export Data                                        
+                        </a>`;
+            }
             return `<div class="btn-group">
                         <button type="button" class="btn btn-flat btn-sm dropdown-toggle" data-toggle="dropdown">
                             <i class="fas fa-bars"></i>
@@ -331,6 +337,30 @@
 
   const filter = () => {
     $('#form-filter').modal('show');
+  }
+
+  const ekspor = (id) => {
+    $.ajax({
+        type: "GET",
+        url: `{{route('goodsreceipt.export')}}`,
+        data: {
+            _token: "{{ csrf_token() }}",
+            id : id
+        },
+        dataType: "JSON",
+        success: function (response) {
+            if (response.status) {
+                let download = document.createElement("a");
+                download.href = response.file;
+                document.body.appendChild(download);
+                download.download = response.document;
+                download.click();
+                download.remove();
+            }else{
+                toastr.warning(response.message);
+            }             
+        }
+    });
   }
 </script>
 @endsection

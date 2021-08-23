@@ -1047,8 +1047,7 @@ class GoodsIssueController extends Controller
     }
 
     public function export(Request $request)
-    {
-        $now = date('Y-m-d');
+    {        
         $id  = $request->id;
 
         $query = GoodsIssue::with([
@@ -1150,11 +1149,12 @@ class GoodsIssueController extends Controller
         $logo = new HeaderFooterDrawing(); 
         $logo->setName('Geodipa Energi Logo');
         $logo->setPath(public_path('assets/logo.png'));
-        $logo->setHeight(20);
-        $logo->setWidth(20);
+        $logo->setHeight(150);
+        $logo->setWidth(150);
+        $logo->setOffsetX(50);        
 
-        $headerFooter->setOddHeader('&B&U&"Arial" SURAT BARANG KELUAR');
-        $headerFooter->addImage($logo,HeaderFooter::IMAGE_HEADER_LEFT);
+        $headerFooter->addImage($logo,HeaderFooter::IMAGE_HEADER_CENTER);
+        $headerFooter->setOddHeader('&C&B&U&"Arial" SURAT BARANG KELUAR');                        
                         
         $lastRow      = $activesheet->getHighestRow();        
 
@@ -1409,9 +1409,5 @@ class GoodsIssueController extends Controller
             'file'      => "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64," . base64_encode($export)
         ],200);
                 
-    }
-
-    function dataExport($param){
-
     }
 }
