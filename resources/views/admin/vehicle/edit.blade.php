@@ -132,9 +132,6 @@ Edit {{ @$menu_name }}
 			},
 			allowClear: true,
 		});
-        $("#site_id").select2("trigger", "select", {
-			data: {id:'{{$user->site_id}}', text:'{{$user->site_name}}'}
-		});
 
 		$.validator.setDefaults({
 			submitHandler: function () {
@@ -211,6 +208,12 @@ Edit {{ @$menu_name }}
 				$(element).removeClass('is-invalid');
 			}
 		});
+
+		@if ($user->site_id)	
+		$("#site_id").select2("trigger", "select", {
+			data: {id:'{{$user->site_id}}', text:'{{$user->site_name}}'}
+		});
+		@endif
 
 	});
 </script>

@@ -1,17 +1,17 @@
 @extends('admin.layouts.app')
-@section('title', $menu_name)
+@section('title','Product Borrowing')
 
 @section('breadcrumb')
 <div class="row mb-3 mt-3">
     <div class="col-sm-4">
         <h1 id="title-branch" class="m-0 text-dark">
-            {{ $menu_name }}
+            Product Borrowing
         </h1>
     </div>
     <div class="col-sm-8">
         <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
-            <li class="breadcrumb-item">{{ $parent_name }}</li>
-            <li class="breadcrumb-item">{{ $menu_name }}</li>
+            <li class="breadcrumb-item">Inventory</li>
+            <li class="breadcrumb-item">Product Borrowing</li>
         </ol>
     </div>
 </div>
@@ -54,12 +54,12 @@
                                     <table class="table table-striped" id="table-general" width="100%">
                                         <thead>
                                             <tr>
-                                                <th width="10" class="text-center">No</th>
-                                                <th width="25">Borrowing Number</th>
-                                                <th width="25" class="text-center">Borrowing Date</th>
-                                                <th width="50">Issued By</th>
-                                                <th width="20" class="text-center">Status</th>
-                                                <th width="10" class="text-center">Action</th>
+                                                <th width="5%" class="text-center">No</th>
+                                                <th width="30%" class="text-center">Borrowing Date</th>
+                                                <th width="30%">Borrowing Number</th>                                                
+                                                <th width="20%">Issued By</th>
+                                                <th width="10%" class="text-center">Status</th>
+                                                <th width="5%" class="text-center">Action</th>
                                             </tr>
                                         </thead>
                                     </table>
@@ -71,12 +71,12 @@
                                     <table class="table table-striped" id="table-approved" width="100%">
                                         <thead>
                                             <tr>
-                                                <th width="10" class="text-center">No</th>
-                                                <th width="25">Borrowing Number</th>
-                                                <th width="25" class="text-center">Borrowing Date</th>
-                                                <th width="50">Issued By</th>
-                                                <th width="20" class="text-center">Status</th>
-                                                <th width="10" class="text-center">Action</th>
+                                                <th width="5%" class="text-center">No</th>
+                                                <th width="30%" class="text-center">Borrowing Date</th>
+                                                <th width="30%">Borrowing Number</th>                                                
+                                                <th width="20%">Issued By</th>
+                                                <th width="10%" class="text-center">Status</th>
+                                                <th width="5%" class="text-center">Action</th>
                                             </tr>
                                         </thead>
                                     </table>
@@ -88,12 +88,12 @@
                                     <table class="table table-striped" id="table-archived" width="100%">
                                         <thead>
                                             <tr>
-                                                <th width="10" class="text-center">No</th>
-                                                <th width="25">Borrowing Number</th>
-                                                <th width="25" class="text-center">Borrowing Date</th>
-                                                <th width="50">Issued By</th>
-                                                <th width="20" class="text-center">Status</th>
-                                                <th width="10" class="text-center">Action</th>
+                                                <th width="5%" class="text-center">No</th>
+                                                <th width="30%" class="text-center">Borrowing Date</th>
+                                                <th width="30%">Borrowing Number</th>                                                
+                                                <th width="20%">Issued By</th>
+                                                <th width="10%" class="text-center">Status</th>
+                                                <th width="5%" class="text-center">Action</th>
                                             </tr>
                                         </thead>
                                     </table>
@@ -106,6 +106,7 @@
         </div>
     </div>
 </section>
+
 <div id="add-filter" class="modal fade" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="filter-modal" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -194,6 +195,7 @@
         "showMethod": "fadeIn",
         "hideMethod": "fadeOut"
     };
+    
     $(function() {
         $('.select2').select2({
             allowClear: true
@@ -223,24 +225,24 @@
             responsive: true,
             lengthChange: false,
             order: [
-                [1, "asc"]
+                [2, "desc"]
             ],
             ajax: {
                 url: "{{route('productborrowing.read')}}",
                 type: "GET",
                 data: function(data) {
-                    var number = $('#form-search').find('#borrowing-number').val(),
-                        dates = $('#form-search').find('#dates').data('daterangepicker'),
-                        startDate = dates.startDate.format('YYYY-MM-DD'),
-                        finishDate = dates.endDate.format('YYYY-MM-DD'),
-                        issuedby = $('#form-search').find('#issued-by').val(),
-                        status = $('#general-status').select2('val');
+                    var number      = $('#form-search').find('#borrowing-number').val(),
+                        dates       = $('#form-search').find('#dates').data('daterangepicker'),
+                        startDate   = dates.startDate.format('YYYY-MM-DD'),
+                        finishDate  = dates.endDate.format('YYYY-MM-DD'),
+                        issuedby    = $('#form-search').find('#issued-by').val(),
+                        status      = $('#general-status').select2('val');
 
-                    data.number = number;
-                    data.start_date = startDate;
+                    data.number      = number;
+                    data.start_date  = startDate;
                     data.finish_date = finishDate;
-                    data.issuedby = issuedby;
-                    data.status = status;
+                    data.issuedby    = issuedby;
+                    data.status      = status;
                 }
             },
             columnDefs: [{
@@ -249,17 +251,11 @@
                 },
                 {
                     className: "text-center",
-                    targets: [0, 2, 4]
+                    targets: [0, 1, 4]
                 },
                 {
-                    render: function(data, type, row) {
-                        return `<b><a href="javascript:void(0)" onclick="edit(${row.id})">${row.borrowing_number}</a></b>`;
-                    }, targets: [1],
-                },
-                {
-                    render: function(data, type, row) {
-                        return `${row.borrowing_date} s/d ${row.return_date}`;
-                    }, targets: [2],
+                    className: "text-bold",
+                    targets : [2]
                 },
                 {
                     render: function(data, type, row) {
@@ -269,8 +265,9 @@
                             badge = 'bg-gray';
                         } else if (status == 'waiting') {
                             badge = 'badge-warning';
-                        } else if (status == 'approved') {
-                            badge = 'badge-info';
+                            status = 'waiting approval';
+                        } else if (status == 'rejected') {
+                            badge = 'bg-red';
                         }
 
                         return `<span class="badge ${badge} text-sm" style="text-transform: capitalize;">${status}</span>`;
@@ -283,9 +280,11 @@
                         var button = '';
                         // update
                         if (actionmenu.indexOf('update') > 0) {
-                            button += `<a class="dropdown-item" href="javascript:void(0);" onclick="edit(${row.id})">
-                                        <i class="far fa-edit"></i>Update Data
-                                    </a>`;
+                            var disabled = row.status=='draft'?'':'disabled';
+
+                            button += `<a class="dropdown-item ${disabled}" href="javascript:void(0);" onclick="edit(${row.id})">
+                                            <i class="far fa-edit"></i>Update Data
+                                       </a>`;
                         }
                         // delete
                         if (actionmenu.indexOf('delete') > 0) {
@@ -309,11 +308,11 @@
                     data: "no"
                 },
                 {
-                    data: "borrowing_number"
-                },
-                {
                     data: "borrowing_date"
                 },
+                {
+                    data: "borrowing_number"
+                },                
                 {
                     data: "issued"
                 },
@@ -335,7 +334,7 @@
             responsive: true,
             lengthChange: false,
             order: [
-                [1, "asc"]
+                [2, "desc"]
             ],
             ajax: {
                 url: "{{route('productborrowing.read')}}",
@@ -361,26 +360,15 @@
                 },
                 {
                     className: "text-center",
-                    targets: [0, 2, 4]
+                    targets: [0, 1, 4, 5]
                 },
                 {
-                    render: function(data, type, row) {
-                        return `${row.borrowing_date} s/d ${row.return_date}`;
-                    }, targets: [2],
+                    className: "text-bold",
+                    targets : [2]
                 },
                 {
-                    render: function(data, type, row) {
-                        var badge = '',
-                            status = row.status;
-                        if (status == 'draft') {
-                            badge = 'bg-gray';
-                        } else if (status == 'waiting') {
-                            badge = 'badge-warning';
-                        } else if (status == 'approved') {
-                            badge = 'badge-info';
-                        }
-
-                        return `<span class="badge ${badge} text-sm" style="text-transform: capitalize;">${status}</span>`;
+                    render: function(data, type, row) {                    
+                        return `<span class="badge badge-info text-sm" style="text-transform: capitalize;">approved</span>`;
 
                     },
                     targets: [4]
@@ -402,15 +390,16 @@
                     targets: [5]
                 }
             ],
-            columns: [{
-                    data: "no"
-                },
+            columns: [
                 {
-                    data: "borrowing_number"
+                    data: "no"
                 },
                 {
                     data: "borrowing_date"
                 },
+                {
+                    data: "borrowing_number"
+                },                
                 {
                     data: "issued"
                 },
@@ -432,7 +421,7 @@
             responsive: true,
             lengthChange: false,
             order: [
-                [1, "asc"]
+                [2, "desc"]
             ],
             ajax: {
                 url: "{{route('productborrowing.readarchived')}}",
@@ -447,7 +436,11 @@
                 },
                 {
                     className: "text-center",
-                    targets: [0, 2, 4]
+                    targets: [0, 1, 4, 5]
+                },
+                {
+                    className: "text-bold",
+                    targets : [2]
                 },
                 {
                     render: function(data, type, row) {
@@ -473,14 +466,15 @@
                     targets: [5]
                 }
             ],
-            columns: [{
+            columns: [
+                {
                     data: "no"
+                },                
+                {
+                    data: "borrowing_date"
                 },
                 {
                     data: "borrowing_number"
-                },
-                {
-                    data: "borrowing_date"
                 },
                 {
                     data: "issued"

@@ -173,7 +173,7 @@
             <div class="card-footer text-right">
               <input type="hidden" name="status">
               <input type="hidden" name="type">
-              @if (in_array('approval', $actionmenu) && ($attendance->employee->user->spv_id == Auth::guard('admin')->user()->id))
+              @if (in_array('approval', $actionmenu) && ($attendance->employee->user->spv_id == Auth::guard('admin')->user()->id) && $attendance->status == 'WAITING')
               <button type="button" onclick="submitTest(`approved`)" class="btn btn-success btn-labeled legitRipple btn-sm text-sm" data-type="approved">
                 <b><i class="fas fa-check-circle"></i></b>
                 Approved
@@ -183,7 +183,7 @@
                 Save
               </button>
               @endif
-              @if (($attendance->attendance_date == date('Y-m-d')) && ($attendance->employee->user->id == Auth::guard('admin')->user()->id)) <button type="submit" class="btn bg-olive color-palette btn-labeled legitRipple text-sm btn-sm checkout">
+              @if (($attendance->attendance_date == date('Y-m-d')) && ($attendance->employee->user->id == Auth::guard('admin')->user()->id || $attendance->employee->user->spv_id == Auth::guard('admin')->user()->id) && ($attendance->status != 'APPROVED')) <button type="submit" class="btn bg-olive color-palette btn-labeled legitRipple text-sm btn-sm checkout">
                 <b><i class="fas fa-save"></i></b> Check Out
               </button>
               @endif
@@ -572,6 +572,7 @@
     $("form").first().trigger("submit");
   }
   $(function() {
+    $('input[name="shift_type"]').val() == 'Hourly' ? $('#shift').parent().parent().addClass('d-none') : $('#shift').parent().parent().removeClass('d-none')
     summernote();
     $('#type_request').trigger('change');
     $('.spv-access').prop('disabled', true)

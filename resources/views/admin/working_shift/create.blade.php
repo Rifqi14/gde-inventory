@@ -128,47 +128,7 @@ Create Working Shift
 			}
 		});
 		$('.select2').select2();
-
-		$.validator.setDefaults({
-			submitHandler: function () {
-				$.ajax({
-                        url: $('#form').attr('action'),
-                        method: 'post',
-                        data: new FormData($('#form')[0]),
-                        processData: false,
-                        contentType: false,
-                        dataType: 'json',
-						success:function(result){
-							$('#form').unblock();
-							 if(result.status){
-								document.location = "{{ route('workingshift.index') }}";
-							}else{
-								toastr.options = {
-									"closeButton": false,
-									"debug": false,
-									"newestOnTop": false,
-									"progressBar": false,
-									"positionClass": "toast-top-right",
-									"preventDuplicates": false,
-									"onclick": null,
-									"showDuration": "300",
-									"hideDuration": "1000",
-									"timeOut": "5000",
-									"extendedTimeOut": "1000",
-									"showEasing": "swing",
-									"hideEasing": "linear",
-									"showMethod": "fadeIn",
-									"hideMethod": "fadeOut"
-								}
-								toastr.warning(result.message);
-							}
-						},
-						beforeSend: function(){
-							blockMessage('#form', 'Loading', '#fff');
-						}
-				});
-			}
-		});
+		
 		$('#form').validate({
 			rules: {
 				shift_name:{
@@ -180,6 +140,9 @@ Create Working Shift
 				time_out:{
 					required:true,
 				},
+				calendar_id: {
+					required: true,
+				},
 			},
 			messages: {
 				shift_name:{
@@ -189,6 +152,9 @@ Create Working Shift
 					required: "This field is required.",
 				},
 				time_out:{
+					required: "This field is required.",
+				},
+				calendar_id: {
 					required: "This field is required.",
 				},
 			},
@@ -202,6 +168,65 @@ Create Working Shift
 			},
 			unhighlight: function (element, errorClass, validClass) {
 				$(element).removeClass('is-invalid');
+			},
+			submitHandler: function () {
+				$.ajax({
+					url: $('#form').attr('action'),
+					method: 'post',
+					data: new FormData($('#form')[0]),
+					processData: false,
+					contentType: false,
+					dataType: 'json',
+					beforeSend: function(){
+						blockMessage('#form', 'Loading', '#fff');
+					}
+				}).done(function(response){
+            $('#form').unblock();
+            if(response.status){
+                document.location = response.results;
+            }else{	
+                toastr.options = {
+                    "closeButton": false,
+                    "debug": false,
+                    "newestOnTop": false,
+                    "progressBar": false,
+                    "positionClass": "toast-top-right",
+                    "preventDuplicates": false,
+                    "onclick": null,
+                    "showDuration": "300",
+                    "hideDuration": "1000",
+                    "timeOut": "5000",
+                    "extendedTimeOut": "1000",
+                    "showEasing": "swing",
+                    "hideEasing": "linear",
+                    "showMethod": "fadeIn",
+                    "hideMethod": "fadeOut"
+                }
+                toastr.warning(response.message);
+            }
+            return;
+        }).fail(function(response){
+            $('#form').unblock();
+            var response = response.responseJSON;
+            toastr.options = {
+                "closeButton": false,
+                "debug": false,
+                "newestOnTop": false,
+                "progressBar": false,
+                "positionClass": "toast-top-right",
+                "preventDuplicates": false,
+                "onclick": null,
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "5000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            }
+            toastr.warning(response.message);
+        });
 			}
 		});
 

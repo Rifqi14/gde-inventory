@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Calendar;
 use App\Models\Menu;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
@@ -47,16 +50,25 @@ class CalendarController extends Controller
         $name           = strtoupper($request->name);
         $code           = strtoupper($request->code);
         $description    = strtoupper($request->description);
+        $period         = Carbon::parse($request->period);
 
         // Count Data
-        $queryData      = Calendar::GetByName($name)->GetByCode($code);
+        $queryData      = Calendar::with(['exceptions' => function ($q) use ($period) {
+            if ($period) {
+                $q->whereMonth('date_exception', $period)->whereYear('date_exception', $period);
+            }
+        }])->GetByName($name)->GetByCode($code);
         if ($description) {
             $queryData->GetByDescription($description);
         }
         $recordsTotal   = $queryData->get()->count();
 
         // Select Pagination
-        $queryData      = Calendar::GetByName($name)->GetByCode($code);
+        $queryData      = Calendar::with(['exceptions' => function ($q) use ($period) {
+            if ($period) {
+                $q->whereMonth('date_exception', $period)->whereYear('date_exception', $period);
+            }
+        }])->GetByName($name)->GetByCode($code);
         if ($description) {
             $queryData->GetByDescription($description);
         }
@@ -67,6 +79,8 @@ class CalendarController extends Controller
         $data           = [];
         foreach ($calendars as $key => $calendar) {
             $calendar->no   = ++$start;
+            $calendar->day_month    = Carbon::now()->daysInMonth;
+            $calendar->workday      = $calendar->exceptions ? $calendar->day_month - $calendar->exceptions->count() : 0;
             $data[]         = $calendar;
         }
         return response()->json([
@@ -88,13 +102,22 @@ class CalendarController extends Controller
         $start          = $request->page ? $request->page - 1 : 0;
         $length         = $request->limit;
         $name           = strtoupper($request->name);
+        $workday        = $request->workday ? $request->workday : false;
 
         // Count Data
-        $queryData      = Calendar::GetByName($name);
+        $queryData      = Calendar::with(['exceptions' => function ($q) use ($workday) {
+            if ($workday) {
+                $q->whereMonth('date_exception', Carbon::now())->whereYear('date_exception', Carbon::now());
+            }
+        }])->GetByName($name);
         $recordsTotal   = $queryData->get()->count();
 
         // Select Pagination
-        $queryData      = Calendar::GetByName($name);
+        $queryData      = Calendar::with(['exceptions' => function ($q) use ($workday) {
+            if ($workday) {
+                $q->whereMonth('date_exception', Carbon::now())->whereYear('date_exception', Carbon::now());
+            }
+        }])->GetByName($name);
         $queryData->paginate($length);
         $queryData->orderBy('created_at', 'desc');
         $calendars      = $queryData->get();
@@ -102,6 +125,8 @@ class CalendarController extends Controller
         $data           = [];
         foreach ($calendars as $key => $calendar) {
             $calendar->no   = ++$start;
+            $calendar->day_month    = Carbon::now()->daysInMonth;
+            $calendar->workday      = $calendar->exceptions ? $calendar->day_month - $calendar->exceptions->count() : 0;
             $data[]         = $calendar;
         }
         return response()->json([

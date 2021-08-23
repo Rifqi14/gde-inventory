@@ -38,11 +38,11 @@
                                     <div class="form-group">
                                         <label for="borrowing-number" class="control-label">Borrowing Number</label>
                                         <input type="text" class="form-control" name="borrowing_number" id="borrowing-number" placeholder="Enter Borrowing Number" value="{{$data->borrowing_number}}" readonly>
-                                    </div>
-                                    <!-- Product Category -->
+                                    </div>                                    
+                                    <!-- Site -->
                                     <div class="form-group">
-                                        <label for="product-category" class="control-label">Product Category</label>
-                                        <select name="product_category" id="product-category" class="form-control select2" data-placeholder="Choose Product Category">
+                                        <label for="site" class="control-label">Site</label>
+                                        <select name="site" id="site" class="form-control select2" data-placeholder="Choose Site" required>
                                         </select>
                                     </div>
                                     <!-- Borrowing Date -->
@@ -76,12 +76,12 @@
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <!-- Site -->
+                                    <!-- Product Category -->
                                     <div class="form-group">
-                                        <label for="site" class="control-label">Site</label>
-                                        <select name="site" id="site" class="form-control select2" data-placeholder="Choose Site" required>
+                                        <label for="product-category" class="control-label">Product Category</label>
+                                        <select name="product_category" id="product-category" class="form-control select2" data-placeholder="Choose Product Category">
                                         </select>
-                                    </div>
+                                    </div>                                    
                                     <!-- Warehouse -->
                                     <div class="form-group">
                                         <label for="warehouse" class="control-label">Warehouse</label>
@@ -120,7 +120,7 @@
                             <!-- Description -->
                             <div class="form-group">
                                 <label for="description" class="control-label">Purpose</label>
-                                <textarea name="description" id="description" cols="30" rows="5" class="form-control" placeholder="Enter Descripton">{{$data->description}}</textarea>
+                                <textarea name="description" id="description" class="form-control summernote" placeholder="Enter Descripton"></textarea>
                             </div>
                             <input type="hidden" name="status" id="status" value="{{$data->status}}">
                         </div>
@@ -147,7 +147,9 @@
                                 <table class="table table-striped" id="table-products" width="100%">
                                     <thead>
                                         <tr>
-                                            <th width="200">Product Name</th>
+                                            <th width="100">Product</th>
+                                            <th width="100">Product Category</th>
+                                            <th width="15" class="text-center">Has Serial</th>
                                             <th width="15" class="text-center">UOM</th>
                                             <th width="15" class="text-right">Current Stock</th>
                                             <th width="10" class="text-right">Qty Borrowing</th>
@@ -156,7 +158,7 @@
                                     </thead>
                                     <tbody>
                                         <tr class="no-available-data">
-                                            <td colspan="5" class="text-center">No available data.</td>
+                                            <td colspan="7" class="text-center">No available data.</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -247,10 +249,70 @@
         </form>
     </div>
 </section>
+
+<div class="modal fade" id="modal-serial">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" style="text-transform: capitalize;">Choose Product Serial</h5>
+        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="card">
+          <div class="card-header p-0 pt-1">
+            <ul class="nav nav-tabs" id="serial-tab" role="tablist">
+              <li class="nav-item">
+                <a href="#choose-serial" class="nav-link active" id="choose-serial-tab" data-toggle="pill" role="tab" aria-controls="choose-serial" aria-selected="false">Unselected</a>
+              </li>
+              <li class="nav-item">
+                <a href="#remove-serial" class="nav-link" id="remove-serial-tab" data-toggle="pill" role="tab" aria-controls="remove-serial" aria-selected="false">Selected</a>
+              </li>
+            </ul>
+          </div>
+          <div class="card-body">
+            <div class="tab-content" id="serial-tab">
+              <div class="tab-pane fade show active table-responsive p-0" id="choose-serial" role="tabpanel" aria-labelledby="choose-serial-tab">
+                <table id="table-choose-serial" class="table table-striped datatable" data-product-id="" width="100%">
+                    <thead>
+                        <tr>                            
+                            <th width="45%">Product</th>
+                            <th width="45%">Serial Number</th>
+                            <th width="10%" class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                </table>
+              </div>
+              <div class="tab-pane fade show table-responsive" id="remove-serial" role="tabpanel" aria-labelledby="remove-serial-tab">
+                <table id="table-already-serial" class="table table-striped datatable" data-product-id="" width="100%">
+                    <thead>
+                        <tr>                            
+                            <th width="45%">Product</th>
+                            <th width="45%">Serial Number</th>
+                            <th width="10%" class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-labeled  btn-danger btn-sm btn-sm btn-flat legitRipple" data-dismiss="modal"><b><i class="fas fa-times"></i></b> Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 @endsection
 
 @section('scripts')
 <script>
+    var selectedProducts = [];
+    var dataSerial       = [];
+    var setDataSerial    = [];
+
     toastr.options = {
         "closeButton": false,
         "debug": false,
@@ -284,10 +346,8 @@
                 break;
             case 'waiting' : 
                 statusBadge = 'badge-warning';
-                break;
-            case 'approved' : 
-                statusBadge = 'badge-info';
-                break;                
+                borrowingStatus = 'waiting approval';
+                break;              
             default:
                 statusBadge = '';
         }
@@ -296,10 +356,7 @@
 
         $('.select2').select2({
             allowClear: true
-        });  
-        
-        initInputFile();
-        initDocuments();
+        });              
 
         $('.datepicker').daterangepicker({
             singleDatePicker: true,
@@ -334,6 +391,8 @@
                 ['misc', ['fullscreen', 'codeview', 'help']]
             ]
         });
+
+        $('#description').summernote('code',@json($data->description));
 
         $('#form-document').on('click', '.remove', function() {
             $(this).parents('.document-item').remove();
@@ -384,7 +443,7 @@
 
         $("#warehouse").select2({
             ajax: {
-                url: "{{route('productborrowing.selectwarehouse')}}",
+                url: "{{route('warehouse.select')}}",
                 type: 'GET',
                 dataType: 'json',
                 data: function(params) {
@@ -401,10 +460,10 @@
                     var option = [];
                     $.each(data.rows, function(index, item) {
                         option.push({
-                            id: item.id,
-                            text: item.name,
-                            site_id: item.site_id,
-                            site: item.site
+                            id      : item.id,
+                            text    : item.name,
+                            site_id : item.site_id,
+                            site    : item.site
                         });
                     });
                     return {
@@ -414,6 +473,24 @@
                 },
             },
             allowClear: true,
+        }).on('select2:select', function(e){
+            var data = e.params.data;
+
+            if(data.site_id){
+                $('#site').select2('trigger','select',{
+                    data : {
+                        id : data.site_id,
+                        text: `${data.site}`
+                    }
+                });
+            }
+        }).on('change', function(){
+            $('#table-products > tbody').html(
+                `<tr class="no-available-data">
+                    <td colspan="7" class="text-center">No available data.</td>
+                </tr>`);
+
+            selectedProducts = [];
         });
 
         $("#product-category").select2({
@@ -455,6 +532,7 @@
         }).on('select2:clearing', function() {
             $('#product').val(null).trigger('change');
         });
+        
 
         if(siteID){
             $('#site').select2('trigger','select',{
@@ -480,22 +558,21 @@
                 type: 'GET',
                 dataType: 'json',
                 data: function(params) {
-                    var productCategory = $('#product-category').select2('val');
-                    var products      = [];
-                
-                    $.each($('#table-products > tbody > .product-item'), function (index, value) { 
-                        var product      = $(this).find('.item-product'),
-                            product_id   = product.val();
-                                            
-                        products.push(product_id);
+                    var productCategory = $('#product-category').select2('val');                                
+                    var warehouseID     = $('#warehouse').find('option:selected').val();                    
 
-                    });
+                    if(!warehouseID){
+                        toastr.warning('Select warehouse first.');
+                        return false;
+                    }                    
+
                     return {
-                        name: params.term,
+                        name                : params.term,
                         product_category_id : productCategory,
-                        products: products,
-                        page: params.page,
-                        limit: 30,
+                        warehouse_id        : warehouseID,
+                        page                : params.page,
+                        products            : selectedProducts,
+                        limit               : 30,
                     };
                 },
                 processResults: function(data, params) {
@@ -503,37 +580,42 @@
                     var option = [];
                     $.each(data.rows, function(index, item) {
                         option.push({
-                            id: item.id,
-                            text: item.name,
-                            uom_id : item.uom_id,
-                            uom: item.uom,
-                            product_category_id : item.product_category_id,
-                            qty_system: item.qty_system
+                            id          : item.id,
+                            text        : item.name,
+                            uom_id      : item.uom_id,
+                            uom         : item.uom,
+                            category_id : item.product_category_id,
+                            category    : item.category,
+                            is_serial   : item.is_serial=='1'?true:false,
+                            stock       : item.stock?item.stock:0
                         });
                     });
                     return {
                         results: option,
                         more: more,
                     };
-                },
+                },                
             },
+            escapeMarkup: function (text) { return text; },
+            templateResult : function(data){
+                if(!data.id){
+                    return data.text;
+                }
+
+                return `<b>${data.text}</b>
+                        <span style="float: right;">Stock : ${data.stock}</span>
+                        <p style="margin-top: 1px;">${data.category}</p>`;
+            },            
             allowClear: true,
         });
+
+        initInputFile();
+        initDocuments();        
 
         $('#table-products').on('change','.qty-request', function() {
             var qty     = $(this).val();
             $(this).parents('.product-item').find('.item-product').attr('data-qty-request',qty);        
-        });
-
-        $('#table-products > tbody').on('click', '.remove', function() {
-            $(this).closest('.product-item').remove();
-            if ($('#table-products > tbody > .product-item').length == 0) {
-                var html = `<tr class="no-available-data">
-                                <td colspan="5" class="text-center">No available data.</td>
-                            </tr>`;
-                $('#table-products > tbody').append(html);
-            }
-        });
+        });        
 
         $('#table-document > tbody').on('click', '.remove', function() {
             $(this).closest('tr').remove();
@@ -610,6 +692,8 @@
             },
             submitHandler: function() {                
                 var data          = new FormData($('#form')[0]),
+                siteID        = $('#form').find('#site').find('option:selected').val(),
+                    warehouseID   = $('#form').find('#warehouse').find('option:selected').val(),                    
                     issuedBy      = $('#form').find('#issued-by').select2('val'),
                     borrowingDate = $('#form').find('#borrowing-date').data('daterangepicker').startDate.format('YYYY-MM-DD'),
                     returnDate    = $('#form').find('#return-date').data('daterangepicker').startDate.format('YYYY-MM-DD'),
@@ -622,23 +706,30 @@
                          product_id   = product.val(),
                          categoryID   = product.attr('data-category-id'),
                          uomID        = product.attr('data-uom-id'),
+                         isSerial     = product.attr('data-has-serial'),
                          qtySystem    = product.attr('data-qty-system'),
                          qtyRequested = $(this).find('.qty-request').val();
                                          
                     products.push({
+                        site_id         : siteID,
+                        warehouse_id    : warehouseID,
                         product_id      : product_id,
                         category_id     : categoryID,
-                        uom_id          : uomID,
+                        uom_id          : uomID,                                          
                         qty_system      : qtySystem,
+                        current_stock   : qtySystem-qtyRequested,
                         qty_requested   : qtyRequested
-                    });
+                    });                    
 
                     if(qtyRequested == 0 || qtyRequested == ''){                        
                         zeroValue = true;
                         return false;
                     }
 
-                });                
+                });            
+
+                // console.log({products :products});
+                // return false;
 
                 $.each($('#table-document > tbody > .document-item').find('.doc-cell'), function (index, val) { 
                      var input    = $(this).parents('.document-item').find('.document-name'),
@@ -719,34 +810,60 @@
             return false;
         }
 
-        product = product[0];
+        product = product[0];        
+
         var id          = product.id,
             productName = product.text,
-            categoryID  = product.product_category_id,
+            categoryID  = product.category_id,
+            category    = product.category,
             uomID       = product.uom_id,
             uom         = product.uom,
-            qtySystem   = product.qty_system,
+            isSerial    = product.is_serial,
+            qtySystem   = product.stock,
             table       = $('#table-products > tbody');
 
         if (table.find('.no-available-data').length > 0) {
             table.find('.no-available-data').remove();
         }
+        
+        if(isSerial){                       
+            badge   = 'badge-info';
+            icon    = 'fas fa-check';
+        }else{            
+            badge   = 'bg-red';
+            icon    = 'fas fa-times';
+        }
 
         var html = `<tr class="product-item">
-                        <input type="hidden" class="item-product" value="${id}" data-category-id="${categoryID}" data-uom-id="${uomID}" data-qty-system="${qtySystem}" data-qty-request="0">
+                        <input type="hidden" class="item-product" value="${id}" data-category-id="${categoryID}" data-uom-id="${uomID}" data-has-serial="${isSerial}" data-qty-system="${qtySystem}" data-qty-request="0">
                         <td width="100">${productName}</td>
-                        <td class="text-center" width="15">${uom}</td>
+                        <td width="100">${category}</td>
+                        <td width="15" class="text-center"><span class="badge ${badge} text-md"><i class="${icon}" style="size: 2x;"></i></span></td>
+                        <td class="text-center" width="15">${uom?uom:'-'}</td>
                         <td class="text-right" width="15">${qtySystem}</td>
                         <td class="text-center" width="15">
-                            <input type="number" name="qty_request" class="form-control numberfield text-right qty-request" min="0" max="${qtySystem}" placeholder="0" required>
+                            <input type="number" name="qty_request" class="form-control numberfield text-right qty-request" placeholder="0" value="0" min="0" max="${qtySystem}" data-qty_system="${qtySystem}" required>
                         </td>
-                        <td class="text-center" width="15">
-                            <button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
+                        <td class="text-center" width="15">                            
+                            <button class="btn btn-sm text-xs btn-danger btn-flat legitRipple" onclick="removeProduct($(this),${id})" type="button"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>`;
 
         table.append(html);
-        $('#product').val(null).trigger('change');
+        $('#product').val(null).trigger('change');        
+        selectedProducts.push(parseInt(id));        
+    }
+
+    const removeProduct = (that,productID) => {
+        that.closest('.product-item').remove();
+
+        if ($('#table-products > tbody > .product-item').length == 0) {
+            var html = `<tr class="no-available-data">
+                            <td colspan="7" class="text-center">No available data.</td>
+                        </tr>`;
+            $('#table-products > tbody').append(html);
+        }
+        selectedProducts.splice($.inArray(productID, selectedProducts), 1);                
     }
 
     function addDocument() {
@@ -806,7 +923,7 @@
     function initDocuments() {
        var  dataProducts  = @json($data->products),
             dataFiles     = @json($data->files),
-            dataImages    = @json($data->images); 
+            dataImages    = @json($data->images);             
             
         // Init Products
         if(dataProducts.length > 0){
@@ -814,30 +931,48 @@
                 table = $('#table-products > tbody');
 
             $.each(dataProducts, function (index, value) { 
-                 var id          = value.product_id,
-                     productName = value.product_name,
-                     categoryID  = value.product_category_id,
-                     uomID       = value.uom_id,
-                     uom         = value.uom_name,
-                     qtySystem   = value.qty_system,
-                     qtyRequest  = value.qty_requested;
+                var id          = value.product_id,
+                    productName = value.product,
+                    categoryID  = value.product_category_id,
+                    category    = value.category,
+                    uomID       = value.uom_id,
+                    uom         = value.uom,
+                    isSerial    = value.is_serial=='1'?true:false,                     
+                    qtySystem   = value.qty_system,
+                    qtyRequest  = value.qty_requested;
+
+                switch (isSerial) {
+                    case true:
+                        badge = 'badge-info';
+                        icon  = 'fas fa-check';
+                        break;
+                
+                    default:
+                        badge = 'bg-red';
+                        icon  = 'fas fa-times';
+                        break;
+                }
 
                  html += `<tr class="product-item">
-                            <input type="hidden" class="item-product" value="${id}" data-category-id="${categoryID}" data-uom-id="${uomID}" data-qty-system="${qtySystem}" data-qty-request="0">
+                            <input type="hidden" class="item-product" value="${id}" data-category-id="${categoryID}" data-uom-id="${uomID}" data-has-serial="${isSerial}" data-qty-system="${qtySystem}" data-qty-request="0">
                             <td width="100">${productName}</td>
+                            <td width="100">${category}</td>
+                            <td width="15" class="text-center"><span class="badge ${badge} text-md"><i class="${icon}" style="size: 2x;"></i></span></td>
                             <td class="text-center" width="15">${uom}</td>
                             <td class="text-right" width="15">${qtySystem}</td>
                             <td class="text-center" width="15">
                                 <input type="number" name="qty_request" class="form-control numberfield text-right qty-request" placeholder="0" min="0" max="${qtySystem}" value="${qtyRequest}" required>
                             </td>
-                            <td class="text-center" width="15">
-                                <button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
+                            <td class="text-center" width="15">                                
+                                <button class="btn btn-sm text-xs btn-danger btn-flat legitRipple" onclick="removeProduct($(this),${id})" type="button"><i class="fas fa-trash"></i></button>
                             </td>
-                        </tr>`;            
+                        </tr>`;     
+                        
+                selectedProducts.push(id);                
             });
 
             table.find('.no-available-data').remove();
-            table.append(html);
+            table.append(html);            
         }
         
         // Init Files

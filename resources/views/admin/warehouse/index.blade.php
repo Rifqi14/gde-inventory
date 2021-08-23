@@ -135,7 +135,7 @@
         "hideMethod": "fadeOut"
     };
 
-    $(function() {
+    $(function() {        
         $(".select2").select2({
             allowClear: true
         });
@@ -214,13 +214,13 @@
                                         <i class="far fa-eye"></i>View Data
                                     </a>`;
                         // update
-                        if (actionmenu.indexOf('update') > 0) {
+                        if (actionmenu.indexOf('update') >= 0) {
                             button += `<a class="dropdown-item" href="javascript:void(0);" onclick="edit(${row.id})">
                                         <i class="far fa-edit"></i>Update Data
                                     </a>`;
                         }
                         // delete
-                        if (actionmenu.indexOf('delete') > 0) {
+                        if (actionmenu.indexOf('delete') >= 0) {
                             button += `<a class="dropdown-item" href="javascript:void(0);" onclick="destroy(${row.id})">
                                         <i class="fa fa-trash-alt"></i> Delete Data
                                     </a>`;
@@ -265,7 +265,7 @@
             $('#form-filter').modal('hide');
         });
         
-    });
+    });    
 
     const destroy = (id) => {
         bootbox.confirm({

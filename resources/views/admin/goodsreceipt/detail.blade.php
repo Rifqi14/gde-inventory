@@ -51,9 +51,15 @@
                     </div>
                   </div>
                 </div>
+                <div class="col-md-6">
+                  <div class="form-group row">
+                    <label for="issued-by" class="cl-md-12 col-xs-12 control-label">Issued By</label>
+                    <input type="text" class="form-control" placeholder="Issued by" value="{{$data->issued}}" readonly>
+                  </div>
+                </div>
                 <div class="col-sm-6">
                   <div class="form-group">
-                    <label for="unit">Unit</label>
+                    <label for="unit">Site</label>
                     <select name="site" id="site" class="form-control select2" data-placeholder="Unit" disabled></select>
                   </div>
                 </div>
@@ -61,6 +67,12 @@
                   <div class="form-group">
                     <label for="warehouse">Warehouse</label>
                     <select name="warehouse" id="warehouse" class="form-control select2" data-placeholder="Warehouse" disabled></select>
+                  </div>
+                </div>
+                <div class="col-sm-6">
+                  <div class="form-group form-status">
+                    <label for="state" class="control-label">Status</label>
+                    <div class="controls"></div>
                   </div>
                 </div>
               </div>
@@ -73,21 +85,13 @@
               <span class="title">
                 <hr>
                 <h5 class="text-md text-dark text-uppercase">Other Information</h5>
-              </span>
-              <div class="form-group row">
-                <label for="issued-by" class="cl-md-12 col-xs-12 control-label">Issued By</label>
-                <input type="text" class="form-control" placeholder="Issued by" value="{{$data->issued}}" readonly>
-              </div>
+              </span>              
               <div class="form-group row">
                 <label for="description" class="col-md-12 col-xs-12 control-label">Description</label>
                 <div class="col-sm-12 controls">
-                  <textarea class="form-control summernote" name="description" id="description" rows="4" placeholder="Description">{{$data->description}}</textarea>
+                  <textarea class="form-control summernote" name="description" id="description" rows="4" placeholder="Description"></textarea>
                 </div>
-              </div>
-              <div class="form-group form-status">
-                <label for="state" class="control-label">Status</label>
-                <div class="controls"></div>
-              </div>
+              </div>              
             </div>
           </div>
         </div>
@@ -102,17 +106,18 @@
                 <table id="table-product" class="table table-striped datatable" width="100%">
                   <thead>
                     <tr>
-                      <th width="10%">Product Name</th>
-                      <th width="10%">Reference</th>
-                      <th width="10%" class="text-right">Qty Order</th>
-                      <th width="10%" class="text-right">Qty Receipt</th>
-                      <th width="10%">Rack</th>
-                      <th width="10%">Bin</th>
+                      <th width="100">Product</th>
+                      <th width="100">Category</th>
+                      <th width="30" class="text-center">Has Serial</th>                      
+                      <th width="40" class="text-center" style="white-space: nowrap;">Qty Order</th>
+                      <th width="40" class="text-center" style="white-space: nowrap;">Qty Receipt</th>
+                      <th width="100">Rack</th>
+                      <th width="100">Bin</th>                      
                     </tr>
                   </thead>
                   <tbody>
                     <tr class="no-available-data">
-                      <td colspan="6" class="text-center">No available data.</td>
+                      <td colspan="7" class="text-center">No available data.</td>
                     </tr>
                   </tbody>
                 </table>
@@ -236,20 +241,11 @@
 
     $('.summernote').summernote({
       height: 145,
-      toolbar: [
-        ['style', ['style']],
-        ['font-style', ['bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'clear']],
-        ['font', ['fontname']],
-        ['font-size', ['fontsize']],
-        ['font-color', ['color']],
-        ['para', ['ul', 'ol', 'paragraph']],
-        ['table', ['table']],
-        ['insert', ['link', 'picture', 'video', 'hr']],
-        ['misc', ['fullscreen', 'codeview', 'help']]
-      ]
-    });
+      toolbar: []
+    });    
     
     $('.summernote').summernote('disable');
+    $('#description').summernote('code',@json($data->description));
 
     $('.datepicker').daterangepicker({
       singleDatePicker: true,
@@ -369,6 +365,10 @@
     var files    = @json($data->files);
     var images   = @json($data->images);
 
+    console.log({
+      products :  products
+    });
+
     if(products.length > 0){
       var html  = '',
           table = $('#table-product > tbody');
@@ -376,9 +376,11 @@
       $.each(products, function (index, value) { 
         var productID    = value.product_id,
             product      = value.product,
+            category     = value.category,
             referenceID  = value.reference_id,
             reference    = value.reference,
             uomID        = value.uom_id,
+            isSerial     = value.is_serial,
             order        = value.qty_order,
             receipt      = value.qty_receipt?value.qty_receipt:0,
             rackID       = value.rack_id,
@@ -387,13 +389,26 @@
             bin          = value.bin,
             type         = value.type;
 
+            if (isSerial == '1') {
+              disable = type == 'contract'?'disabled':'';
+              icon    = 'fas fa-check';
+              badge   = 'badge-info';            
+
+            } else {
+              icon  = 'fas fa-times';
+              badge = 'bg-red';
+            }
+
+            var serial = `<span class="badge ${badge} text-md"><i class="${icon}" style="size: 1x;"></i></span>`;
+
             html += `<tr class="product-item">                   
-                      <td width="100">${product}</td>
-                      <td width="100"><b>${reference}</b></td>
+                      <td width="100"><p>${product}<br><b>${reference}</b></p></td>
+                      <td width="100">${category}</td>
+                      <td width="30" class="text-center">${serial}</td>
                       <td class="text-right" width="30">${order}</td>
                       <td class="text-right" width="30">${receipt}</td>
                       <td width="100">${rack}</td>
-                      <td width="100">${bin}</td>                       
+                      <td width="100">${bin}</td>                                             
                     </tr>`;
          
       });
@@ -419,10 +434,7 @@
                             <a href="${path}" target="_blank">
                               <b><i class="fas fa-download"></i></b> Download File
                             </a>                             
-                        </td>
-                        <td class="text-center">
-                            <button class="btn btn-md text-xs btn-danger btn-flat legitRipple" onclick="removeDoc($(this),${id})" type="button"><i class="fas fa-trash"></i></button>                                
-                        </td>
+                        </td>                        
                     </tr>`;
         });
 
@@ -453,73 +465,7 @@
 
         table.find('.no-available-data').remove();
         table.append(html);
-    }
-
-    console.log({
-      products :  products,
-      contractref :files,
-      images    : images
-    });
-  }
-
-  const addProduct = () => {
-    $('#form-reference').modal('show');
-  }
-
-  const addDocument = () => {
-    var number = $('#table-document').find('tr:last').data('number') ? $('#table-document').find('tr:last').data('number') + 1 : 1;
-    var html = `
-    <tr data-number="${number}">
-      <td><input type="text" class="form-control" id="document_name_${number}" name="document_name[]" placeholder="Document Name" aria-required="true"></td>
-      <td>
-        <div class="input-group">
-          <div class="custom-file">
-            <input type="file" class="custom-file-input" name="image" accept="image/*" onchange="changePath(this)">
-            <label class="custom-file-label" for="exampleInputFile">Attach Image</label>
-          </div>
-        </div>
-      </td>
-      <td>
-        <button type="button" class="btn btn-transparent text-md" onclick="removeDocument($(this))" data-document=${number}>
-          <i class="fas fa-trash text-maroon color-palette"></i>
-        </button>
-      </td>
-    </tr>
-    `;
-    $("#table-document tbody").append(html);
-  }
-
-  const removeDocument = (a) => {
-    var number = a.attr('data-document');
-    $("#table-document tbody").find("tr[data-number=" + number + "]").remove();
-  }
-
-  const addPhoto = () => {
-    var number = $('#table-photo').find('tr:last').data('number') ? $('#table-photo').find('tr:last').data('number') + 1 : 1;
-    var html = `
-    <tr data-number="${number}">
-      <td><input type="text" class="form-control" id="photo_name_${number}" name="photo_name[]" placeholder="Photo Name" aria-required="true"></td>
-      <td>
-        <div class="input-group">
-          <div class="custom-file">
-            <input type="file" class="custom-file-input" name="image" accept="image/*" onchange="changePath(this)">
-            <label class="custom-file-label" for="exampleInputFile">Attach Image</label>
-          </div>
-        </div>
-      </td>
-      <td>
-        <button type="button" class="btn btn-transparent text-md" onclick="removePhoto($(this))" data-photo=${number}>
-          <i class="fas fa-trash text-maroon color-palette"></i>
-        </button>
-      </td>
-    </tr>
-    `;
-    $("#table-photo tbody").append(html);
-  }
-
-  const removePhoto = (a) => {
-    var number = a.attr('data-photo');
-    $("#table-photo tbody").find("tr[data-number=" + number + "]").remove();
-  }
+    }    
+  }  
 </script>
 @endsection

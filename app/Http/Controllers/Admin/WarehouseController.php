@@ -84,12 +84,13 @@ class WarehouseController extends Controller
         ");
         $query->leftJoin('sites','sites.id','=','warehouses.site_id');
         $query->whereRaw("upper(warehouses.name) like '%$name%'");
+        $query->where('warehouses.type','<>','virtual');
         if($site_id){
             $query->where('site_id',$site_id);
         }
         if($except_id){
             $query->where('warehouses.id','<>',$except_id);
-        }
+        }        
 
         $row = clone $query;
         $recordsTotal = $row->count();

@@ -58,6 +58,8 @@
         </div>
     </div>
 </section>
+
+<!-- Modal Filter -->
 <div class="modal fade" id="form-filter">
     <div class="modal-dialog modal-md">
         <div class="modal-content">
@@ -74,7 +76,12 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label class="control-label" for="date">Date</label>
-                                <input type="text" id="date" class="form-control datepicker text-right" placeholder="Enter date">
+                                <div class="input-group">
+                                    <input type="text" id="date" class="form-control datepicker text-right" placeholder="Enter date">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                                    </div>
+                                </div>                                
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -112,6 +119,10 @@
         </div>
     </div>
 </div>
+
+<div style="display: none;">
+	<iframe id="bodyReplace" scrolling="no" allowtransparency="true" style="width: 69%; border-width: 0px; position: relative; margin: 0 auto; display: block;" onload="this.style.height=(this.contentDocument.body.scrollHeight+45) +'px';"></iframe>
+</div>
 @endsection
 
 @section('scripts')
@@ -136,7 +147,7 @@
         "hideMethod": "fadeOut"
     };
 
-    $(function() {
+    $(function() {        
         $('.select2').select2({
             allowClear: true
         });
@@ -165,7 +176,7 @@
             responsive: true,
             lengthChange: false,
             order: [
-                [1, "asc"]
+                [2, "desc"]
             ],
             ajax: {
                 url: "{{route('goodsissue.read')}}",
@@ -235,16 +246,23 @@
                                         <i class="far fa-eye"></i>View Data
                                     </a>`;
                         // update
-                        if (actionmenu.indexOf('update') > 0 && row.status != 'approved') {
-                            button += `<a class="dropdown-item" href="javascript:void(0);" onclick="edit(${row.id})">
-                                        <i class="far fa-edit"></i>Update Data
-                                    </a>`;
-                        }
+                        // if (actionmenu.indexOf('update') >= 0 && row.status != 'approved') {
+                        //     button += `<a class="dropdown-item" href="javascript:void(0);" onclick="edit(${row.id})">
+                        //                 <i class="far fa-edit"></i>Update Data
+                        //             </a>`;
+                        // }
                         // delete
-                        if (actionmenu.indexOf('delete') > 0 && row.status != 'approved') {
-                            button += `<a class="dropdown-item" href="javascript:void(0);" onclick="destroy(${row.id})">
-                                        <i class="fa fa-trash-alt"></i> Delete Data
-                                    </a>`;
+                        // if (actionmenu.indexOf('delete') >= 0 && row.status != 'approved') {
+                        //     button += `<a class="dropdown-item" href="javascript:void(0);" onclick="destroy(${row.id})">
+                        //                 <i class="fa fa-trash-alt"></i> Delete Data
+                        //             </a>`;
+                        // }
+
+                        // print
+                        if (actionmenu.indexOf('export') >= 0 && row.status == 'approved') {
+                            button +=   `<a class="dropdown-item" href="javascript:void(0);" onclick="ekspor(${row.id})">
+                                            <i class="fas fa-file-export"></i>Export Data                                        
+                                        </a>`;
                         }
                         return `<div class="btn-group">
                         <button type="button" class="btn btn-flat btn-sm dropdown-toggle" data-toggle="dropdown">
@@ -353,6 +371,30 @@
             search.find('#status').val(null).trigger('change');        
         
             dataTable.draw();
+    }
+
+    const ekspor = (id) => {
+        $.ajax({
+            type: "GET",
+            url: `{{route('goodsissue.export')}}`,
+            data: {
+                _token: "{{ csrf_token() }}",
+                id : id
+            },
+            dataType: "JSON",
+            success: function (response) {
+                if (response.status) {
+                    let download = document.createElement("a");
+                    download.href = response.file;
+                    document.body.appendChild(download);
+                    download.download = response.document;
+                    download.click();
+                    download.remove();
+                }else{
+                    toastr.warning(response.message);
+                }             
+            }
+        });
     }
 </script>
 @endsection

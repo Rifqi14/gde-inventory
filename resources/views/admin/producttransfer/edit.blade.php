@@ -47,6 +47,14 @@
                                         <label for="origin-warehouse" class="control-label">Origin Warehouse</label>
                                         <select name="origin_warehouse" id="origin-warehouse" class="form-control select2 editable" data-placeholder="Choose origin warehouse" disabled></select>
                                     </div>
+                                    <div class="form-group">
+                                        <label for="vehicle_type" class="control-label">Vehicle Type</label>
+                                        <select name="vehicle_type" id="vehicle_type" class="form-control select2 editable" data-placeholder="Choose Vehicle Type" disabled>
+                                            <option value=""></option>
+                                            <option value="Rent" @if ($data->vehicle_type == 'Rent') selected @endif>Rent</option>
+                                            <option value="Internal" @if ($data->vehicle_type == 'Internal') selected @endif>Internal</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="form-group">
@@ -67,6 +75,16 @@
                                     <div class="form-group">
                                         <label for="destination-warehouse" class="control-label">Destination Warehouse</label>
                                         <select name="destination_warehouse" id="destination-warehouse" class="form-control select2 editable" data-placeholder="Choose destination warehouse" disabled></select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="police_number" class="control-label">Police Number</label>
+                                        <input type="text" class="form-control editable" placeholder="Police Number" name="police_number" value="{{$data->police_number}}" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label for="product_category_id" class="control-label">Product Category</label>
+                                        <select name="product_category_id" id="product_category_id" class="form-control select2 editable" data-placeholder="Choose Product Category" disabled></select>
                                     </div>
                                 </div>
                             </div>
@@ -111,9 +129,6 @@
                                 <h5 class="text-md text-dark text-uppercase">Product Information</h5>
                             </span>
                             <div class="form-group">
-                                <label for="product_category_id" class="control-label">Product Category</label>
-                                <select name="product_category_id" id="product_category_id" class="form-control select2 editable" data-placeholder="Choose Product Category" disabled></select>
-                                <br>
                                 <label for="product" class="control-label">Product</label>
                                 <select name="product" id="product" class="form-control select2 editable" data-placeholder="Choose Product" disabled></select>
                                 <br>
@@ -260,6 +275,8 @@
         if ($(e).data('action') == 'open') {
             $('#form .editable').attr('readonly', false);
             $('#form .editable').prop('disabled', false);
+            $('.editable').attr('readonly', false);
+            $('.editable').prop('disabled', false);
             $('.btn-approve').removeClass('d-none');
             $('.btn-submit').removeClass('d-none');
             $('.summernote').summernote('enable');
@@ -269,7 +286,9 @@
             $(e).html('<b><i class="fas fa-ban"></i></b> Cancel');
         } else {
             $('#form .editable').attr('readonly', true);
-            $('#form .editable').prop('disabled', true);
+            $('#form .editable').attr('readonly', true);
+            $('.editable').prop('disabled', true);
+            $('.editable').prop('disabled', true);
             $('#save-button').addClass('d-none');
             $('.btn-approve').addClass('d-none');
             $('.btn-submit').addClass('d-none');
@@ -822,7 +841,9 @@
 
             table.find('.no-available-data').remove();
             table.append(html);
-        }        
+        }
+
+        console.log(files);
 
         if(files.length > 0){
             var html  = '',
@@ -837,7 +858,7 @@
 
                 html += `<tr class="document-item">
                             <td>
-                                <input type="text" class="form-control document-name" data-id="${id}" data-transfer-id="${transferID}" data-type="file" data-file="${file}" placeholder="Enter document name" value="${filename}" required>                                
+                                <input type="text" class="form-control document-name" data-id="${id}" data-transfer-id="${transferID}" data-type="file" data-file="${file}" placeholder="Enter document name" value="${filename}" required readonly>                                
                             </td>
                             <td class="doc-cell">                       
                                 <a href="${path}" target="_blank">
@@ -867,7 +888,7 @@
 
                 html += `<tr class="photo-item">
                             <td>
-                            <input type="text" class="form-control document-name" data-id="${id}" data-transfer-id="${transferID}" data-type="photo" data-file="${file}" placeholder="Enter photo name" value="${filename}" required>                            
+                            <input type="text" class="editable form-control document-name" data-id="${id}" data-transfer-id="${transferID}" data-type="photo" data-file="${file}" placeholder="Enter photo name" value="${filename}" required  readonly>                            
                             </td>
                             <td class="doc-cell">          
                                 <a href="${path}" target="_blank">
@@ -1034,9 +1055,7 @@
         deletedDoc.push({
             id : id,            
             path : `assets/producttransfer/${transferID}/image/${file}`
-        });
-
-        console.log({ deleted : deletedDoc});
+        });        
     }   
 
     const onSubmit = (status) => {

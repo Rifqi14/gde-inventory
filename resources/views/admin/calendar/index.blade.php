@@ -41,6 +41,7 @@
                     <th>No.</th>
                     <th>Name</th>
                     <th>Description</th>
+                    <th class="workday">Workday this month</th>
                     <th>Action</th>
                   </tr>
                 </thead>
@@ -81,6 +82,12 @@
                   <textarea name="description" id="description" class="form-control" rows="4" style="resize: none;" placeholder="Description..."></textarea>
                 </div>
               </div>
+              <div class="col-md-12">
+                <div class="form-group">
+                  <label for="period" class="control-label">Period</label>
+                  <input type="text" name="period" id="period" class="form-control datepicker" placeholder="Period">
+                </div>
+              </div>
             </div>
           </div>
         </form>
@@ -99,6 +106,23 @@
   var actionmenu = JSON.parse('{!! json_encode($actionmenu) !!}');
   $(function() {
     $('.select2').select2();
+    $('.datepicker').daterangepicker({
+      singleDatePicker: true,
+      timePicker: false,
+      timePickerIncrement: 1,
+      timePicker24Hour: false,
+      timePickerSeconds: false,
+      autoUpdateInput: false,
+      drops: 'auto',
+      opens: 'center',
+      locale: {
+        format: 'YYYY-MM'
+      }
+    }).on('apply.daterangepicker', function(ev, picker) {
+      $(this).val(picker.startDate.format('YYYY-MM'));
+    }).on('cancel.daterangepicker', function(ev, picker) {
+      $(this).val('');
+    });
     dataTable   = $('#calendar-table').DataTable({
       processing: true,
       language: {
@@ -119,6 +143,8 @@
           var name        = $('#form-search').find('#name').val();
           var code        = $('#form-search').find('#code').val();
           var description = $('#form-search').find('#description').val();
+          var period      = $('#form-search').find('#period').val();
+          data.period     = period;
           data.name       = name;
           data.code       = code;
           data.description= description;
@@ -131,10 +157,11 @@
           width: 120,
           orderable: false,
           render: function(data, type, full, meta) {
-            return `<b>${full.name}</b><br><small>${full.code}</small>`;
+            return `<a href="javascript:void(0)" onclick="show(${full.id})"><b>${full.name}</b></a><br><small>${full.code}</small>`;
           },
         },
         { "data": "description", "name": "description", width: 120, orderable: false },
+        { "data": "workday", "name": "workday", width: 50, orderable: false, render: function(data, type, full, meta) { return `${full.workday} days` } },
         {
             width: 50,
             className: "text-center",
@@ -171,6 +198,7 @@
     $("#form-search").submit(function(e) {
       e.preventDefault();
       dataTable.draw();
+      $('.workday').append(` (${$(this).find('#period').val()})`);
       $("#add-filter").modal('hide');
     });
   });
@@ -196,40 +224,99 @@
 
   function destroy(id)
 	{
-		Swal.fire({
-			title: 'Hapus',
-			text: "Apa Anda Yakin Akan Menghapus Data ?",
-			icon: 'error',
-			showCancelButton: true,
-			confirmButtonColor: '#3085d6',
-			cancelButtonColor: '#d33',
-			confirmButtonText: 'Hapus!',
-			cancelButtonText: 'Batal'
-		}).then((result) => {
-			if (result.value) {
+		bootbox.confirm({
+        buttons: {
+            confirm: {
+                label: '<i class="fa fa-check"></i>',
+                className: 'btn-primary btn-sm'
+            },
+            cancel: {
+                label: '<i class="fa fa-undo"></i>',
+                className: 'btn-default btn-sm'
+            },
+        },
+        title: 'Delete data?',
+        message: 'Are you sure want to delete this site?',
+        callback: function (result) {
+            if (result) {
                 var data = {
                     _token: "{{ csrf_token() }}"
                 };
-				$.ajax({
-					url: `{{url('admin/calendar')}}/${id}`,
-					dataType: 'json', 
-					data:data,
-					type:'DELETE',
-					success:function(response){
-						if(response.status){
-              dataTable.ajax.reload(null, false);
-						}
-						else{
-							Swal.fire(
-								'Error!',
-								'Data Gagal Di Hapus.',
-								'error'
-							)
-						}
-				}});
-				
-			}
-		});
+                $.ajax({
+                    url: `{{route('calendar.index')}}/${id}`,
+                    dataType: 'json',
+                    data: data,
+                    type: 'DELETE',
+                    beforeSend: function () {
+                        blockMessage('body', 'Loading', '#fff');
+                    }
+                }).done(function (response) {
+                    $('body').unblock();
+                    if (response.status) {
+                        toastr.options = {
+                            "closeButton": false,
+                            "debug": false,
+                            "newestOnTop": false,
+                            "progressBar": false,
+                            "positionClass": "toast-top-right",
+                            "preventDuplicates": false,
+                            "onclick": null,
+                            "showDuration": "300",
+                            "hideDuration": "1000",
+                            "timeOut": "5000",
+                            "extendedTimeOut": "1000",
+                            "showEasing": "swing",
+                            "hideEasing": "linear",
+                            "showMethod": "fadeIn",
+                            "hideMethod": "fadeOut"
+                        }
+                        toastr.success(response.message);
+                        dataTable.ajax.reload(null, false);
+                    }else {
+                        toastr.options = {
+                            "closeButton": false,
+                            "debug": false,
+                            "newestOnTop": false,
+                            "progressBar": false,
+                            "positionClass": "toast-top-right",
+                            "preventDuplicates": false,
+                            "onclick": null,
+                            "showDuration": "300",
+                            "hideDuration": "1000",
+                            "timeOut": "5000",
+                            "extendedTimeOut": "1000",
+                            "showEasing": "swing",
+                            "hideEasing": "linear",
+                            "showMethod": "fadeIn",
+                            "hideMethod": "fadeOut"
+                        }
+                        toastr.warning(response.message);
+                    }
+                }).fail(function (response) {
+                    var response = response.responseJSON;
+                    $('body').unblock();
+                    toastr.options = {
+                        "closeButton": false,
+                        "debug": false,
+                        "newestOnTop": false,
+                        "progressBar": false,
+                        "positionClass": "toast-top-right",
+                        "preventDuplicates": false,
+                        "onclick": null,
+                        "showDuration": "300",
+                        "hideDuration": "1000",
+                        "timeOut": "5000",
+                        "extendedTimeOut": "1000",
+                        "showEasing": "swing",
+                        "hideEasing": "linear",
+                        "showMethod": "fadeIn",
+                        "hideMethod": "fadeOut"
+                    }
+                    toastr.warning(response.message);
+                })
+            }
+        }
+    });
 	}
 </script>
 @endsection

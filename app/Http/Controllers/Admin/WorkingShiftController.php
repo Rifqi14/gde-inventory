@@ -64,22 +64,25 @@ class WorkingShiftController extends Controller
             ], 200);
         }
 
-        $user = WorkingShift::create([
-            'shift_type' => $request->shift_type,
-            'shift_name' => $request->shift_name,
-            'time_in' => $request->time_in,
-            'time_out' => $request->time_out,
-            'status' => $request->status,
-            'total_working_time'    => Carbon::parse($request->time_in)->diffInHours(Carbon::parse($request->time_out)),
-        ]);
-
-        if (!$user) {
+        DB::beginTransaction();
+        try {
+            $user = WorkingShift::create([
+                'shift_type'            => $request->shift_type,
+                'shift_name'            => $request->shift_name,
+                'time_in'               => $request->time_in,
+                'time_out'              => $request->time_out,
+                'status'                => $request->status,
+                'total_working_time'    => Carbon::parse($request->time_in)->diffInHours(Carbon::parse($request->time_out)),
+            ]);
+        } catch (\Illuminate\Database\QueryException $ex) {
+            DB::rollBack();
             return response()->json([
-                'status' => false,
-                'message'     => 'Cant create shift'
-            ], 200);
+                'status'    => false,
+                'message'   => "Error create data: {$ex->errorInfo[2]}",
+            ], 400);
         }
 
+        DB::commit();
         return response()->json([
             'status'     => true,
             'message'     => 'Created success',
@@ -95,9 +98,7 @@ class WorkingShiftController extends Controller
      */
     public function show($id)
     {
-        $query = DB::table('working_shifts');
-        $query->where('id', '=', $id);
-        $user = $query->get()->first();
+        $user   = WorkingShift::find($id);
         if ($user) {
             return view('admin.working_shift.detail', compact('user'));
         } else {
@@ -113,11 +114,9 @@ class WorkingShiftController extends Controller
      */
     public function edit($id)
     {
-        $query = DB::table('working_shifts');
-        $query->where('id', '=', $id);
-        $user = $query->get()->first();
-        if ($user) {
-            return view('admin.working_shift.edit', compact('user'));
+        $shift  = WorkingShift::find($id);
+        if ($shift) {
+            return view('admin.working_shift.edit', compact('shift'));
         } else {
             abort(404);
         }
@@ -145,25 +144,28 @@ class WorkingShiftController extends Controller
             ], 200);
         }
 
-        $user = WorkingShift::find($id);
-        $user->shift_type = $request->shift_type;
-        $user->shift_name = $request->shift_name;
-        $user->time_in = $request->time_in;
-        $user->time_out = $request->time_out;
-        $user->status = $request->status;
-        $user->total_working_time   = Carbon::parse($user->time_in)->diffInHours(Carbon::parse($user->time_out));
-        $user->save();
-
-        if (!$user) {
+        DB::beginTransaction();
+        try {
+            $user = WorkingShift::find($id);
+            $user->shift_type           = $request->shift_type;
+            $user->shift_name           = $request->shift_name;
+            $user->time_in              = $request->time_in;
+            $user->time_out             = $request->time_out;
+            $user->status               = $request->status;
+            $user->total_working_time   = Carbon::parse($user->time_in)->diffInHours(Carbon::parse($user->time_out));
+            $user->save();
+        } catch (\Illuminate\Database\QueryException $ex) {
+            DB::rollBack();
             return response()->json([
-                'status' => false,
-                'message'     => "Cant update shift"
-            ], 200);
+                'status'    => false,
+                'message'   => "Cant update data: {$ex->errorInfo[2]}"
+            ], 400);
         }
-
+        
+        DB::commit();
         return response()->json([
-            'status'     => true,
-            'results'     => route('workingshift.index'),
+            'status'    => true,
+            'results'   => route('workingshift.index'),
         ], 200);
     }
 

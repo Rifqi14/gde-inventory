@@ -38,6 +38,11 @@ class GoodsIssue extends Model
         return $this->hasMany('App\Models\GoodsIssueProduct','goods_issue_id')->where('goods_issue_products.type','transfer');
     }
 
+    public function borrowingproducts()
+    {
+        return $this->hasMany('App\Models\GoodsIssueProduct','goods_issue_id')->where('goods_issue_products.type','borrowing');
+    }
+
     public function documents()
     {
         return $this->hasMany('App\Models\GoodsIssueDocument','goods_issue_id');

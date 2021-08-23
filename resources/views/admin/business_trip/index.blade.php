@@ -278,11 +278,13 @@
         },
         {
           render: function(data, type, row) {
-            if (row.rate) {
-              return accounting.formatMoney(row.total_cost, " ", 0, ".", "");
-            } else {
-              return 0;
-            }
+            total = ``
+            $.each(row.total, function(index, value) {
+              if (value.price > 0) {
+                total += `${value.symbol} ${accounting.formatMoney(value.price, " ", 0, ".", "")}<br>`;
+              }
+            });
+            return total;
           },
           targets: [3]
         },
@@ -340,7 +342,7 @@
           data: "schedule"
         },
         {
-          data: "total_cost"
+          data: "id"
         }, {
           data: "status"
         }
@@ -400,7 +402,13 @@
         },
         {
           render: function(data, type, row) {
-            return accounting.formatMoney(row.rate, "", 0, ".", ",");
+            total = ``
+            $.each(row.total, function(index, value) {
+              if (value.price > 0) {
+                total += `${value.symbol} ${accounting.formatMoney(value.price, " ", 0, ".", "")}<br>`;
+              }
+            });
+            return total;
           },
           targets: [3]
         },
@@ -417,7 +425,7 @@
         },
         {
           render: function(data, type, row) {      
-          var button = `<a class="dropdown-item" href="javascript:void(0);" onclick="detail(${row.id},'table-bt-approved')">
+          var button = `<a class="dropdown-item" href="javascript:void(0);" onclick="detail(${row.business_trip_id},'table-bt-approved')">
                           <i class="fa fa-eye"></i> View Data
                         </a>`;      
             if(actionmenu.indexOf('print') > 0){

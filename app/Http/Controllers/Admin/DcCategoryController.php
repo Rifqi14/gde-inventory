@@ -32,13 +32,17 @@ class DcCategoryController extends Controller
         $query = $request->search['value'];
         $sort = $request->columns[$request->order[0]['column']]['data'];
         $dir = $request->order[0]['dir'];
-        $name = strtoupper($request->name);
-        $type = strtoupper($request->type);
+        $menu_id            = $request->menu_id;
+        $document_type_id   = $request->document_type_id;
 
         //Count Data
-        $query = DcCategory::select('*');
-        $query->whereRaw("upper(name) like '%$name%'");
-        $query->whereRaw("upper(type) like '%$type%'");
+        $query = DcCategory::with(['menu', 'doctype']);
+        if ($menu_id) {
+            $query->where('menu_id', $menu_id);
+        }
+        if ($document_type_id) {
+            $query->where('document_type_id', $document_type_id);
+        }
 
         $row = clone $query;
         $recordsTotal = $row->count();
@@ -73,8 +77,8 @@ class DcCategoryController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'type'              => 'required',
-            'name'              => 'required'
+            'menu_id'           => 'required',
+            'document_type_id'  => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -84,26 +88,32 @@ class DcCategoryController extends Controller
             ], 400);
         }
 
-        $dccategory = DcCategory::create([
-            'type'                  => $request->type,
-            'name'                  => $request->name
-        ]);
-        if (!$dccategory) {
+        DB::beginTransaction();
+        try {
+            foreach ($request->menu_id as $key => $menu) {
+                $dccategory = DcCategory::create([
+                    'menu_id'           => $menu,
+                    'document_type_id'  => $request->document_type_id,
+                ]);
+            }
+        } catch (\Illuminate\Database\QueryException $ex) {
+            DB::rollBack();
             return response()->json([
                 'status'    => false,
-                'message'   => "failed Insert Document Category"
+                'message'   => "Error create data: {$ex->errorInfo[2]}",
             ], 400);
         }
+        DB::commit();
         return response()->json([
-            'status'     => true,
-            'results'     => route('documentcategory.index'),
+            'status'    => true,
+            'results'   => route('documentcategory.index'),
         ], 200);
     }
 
     public function edit(Request $request,$id)
     {
         if(in_array('update',$request->actionmenu)){
-            $dccategory = DcCategory::find($id);
+            $dccategory = DcCategory::with(['menu', 'doctype'])->find($id);
             if ($dccategory) {
                 return view('admin.dccategory.edit', compact('dccategory'));
             } else {
@@ -117,8 +127,8 @@ class DcCategoryController extends Controller
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'type'              => 'required',
-            'name'              => 'required'
+            'menu_id'           => 'required',
+            'document_type_id'  => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -128,17 +138,20 @@ class DcCategoryController extends Controller
             ], 400);
         }
 
-        $dccategory = DcCategory::find($id);
-        $dccategory->type = $request->type;
-        $dccategory->name = $request->name;
-        $dccategory->save();
-        if (!$dccategory) {
+        DB::beginTransaction();
+        try {
+            $dccategory = DcCategory::find($id);
+            $dccategory->menu_id            = $request->menu_id;
+            $dccategory->document_type_id   = $request->document_type_id;
+            $dccategory->save();
+        } catch (\Illuminate\Database\QueryException $ex) {
+            DB::rollBack();
             return response()->json([
-                'status' => false,
-                'message'     => "Failed Update Document Category"
+                'status'    => false,
+                'message'   => "Error update data: {$ex->errorInfo[2]}",
             ], 400);
         }
-
+        DB::commit();
         return response()->json([
             'status'     => true,
             'results'     => route('documentcategory.index'),

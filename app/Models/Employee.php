@@ -6,6 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Employee extends Model
 {
+    /**
+     * The attributes that aren't mass assignable.
+     *
+     * @var array
+     */
     protected $guarded = [];
 
     public function user()
@@ -41,6 +46,11 @@ class Employee extends Model
     public function salarycurrency()
     {
         return $this->belongsTo('App\Models\Currency', 'salary_currency_id', 'id');
+    }
+
+    public function calendar()
+    {
+        return $this->belongsTo('App\Models\Calendar', 'calendar_id', 'id');
     }
 
     /**

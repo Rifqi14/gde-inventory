@@ -36,6 +36,7 @@
                 <h5 class="text-md text-dark text-uppercase">{{ $menu_name }} Information</h5>
               </span>
               <div class="row">
+              <!-- Receipt Number -->
                 <div class="col-sm-6">
                   <div class="form-group row">
                     <label for="receipt-number" class="col-md-12 col-xs-12 control-label">Receipt Number</label>
@@ -44,28 +45,60 @@
                     </div>
                   </div>
                 </div>
+                <!-- Issued By -->
+                <div class="col-sm-6">
+                  <div class="form-group row">
+                    <label class="col-md-12 col-xs-12 control-label" for="issued-by">Issued By</label>
+                    <div class="col-sm-12 controls">
+                      <input type="text" class="form-control" value="{{$data->issued}}" readonly>
+                      <input type="hidden" name="issuedby" value="{{$data->issued_by}}">
+                    </div>
+                  </div>
+                </div>
+                <!-- Receipt Date -->
                 <div class="col-sm-6">
                   <div class="form-group row">
                     <label for="receipt_date" class="col-md-12 col-xs-12 control-label">Receipt Date</label>
                     <div class="col-sm-12 controls">
-                      <input type="text" name="receipt_date" id="receipt-date" class="form-control datepicker text-right" placeholder="Enter receipt date">
+                      <div class="input-group">
+                        <input type="text" name="receipt_date" id="receipt-date" class="form-control datepicker text-right" placeholder="Enter receipt date">
+                        <div class="input-group-append">
+                            <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                        </div>
+                      </div>                      
                     </div>
                   </div>
                 </div>
+                 <!-- Product Category -->
+                 <div class="col-md-6">
+                  <label for="product-category" class="control-label">Product Category</label>
+                  <div class="controls">
+                      <select id="product-category" class="form-control select2" data-placeholder="Choose Product Category"></select>
+                  </div>
+                </div>
+                <!-- Site -->
                 <div class="col-sm-6">
                   <div class="form-group">
-                    <label for="unit">Unit</label>
+                    <label for="unit">Site</label>
                     <div class="controls">
-                      <select name="unit" id="unit" class="form-control select2" data-placeholder="Choose site"></select>
+                      <select name="site" id="unit" class="form-control select2" data-placeholder="Choose site"></select>
                     </div>
                   </div>
                 </div>
+                <!-- Warehouse -->
                 <div class="col-sm-6">
                   <div class="form-group">
                     <label for="warehouse">Warehouse</label>
                     <div class="controls">
                       <select name="warehouse" id="warehouse" class="form-control select2" data-placeholder="Choose warehouse"></select>
                     </div>
+                  </div>
+                </div>
+                <!-- Status -->
+                <div class="col-sm-6">
+                  <div class="form-group form-status">
+                    <label for="state" class="control-label">Status</label>
+                    <div class="controls"></div>
                   </div>
                 </div>
               </div>
@@ -78,24 +111,13 @@
               <span class="title">
                 <hr>
                 <h5 class="text-md text-dark text-uppercase">Other Information</h5>
-              </span>
-              <div class="form-group row">
-                <label class="col-md-12 col-xs-12 control-label" for="issued-by">Issued By</label>
-                <div class="col-sm-12 controls">
-                  <input type="text" class="form-control" value="{{$data->issued}}" readonly>
-                  <input type="hidden" name="issuedby" value="{{$data->issued_by}}">
-                </div>
-              </div>
+              </span>              
               <div class="form-group row">
                 <label for="description" class="col-md-12 col-xs-12 control-label">Description</label>
                 <div class="col-sm-12 controls">
                   <textarea class="form-control summernote" name="description" id="description" rows="4" placeholder="Description">{{$data->description}}</textarea>
                 </div>
-              </div>
-              <div class="form-group form-status">
-                <label for="state" class="control-label">Status</label>
-                <div class="controls"></div>
-              </div>
+              </div>              
             </div>
           </div>
         </div>
@@ -115,18 +137,19 @@
                 <table id="table-product" class="table table-striped datatable" width="100%">
                   <thead>
                     <tr>
-                      <th width="100">Product Name</th>
-                      <th width="100">Reference</th>
-                      <th width="30" class="text-center">Qty Order</th>
-                      <th width="30" class="text-center">Qty Receipt</th>
-                      <th width="100" class="text-center">Rack</th>
-                      <th width="100" class="text-center">Bin</th>
-                      <th width="10" class="text-center">Action</th>
+                      <th width="100">Product</th>
+                      <th width="100" style="white-space: nowrap;">Product Category</th>
+                      <th width="30" class="text-center">Has Serial</th>                      
+                      <th width="20" class="text-right" style="white-space: nowrap;">Qty Order</th>
+                      <th width="20" class="text-right" style="white-space: nowrap;">Qty Receipt</th>
+                      <th width="100">Rack</th>
+                      <th width="100">Bin</th>
+                      <th width="15" class="text-center">Action</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr class="no-available-data">
-                      <td colspan="7" class="text-center">No available data.</td>
+                      <td colspan="8" class="text-center">No available data.</td>
                     </tr>
                   </tbody>
                 </table>
@@ -222,7 +245,7 @@
 </section>
 
 <div class="modal fade" id="form-reference">
-  <div class="modal-dialog modal-lg">
+  <div class="modal-dialog modal-xl">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" style="text-transform: capitalize;">Add reference</h5>
@@ -248,13 +271,14 @@
                 <table id="table-contract" class="table table-striped datatable" width="100%">
                   <thead>
                     <tr>
-                      <th width="5%" class="text-center">No</th>
-                      <th width="15%" class="text-center">Date</th>
-                      <th width="20%">Contract Number</th>
-                      <th width="20%">Produk</th>
-                      <th width="10%" class="text-center">Qty</th>
-                      <th width="15%" class="text-center">UOM</th>
-                      <th width="15%" class="text-center">Action</th>
+                      <th width="3%" class="text-center">No</th>
+                      <th width="5%" class="text-center">Date</th>                      
+                      <th width="30%">Product</th>
+                      <th width="50%">Product Category</th>
+                      <th width="5%" class="text-center">Has Serial</th>
+                      <th width="10%" class="text-center">UOM</th>
+                      <th width="5%" class="text-right">Qty</th>                      
+                      <th width="5%" class="text-center">Action</th>
                     </tr>
                   </thead>
                 </table>
@@ -263,13 +287,14 @@
                 <table id="table-borrowing" class="table table-striped datatable" width="100%">
                   <thead>
                     <tr>
-                      <th width="5%" class="text-center">No</th>
-                      <th width="15%" class="text-center">Date</th>
-                      <th width="20%">Borrowing Number</th>
-                      <th width="20%">Produk</th>
-                      <th width="10%" class="text-center">Qty</th>
-                      <th width="15%" class="text-center">UOM</th>
-                      <th width="15%" class="text-center">Action</th>
+                      <th width="3%" class="text-center">No</th>
+                      <th width="5%" class="text-center">Date</th>                      
+                      <th width="30%">Product</th>
+                      <th width="50%">Product Category</th>
+                      <th width="5%" class="text-center">Has Serial</th>
+                      <th width="10%" class="text-center">UOM</th>
+                      <th width="5%" class="text-right">Qty</th>                      
+                      <th width="5%" class="text-center">Action</th>
                     </tr>
                   </thead>
                 </table>
@@ -314,9 +339,7 @@
     var receiptDate = '{{$data->date_receipt}}',
         siteID      = {{$data->site_id}},
         warehouseID = {{$data->warehouse_id}},
-        state       = '{{$data->status}}';
-
-    initData();           
+        state       = '{{$data->status}}';    
 
     switch (state) {
       case 'approved':
@@ -350,6 +373,8 @@
       ]
     });
 
+    $('#description').summernote('code',@json($data->description));
+
     $('.datepicker').daterangepicker({
       singleDatePicker: true,
       timePicker: false,
@@ -360,6 +385,8 @@
         format: 'DD/MM/YYYY'
       },
     });
+
+    initData();        
 
     $("#unit").select2({
       ajax: {
@@ -441,8 +468,38 @@
             text: `${data.site}`
           }
         });
-      }
+      }      
     });    
+
+    $("#product-category").select2({
+      ajax: {
+          url: "{{ route('productcategory.select') }}",
+          type: "GET",
+          dataType: "JSON",
+          data: function(params) {
+              return {
+                  name: params.term,
+                  page: params.page,
+                  limit: 30,
+              };
+          },
+          processResults: function(data, params) {
+              var more = (params.page * 30) < data.total;
+              var option = [];
+              $.each(data.rows, function(index, item) {
+                  option.push({
+                      id: item.id,
+                      text: item.name,
+                  });
+              });
+              return {
+                  results: option,
+                  more: more,
+              };
+          },
+      },
+      allowClear: true,
+    });
 
     if(receiptDate){
       var date = $('#receipt-date').data('daterangepicker');
@@ -487,36 +544,57 @@
         type: "GET",
         data: function(data) {
           data.except = receiptProduct;
+          data.category_id = $('#form').find('#product-category').find('option:selected').val();
         }
       },
       columnDefs: [{
           orderable: false,
-          targets: [0, 6]
+          targets: [0, 7]
         },
         {
           className: "text-center",
-          targets: [0, 1, 4, 5, 6]
+          targets: [0, 1, 4, 5, 7]
+        },
+        {
+          className: "text-right",
+          targets: [6]
         },
         {
           render: function(data, type, row) {
-            return `<b>${row.contract_number}</b>`
+            return `<p>${row.product}<br><b>${row.contract_number}</b></p>`;
           },
           targets: [2]
+        },
+        {
+          render: function(data, type, row){
+                switch (row.is_serial) {
+                  case '1':
+                    badge = 'badge-info';
+                    icon  = 'fas fa-check';                    
+                    break;
+                
+                  default:
+                    badge = 'bg-red';
+                    icon  = 'fas fa-times';                    
+                    break;
+                }
+            return `<span class="badge ${badge} text-md"><i class="${icon}" style="size: 2x;"></i></span>`;
+          }, targets: [4]
         },
         {
           render: function(data, type, row) {
             var referenceID = row.contract_id,
               reference = row.contract_number,
               productID = row.product_id,
-              product = row.product,
-              uomID = row.uom_id,
-              order = row.qty ? row.qty : 0;
+              product   = row.product,              
+              uomID     = row.uom_id,
+              order     = row.qty ? row.qty : 0;
 
             return `<button class="btn btn-md text-xs btn-success btn-flat legitRipple" onclick="addProduct($(this),'contract')" type="button" data-reference-id="${referenceID}" data-reference="${reference}" data-product-id="${productID}" data-product="${product}" data-uom-id="${uomID}" data-order="${order}">
                       <i class="fas fa-plus"></i>
                     </button>`;
           },
-          targets: [6]
+          targets: [7]
         }
       ],
       columns: [{
@@ -524,19 +602,23 @@
         },
         {
           data: "signing_date"
-        },
-        {
-          data: "contract_number"
-        },
+        },        
         {
           data: "product"
         },
         {
-          data: "qty"
+          data: "category",
+          className: "product-category"
+        },
+        {
+          data: "is_serial"
         },
         {
           data: "uom"
-        }
+        },
+        {
+          data: "qty"
+        }   
       ]
     });
 
@@ -557,36 +639,59 @@
       ajax: {
         url: "{{route('goodsreceipt.borrowingproducts')}}",
         type: "GET",
-        data: function(data) {}
+        data: function(data) {
+          data.except      = receiptProduct;
+          data.category_id = data.category_id = $('#form').find('#product-category').find('option:selected').val();
+        }
       },
       columnDefs: [{
           orderable: false,
-          targets: [0, 6]
+          targets: [0, 7]
         },
         {
           className: "text-center",
-          targets: [0, 1, 4, 5, 6]
+          targets: [0, 1, 4, 5, 7]
+        },
+        {
+          className: "text-right",
+          targets: [6]
         },
         {
           render: function(data, type, row) {
-            return `<b>${row.borrowing_number}</b>`;
+            return `<p>${row.product}<br><b>${row.borrowing_number}</b></p>`;
           },
           targets: [2]
         },
         {
+          render: function(data, type, row){
+                switch (row.is_serial) {
+                  case '1':
+                    badge = 'badge-info';
+                    icon  = 'fas fa-check';                    
+                    break;
+                
+                  default:
+                    badge = 'bg-red';
+                    icon  = 'fas fa-times';                    
+                    break;
+                }
+            return `<span class="badge ${badge} text-md"><i class="${icon}" style="size: 2x;"></i></span>`;
+          }, targets: [4]
+        },
+        {
           render: function(data, type, row) {
             var referenceID = row.product_borrowing_id,
-              reference = row.borrowing_number,
-              productID = row.product_id,
-              product = row.product,
-              uomID = row.uom_id,
-              order = row.qty ? row.qty : 0;
+                reference   = row.borrowing_number,
+                productID   = row.product_id,
+                product     = row.product,                
+                uomID       = row.uom_id,
+                order       = row.qty ? row.qty : 0;
 
-            return `<button class="btn btn-md text-xs btn-success btn-flat legitRipple" onclick="addProduct($(this),'borrowing')" type="button" data-reference-id="${referenceID}" data-reference="${reference}" data-product-id="${productID}" data-product="${product}" data-uom-id="${uomID}" data-order="${order}">
+            return `<button class="btn btn-sm text-xs btn-success btn-flat legitRipple" onclick="addProduct($(this),'borrowing')" type="button" data-reference-id="${referenceID}" data-reference="${reference}" data-product-id="${productID}" data-product="${product}" data-uom-id="${uomID}" data-order="${order}">
                       <i class="fas fa-plus"></i>
                     </button>`;
           },
-          targets: [6]
+          targets: [7]
         }
       ],
       columns: [{
@@ -594,28 +699,32 @@
         },
         {
           data: "date_borrowing"
-        },
-        {
-          data: "borrowing_number"
-        },
+        },        
         {
           data: "product"
         },
         {
-          data: "qty"
+          data: "category",
+          className: "product-category"
+        },
+        {
+          data: "is_serial"
         },
         {
           data: "uom"
-        }
+        },
+        {
+          data: "qty"
+        }        
       ]
-    });    
+    });           
 
     $("#form").validate({
       rules: {
         receipt_date: {
           required: true
         },
-        unit: {
+        site: {
           required: true
         },
         warehouse: {
@@ -675,33 +784,62 @@
       submitHandler: function() {
         var data        = new FormData($('#form')[0]),
             receiptDate = $('#form').find('#receipt-date').data('daterangepicker').startDate.format('YYYY-MM-DD'),
+            siteID      = $('#unit').find('option:selected').val(),
+            warehouseID = $('#warehouse').find('option:selected').val(),
             products    = [],
             documents   = [],
             zeroValue   = false;
 
         $.each($('#table-product > tbody > .product-item'), function(index, value) {
-          var product = $(this).find('.item-product'),
-            product_id = product.val(),
-            referenceID = product.attr('data-reference-id'),
-            uomID = product.attr('data-uom-id'),
-            qtyOrder = product.attr('data-qty-order'),
-            qtyReceipt = $(this).find('.qty-receipt').val(),
-            rackID = product.parents('.product-item').find('.rack-warehouse > option:selected').val(),
-            binID = product.parents('.product-item').find('.bin-warehouse > option:selected').val(),
-            type = product.attr('data-type');
+          var product     = $(this).find('.item-product'),
+              product_id  = product.val(),
+              referenceID = product.attr('data-reference-id'),
+              reference   = product.attr('data-reference'),
+              uomID       = product.attr('data-uom-id'),
+              sku         = product.attr('data-sku'),
+              qtyOrder    = product.attr('data-qty-order'),
+              qtyReceipt  = $(this).find('.qty-receipt').val(),
+              rackID      = product.parents('.product-item').find('.rack-warehouse > option:selected').val(),
+              binID       = product.parents('.product-item').find('.bin-warehouse > option:selected').val(),
+              type        = product.attr('data-type'),
+              hasSerial   = product.attr('data-has-serial')=='1'?true:false,              
+              lastKey     = parseInt(product.attr('data-last-key')),
+              serials     = null;
+
+            if(type == 'contract' && hasSerial == true){
+              var dataSerial = {
+                warehouse_id : warehouseID,
+                product_id   : product_id, 
+                sku          : sku,
+                qty          : parseInt(qtyReceipt),
+                lastkey      : lastKey                
+              };
+
+              serials = addSerial(dataSerial);
+            }
 
           products.push({
-            product_id: product_id,
-            reference_id: referenceID,
-            uom_id: uomID,
-            qty_order: qtyOrder,
-            qty_receipt: qtyReceipt ? qtyReceipt : 0,
-            rack_id: rackID,
-            bin_id: binID,
-            type: type
+            product_id    : product_id,
+            site_id       : siteID,
+            warehouse_id  : warehouseID,
+            reference_id  : referenceID,
+            reference     : reference,
+            uom_id        : uomID,
+            has_serial    : hasSerial,
+            qty_order     : qtyOrder,
+            qty_receipt   : qtyReceipt ? qtyReceipt : 0,
+            rack_id       : rackID,
+            bin_id        : binID,
+            type          : type,
+            serials       : serials,
+            sku           : sku,
+            last_key      : lastKey
           })
 
         });
+
+        // console.log({products : products});
+        // return false;
 
         if (products.length == 0) {
           toastr.warning('Select the product first. at least one product');
@@ -729,9 +867,7 @@
         data.append('products', JSON.stringify(products));
         data.append('documents',JSON.stringify(documents));
         data.append('undocuments',JSON.stringify(deletedDoc));
-        data.append('receiptdate', receiptDate);
-
-        // s
+        data.append('receiptdate', receiptDate);        
 
         $.ajax({
           url: $('#form').attr('action'),
@@ -813,6 +949,8 @@
       }
     }).on('select2:clear', function() {
       $(this).parents('.product-item').find('.bin-warehouse').val(null).trigger('change');
+    }).on('change',function(){
+      $(this).focus();
     }); 
   }
 
@@ -824,12 +962,14 @@
         dataType: 'json',
         data: function(params) {
           var rackID = $(this).parents('.product-item').find('.rack-warehouse > option:selected').val();
+          var warehouseID = $('#form').find('#warehouse > option:selected').val();
 
           return {
-            name: params.term,
-            rack_id: rackID ? rackID : null,
-            page: params.page,
-            limit: 30,
+            name          : params.term,
+            rack_id       : rackID ? rackID : null,
+            warehouse_id  : warehouseID?warehouseID:null,
+            page          : params.page,
+            limit          : 30,
           };
         },
         processResults: function(data, params) {
@@ -837,12 +977,14 @@
           var option = [];
           $.each(data.rows, function(index, item) {
             option.push({
-              id: item.id,
-              text: item.name,
-              rack_id : item.rack_id,
-              rack : item.rack,
-              warehouse_id: item.warehouse_id,
-              warehouse: item.warehouse
+              id            : item.id,
+              text          : item.name,
+              rack_id       : item.rack_id,
+              rack          : item.rack,
+              site_id       : item.site_id,
+              site          : item.site,
+              warehouse_id  : item.warehouse_id,
+              warehouse     : item.warehouse
             });
           });
           return {
@@ -853,15 +995,14 @@
       },
       allowClear: true,
     }).on('select2:select', function(e){
-      var data = e.params.data;        
-      if(data.rack_id){
-        var rack = $(this).parents('.product-item').find('.rack-warehouse');
-          rack.select2('trigger','select',{
-              data : {
-                  id   : data.rack_id,
-                  text : `${data.rack}`
-              }
-          });
+      var data = e.params.data;              
+      if(data.site_id){
+        $('#form').find('#unit').select2('trigger','select',{
+          data: {
+            id: data.site_id,
+            text: `${data.site}`
+          }
+        });
       }
       if(data.warehouse_id){
         $('#form').find('#warehouse').select2('trigger','select',{
@@ -871,6 +1012,17 @@
           }
         });
       }
+      if(data.rack_id){
+        var rack = $(this).parents('.product-item').find('.rack-warehouse');
+          rack.select2('trigger','select',{
+              data : {
+                  id   : data.rack_id,
+                  text : `${data.rack}`
+              }
+          });
+      }
+    }).on('change',function(){
+      $(this).focus();
     });
   }
   
@@ -889,9 +1041,11 @@
   }
 
   const initData = () => {
-    var products = @json($data->contractref?$data->contractref:$data->borrowingref);
+    var products = @json(count($data->contractref)>0?$data->contractref:$data->borrowingref);
     var files    = @json($data->files);
     var images   = @json($data->images);    
+
+    console.log({initProduct : products});
 
     if(products.length > 0){      
       $.each(products, function (index, value) { 
@@ -899,29 +1053,47 @@
             table   = $('#table-product > tbody');
         var productID    = value.product_id,
             product      = value.product,
+            category     = value.category,
+            sku          = value.sku,
             referenceID  = value.reference_id,
             reference    = value.reference,
             uomID        = value.uom_id,
             order        = value.qty_order,
+            isSerial     = value.is_serial,
+            lastkey      = value.last_serial,
             receipt      = value.qty_receipt?value.qty_receipt:0,
             rackID       = value.rack_id,
             rack         = value.rack,
             binID        = value.bin_id,
             bin          = value.bin,
-            type         = value.type;
+            type         = value.type,
+            disable      = 'disabled';
+
+            if (isSerial == '1') {
+              disable = type == 'contract'?'disabled':'';
+              icon    = 'fas fa-check';
+              badge   = 'badge-info';            
+
+            } else {
+              icon  = 'fas fa-times';
+              badge = 'bg-red';
+            }
+
+            var serial = `<span class="badge ${badge} text-md"><i class="${icon}" style="size: 1x;"></i></span>`;
 
             html = `<tr class="product-item">
-                  <input type="hidden" class="item-product" value="${productID}" data-reference-id="${referenceID}" data-uom-id="${uomID}" data-qty-order="${order}" data-type="${type}">                        
-                  <td width="100">${product}</td>
-                  <td width="100"><b>${reference}</b></td>
-                  <td class="text-center" width="30">${order}</td>
+                  <input type="hidden" class="item-product" value="${productID}" data-reference-id="${referenceID}" data-reference="${reference}" data-sku="${sku}" data-uom-id="${uomID}" data-qty-order="${order}" data-type="${type}" data-has-serial="${isSerial}" data-last-key="${lastkey}">                        
+                  <td width="100"><p>${product}<br><b>${reference}</b></p></td>
+                  <td width="100">${category}</td>
+                  <td width="30" class="text-center">${serial}</td>
+                  <td class="text-right" width="30">${order}</td>
                   <td class="text-center" width="30">
                     <input type="number" class="form-control numberfield text-right qty-receipt" placeholder="0" value="${receipt}">
                   </td>
                   <td width="100">
                     <div class="form-group">
                       <div class="controls">
-                        <select name="rack class="form-control rack-warehouse" data-placeholder="Choose rack" style="width: 100%;" data-rack-id="${rackID}" data-rack="${rack}" required></select>
+                        <select name="rack" class="form-control rack-warehouse" data-placeholder="Choose rack" style="width: 100%;" data-rack-id="${rackID}" data-rack="${rack}" required></select>
                       </div>
                     </div>                    
                   </td>
@@ -932,8 +1104,9 @@
                       </div>
                     </div>                                        
                   </td>
-                  <td class="text-center" width="10">
-                      <button class="btn btn-md text-xs btn-danger btn-flat legitRipple" type="button" onclick="removeProduct($(this))"><i class="fas fa-trash"></i></button>
+                  <td class="text-center" width="15">
+                      <button class="btn btn-sm text-xs btn-warning btn-flat legitRipple ${disable}" type="button" onclick="listSerial($(this),${productID})"><i class="fas fa-bars"></i></button>
+                      <button class="btn btn-sm text-xs btn-danger btn-flat legitRipple" type="button" onclick="removeProduct($(this))"><i class="fas fa-trash"></i></button>
                   </td>
                 </tr>`;
 
@@ -941,11 +1114,11 @@
           receiptProduct.push(productID);
 
           table.find('.no-available-data').remove();
-          table.append(html);                         
-      }); 
-
-      initBin();
-      initRack();
+          table.append(html);          
+          
+          initBin();
+          initRack();
+      });       
 
       $.each($('#table-product > tbody').find('tr.product-item'), function (index, value) { 
          var rack     = $(this).find('.rack-warehouse'),
@@ -1056,20 +1229,37 @@
 
   const addProduct = (that, type) => {
     var referenceID = that.attr('data-reference-id'),
-        reference = that.attr('data-reference'),
-        productID = that.attr('data-product-id'),
-        product = that.attr('data-product'),
-        uomID = that.attr('data-uom-id'),
-        order = that.attr('data-order'),
-        table = $('#table-product > tbody');
+        reference   = that.attr('data-reference'),
+        productID   = that.attr('data-product-id'),
+        product     = that.attr('data-product'),
+        category    = that.parents('tr').find('td.product-category').html(),
+        uomID       = that.attr('data-uom-id'),
+        sku         = that.attr('data-sku'),
+        isSerial    = that.attr('data-serial'),
+        lastKey     = that.attr('data-last-key'),
+        order       = that.attr('data-order'),
+        table       = $('#table-product > tbody'),
+        disable     = 'disable';
 
+        if (isSerial == '1') {
+            disable = type == 'contract'?'disabled':'';
+            icon    = 'fas fa-check';
+            badge   = 'badge-info';            
+
+        } else {
+            icon  = 'fas fa-times';
+            badge = 'bg-red';
+        }
+
+    var serial = `<span class="badge ${badge} text-md"><i class="${icon}" style="size: 1x;"></i></span>`;
 
     var html = `<tr class="product-item">
                   <input type="hidden" class="item-product" value="${productID}" data-reference-id="${referenceID}" data-uom-id="${uomID}" data-qty-order="${order}" data-type="${type}">                        
-                  <td width="100">${product}</td>
-                  <td width="100"><b>${reference}</b></td>
-                  <td class="text-center" width="30">${order}</td>
-                  <td class="text-center" width="30">
+                  <td width="100"><p>${product}<br><b>${reference}</b></p></td>
+                  <td width="100">${category}</td>
+                  <td width="30" class="text-center">${serial}</td>
+                  <td class="text-right" width="20">${order}</td>
+                  <td class="text-right" width="20">
                     <input type="number" class="form-control numberfield text-right qty-receipt" placeholder="0">
                   </td>
                   <td width="100">
@@ -1086,8 +1276,9 @@
                       </div>
                     </div>                    
                   </td>
-                  <td class="text-center" width="10">
-                      <button class="btn btn-md text-xs btn-danger btn-flat legitRipple" type="button" onclick="removeProduct($(this),${productID})"><i class="fas fa-trash"></i></button>
+                  <td class="text-center" width="15">
+                      <button class="btn btn-sm text-xs btn-warning btn-flat legitRipple ${disable}" type="button" onclick="listSerial($(this),${productID})"><i class="fas fa-bars"></i></button>
+                      <button class="btn btn-sm text-xs btn-danger btn-flat legitRipple" type="button" onclick="removeProduct($(this),${productID})"><i class="fas fa-trash"></i></button>
                   </td>
                 </tr>`;          
 
@@ -1112,7 +1303,7 @@
     that.closest('.product-item').remove();
     if ($('#table-product > tbody > .product-item').length == 0) {
       var html = `<tr class="no-available-data">
-                    <td colspan="7" class="text-center">No available data.</td>
+                    <td colspan="8" class="text-center">No available data.</td>
                   </tr>`;
       $('#table-product > tbody').append(html);
 
@@ -1218,6 +1409,46 @@
       });  
     }
   }   
+
+  const addSerial = (param) => {    
+    var serials = [];        
+    var limit   = param.lastkey + param.qty;
+
+    
+    for (var index = param.lastkey; index < limit; index++) {
+      serials.push({          
+          warehouse_id  : param.warehouse_id,
+          product_id    : param.product_id,
+          serial_number : param.sku+'-'+generateNumber(index+1)
+      });      
+    }            
+
+    return serials;
+  }
+
+  // Generating Serial Number then returned to addSerial Function
+  const generateNumber = (number) => {        
+      var number = number.toString();
+      var length = 4-number.length;        
+      
+      switch (length) {
+          case 3:
+              numberChar = '000';
+              break;
+          case 2: 
+              numberChar = '00';
+              break;
+          case 1: 
+              numberChar = '0';
+              break;
+          default:
+              numberChar = '';
+              break;
+      }
+              
+      numberChar = numberChar + number;
+      return numberChar;
+  }
 
   const onSubmit = (status) => {
     $('input[name=status]').val(status);

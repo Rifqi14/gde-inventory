@@ -1,5 +1,5 @@
 @extends('admin.layouts.app')
-@section('title', 'Product')
+@section('title', $menu_name)
 @section('stylesheets')
 <style>
     #input-list-checkbox .form-control {
@@ -25,14 +25,14 @@
 <div class="row mb-3 mt-3">
     <div class="col-sm-4">
         <h1 id="title-branch" class="m-0 text-dark">
-            View Product
+            {{$menu_name}}
         </h1>
     </div>
     <div class="col-sm-8">
         <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
-            <li class="breadcrumb-item">Home</li>
-            <li class="breadcrumb-item">Product</li>
-            <li class="breadcrumb-item">View</li>
+            <li class="breadcrumb-item">{{ $parent_name }}</li>
+            <li class="breadcrumb-item">{{ $menu_name }}</li>
+            <li class="breadcrumb-item">Detail</li>
         </ol>
     </div>
 </div>

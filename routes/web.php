@@ -23,6 +23,7 @@ Auth::routes();
 
 Route::get('/test', 'Admin\TestController@test')->name('test');
 Route::get('/businesstrip/rateprocess', 'Admin\BusinessTripController@rateprocess')->name('businesstrip.rateprocess');
+Route::get('/reimbursement/rateprocess', 'Admin\ReimbursementController@rateprocess')->name('reimbursement.rateprocess');
 
 Route::get('/home', 'HomeController@index')->name('home');
 Route::group(['prefix' => 'admin'], function () {
@@ -144,6 +145,7 @@ Route::group(['prefix' => 'admin'], function () {
         // Route Product
         Route::get('/product/read', 'Admin\ProductController@read')->name('product.read');
         Route::get('/product/select','Admin\ProductController@select')->name('product.select');
+        Route::get('/product/export','Admin\ProductController@export')->name('product.export');
         Route::resource('/product','Admin\ProductController');
         // Route Province
         Route::get('/province/select', 'Admin\ProvinceController@select')->name('province.select');
@@ -228,6 +230,8 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/goodsreceipt/read','Admin\GoodsReceiptController@read')->name('goodsreceipt.read');
         Route::get('/goodsreceipt/contractproducts','Admin\GoodsReceiptController@contractproducts')->name('goodsreceipt.contractproducts');
         Route::get('/goodsreceipt/borrowingproducts','Admin\GoodsReceiptController@borrowingproducts')->name('goodsreceipt.borrowingproducts');
+        Route::get('/goodsreceipt/readserial','Admin\GoodsReceiptController@readserial')->name('goodsreceipt.readserial');        
+        Route::get('/goodsreceipt/export','Admin\GoodsReceiptController@export')->name('goodsreceipt.export');
         Route::resource('/goodsreceipt', 'Admin\GoodsReceiptController');
 
         // Attendance
@@ -245,6 +249,7 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/productborrowing/selectwarehouse','Admin\ProductBorrowingController@selectwarehouse')->name('productborrowing.selectwarehouse');        
         Route::get('/productborrowing/selectproduct','Admin\ProductBorrowingController@selectproduct')->name('productborrowing.selectproduct');        
         Route::get('/productborrowing/readarchived','Admin\ProductBorrowingController@readarchived')->name('productborrowing.readarchived');
+        Route::get('/productborrowing/readserial','Admin\ProductBorrowingController@readserial')->name('productborrowing.readserial');
         Route::get('/productborrowing/archive/{id}','Admin\ProductBorrowingController@archive');
         Route::get('/productborrowing/delete/{id}','Admin\ProductBorrowingController@destroy');                
         Route::resource('/productborrowing','Admin\ProductBorrowingController');
@@ -282,6 +287,131 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/goodsissue/read','Admin\GoodsIssueController@read')->name('goodsissue.read');
         Route::get('/goodsissue/consumableproducts','Admin\GoodsIssueController@consumableproducts')->name('goodsissue.consumableproducts');
         Route::get('/goodsissue/transferproducts','Admin\GoodsIssueController@transferproducts')->name('goodsissue.transferproducts');
+        Route::get('/goodsissue/borrowingprodutcs','Admin\GoodsIssueController@borrowingproducts')->name('goodsissue.borrowingproducts');
+        Route::get('/goodsissue/readserial','Admin\GoodsIssueController@readserial')->name('goodsissue.readserial');
+        Route::get('/goodsissue/print','Admin\GoodsIssueController@print')->name('goodsissue.print');
+        Route::get('/goodsissue/export','Admin\GoodsIssueController@export')->name('goodsissue.export');
         Route::resource('/goodsissue','Admin\GoodsIssueController');
+
+        // Stock Movement
+        Route::resource('/stockmovement','Admin\StockMovementController');
+
+        // Stock Adjustment 
+        Route::get('/stockadjustment/read','Admin\StockAdjusmentController@read')->name('stockadjustment.read');
+        Route::post('/stockadjustment/productserial','Admin\StockAdjusmentController@productserial')->name('stockadjustment.productserial');
+        Route::resource('/stockadjustment','Admin\StockAdjusmentController');
+
+        // Contract Document Receipt Detail
+        Route::resource('/contractdocument', 'Admin\ContractDocumentReceiptDetailController');
+
+        // Contract Document Receipt Detail
+        Route::get('/salaryreport/read', 'Admin\SalaryReportController@read')->name('salaryreport.read');
+        Route::resource('/salaryreport', 'Admin\SalaryReportController');
+
+        // Salary Report Detail
+        Route::get('/salarydetail/read', 'Admin\SalaryReportDetailController@read')->name('salarydetail.read');
+        Route::resource('/salarydetail', 'Admin\SalaryReportDetailController');
+
+        // Working Area
+        Route::get('/area/read', 'Admin\AreaController@read')->name('area.read');
+        Route::get('/area/select', 'Admin\AreaController@select')->name('area.select');
+        Route::resource('/area', 'Admin\AreaController');
+
+        // Equipment
+        Route::get('/equipment/read', 'Admin\EquipmentController@read')->name('equipment.read');
+        Route::get('/equipment/select', 'Admin\EquipmentController@select')->name('equipment.select');
+        Route::resource('/equipment', 'Admin\EquipmentController');
+
+        // Document Center
+        Route::get('/documentcenter/read', 'Admin\DocumentCenterController@read')->name('documentcenter.read');
+        Route::get('/documentcenter/select', 'Admin\DocumentCenterController@select')->name('documentcenter.select');
+        Route::get('/documentcenter/data/{id}', 'Admin\DocumentCenterController@getDocumentCenterData')->name('documentcenter.data');
+        Route::get('/documentcenter/{page}/', 'Admin\DocumentCenterController@index')->name('documentcenter.index');
+        Route::get('/documentcenter/{page}/create/{category}', 'Admin\DocumentCenterController@create')->name('documentcenter.create');
+        Route::get('/documentcenter/{page}/{id}/edit', 'Admin\DocumentCenterController@edit')->name('documentcenter.edit');
+        Route::resource('/documentcenter', 'Admin\DocumentCenterController')->except([
+            'index',
+            'create',
+            'edit'
+        ]);
+
+        // Document Type
+        Route::get('/documenttype/read', 'Admin\DocumentTypeController@read')->name('documenttype.read');
+        Route::get('/documenttype/select', 'Admin\DocumentTypeController@select')->name('documenttype.select');
+        Route::resource('/documenttype', 'Admin\DocumentTypeController');
+
+        // Organization Code
+        Route::get('/organization/read', 'Admin\OrganizationCodeController@read')->name('organization.read');
+        Route::get('/organization/select', 'Admin\OrganizationCodeController@select')->name('organization.select');
+        Route::resource('/organization', 'Admin\OrganizationCodeController');
+
+        // Unit Code
+        Route::get('/unitcode/read', 'Admin\UnitCodeController@read')->name('unitcode.read');
+        Route::get('/unitcode/select', 'Admin\UnitCodeController@select')->name('unitcode.select');
+        Route::resource('/unitcode', 'Admin\UnitCodeController');
+
+        // Document Center Document
+        Route::get('/centerdocument/read', 'Admin\DocumentCenterDocumentController@read')->name('centerdocument.read');
+        Route::resource('/centerdocument', 'Admin\DocumentCenterDocumentController');
+
+        // Document Center Document Detail
+        Route::resource('/documentdetail', 'Admin\DocumentCenterDocumentDetailController');
+
+        // Document Center Log
+        Route::get('/documentlog/read', 'Admin\DocumentCenterLogController@read')->name('documentlog.read');
+        Route::resource('/documentlog', 'Admin\DocumentCenterLogController');
+
+        // Reimbursement
+        Route::get('/reimbursement/read', 'Admin\ReimbursementController@read')->name('reimbursement.read');
+        Route::get('/reimbursement/select', 'Admin\ReimbursementController@select')->name('reimbursement.select');
+        Route::resource('/reimbursement', 'Admin\ReimbursementController');
+
+        // Document External Properties
+        Route::resource('/docexternalproperties', 'Admin\ExternalPropertiesController');
+
+        // Document External Site Code
+        Route::get('/docexternalproperties/sitecode/read', 'Admin\ExternalProperties\SiteCodeController@read')->name('sitecode.read');
+        Route::get('/docexternalproperties/sitecode/select', 'Admin\ExternalProperties\SiteCodeController@select')->name('sitecode.select');
+        Route::resource('/docexternalproperties/sitecode', 'Admin\ExternalProperties\SiteCodeController');
+
+        // Document External Discipline Code
+        Route::get('/docexternalproperties/disciplinecode/read', 'Admin\ExternalProperties\DisciplineCodeController@read')->name('disciplinecode.read');
+        Route::get('/docexternalproperties/disciplinecode/select', 'Admin\ExternalProperties\DisciplineCodeController@select')->name('disciplinecode.select');
+        Route::resource('/docexternalproperties/disciplinecode', 'Admin\ExternalProperties\DisciplineCodeController');
+
+        // Document External Document Type
+        Route::get('/docexternalproperties/documenttypeext/read', 'Admin\ExternalProperties\DocumentTypeController@read')->name('documenttypeext.read');
+        Route::get('/docexternalproperties/documenttypeext/select', 'Admin\ExternalProperties\DocumentTypeController@select')->name('documenttypeext.select');
+        Route::resource('/docexternalproperties/documenttypeext', 'Admin\ExternalProperties\DocumentTypeController');
+
+        // Document External Originator Code
+        Route::get('/docexternalproperties/originatorcode/read', 'Admin\ExternalProperties\OriginatorCodeController@read')->name('originatorcode.read');
+        Route::get('/docexternalproperties/originatorcode/select', 'Admin\ExternalProperties\OriginatorCodeController@select')->name('originatorcode.select');
+        Route::resource('/docexternalproperties/originatorcode', 'Admin\ExternalProperties\OriginatorCodeController');
+
+        // Document External Phase Code
+        Route::get('/docexternalproperties/phasecode/read', 'Admin\ExternalProperties\PhaseCodeController@read')->name('phasecode.read');
+        Route::get('/docexternalproperties/phasecode/select', 'Admin\ExternalProperties\PhaseCodeController@select')->name('phasecode.select');
+        Route::resource('/docexternalproperties/phasecode', 'Admin\ExternalProperties\PhaseCodeController');
+
+        // Document External Sheet Size
+        Route::get('/docexternalproperties/sheetsize/read', 'Admin\ExternalProperties\SheetSizeController@read')->name('sheetsize.read');
+        Route::get('/docexternalproperties/sheetsize/select', 'Admin\ExternalProperties\SheetSizeController@select')->name('sheetsize.select');
+        Route::resource('/docexternalproperties/sheetsize', 'Admin\ExternalProperties\SheetSizeController');
+
+        // Document External KKS Category
+        Route::get('/docexternalproperties/kkscategory/read', 'Admin\ExternalProperties\KksCategoryController@read')->name('kkscategory.read');
+        Route::get('/docexternalproperties/kkscategory/select', 'Admin\ExternalProperties\KksCategoryController@select')->name('kkscategory.select');
+        Route::resource('/docexternalproperties/kkscategory', 'Admin\ExternalProperties\KksCategoryController');
+
+        // Document External KKS Code
+        Route::get('/docexternalproperties/kkscode/read', 'Admin\ExternalProperties\KksCodeController@read')->name('kkscode.read');
+        Route::get('/docexternalproperties/kkscode/select', 'Admin\ExternalProperties\KksCodeController@select')->name('kkscode.select');
+        Route::resource('/docexternalproperties/kkscode', 'Admin\ExternalProperties\KksCodeController');
+
+        // Document External Contractor Name
+        Route::get('/docexternalproperties/contractorname/read', 'Admin\ExternalProperties\ContractorNameController@read')->name('contractorname.read');
+        Route::get('/docexternalproperties/contractorname/select', 'Admin\ExternalProperties\ContractorNameController@select')->name('contractorname.select');
+        Route::resource('/docexternalproperties/contractorname', 'Admin\ExternalProperties\ContractorNameController');
     });
 });

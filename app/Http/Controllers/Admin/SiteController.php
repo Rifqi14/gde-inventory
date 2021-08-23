@@ -91,11 +91,11 @@ class SiteController extends Controller
      */
     public function create(Request $request)
     {
-        // if(in_array('create',$request->actionmenu)){
+        if(in_array('create',$request->actionmenu)){
             return view('admin.site.create');
-        // }else{
-            // abort(403);
-        // }
+        }else{
+            abort(403);
+        }
     }
 
     /**

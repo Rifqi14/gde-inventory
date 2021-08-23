@@ -14,8 +14,6 @@ class LogReviseController extends Controller
         $start         = $request->start;
         $length        = $request->length;
         $query         = $request->search['value'];
-        $sort          = $request->columns[$request->order[0]['column']]['data'];
-        $dir           = $request->order[0]['dir'];
         $menu_route    = $request->menu_route;
         $data_id       = $request->data_id;
 
@@ -26,7 +24,7 @@ class LogReviseController extends Controller
 
         $query->offset($start);
         $query->limit($length);
-        $query->orderBy($sort, $dir);
+        $query->orderBy('revise_number', 'asc');
         $logrevises = $query->get();
 
         $data = [];

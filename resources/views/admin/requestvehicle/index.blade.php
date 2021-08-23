@@ -74,10 +74,12 @@
                                     <label class="control-label" for="vehicle-name">Vehicle</label>
                                     <select name="vehicle" id="vehicle" class="form-control" data-placeholder="Choose vehicle"></select>
                                 </div>
+                                @if (Auth::user()->roles()->first()->data_manager == 1)
                                 <div class="form-group">
                                     <label class="control-label" for="borrower">Borrower</label>
                                     <select class="form-control select2" name="borrower" id="borrower" data-placeholder="Borrower"></select>
                                 </div>
+                                @endif
                                 <div class="form-group">
                                     <label class="control-label" for="date-request">Date</label>
                                     <input class="form-control datepicker" type="datepicker" name="date_request" id="date-request" placeholder="Date" autocomplete="off">
@@ -107,7 +109,9 @@
 
 @section('scripts')
 <script>
-    var actionmenu = JSON.parse('{!! json_encode($actionmenu) !!}');
+    var actionmenu      = JSON.parse('{!! json_encode($actionmenu) !!}');
+    var data_manager    = JSON.parse(`{!! Auth::user()->roles()->first()->data_manager !!}`);
+    var global_status   = JSON.parse(`{!! json_encode(config('enums.global_status')) !!}`);
     toastr.options = {
         "closeButton": false,
         "debug": false,
@@ -229,7 +233,7 @@
                         plate = $('#form-search').find('input[id=police-number]').val(),
                         date = $('#form-search').find('input[id=date-request]').data('daterangepicker'),
                         status = $('#form-search').find('select[id=status]').select2('val');
-                        borrowers = $('#borrower').find('option:selected').val();                  
+                        borrowers = data_manager == 1 ? $('#borrower').find('option:selected').val() : `{{ Auth::user()->employee_id ? Auth::user()->employees->id : null }}`;
 
                     data.vehicle  = vehicle;
                     data.plate    = plate;
@@ -258,20 +262,22 @@
                 },                
                 {
                     render: function(data, type, row) {
-                        var label = '',
-                            status = row.status;
+                        var label   = '',
+                            text    = '',
+                            status  = row.status;
 
-                        if (status == 1) {
-                            label = '<span class="badge bg-warning text-sm">Waiting</span>';
-                        } else if (status == 2) {
-                            label = '<span class="badge bg-success text-sm">Approved</span>';
-                        } else if (status == 3) {
-                            label = '<span class="badge bg-info text-sm">Completed</span>';
-                        } else if (status == 4) {
-                            label = '<span class="badge bg-red text-sm">Rejected</span>';
-                        }
+                        $.each(global_status, function(index, value) {
+                            if (index == status) {
+                                label   = value.badge;
+                                text    = value.text;
+                            }
+                            if (status == 'REVISED') {
+                                label   = 'secondary';
+                                text    = 'Draft';
+                            }
+                        });
 
-                        return label;
+                        return `<span class="badge bg-${label} text-sm">${text}</span>`;
                     },
                     targets: [4]
                 },
@@ -283,20 +289,21 @@
                                             <i class="fa fa-eye"></i> View Data
                                         </a>`;
                     
-                        if(row.status < 3){
-                            // update
-                            if (actionmenu.indexOf('update') > 0) {
-                                button += `<a class="dropdown-item" href="javascript:void(0);" onclick="edit(${row.id})">
-                                            <i class="far fa-edit"></i>Update Data
-                                        </a>`;
+                        $.each(global_status, function(index, value) {
+                            if ((index == row.status) && !value.isLocked) {
+                                if (actionmenu.indexOf('update') > 0) {
+                                    button += `<a class="dropdown-item" href="javascript:void(0);" onclick="edit(${row.id})">
+                                                <i class="far fa-edit"></i>Update Data
+                                            </a>`;
+                                }
+                                // delete
+                                if (actionmenu.indexOf('delete') > 0) {
+                                    button += `<a class="dropdown-item" href="javascript:void(0);" onclick="destroy(${row.id})">
+                                                <i class="fa fa-trash-alt"></i> Delete Data
+                                            </a>`;
+                                }
                             }
-                            // delete
-                            if (actionmenu.indexOf('delete') > 0) {
-                                button += `<a class="dropdown-item" href="javascript:void(0);" onclick="destroy(${row.id})">
-                                            <i class="fa fa-trash-alt"></i> Delete Data
-                                        </a>`;
-                            }
-                        }                        
+                        })            
                         return `<div class="btn-group">
                                 <button type="button" class="btn btn-flat btn-sm dropdown-toggle" data-toggle="dropdown">
                                     <i class="fas fa-bars"></i>

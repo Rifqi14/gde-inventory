@@ -86,12 +86,12 @@
             <div class="col-md-12">
               <div class="form-group">
                 <label class="control-label" for="attendance_date">Attendance Date</label>
-                <input type="text" name="attendance_date" class="form-control" placeholder="Attendance Date">
+                <input type="text" name="attendance_date" class="form-control datepicker" placeholder="Attendance Date">
               </div>
             </div>
             <div class="col-md-12">
               <div class="form-group row">
-                <label class="col-md-12 col-xs-12 control-label" for="employee">Type</label>
+                <label class="col-md-12 col-xs-12 control-label" for="employee">Employee</label>
                 <div class="col-sm-12 controls">
                   <select name="employee" id="employee" class="form-control select2">
                     <option value="">Select Employee</option>
@@ -142,6 +142,23 @@
 
   $(function() {
     $('.select2').select2();
+    $('.datepicker').daterangepicker({
+      singleDatePicker: true,
+      timePicker: false,
+      timePickerIncrement: 1,
+      timePicker24Hour: false,
+      timePickerSeconds: false,
+      autoUpdateInput: false,
+      drops: 'auto',
+      opens: 'center',
+      locale: {
+        format: 'YYYY-MM'
+      }
+    }).on('apply.daterangepicker', function(ev, picker) {
+      $(this).val(picker.startDate.format('YYYY-MM'));
+    }).on('cancel.daterangepicker', function(ev, picker) {
+      $(this).val('');
+    });
     dataTable = $('.datatable').DataTable( {
         processing: true,
         language: {
@@ -158,7 +175,7 @@
             url: "{{route('attendance.read')}}",
             type: "GET",
             data:function(data){
-                var date = $('#form-search').find('input[name=date]').val();
+                var date = $('#form-search').find('input[name=attendance_date]').val();
                 var employee = $('#form-search').find('select[name=employee]').val();
                 var status = $('#form-search').find('select[name=status]').val();
                 data.date     = date;
@@ -187,14 +204,17 @@
               width: "10%",
               render: function(data, type, row) {
                 html  = '';
-                if (row.diff_in) {
+                hourly  = '';
+                if (row.diff_in != null) {
                   if (row.diff_in.diff_type == 'late') {
                     html = `<b>${row.attendance_in}</b><br><small class="text-danger">${row.diff_in.diff_format}</small>`;
                   } else {
                     html = `<b>${row.attendance_in}</b><br><small class="text-success">${row.diff_in.diff_format}</small>`;
                   }
+                } else {
+                  html  = `<b>${row.attendance_in ? row.attendance_in : '-'}</b>`;
                 }
-                return row.diff_in ? html : '-'
+                return html
               }, targets: [3]
             },
             {
@@ -207,8 +227,10 @@
                   } else {
                     html = `<b>${row.attendance_out}</b><br><small class="text-success">${row.diff_out.diff_format}</small>`;
                   }
+                } else {
+                  html  = `<b>${row.attendance_out ? row.attendance_out : '-'}</b>`;
                 }
-                return row.diff_out ? html : '-'
+                return html;
               }, targets: [4]
             },
             {
@@ -308,6 +330,47 @@
         $('#form-filter').modal('hide');
     });
 
+    $("#employee").select2({
+        ajax: {
+            url: "{{ route('employee.select') }}",
+            type: "GET",
+            dataType: "JSON",
+            data: function(params) {
+                return {
+                    employee_id: `{{ Auth::user()->employee_id ? Auth::user()->employee_id : null }}`,
+                    name: params.term,
+                    page: params.page,
+                    limit: 30,
+                    salary: true,
+                };
+            },
+            processResults: function(data, params) {
+                var more = (params.page * 30) < data.total;
+                var option = [];
+                $.each(data.rows, function(index, item) {
+                    option.push({
+                        id: item.id,
+                        text: item.name,
+                    });
+                });
+                return {
+                    results: option,
+                    more: more,
+                };
+            },
+        },
+        allowClear: true,
+    });
+    
+    @if (Auth::user()->employee_id)
+      $('#employee').select2('trigger', 'select', {
+        data: {
+          id: `{{ Auth::user()->employees->id }}`,
+          text: `{{ Auth::user()->employees->name }}`,
+        }
+      });
+    @endif
+
     $(document).on('click', '.delete', function () {
         var id = $(this).data('id');
         bootbox.confirm({
@@ -329,7 +392,7 @@
                         _token: "{{ csrf_token() }}"
                     };
                     $.ajax({
-                        url: `{{route('attendancemachine.index')}}/${id}`,
+                        url: `{{route('attendance.index')}}/${id}`,
                         dataType: 'json',
                         data: data,
                         type: 'DELETE',

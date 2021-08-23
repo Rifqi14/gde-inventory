@@ -15,7 +15,7 @@
         <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
             <li class="breadcrumb-item">Home</li>
             <li class="breadcrumb-item">Document Category</li>
-            <li class="breadcrumb-item">Create</li> 
+            <li class="breadcrumb-item">Create</li>
         </ol>
     </div>
 </div>
@@ -36,20 +36,17 @@
                             </span>
                             <div class="mt-5"></div>
                             <div class="form-group row">
-                                <label class="col-md-2 col-xs-12 control-label" for="name">Type <b class="text-danger">*</b></label>
-                                <div class="col-sm-6 controls">
-                                    <select name="type" id="type" class="select2 form-control" required>
-                                        @foreach(config('enums.dc_type') as $key => $dc_type)
-                                            <option value="{{ $key }}">{{ $dc_type }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
+                                <label class="col-md-2 col-xs-12 control-label" for="menu_id">Sub Menu <b class="text-danger">*</b></label>
+                                <select name="menu_id[]" id="menu_id" multiple="multiple" class="select2 form-control col-md-6" required>
+                                </select>
                             </div>
                             <div class="form-group row">
-                                <label class="col-md-2 col-xs-12 control-label" for="name">Name <b class="text-danger">*</b></label>
-                                <div class="col-sm-6 controls">
-                                    <input type="text" class="form-control" id="name" name="name" placeholder="Name" required="" aria-required="true">
-                                </div>
+                                <label class="col-form-label col-md-2 col-xs-12" for="document_type_id">Document Type Code <b class="text-danger">*</b></label>
+                                <select name="document_type_id" id="document_type_id" class="select2 form-control col-md-6" required></select>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-form-label col-md-2 col-xs-12" for="name">Document Type Name <b class="text-danger">*</b></label>
+                                <input type="text" name="name" id="name" class="form-control col-md-6" placeholder="Document Type Name" readonly>
                             </div>
                         </div>
                         <div class="card-footer">
@@ -155,6 +152,73 @@
                     toastr.warning(response.message);
                 })	
             }
+        });
+
+        $('#menu_id').select2({
+            placeholder: "Choose Sub Menu ...",
+            ajax: {
+                url: "{{ route('menu.select') }}",
+                type: 'GET',
+                dataType: 'json',
+                data: function(params) {
+                    return {
+                        route: 'documentcenter',
+                        name: params.term,
+                        page: params.page,
+                        limit: 30,
+                    };
+                },
+                processResults: function(data, params) {
+                    params.page = params.page || 1;
+                    var more    = (params.page * 30) < data.total;
+                    var option  = [];
+                    $.each(data.rows, function(index, item) {
+                        if (item.child) {
+                            $.each(item.child, function(indexChild, child) {
+                                option.push({
+                                    id: child.id,
+                                    text: `${child.menu_name}`,
+                                });
+                            })
+                        }
+                    });
+                    return { results: option, more: more };
+                },
+            },
+            allowClear: true,
+        });
+
+        $('#document_type_id').select2({
+            placeholder: "Choose Document Type ...",
+            ajax: {
+                url: "{{ route('documenttype.select') }}",
+                type: 'GET',
+                dataType: 'json',
+                data: function(params) {
+                    return {
+                        name: params.term,
+                        page: params.page,
+                        limit: 30,
+                    };
+                },
+                processResults: function(data, params) {
+                    params.page = params.page || 1;
+                    var more    = (params.page * 30) < data.total;
+                    var option  = [];
+                    $.each(data.rows, function(index, item) {
+                        option.push({
+                            id: item.id,
+                            text: `${item.code}`,
+                            name: `${item.name}`,
+                        });
+                    });
+                    return { results: option, more: more };
+                },
+            },
+            allowClear: true,
+        }).on('select2:select', function(e) {
+            var data    = $(this).select2('data');
+            $('#name').val(data[0].name);
         });
     });
 </script>

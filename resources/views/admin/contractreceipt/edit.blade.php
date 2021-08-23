@@ -200,17 +200,16 @@
                       <input type="text" class="form-control" id="document_name_safeguard{{ $key }}" name="document_name_safeguard[{{ $key }}]" placeholder="Document Name" aria-required="true" value="{{ $item->document_name }}" readonly>
                     </td>
                     <td>
-                      @foreach ($item->detail as $keys => $items)
+                      @foreach ($item->detail->sortBy('revision_number') as $keys => $items)
                       <div class="input-group download">
                         <a href="{{ asset($items->source) }}" class="" dl-id="44" download="" target="_blank">
-                          <b><i class="fas fa-download"></i></b> Download - Rev {{ ++$keys }}
+                          <b><i class="fas fa-download"></i></b> Download - Rev {{ $items->revision_number }}
                         </a>
                         <button type="button" class="btn btn-transparent text-md p-0 pl-2 float-right" onclick="removeFile($(this))" data-type="safeguard" data-doc="{{ $keys }}" data-id="{{ $items->id }}">
                           <i class="fas fa-trash text-maroon color-palette"></i>
                         </button>
                       </div>
                       @endforeach
-                      @if ($item->detail->where('status', 'Approved')->count() == 0)
                       <div class="input-group">
                         <div class="custom-file">
                           <input type="hidden" name="file_contract_safeguard[{{ $key }}][]">
@@ -220,14 +219,13 @@
                         <div class="input-group-append">
                           <span class="input-group-text" id=""><i class="fa fa-upload"></i></span>
                         </div>
-                        <button type="button" class="btn btn-transparent text-md" onclick="addUpload($(this))" data-doc="{{ $key }}">
+                        <button type="button" class="btn btn-transparent text-md" onclick="addUpload($(this))" data-doc="{{ $key }}" data-type="safeguard">
                           <i class="fas fa-plus text-green color-palette"></i>
                         </button>
                       </div>
-                      @endif
                     </td>
                     <td class="text-center" style="padding-top: .5rem;">
-                      @foreach ($item->detail as $keyApproval => $itemApproval)
+                      @foreach ($item->detail->sortBy('revision_number') as $keyApproval => $itemApproval)
                       @switch($itemApproval->status)
                       @case('Approved')
                       <div class="mt-2"></div>
@@ -240,6 +238,7 @@
                       <div class="mb-2"></div>
                       @break
                       @default
+                      @if (Auth::user()->roles->first()->data_manager == 1)
                       <div class="mt-1"></div>
                       <button type="button" class="btn text-sm btn-sm bg-green btn-flat legitRipple" onclick="approveDocument('Approved', {{ $itemApproval->id }})" data-toggle="tooltip" data-placement="top" title="Approved Request">
                         <b><i class="fas fa-check"></i></b>
@@ -247,11 +246,16 @@
                       <button type="button" class="btn text-sm btn-sm bg-red btn-flat legitRipple" onclick="approveDocument('Rejected', {{ $itemApproval->id }})" data-toggle="tooltip" data-placement="top" title="Reject Request">
                         <b><i class="fas fa-times"></i></b>
                       </button>
+                      @else
+                      <div class="mt-2"></div>
+                      <span class="badge bg-warning">{{ $itemApproval->status }}</span>
+                      <div class="mb-2"></div>
+                      @endif
                       @endswitch
                       @endforeach
                     </td>
                     <td class="text-center">
-                      @foreach ($item->detail as $keyDocument => $itemDocument)
+                      @foreach ($item->detail->sortBy('revision_number') as $keyDocument => $itemDocument)
                       <div class="mb-1"></div>
                       <span>{{ date("d/m/Y", strtotime($itemDocument->upload_date)) }}</span>
                       @endforeach
@@ -282,8 +286,9 @@
               <table id="table-document-user" class="table table-striped datatable" width="100%">
                 <thead>
                   <tr>
-                    <th width="40%">Document Name</th>
-                    <th width="40%">Upload Document</th>
+                    <th width="35%">Document Name</th>
+                    <th width="35%">Upload Document</th>
+                    <th width="10%" class="text-center">Approval</th>
                     <th width="10%" class="text-center">Upload Date</th>
                     <th width="5%" class="text-center">#</th>
                   </tr>
@@ -299,10 +304,10 @@
                       <input type="text" class="form-control" id="document_name_user{{ $key }}" name="document_name_user[{{ $key }}]" placeholder="Document Name" aria-required="true" value="{{ $item->document_name }}">
                     </td>
                     <td>
-                      @foreach ($item->detail as $keys => $items)
+                      @foreach ($item->detail->sortBy('revision_number') as $keys => $items)
                       <div class="input-group download">
                         <a href="{{ asset($items->source) }}" class="" dl-id="44" download="" target="_blank">
-                          <b><i class="fas fa-download"></i></b> Download - Rev {{ ++$keys }}
+                          <b><i class="fas fa-download"></i></b> Download - Rev {{ $items->revision_number }}
                         </a>
                         <button type="button" class="btn btn-transparent text-md p-0 pl-2 float-right" onclick="removeFile($(this))" data-type="user" data-doc="{{ $keys }}" data-id="{{ $items->id }}">
                           <i class="fas fa-trash text-maroon color-palette"></i>
@@ -318,14 +323,48 @@
                         <div class="input-group-append">
                           <span class="input-group-text" id=""><i class="fa fa-upload"></i></span>
                         </div>
-                        <button type="button" class="btn btn-transparent text-md" onclick="addUpload($(this))" data-doc="{{ $key }}">
+                        <button type="button" class="btn btn-transparent text-md" onclick="addUpload($(this))" data-doc="{{ $key }}" data-type="user">
                           <i class="fas fa-plus text-green color-palette"></i>
                         </button>
                       </div>
                     </td>
+                    <td class="text-center" style="padding-top: .5rem;">
+                      @foreach ($item->detail->sortBy('revision_number') as $keyApproval => $itemApproval)
+                      @switch($itemApproval->status)
+                      @case('Approved')
+                      <div class="mt-2"></div>
+                      <span class="badge bg-success">{{ $itemApproval->status }}</span>
+                      <div class="mb-2"></div>
+                      @break
+                      @case('Rejected')
+                      <div class="mt-2"></div>
+                      <span class="badge bg-maroon">{{ $itemApproval->status }}</span>
+                      <div class="mb-2"></div>
+                      @break
+                      @default
+                      @if (Auth::user()->roles->first()->id == $contractreceipt->role_id)
+                      <div class="mt-1"></div>
+                      <button type="button" class="btn text-sm btn-sm bg-green btn-flat legitRipple" onclick="approveDocument('Approved', {{ $itemApproval->id }})" data-toggle="tooltip" data-placement="top" title="Approved Request">
+                        <b><i class="fas fa-check"></i></b>
+                      </button>
+                      <button type="button" class="btn text-sm btn-sm bg-red btn-flat legitRipple" onclick="approveDocument('Rejected', {{ $itemApproval->id }})" data-toggle="tooltip" data-placement="top" title="Reject Request">
+                        <b><i class="fas fa-times"></i></b>
+                      </button>
+                      @else
+                      <div class="mt-2"></div>
+                      <span class="badge bg-warning">{{ $itemApproval->status }}</span>
+                      <div class="mb-2"></div>
+                      @endif
+                      @endswitch
+                      @endforeach
+                    </td>
                     <td class="text-center">
+                      @foreach ($item->detail->sortBy('revision_number') as $keyDocument => $itemDocument)
                       <div class="mb-1"></div>
-                      {{ date("d/m/Y") }}
+                      <span>{{ date("d/m/Y", strtotime($itemDocument->upload_date)) }}</span>
+                      @endforeach
+                      <div class="mt-3"></div>
+                      <span>{{ date("d/m/Y") }}</span>
                     </td>
                     <td class="text-center">
                       {{-- <button type="button" class="btn btn-transparent text-md" onclick="removeDocument($(this))" data-document="{{ $i }}">
@@ -343,10 +382,12 @@
             </div>
             <div class="card-footer">
               <input type="hidden" name="status" value="{{ $contractreceipt->status }}">
+              @if ($approvedBtn)
               <button type="button" class="btn bg-success color-palette btn-labeled legitRipple text-sm btn-sm" onclick="submitTest('COMPLETED')">
                 <b><i class="fas fa-check-circle"></i></b>
                 Approved
               </button>
+              @endif
               <button type="button" class="btn bg-olive color-palette btn-labeled legitRipple text-sm btn-sm" onclick="submitTest('CHECKSTATUS')">
                 <b><i class="fas fa-save"></i></b>
                 Save
@@ -442,7 +483,7 @@
                           "hideMethod": "fadeOut"
                       }
                       toastr.success(response.message);
-                      setTimeout(function(){location.reload()}, 3000);
+                      setTimeout(function(){location.reload()}, 1000);
                   }else {
                       toastr.options = {
                           "closeButton": false,
@@ -510,10 +551,15 @@
           <div class="input-group-append">
             <span class="input-group-text" id=""><i class="fa fa-upload"></i></span>
           </div>
-          <button type="button" class="btn btn-transparent text-md" onclick="addUpload($(this))" data-doc="${number}">
+          <button type="button" class="btn btn-transparent text-md" onclick="addUpload($(this))" data-doc="${number}" data-type="user">
             <i class="fas fa-plus text-green color-palette"></i>
           </button>
         </div>
+      </td>
+      <td class="text-center">
+        <div class="mt-2"></div>
+          <span class="badge bg-secondary">Draft</span>
+        <div class="mb-2"></div>
       </td>
       <td class="text-center">
         <div class="mb-1"></div>
@@ -532,11 +578,12 @@
 
   const addUpload = (e) => {
     var number = e.attr("data-doc");
+    var type = e.attr("data-type");
     var html = `
         <div class="input-group">
             <div class="custom-file">
-                <input type="hidden" name="file_contract[${number}][]">
-                <input type="file" class="custom-file-input" name="file[${number}][]" onchange="changePath(this)">
+                <input type="hidden" name="file_contract_${type}[${number}][]">
+                <input type="file" class="custom-file-input" name="file_${type}[${number}][]" onchange="changePath(this)">
                 <label class="custom-file-label" for="exampleInputFile">Attach Image</label>
             </div>
             <div class="input-group-append">
@@ -555,7 +602,7 @@
     e.parent().remove();
   }
 
-  const removeFile = (e) => {
+  const removeFile2 = (e) => {
     var number = e.attr("data-doc");
     var type = e.attr("data-type");
     var id = e.attr("data-id");
@@ -565,7 +612,7 @@
     e.parent().remove();
   }
 
-  const removeFile2 = (e) => {
+  const removeFile = (e) => {
     var type = e.attr("data-type");
     var id = e.attr("data-id");
     bootbox.confirm({
@@ -585,16 +632,14 @@
           if (result) {
               var data = {
                   _token: "{{ csrf_token() }}",
-                  type: type,
-                  id: id,
               };
               $.ajax({
-                  url: `{{route('contractreceipt.approval')}}`,
+                  url: `{{route('contractdocument.index')}}/${id}`,
                   dataType: 'json',
                   data: data,
-                  method: 'post',
+                  type: 'DELETE',
                   beforeSend: function () {
-                      blockMessage('#content', 'Loading', '#fff');
+                      blockMessage('#content', 'Loading...', '#fff');
                   }
               }).done(function (response) {
                   $('#content').unblock();
@@ -617,7 +662,7 @@
                           "hideMethod": "fadeOut"
                       }
                       toastr.success(response.message);
-                      setTimeout(function(){location.reload()}, 3000);
+                      setTimeout(function(){location.reload()}, 1000);
                   }else {
                       toastr.options = {
                           "closeButton": false,
@@ -759,12 +804,14 @@
         },
         allowClear: true,
     });
+    @if ($contractreceipt->role_id) 
     $('#role_id').select2('trigger', 'select', {
       data: {
         id: `{{ $contractreceipt->role_id }}`,
         text: `{{ $contractreceipt->role->name }}`
       }
     });
+    @endif
 
     $('#warehouse_id').select2({
       ajax: {

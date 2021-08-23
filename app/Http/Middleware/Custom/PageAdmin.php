@@ -25,6 +25,7 @@ class PageAdmin
     {
         if (Auth::guard('admin')->check()) {
             $route = explode('.',Route::currentRouteName());
+            $route[0] = $request->page ? "{$route[0]}/$request->page" : $route[0];
             $user_id = Auth::guard('admin')->user()->id;
             $role_user = RoleUser::where("user_id", $user_id)->first();
             $role = Role::find($role_user->role_id);

@@ -24,6 +24,16 @@ class Calendar extends Model
     }
 
     /**
+     * Define relation one to many with working_shifts table
+     *
+     * @return \Illuminate\Database\Eloquent\Model
+     */
+    public function employees()
+    {
+        return $this->hasMany('App\Models\Employee', 'calendar_id', 'id');
+    }
+
+    /**
      * Scope to get data by name
      *
      * @param $query

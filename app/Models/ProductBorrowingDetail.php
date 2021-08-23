@@ -12,4 +12,9 @@ class ProductBorrowingDetail extends Model
     {
         return $this->belongsTo('App\Models\ProductBorrowing','id','product_borrowing_id');
     }
+
+    public function serials()
+    {
+        return $this->hasMany('App\Models\ProductBorrowingSerial','borrowing_detail_id');
+    }
 }

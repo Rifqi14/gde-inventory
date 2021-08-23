@@ -1,5 +1,5 @@
 @extends('admin.layouts.app')
-@section('title',"Create $menu_name")
+@section('title',$menu_name)
 
 @section('breadcrumb')
 <div class="row mb-3 mt-3">
@@ -36,14 +36,14 @@
                                     <!-- Borrowing Number -->
                                     <div class="form-group">
                                         <label for="borrowing-number" class="control-label">Borrowing Number</label>
-                                        <input type="text" class="form-control" name="borrowing_number" id="borrowing-number" placeholder="Enter Borrowing Number" readonly>
-                                    </div>
-                                    <!-- Product Category -->
+                                        <input type="text" class="form-control" name="borrowing_number" id="borrowing-number" placeholder="Automatically generateds" readonly>
+                                    </div>            
+                                    <!-- Site -->
                                     <div class="form-group">
-                                        <label for="product-category" class="control-label">Product Category</label>
-                                        <select name="product_category" id="product-category" class="form-control select2" data-placeholder="Choose Product Category">
+                                        <label for="site" class="control-label">Site</label>
+                                        <select name="site" id="site" class="form-control select2" data-placeholder="Choose Site" required>
                                         </select>
-                                    </div>
+                                    </div>                                                            
                                     <!-- Borrowing Date -->
                                     <div class="row">
                                         <div class="col-md-6">
@@ -74,11 +74,11 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <!-- Site -->
+                                <div class="col-md-6">                                    
+                                    <!-- Product Category -->
                                     <div class="form-group">
-                                        <label for="site" class="control-label">Site</label>
-                                        <select name="site" id="site" class="form-control select2" data-placeholder="Choose Site" required>
+                                        <label for="product-category" class="control-label">Product Category</label>
+                                        <select name="product_category" id="product-category" class="form-control select2" data-placeholder="Choose Product Category">
                                         </select>
                                     </div>
                                     <!-- Warehouse -->
@@ -93,7 +93,7 @@
                                         <div class="row ml-1">
                                             <div class="col-2">Submit</div>
                                             <div class="col-1">:</div>
-                                            <div class="col-7"><span class="badge badge-warning text-sm">Waiting</span></div>
+                                            <div class="col-7"><span class="badge badge-warning text-sm">Waiting Approval</span></div>
                                         </div>
                                         <div class="row mt-2 ml-1">
                                             <div class="col-2">Save</div>
@@ -126,7 +126,7 @@
                             <!-- Description -->
                             <div class="form-group">
                                 <label for="description" class="control-label">Purpose</label>
-                                <textarea name="description" id="description" cols="30" rows="5" class="form-control" placeholder="Enter Purpose"></textarea>
+                                <textarea name="description" id="description" class="form-control summernote" placeholder="Enter Purpose"></textarea>
                             </div>
                             <input type="hidden" name="status" id="status" value="draft">
                         </div>
@@ -153,7 +153,9 @@
                                 <table class="table table-striped" id="table-products" width="100%">
                                     <thead>
                                         <tr>
-                                            <th width="200">Product Name</th>
+                                            <th width="100">Product</th>
+                                            <th width="100">Product Category</th>
+                                            <th width="15" class="text-center">Has Serial</th>
                                             <th width="15" class="text-center">UOM</th>
                                             <th width="15" class="text-right">Current Stock</th>
                                             <th width="10" class="text-right">Qty Borrowing</th>
@@ -162,7 +164,7 @@
                                     </thead>
                                     <tbody>
                                         <tr class="no-available-data">
-                                            <td colspan="5" class="text-center">No available data.</td>
+                                            <td colspan="7" class="text-center">No available data.</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -257,9 +259,8 @@
 
 @section('scripts')
 <script>
-    const checkQty = (e) => {
-        console.log(e);
-    }
+    var selectedProducts = [];      
+
     toastr.options = {
         "closeButton": false,
         "debug": false,
@@ -360,7 +361,7 @@
 
         $("#warehouse").select2({
             ajax: {
-                url: "{{route('productborrowing.selectwarehouse')}}",
+                url: "{{route('warehouse.select')}}",
                 type: 'GET',
                 dataType: 'json',
                 data: function(params) {
@@ -377,10 +378,10 @@
                     var option = [];
                     $.each(data.rows, function(index, item) {
                         option.push({
-                            id: item.id,
-                            text: item.name,
-                            site_id: item.site_id,
-                            site: item.site
+                            id      : item.id,
+                            text    : item.name,
+                            site_id : item.site_id,
+                            site    : item.site
                         });
                     });
                     return {
@@ -390,6 +391,25 @@
                 },
             },
             allowClear: true,
+        }).on('select2:select', function(e){
+            var data = e.params.data;
+
+            if(data.site_id){
+                $('#site').select2('trigger','select',{
+                    data : {
+                        id : data.site_id,
+                        text: `${data.site}`
+                    }
+                });
+            }
+        }).on('change', function(){
+            $('#table-products > tbody').html(
+                `<tr class="no-available-data">
+                    <td colspan="7" class="text-center">No available data.</td>
+                </tr>`);
+
+            selectedProducts = [];
+            $('#product').val(null).trigger('change');
         });
 
         $("#product-category").select2({
@@ -430,7 +450,7 @@
             }
         }).on('select2:clearing', function() {
             $('#product').val(null).trigger('change');
-        });
+        });        
 
         $("#product").select2({
             ajax: {
@@ -438,22 +458,21 @@
                 type: 'GET',
                 dataType: 'json',
                 data: function(params) {
-                    var productCategory = $('#product-category').select2('val');
-                    var products      = [];
-                
-                    $.each($('#table-products > tbody > .product-item'), function (index, value) { 
-                        var product      = $(this).find('.item-product'),
-                            product_id   = product.val();
-                                            
-                        products.push(product_id);
+                    var productCategory = $('#product-category').select2('val');                                
+                    var warehouseID     = $('#warehouse').find('option:selected').val();                    
 
-                    });
+                    if(!warehouseID){
+                        toastr.warning('Select warehouse first.');
+                        return false;
+                    }                                   
+
                     return {
-                        name: params.term,
+                        name                : params.term,
                         product_category_id : productCategory,
-                        page: params.page,
-                        products: products,
-                        limit: 30,
+                        warehouse_id        : warehouseID,
+                        page                : params.page,
+                        products            : selectedProducts,
+                        limit               : 30,
                     };
                 },
                 processResults: function(data, params) {
@@ -461,37 +480,39 @@
                     var option = [];
                     $.each(data.rows, function(index, item) {
                         option.push({
-                            id: item.id,
-                            text: item.name,
-                            uom_id : item.uom_id,
-                            uom: item.uom,
-                            product_category_id : item.product_category_id,
-                            qty_system: item.qty_system
+                            id          : item.id,
+                            text        : item.name,
+                            uom_id      : item.uom_id,
+                            uom         : item.uom,
+                            category_id : item.product_category_id,
+                            category    : item.category,
+                            is_serial   : item.is_serial=='1'?true:false,
+                            stock       : item.stock>=0?item.stock:0
                         });
                     });
                     return {
                         results: option,
                         more: more,
                     };
-                },
+                },                
             },
+            escapeMarkup: function (text) { return text; },
+            templateResult : function(data){
+                if(!data.id){
+                    return data.text;
+                }
+
+                return `<b>${data.text}</b>
+                        <span style="float: right;">Stock : ${data.stock}</span>
+                        <p style="margin-top: 1px;">${data.category}</p>`;
+            },            
             allowClear: true,
-        });
+        });       
 
         $('#table-products').on('change','.qty-request', function() {
             var qty     = $(this).val();
             $(this).parents('.product-item').find('.item-product').attr('data-qty-request',qty);        
-        });
-
-        $('#table-products > tbody').on('click', '.remove', function() {
-            $(this).closest('.product-item').remove();
-            if ($('#table-products > tbody > .product-item').length == 0) {
-                var html = `<tr class="no-available-data">
-                                <td colspan="5" class="text-center">No available data.</td>
-                            </tr>`;
-                $('#table-products > tbody').append(html);
-            }
-        });
+        });        
 
         $('#table-document > tbody').on('click', '.remove', function() {
             $(this).closest('tr').remove();
@@ -511,6 +532,70 @@
                             </tr>`;
                 $('#table-photo > tbody').append(html);
             }
+        });
+
+        tableSerial = $('#table-serial').DataTable({
+            processing: true,
+            language: {
+                processing: `<div class="p-2 text-center">
+                            <i class="fas fa-circle-notch fa-spin fa-fw"></i> Loading...
+                            </div>`
+            },
+            serverSide: true,
+            filter: false,
+            responsive: true,
+            lengthChange: false,
+            order: [
+                [1, "asc"]
+            ],
+            ajax: {
+                url: "{{route('productborrowing.readserial')}}",
+                type: "GET",
+                data: function(data) {                
+                    data.warehouse_id = $('#warehouse').find('option:selected').val();
+                    data.product_id   = $('#table-serial').attr('data-product-id');
+                }
+            },
+            columnDefs: [{
+                orderable: false,
+                    targets: [0, 3]
+                },
+                {
+                    className: "text-center",
+                    targets: [0, 3]
+                },
+                {
+                    render: function(data, type, row){
+                        return `<b>${row.product}</b><p style="margin-top: 1px;">${row.category}</p>`;
+                    }, 
+                    targets: [1]
+                },                                
+                {
+                    render: function(data, type, row) {
+                        return `<b>${row.serial_number}</b>`;
+                    },
+                    targets: [2]
+                },                                
+                {
+                render: function(data, type, row) {                   
+                        return `<button class="btn btn-sm text-xs btn-success btn-flat legitRipple" onclick="addSerialQty(${row.product_id})" type="button">
+                                    <i class="fas fa-plus"></i>
+                                </button>`;
+                    },
+                    targets: [3]
+                }
+            ],
+            columns: [
+                {
+                    data: "no"
+                },
+                {
+                    data: "product"
+                },
+                {
+                    data: "serial_number"
+                }
+            ]
         });
 
         $("#form").validate({
@@ -563,6 +648,8 @@
             submitHandler: function() {                
                 var data          = new FormData($('#form')[0]),
                     issuedBy      = $('#form').find('#issued-by').select2('val'),
+                    siteID        = $('#form').find('#site').find('option:selected').val(),
+                    warehouseID   = $('#form').find('#warehouse').find('option:selected').val(),
                     borrowingDate = $('#form').find('#borrowing-date').data('daterangepicker').startDate.format('YYYY-MM-DD'),
                     returnDate    = $('#form').find('#return-date').data('daterangepicker').startDate.format('YYYY-MM-DD'),
                     products      = [],
@@ -573,23 +660,27 @@
                          product_id   = product.val(),
                          categoryID   = product.attr('data-category-id'),
                          uomID        = product.attr('data-uom-id'),
+                         isSerial     = product.attr('data-has-serial'),
                          qtySystem    = product.attr('data-qty-system'),
-                         qtyRequested = $(this).find('.qty-request').val();
+                         qtyRequested = $(this).find('.qty-request').val();                    
                                          
                     products.push({
+                        site_id         : siteID,
+                        warehouse_id    : warehouseID,
                         product_id      : product_id,
                         category_id     : categoryID,
-                        uom_id          : uomID,
+                        uom_id          : uomID,            
+                        current_stock   : qtySystem - qtyRequested,            
                         qty_system      : qtySystem,
                         qty_requested   : qtyRequested
-                    });
+                    });                    
 
                     if(qtyRequested == 0 || qtyRequested == ''){                        
                         zeroValue = true;
                         return false;
                     }
 
-                });
+                });                
 
                 if(products.length == 0){
                     toastr.warning('Select product first.');
@@ -656,34 +747,61 @@
             return false;
         }
 
-        product = product[0];
+        product = product[0];        
+
         var id          = product.id,
             productName = product.text,
-            categoryID  = product.product_category_id,
+            categoryID  = product.category_id,
+            category    = product.category,
             uomID       = product.uom_id,
             uom         = product.uom,
-            qtySystem   = product.qty_system,
+            isSerial    = product.is_serial,
+            qtySystem   = product.stock,
             table       = $('#table-products > tbody');
 
         if (table.find('.no-available-data').length > 0) {
             table.find('.no-available-data').remove();
         }
+        
+        if(isSerial){                       
+            badge   = 'badge-info';
+            icon    = 'fas fa-check';
+        }else{            
+            badge   = 'bg-red';
+            icon    = 'fas fa-times';
+        }
 
         var html = `<tr class="product-item">
-                        <input type="hidden" class="item-product" value="${id}" data-category-id="${categoryID}" data-uom-id="${uomID}" data-qty-system="${qtySystem}" data-qty-request="0">
+                        <input type="hidden" class="item-product" value="${id}" data-category-id="${categoryID}" data-uom-id="${uomID}" data-has-serial="${isSerial}" data-qty-system="${qtySystem}" data-qty-request="0">
                         <td width="100">${productName}</td>
-                        <td class="text-center" width="15">${uom}</td>
+                        <td width="100">${category}</td>
+                        <td width="15" class="text-center"><span class="badge ${badge} text-md"><i class="${icon}" style="size: 2x;"></i></span></td>
+                        <td class="text-center" width="15">${uom?uom:'-'}</td>
                         <td class="text-right" width="15">${qtySystem}</td>
                         <td class="text-center" width="15">
-                            <input type="number" name="qty_request" class="form-control numberfield text-right qty-request" placeholder="0" min="0" max="${qtySystem}" data-qty_system="${qtySystem}" required>
+                            <input type="number" name="qty_request" class="form-control numberfield text-right qty-request" placeholder="0" value="0" min="0" max="${qtySystem}" data-qty_system="${qtySystem}" required>
                         </td>
-                        <td class="text-center" width="15">
-                            <button class="btn btn-md text-xs btn-danger btn-flat legitRipple remove" type="button"><i class="fas fa-trash"></i></button>
+                        <td class="text-center" width="15">                            
+                            <button class="btn btn-sm text-xs btn-danger btn-flat legitRipple" onclick="removeProduct($(this),${id})" type="button"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>`;
 
         table.append(html);
-        $('#product').val(null).trigger('change');
+        $('#product').val(null).trigger('change');        
+
+        selectedProducts.push(parseInt(id));        
+    }
+
+    const removeProduct = (that,productID) => {
+        that.closest('.product-item').remove();
+
+        if ($('#table-products > tbody > .product-item').length == 0) {
+            var html = `<tr class="no-available-data">
+                            <td colspan="7" class="text-center">No available data.</td>
+                        </tr>`;
+            $('#table-products > tbody').append(html);
+        }
+        selectedProducts.splice($.inArray(productID, selectedProducts), 1);                
     }
 
     function addDocument() {
@@ -738,8 +856,8 @@
                     </tr>`;
         $('#table-photo > tbody').append(html);
         initInputFile();
-    }
-
+    }      
+    
     function onSubmit(status) {
         $('#form').find('input[name=status]').val(status);
         $('form').first().trigger('submit');
