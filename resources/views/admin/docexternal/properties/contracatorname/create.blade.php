@@ -35,7 +35,7 @@
             <div class="col-md-8">
               <div class="form-group row">
                 <label for="role_id" class="control-label col-md-3">Contractor User Group</label>
-                <select name="role_id" id="role_id" class="select2 form-control col-md-8"></select>
+                <select name="role_id[]" id="role_id" class="select2 form-control col-md-8" multiple="multiple"></select>
               </div>
             </div>
             <div class="col-md-8">
