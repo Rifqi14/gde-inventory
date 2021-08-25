@@ -122,6 +122,13 @@ Route::group(['prefix' => 'admin'], function () {
         Route::post('/purchasing/addnotes', 'Admin\PurchasingController@addnotes')->name('purchasing.addnotes');
         Route::get('/purchasing/test', 'Admin\PurchasingController@test');
         Route::resource('/purchasing', 'Admin\PurchasingController');
+
+        // Grievance
+        Route::get('/grievance/report/read', 'Admin\GrievanceController@reportread')->name('grievance.report.read');
+        Route::get('/grievance/read', 'Admin\GrievanceController@read')->name('grievance.read');
+        Route::post('/grievance/update_status', 'Admin\GrievanceController@update_status')->name('grievance.update_status');
+        Route::resource('/grievance', 'Admin\GrievanceController');
+
         // Route Stock Adjustment
         Route::get('/stockadjustment/read', 'Admin\StockAdjustmentController@read')->name('stockadjustment.read');
         Route::get('/stockadjustment/getitemserial', 'Admin\StockAdjustmentController@getitemserial')->name('stockadjustment.getitemserial');
