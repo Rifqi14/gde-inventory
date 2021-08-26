@@ -1,60 +1,33 @@
-@extends('admin.layouts.app')
-@section('title', $menu_name)
-
 @section('button')
+@parent
 @if (in_array('create', $actionmenu))
-<button type="button" id="add-organization" class="btn btn-labeled text-sm btn-sm btn-success btn-flat legitRipple" onclick="windowLocation('{{ route('organization.create') }}')">
+<button type="button" id="add-organization" class="btn btn-labeled text-sm btn-sm btn-success btn-flat d-none legitRipple" onclick="windowLocation('{{ route('organization.create') }}')">
   <b><i class="fas fa-plus"></i></b> Create
 </button>
 @endif
 @if (in_array('read', $actionmenu))
-<button type="button" id="filter-organization" class="btn btn-labeled text-sm btn-sm btn-default btn-flat legitRipple" onclick="filter()">
+<button type="button" id="filter-organization" class="btn btn-labeled text-sm btn-sm btn-default btn-flat legitRipple d-none" onclick="filterOrganizationCode()">
   <b><i class="fas fa-search"></i></b> Filter
 </button>
 @endif
 @endsection
 
-@section('breadcrumb')
-<div class="row mb-3 mt-3">
-  <div class="col-sm-4">
-    <h1 id="title-branch" class="m-0 text-dark">
-      {{ $menu_name }}
-    </h1>
-  </div>
-  <div class="col-sm-8">
-    <ol class="breadcrumb float-sm-right text-dark mr-2 text-sm">
-      <li class="breadcrumb-item">{{ $parent_name }}</li>
-      <li class="breadcrumb-item">{{ $menu_name }}</li>
-    </ol>
+<div class="tab-pane fade show" id="organizationcode" role="tabpanel" aria-labelledby="organizationcode-tab">
+  <div class="table-responsive">
+    <table id="table-organization" class="table table-striped datatable" width="100%">
+      <thead>
+        <tr>
+          <th width="2%">No.</th>
+          <th width="50%">Code</th>
+          <th width="45%">Name</th>
+          <th width="3%">Action</th>
+        </tr>
+      </thead>
+    </table>
   </div>
 </div>
-@endsection
-
-@section('content')
-<section class="content" id="content">
-  <div class="container-fluid">
-    <div class="row">
-      <div class="col-md-12">
-        <div class="card">
-          <div class="card-header"></div>
-          <div class="card-body table-responsive p-0">
-            <table id="table-organization" class="table table-striped datatable" width="100%">
-              <thead>
-                <tr>
-                  <th width="2%">No.</th>
-                  <th width="50%">Code</th>
-                  <th width="45%">Name</th>
-                  <th width="3%">Action</th>
-                </tr>
-              </thead>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-<div class="modal fade" id="form-filter">
+@push('filter')
+<div class="modal fade" id="form-filter-organizationcode">
   <div class="modal-dialog modal-md">
     <div class="modal-content">
       <div class="modal-header">
@@ -64,7 +37,7 @@
         </button>
       </div>
       <div class="modal-body">
-        <form id="form-search" method="POST" autocomplete="off">
+        <form id="form-search-organizationcode" method="POST" autocomplete="off">
           @csrf
           <input type="hidden" name="_method">
           <div class="row">
@@ -84,7 +57,7 @@
         </form>
       </div>
       <div class="modal-footer text-right">
-        <button type="submit" form="form-search" class="btn btn-labeled text-sm btn-default btn-flat legitRipple">
+        <button type="submit" form="form-search-organizationcode" class="btn btn-labeled text-sm btn-default btn-flat legitRipple">
           <b><i class="fas fa-search"></i></b>
           Filter
         </button>
@@ -92,9 +65,10 @@
     </div>
   </div>
 </div>
-@endsection
+@endpush
 
 @section('scripts')
+@parent
 <script>
   var actionmenu  = @json(json_encode($actionmenu));
   
@@ -116,15 +90,15 @@
                           "hideMethod": "fadeOut"
                       }
 
-  const filter = () => {
-    $('#form-filter').modal('show');
+  const filterOrganizationCode = () => {
+    $('#form-filter-organizationcode').modal('show');
   }
 
-  const edit = (id) => {
+  const editOrganizationCode = (id) => {
     document.location   = `{{ route('organization.index') }}/${id}/edit`;
   }
 
-  const destroy = (id) => {
+  const destroyOrganizationCode = (id) => {
     bootbox.confirm({
       buttons: {
         confirm: {
@@ -155,7 +129,7 @@
             $('body').unblock();
             if (response.status) {
               toastr.success(response.message);
-              dataTable.ajax.reload(null, false);
+              dataTableOrganization.ajax.reload(null, false);
             }else {
               toastr.warning(response.message);
             }
@@ -171,7 +145,7 @@
 
   $(function() {
     $('.select2').select2();
-    dataTable = $('#table-organization').DataTable( {
+    dataTableOrganization = $('#table-organization').DataTable( {
       processing: true,
       language: {
         processing: `<div class="p-2 text-center">
@@ -187,8 +161,8 @@
         url: "{{route('organization.read')}}",
         type: "GET",
         data:function(data){
-          var code      = $('#form-search').find('input[name=code]').val();
-          var name      = $('#form-search').find('input[name=name]').val();
+          var code      = $('#form-search-organizationcode').find('input[name=code]').val();
+          var name      = $('#form-search-organizationcode').find('input[name=name]').val();
           data.code     = code;
           data.name     = name;
         }
@@ -201,12 +175,12 @@
           render: function ( data, type, row ) {
             var button = '';
             if (actionmenu.indexOf('update') > 0) {
-              button += `<a class="dropdown-item" href="javascript:void(0);" onclick="edit(${row.id})">
+              button += `<a class="dropdown-item" href="javascript:void(0);" onclick="editOrganizationCode(${row.id})">
               <i class="far fa-edit"></i>Update Data
               </a>`;
             }
             if (actionmenu.indexOf('delete') > 0) {
-              button += `<a class="dropdown-item delete" href="javascript:void(0);" onclick="destroy(${row.id})">
+              button += `<a class="dropdown-item delete" href="javascript:void(0);" onclick="destroyOrganizationCode(${row.id})">
               <i class="fa fa-trash-alt"></i> Delete Data
               </a>`;
             }
@@ -229,10 +203,10 @@
       ]
     });
 
-    $('#form-search').submit(function (e) {
+    $('#form-search-organizationcode').submit(function (e) {
       e.preventDefault();
-      dataTable.draw();
-      $('#form-filter').modal('hide');
+      dataTableOrganization.draw();
+      $('#form-filter-organizationcode').modal('hide');
     });
   });
 </script>
