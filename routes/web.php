@@ -127,6 +127,10 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/grievance/report/read', 'Admin\GrievanceController@reportread')->name('grievance.report.read');
         Route::get('/grievance/read', 'Admin\GrievanceController@read')->name('grievance.read');
         Route::post('/grievance/update_status', 'Admin\GrievanceController@update_status')->name('grievance.update_status');
+        Route::get('/grievance/report/{id}/edit', 'Admin\GrievanceController@edit_report')->name('grievance.report.edit');
+        Route::get('/grievance/report/{id}', 'Admin\GrievanceController@detail_report')->name('grievance.report.detail');
+        Route::post('/grievance/report/update/{id}', 'Admin\GrievanceController@update_report')->name('grievance.report.update');
+        Route::post('/grievance/report/update_status', 'Admin\GrievanceController@update_status_report')->name('grievance.report.update_status');
         Route::resource('/grievance', 'Admin\GrievanceController');
 
         // Route Stock Adjustment

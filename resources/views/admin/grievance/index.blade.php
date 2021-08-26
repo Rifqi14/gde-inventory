@@ -115,7 +115,7 @@
     }
 
     function editreport(id) {
-        document.location = '{{route('grievance.index')}}/' + id + '/edit';
+        document.location = '{{route('grievance.index')}}/report/' + id + '/edit';
     }
 
     $(function(){
@@ -294,7 +294,7 @@
                     width: 100,
                     sortable: false,
                     render: function (data, type, full, meta) {
-                        return `<a href="{{ route('grievance.index') }}/${full.id}">
+                        return `<a href="{{ route('grievance.index') }}/report/${full.id}">
                                     <div class="text-md text-info text-bold">
                                         ${full.number}
                                     </div>

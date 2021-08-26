@@ -534,7 +534,7 @@
 				</button>
 			</div>
 			<div class="modal-body">
-                {{ $data->comment }}
+                {!! $data->comment !!}
             
                 @if($data->attachment_comment)
                     <a href="{{ url($data->attachment_comment) }}" target="_blank" class="btn bg-success color-palette btn-labeled legitRipple text-sm btn-sm">

@@ -13,6 +13,7 @@ use App\Models\Menu;
 
 use App\User;
 use App\Models\Site;
+use App\Models\Budget;
 use App\Models\GrievanceRedress;
 use App\Models\GrievanceRedressFocal;
 use App\Models\GrievanceRedressHistory;
@@ -31,8 +32,13 @@ class GrievanceController extends Controller
         $this->middleware('accessmenu', ['except' => ['select']]);
     }
 
-    public function index($type="app")
+    public function index(Request $request)
     {
+        if(!$request->type){
+            $type = "app";
+        }else{
+            $type = $request->type;
+        }
         $userid = Auth::guard('admin')->user()->id;
         return view('admin.grievance.index', compact('userid','type'));
     }
@@ -189,7 +195,7 @@ class GrievanceController extends Controller
 		$data['approval_status'] = $approv;
 
         if ($request->hasFile('attach')) {
-            $path = 'assets/safeguard/grievance';
+            $path = 'assets/safeguard/grievance/';
 			if (!file_exists($path)) {
 				mkdir($path, 0777, true);
             }
@@ -207,7 +213,7 @@ class GrievanceController extends Controller
             $data['idm_email'] = $request->idm_email?$request->idm_email:null;
 
             if ($request->hasFile('idm_attach')) {
-                $path = 'assets/safeguard/grievance';
+                $path = 'assets/safeguard/grievance/';
                 if (!file_exists($path)) {
                     mkdir($path, 0777, true);
                 }
@@ -358,7 +364,7 @@ class GrievanceController extends Controller
 		}
 
         if ($request->hasFile('attach')) {
-            $path = 'assets/safeguard/grievance';
+            $path = 'assets/safeguard/grievance/';
 			if (!file_exists($path)) {
 				mkdir($path, 0777, true);
             }
@@ -376,7 +382,7 @@ class GrievanceController extends Controller
             $data['idm_email'] = $request->idm_email?$request->idm_email:null;
 
             if ($request->hasFile('idm_attach')) {
-                $path = 'assets/safeguard/grievance';
+                $path = 'assets/safeguard/grievance/';
                 if (!file_exists($path)) {
                     mkdir($path, 0777, true);
                 }
@@ -473,7 +479,7 @@ class GrievanceController extends Controller
 		];
 
         if ($request->hasFile('attach')) {
-            $path = 'assets/safeguard/grievance/comment';
+            $path = 'assets/safeguard/grievance/comment/';
 			if (!file_exists($path)) {
 				mkdir($path, 0777, true);
             }
@@ -541,6 +547,265 @@ class GrievanceController extends Controller
                 'message'   => "Can't update data grievance"
             ], 400);
         }
+    }
+
+    public function edit_report(Request $request, $id)
+    {
+        if(in_array('update',$request->actionmenu)){
+            $data = GrievanceRedressReport::where("id", $id)->with('grievance_redress')->first();
+            $data->affiliation = json_decode($data->grievance_redress->affiliation);
+            $data->complaint_type = json_decode($data->grievance_redress->complaint_type);
+            $data->media = json_decode($data->grievance_redress->media);
+            $focals = GrievanceRedressFocal::where("grievance_id",$data->grievance_redress->id)->get();
+            $focal = [];
+            foreach($focals as $fc){
+                $f = new \stdClass;
+                $f->user_id = $fc->user_id;
+                $f->realname = User::find($fc->user_id)->name;
+                $focal[] = $f;
+            }
+            $data->parent_id = $data->grievance_redress->id;
+            $data->focal = $focal;
+            $site = Site::find($data->grievance_redress->unit);
+            $userid = Auth::guard('admin')->user()->id;
+            $cek_spv = Auth::guard('admin')->user()->id;
+            $data->spv_id = User::find($data->grievance_redress->created_user)->spv_id;
+            $data->budget = Budget::all();
+            $url_action = route('grievance.report.update', ['id'=>$id]);
+            if ($data) {
+                return view('admin.grievance.report.edit', compact('data','userid','site', 'cek_spv', 'url_action'));
+            } else {
+                abort(404);
+            }
+        }else{
+            abort(403);
+        }
+    }
+
+    public function update_report(Request $request, $id)
+    {
+        DB::beginTransaction();
+
+        $id = $id;
+		$parent_id = $request->parent_id;
+		$content = $request;
+		$finance = (($request->finance) ? 1 : 0);
+		$attach = $request->file('attach');
+		$updated_user = Auth::guard('admin')->user()->id;
+		$pic = Auth::guard('admin')->user()->name;
+		$table = 'grievance_redress_report';
+
+        $data = [
+            'description' => $request->description,
+            'status' => $request->status,
+            'finance' => $finance,
+			'updated_user' => $updated_user,
+			'pic' => $pic,
+		];
+
+        if ($request->hasFile('attach')) {
+            $path = 'assets/safeguard/grievance/report/';
+			if (!file_exists($path)) {
+				mkdir($path, 0777, true);
+            }
+            $attach->move($path, $request->number.seo($attach->getClientOriginalName()).'.'.$attach->getClientOriginalExtension());
+            $filename = $path.$request->number.seo($attach->getClientOriginalName()).'.'.$attach->getClientOriginalExtension();
+			$data['attachment'] = $filename;
+        }
+
+        if($request->status == 'approved'){
+			$approv = 'cleared';
+			$gr = ['approval_status' => $approv, 'cleared_date' => date("Y-m-d")];
+		} else {
+			$approv = 'active';
+			$gr = ['approval_status' => $approv, 'active_date' => date("Y-m-d")];
+		}
+
+        $history = GrievanceRedressHistory::where('grievance_id',$parent_id)->where('status',$approv);
+        $history->delete();
+		$status_type = [
+			'grievance_id' => $parent_id,
+			'status' => $approv,
+		];
+        $st = GrievanceRedressHistory::create($status_type);
+		if (!$st) {
+			DB::rollback();
+            return response()->json([
+                'success'    => false,
+                'message'   => "Can't update data grievance"
+            ], 400);
+		}
+
+        $grievance = GrievanceRedress::find($parent_id);
+        $grievance->update($gr);
+		if (!$grievance) {
+            DB::rollback();
+            return response()->json([
+                'success'    => false,
+                'message'   => "Can't insert data report"
+            ], 400);
+		}
+
+        $ok = GrievanceRedressReport::find($id);
+        $ok->update($data);
+        if ($ok) {
+            $d = GrievanceRedressReportBudget::where("report_id", $request->report_id);
+            $d->delete();
+            
+			$budget_ids = (isset($request->budget_id)) ? $request->budget_id:[];
+            $budget_val = (isset($request->budget_val)) ? $request->budget_val:[];
+            foreach ($budget_ids as $key => $budget) {
+                $data = [
+                    'report_id' => $request->report_id,
+                    'budget_id' => $budget,
+					'value' => (float) str_replace(',','.', str_replace('.','',$budget_val[$key])),
+                ];
+                $ok = GrievanceRedressReportBudget::create($data);
+                if(!$ok){
+                    DB::rollback();
+                    return response()->json([
+                        'success'    => false,
+                        'message'   => "Can't insert data report"
+                    ], 400);
+                }
+            }
+
+            DB::commit();
+            return response()->json([
+                'success'     => true,
+                'message'   => "Data has been updated",
+                'results'     => route('grievance.index')."/?type=report",
+            ], 200);
+        }else{
+            DB::rollback();
+            return response()->json([
+                'success'    => false,
+                'message'   => "Can't update data grievance"
+            ], 400);
+        }
+
+    }
+
+    public function detail_report(Request $request, $id)
+    {
+        if(in_array('update',$request->actionmenu)){
+            $data = GrievanceRedressReport::where("id", $id)->with('grievance_redress')->first();
+            $data->affiliation = json_decode($data->grievance_redress->affiliation);
+            $data->complaint_type = json_decode($data->grievance_redress->complaint_type);
+            $data->media = json_decode($data->grievance_redress->media);
+            $focals = GrievanceRedressFocal::where("grievance_id",$data->grievance_redress->id)->get();
+            $focal = [];
+            foreach($focals as $fc){
+                $f = new \stdClass;
+                $f->user_id = $fc->user_id;
+                $f->realname = User::find($fc->user_id)->name;
+                $focal[] = $f;
+            }
+            $data->parent_id = $data->grievance_redress->id;
+            $data->focal = $focal;
+            $site = Site::find($data->grievance_redress->unit);
+            $userid = Auth::guard('admin')->user()->id;
+            $cek_spv = Auth::guard('admin')->user()->id;
+            $data->spv_id = User::find($data->grievance_redress->created_user)->spv_id;
+            $data->budget = Budget::all();
+            $url_action = route('grievance.report.update', ['id'=>$id]);
+            if ($data) {
+                return view('admin.grievance.report.detail', compact('data','userid','site', 'cek_spv', 'url_action'));
+            } else {
+                abort(404);
+            }
+        }else{
+            abort(403);
+        }
+    }
+
+    public function update_status_report(Request $request)
+    {
+        DB::beginTransaction();
+
+        $id = $request->id;
+		$parent_id = $request->parent_id;
+		$status = $request->status;
+		$comment  = $request->comment;
+        $attach = $request->file('attachment');
+		$updated_user = Auth::guard('admin')->user()->id;
+		$table = 'grievance_redress_report';
+
+        if($status == 'approved'){
+			$approv = 'cleared';
+		} else {
+			$approv = 'active';
+		}
+
+        $data = [
+			'status' => $status,
+			'comment' => $comment,
+		];
+
+        if ($request->hasFile('attachment')) {
+            $path = 'assets/safeguard/grievance/report/comment/';
+			if (!file_exists($path)) {
+				mkdir($path, 0777, true);
+            }
+            $attach->move($path, $request->number.seo($attach->getClientOriginalName()).'.'.$attach->getClientOriginalExtension());
+            $filename = $path.$request->number.seo($attach->getClientOriginalName()).'.'.$attach->getClientOriginalExtension();
+			$data['attachment_comment'] = $filename;
+        }
+
+        $ok = GrievanceRedressReport::find($id);
+        $ok->update($data);
+        if ($ok) {
+            $data = [
+				'approval_status' => $approv,
+				'updated_user' => $updated_user,
+			];
+
+			if($approv == 'cleared'){
+				$data['cleared_date'] = date("Y-m-d");
+			} else {
+				$data['active_date'] = date("Y-m-d");
+			}
+
+            $history = GrievanceRedressHistory::where('grievance_id',$parent_id)->where('status',$approv);
+            $history->delete();
+
+			$status_type = [
+				'grievance_id' => $parent_id,
+				'status' => $approv,
+			];
+            $st = GrievanceRedressHistory::create($status_type);
+			if (!$st) {
+                DB::rollback();
+                return response()->json([
+                    'success'    => false,
+                    'message'   => "Can't insert data grievance"
+                ], 400);
+			}
+
+            $grievance = GrievanceRedress::find($parent_id);
+            $grievance->update($data);
+			if(!$grievance){
+				DB::rollback();
+                return response()->json([
+                    'success'    => false,
+                    'message'   => "Can't insert data report"
+                ], 400);
+			}
+
+            DB::commit();
+            return response()->json([
+                'success'     => true,
+                'message'   => "Data has been updated",
+                'results'     => route('grievance.index')."/?type=report",
+            ], 200);
+        }else{
+            DB::rollback();
+            return response()->json([
+                'success'    => false,
+                'message'   => "Can't insert data report"
+            ], 400);
+        }
+
     }
 
     public function destroy($id)
