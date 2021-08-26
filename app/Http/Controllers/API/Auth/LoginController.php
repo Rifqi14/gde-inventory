@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Auth\API;
+namespace App\Http\Controllers\API\Auth;
 
 use App\Http\Controllers\Auth\API\APIController;
 use App\Http\Controllers\Controller;
@@ -29,17 +29,17 @@ class LoginController extends APIController
         return $request->authentication();
     }
 
-    public function profile()
-    {
-        return response()->json(auth('api')->user());
-    }
-
     public function logout()
     {
         Auth::guard('api')->logout();
 
         return response()->json([],Response::HTTP_NO_CONTENT);
     }
+
+    public function profile()
+    {
+        return response()->json(auth('api')->user());
+    }    
 
     public function refresh()
     {
