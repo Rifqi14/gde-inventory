@@ -17,7 +17,7 @@ class OrganizationCodeController extends Controller
         $parent     = Menu::parent($menu->parent_id)->first();
         View::share('menu_name', $menu->menu_name);
         View::share('parent_name', $parent->menu_name);
-        View::share('menu_active', url('admin/organization'));
+        View::share('menu_active', url('admin/doccenterproperties'));
         $this->middleware('accessmenu', ['except' => ['select']]);
     }
     
@@ -87,7 +87,7 @@ class OrganizationCodeController extends Controller
         return response()->json([
             'status'    => true,
             'message'   => "Success create data",
-            'results'   => route('organization.index'),
+            'results'   => route('doccenterproperties.index'),
         ], 200);
     }
 
@@ -159,7 +159,7 @@ class OrganizationCodeController extends Controller
         return response()->json([
             'status'    => true,
             'message'   => "Success update data",
-            'results'   => route('organization.index'),
+            'results'   => route('doccenterproperties.index'),
         ], 200);
     }
 
