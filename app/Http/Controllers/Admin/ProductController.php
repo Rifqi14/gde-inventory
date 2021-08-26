@@ -518,7 +518,8 @@ class ProductController extends Controller
         ];            
 
         foreach ($ranges as $key => $range) {   
-            
+
+            // Sorting data on this range
             $categories = [];
             foreach($queries as $row){                          
                 $products = [];
@@ -555,7 +556,8 @@ class ProductController extends Controller
                             'minmax'    => $product['minmax']
                         ];
                     }
-                }            
+                }   
+                         
                 if(count($row->subcategories) > 0 && count($products) > 0){                                                                  
                     $categories[] = [
                         'category' => $row->category,
@@ -996,7 +998,7 @@ class ProductController extends Controller
                     $qtyDieng   = ['in' => 0, 'out' => 0];
                     $qtyPatuha  = ['in' => 0, 'out' => 0];
                     $qtyMinMax  = ['min' => ['dieng' => 0, 'patuha' => 0], 'max' => 0];
-                    $dateSchema = ['in' => [], 'out' => []];                      
+                    $dateSchema = ['in' => [], 'out' => []];                                          
 
                     foreach($product['minmax'] as $minmax){
                         $site = strtolower($minmax['site']);                        
@@ -1066,8 +1068,45 @@ class ProductController extends Controller
             
                         }                        
                     }     
-                                                            
-                    
+
+                    $SOH        = [
+                        'dieng'  => ($qtyDieng['in']-$qtyDieng['out']),
+                        'patuha' => ($qtyPatuha['in']-$qtyPatuha['out'])
+                    ];
+
+                    $statusStock = [
+                        'dieng'     => ['status' => '', 'style'  => []],
+                        'patuha'    => ['status' => '', 'style'  => []]                   
+                     ];
+
+                    if($SOH['dieng'] <= $qtyMinMax['min']['dieng']){
+                        $statusStock['dieng']['status'] = 'Stock Minimum';
+                        $statusStock['dieng']['style'] = [
+                            'font' => ['bold' => true],
+                            'fill' => ['fillType' => Fill::FILL_SOLID, 'color' => ['argb' => 'ff0000']]
+                        ];
+                    }else if($SOH['dieng'] >= $qtyMinMax['max']){
+                        $statusStock['dieng']['status'] = 'Stock Maximum';
+                        $statusStock['dieng']['style'] = [
+                            'font' => ['bold' => true],
+                            'fill' => ['fillType' => Fill::FILL_SOLID, 'color' => ['argb' => '00b050']]
+                        ];
+                    }
+
+                    if($SOH['patuha'] <= $qtyMinMax['min']['patuha']){
+                        $statusStock['patuha']['status'] = 'Stock Minimum';
+                        $statusStock['patuha']['style'] = [
+                            'font' => ['bold' => true],
+                            'fill' => ['fillType' => Fill::FILL_SOLID, 'color' => ['argb' => 'ff0000']]
+                        ];
+                    }else if($SOH['patuha'] >= $qtyMinMax['max']){
+                        $statusStock['patuha']['status'] = 'Stock Maximum';
+                        $statusStock['patuha']['style'] = [
+                            'font' => ['bold' => true],
+                            'fill' => ['fillType' => Fill::FILL_SOLID, 'color' => ['argb' => '00b050']]
+                        ];
+                    }
+                                                                                
                     $items = [                        
                         [
                             'columns' => [
@@ -1078,11 +1117,15 @@ class ProductController extends Controller
                                 ['column' => 'G', 'data' => $uom],
                                 ['column' => 'I', 'data' => 'In'],                                
                                 ['column' => 'BT', 'data' => $qtyDieng['in']],
-                                ['column' => 'BU', 'data' => $qtyPatuha['in']],
+                                ['column' => 'BU', 'data' => $qtyPatuha['in']],                                
+                                ['column' => 'BV', 'data' => $SOH['dieng']<0?0:$SOH['dieng']],
+                                ['column' => 'BW', 'data' => $SOH['patuha']<0?0:$SOH['patuha']],
                                 ['column' => 'BX', 'data' => $uom],
                                 ['column' => 'BY', 'data' => $qtyMinMax['min']['dieng']],
                                 ['column' => 'BZ', 'data' => $qtyMinMax['min']['dieng']],
                                 ['column' => 'CA', 'data' => $qtyMinMax['max']],
+                                ['column' => 'CB', 'data' => $statusStock['dieng']['status']],
+                                ['column' => 'CC', 'data' => $statusStock['patuha']['status']],
                             ]
                         ],
                         [
@@ -1094,7 +1137,8 @@ class ProductController extends Controller
                                 ['column' => 'BU', 'data' => $qtyPatuha['out']]
                             ]
                         ]
-                    ];                    
+                    ];      
+                                        
 
                     if(count($dateSchema['in']) > 0 || count($dateSchema['out']) > 0){
                         foreach($dateSchema['in'] as $schema){
@@ -1176,6 +1220,15 @@ class ProductController extends Controller
                                         ]
                                 ],    
                                 [
+                                    'column' => ['BV','BW'], 
+                                    'style'  => [
+                                        'font' => ['bold' => true, 'size' => 13, 'color' => ['argb' => '0000FF']],
+                                        'alignment' => [
+                                            'vertical' => Alignment::VERTICAL_CENTER
+                                            ]                                                                                
+                                        ]
+                                ],   
+                                [
                                     'column' => 'BX',
                                     'style'  => [
                                         'font' => ['size' => 13, 'color' => ['argb' => '0000ff']],
@@ -1204,6 +1257,24 @@ class ProductController extends Controller
                                             'horizontal'    => Alignment::HORIZONTAL_CENTER
                                         ]
                                     ]
+                                ],
+                                [
+                                    'column' => ['CB','CC'],
+                                    'style'  => [
+                                        'font' => ['bold' => true],
+                                        'alignment' => [
+                                            'vertical'      => Alignment::VERTICAL_CENTER,
+                                            'horizontal'    => Alignment::HORIZONTAL_CENTER
+                                        ]
+                                    ]
+                                ],
+                                [
+                                    'column' => 'CB',
+                                    'style'  => $statusStock['dieng']['style']
+                                ],
+                                [
+                                    'column' => 'CC',
+                                    'style'  => $statusStock['patuha']['style']
                                 ],
                                 [
                                     'column' => 'CD',

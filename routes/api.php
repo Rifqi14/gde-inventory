@@ -21,5 +21,14 @@ Route::group([
     Route::post('/login', 'Auth\API\LoginController@login');
     Route::post('/logout', 'Auth\API\LoginController@logout');
     Route::post('/refresh', 'Auth\API\LoginController@refresh');
-    Route::post('/profile', 'Auth\API\LoginController@profile');
+    Route::post('/profile', 'Auth\API\LoginController@profile');    
+    
+});
+
+// Account and Authentication
+Route::group([
+    'prefix' => 'account'
+],function(){
+    // Register
+    Route::post('/signup','Api\RegisterController@signup');
 });

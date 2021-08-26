@@ -379,6 +379,7 @@ Route::group(['prefix' => 'admin'], function () {
 
         // Document External Properties
         Route::resource('/docexternalproperties', 'Admin\ExternalPropertiesController');
+        Route::resource('/doccenterproperties', 'Admin\DocCenterPropertiesController');
 
         // Document External Site Code
         Route::get('/docexternalproperties/sitecode/read', 'Admin\ExternalProperties\SiteCodeController@read')->name('sitecode.read');
@@ -424,5 +425,33 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/docexternalproperties/contractorname/read', 'Admin\ExternalProperties\ContractorNameController@read')->name('contractorname.read');
         Route::get('/docexternalproperties/contractorname/select', 'Admin\ExternalProperties\ContractorNameController@select')->name('contractorname.select');
         Route::resource('/docexternalproperties/contractorname', 'Admin\ExternalProperties\ContractorNameController');
+
+        // Document External Document Category
+        Route::get('/documentcategoriesexternal/read', 'Admin\DocumentExternal\CategoryDocumentExternalController@read')->name('documentcategoriesexternal.read');
+        Route::resource('/documentcategoriesexternal', 'Admin\DocumentExternal\CategoryDocumentExternalController');
+
+        // Document External
+        Route::get('/documentcenterexternal/read', 'Admin\DocumentExternal\DocumentExternalController@read')->name('documentcenterexternal.read');
+        Route::get('/documentcenterexternal/{page}/{id}/readmatrix', 'Admin\DocumentExternal\DocumentExternalController@readMatrix')->name('documentcenterexternal.readmatrix');
+        Route::get('/documentcenterexternal/select', 'Admin\DocumentExternal\DocumentExternalController@select')->name('documentcenterexternal.select');
+        Route::put('/documentcenterexternal/updatematrix/{id}', 'Admin\DocumentExternal\DocumentExternalController@updateMatrix')->name('documentcenterexternal.updatematrix');
+        Route::post('/documentcenterexternal/{page}/{id}', 'Admin\DocumentExternal\DocumentExternalController@destroy')->name('documentcenterexternal.destroy');
+        Route::get('/documentcenterexternal/{page}/', 'Admin\DocumentExternal\DocumentExternalController@index')->name('documentcenterexternal.index');
+        Route::get('/documentcenterexternal/{page}/create', 'Admin\DocumentExternal\DocumentExternalController@create')->name('documentcenterexternal.create');
+        Route::get('/documentcenterexternal/{page}/{id}/edit', 'Admin\DocumentExternal\DocumentExternalController@edit')->name('documentcenterexternal.edit');
+        Route::resource('/documentcenterexternal', 'Admin\DocumentExternal\DocumentExternalController')->except([
+            'index',
+            'create',
+            'edit'
+        ]);
+
+        // Document External Revision
+        Route::get('/revision/read', 'Admin\DocumentExternal\RevisionController@read')->name('revision.read');
+        Route::get('/revision/latestno', 'Admin\DocumentExternal\RevisionController@getLatestRevisionNo')->name('revision.latestno');
+        Route::get('/revision/latest/{id}', 'Admin\DocumentExternal\RevisionController@getLatestRevision')->name('revision.latest');
+        Route::post('/revision/storelog', 'Admin\DocumentExternal\RevisionController@storeLog')->name('revision.storelog');
+        Route::delete('/revision/destroyfile/{id}', 'Admin\DocumentExternal\RevisionController@destroyFile')->name('revision.destroyfile');
+        Route::delete('/revision/destroy/{id}', 'Admin\DocumentExternal\RevisionController@destroy')->name('revision.destroy');
+        Route::resource('/revision', 'Admin\DocumentExternal\RevisionController');
     });
 });

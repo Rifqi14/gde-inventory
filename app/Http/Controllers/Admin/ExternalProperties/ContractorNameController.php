@@ -59,11 +59,16 @@ class ContractorNameController extends Controller
     {
         return DB::transaction(function() use($request) {
             try {
-                $data   = [
-                    'name'  => $request->name,
-                    'role_id'   => $request->role_id,
-                ];
-                DocumentExternalContractorName::create($data);
+                $data   = [];
+                foreach ($request->role_id as $key => $role) {
+                    $data[]   = [
+                        'name'      => $request->name,
+                        'role_id'   => $role,
+                        'created_at'=> now(),
+                        'updated_at'=> now(),
+                    ];
+                }
+                DocumentExternalContractorName::insert($data);
             } catch (\Illuminate\Database\QueryException $ex) {
                 throw new PropertiesException("Error create data: {$ex->errorInfo[2]}", 400);
             }
@@ -192,16 +197,27 @@ class ContractorNameController extends Controller
         $start  = $request->page ? $request->page - 1 : 0;
         $length = $request->limit;
         $name   = strtoupper($request->name);
+        $contractorname = $request->contractorname;
 
         // Count Data
         $query  = DocumentExternalContractorName::with(['role'])->where('name', 'like', "%$name%");
+        if ($contractorname) {
+            $query->where('name', $contractorname);
+        } else {
+            $query->distinct();
+        }
+        
 
         $row    = clone $query;
         $recordsTotal   = $row->count();
 
         $query->offset($start);
         $query->limit($length);
-        $documents  = $query->get();
+        if ($contractorname) {
+            $documents  = $query->get();
+        } else {
+            $documents  = $query->get(['name']);
+        }
 
         $data = [];
         foreach ($documents as $document) {

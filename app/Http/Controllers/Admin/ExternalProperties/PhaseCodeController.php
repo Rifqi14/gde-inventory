@@ -64,6 +64,7 @@ class PhaseCodeController extends Controller
                     'name'  => $request->name,
                 ];
                 DocumentExternalPhaseCode::create($data);
+                $this->createSubMenu($request);
             } catch (\Illuminate\Database\QueryException $ex) {
                 throw new PropertiesException("Error create data: {$ex->errorInfo[2]}", 400);
             }
@@ -116,6 +117,7 @@ class PhaseCodeController extends Controller
                 $phasecode->code     = strtoupper($request->code);
                 $phasecode->name     = $request->name;
                 $phasecode->save();
+                $this->createSubMenu($request);
             } catch (\Illuminate\Database\QueryException $ex) {
                 throw new PropertyException("Error update data: {$ex->errorInfo[2]}", 400);
             }
@@ -210,5 +212,23 @@ class PhaseCodeController extends Controller
             'total'     => $recordsTotal,
             'rows'      => $data,
         ], 200);
+    }
+
+    public function createSubMenu(Request $request)
+    {
+        $phase      = str_replace(' ', '_', strtolower($request->code));
+        $existMenu  = Menu::GetByRoute("phase_$phase")->first();
+        if ($existMenu) {
+            $existMenu->delete();
+        }
+        $parent     = Menu::GetByRoute('docexternal')->first();
+        $menu       = Menu::create([
+            'parent_id'     => $parent->id,
+            'menu_name'     => "Phase $request->code",
+            'menu_route'    => "documentcenterexternal/phase_$phase",
+            'menu_icon'     => 'fa-file-contract',
+        ]);
+        $menu->menu_sort    = $menu->id;
+        $menu->save();
     }
 }
