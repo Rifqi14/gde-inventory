@@ -27,8 +27,13 @@ Route::group([
 
 // Account and Authentication
 Route::group([
-    'prefix' => 'account'
+    'middleware' => 'api',
+    'prefix'     => 'account'
 ],function(){
+    // Auth
+    Route::post('/signin', 'Auth\API\LoginController@login');
+    Route::post('/signout', 'Auth\API\LoginController@logout');
+
     // Register
     Route::post('/signup','Api\RegisterController@signup');
 });
