@@ -50,7 +50,7 @@ Route::group([
     // Product
     Route::group([
         'middleware' => ['auth:api'],
-        'prefix' => 'product'
+        'prefix'     => 'product'
     ], function(){
         Route::post('/list', 'API\ProductController@read');
     });
