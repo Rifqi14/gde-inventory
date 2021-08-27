@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\Route;
     
 // });
 
+// Account and Auth
 Route::group([
     'middleware' => 'api',
     'prefix'     => 'account'
@@ -39,3 +40,5 @@ Route::group([
         Route::post('/signout', 'API\Auth\LoginController@logout');
     });        
 });
+
+Route::post('/role','API\RoleController@read');
