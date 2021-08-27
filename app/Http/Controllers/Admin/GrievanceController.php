@@ -217,8 +217,8 @@ class GrievanceController extends Controller
                 if (!file_exists($path)) {
                     mkdir($path, 0777, true);
                 }
-                $idm_attach->move($path, $request->number.seo($attach->getClientOriginalName()).'.'.$idm_attach->getClientOriginalExtension());
-                $filename = $path.$request->number.seo($attach->getClientOriginalName()).'.'.$idm_attach->getClientOriginalExtension();
+                $idm_attach->move($path, $request->number.seo($idm_attach->getClientOriginalName()).'.'.$idm_attach->getClientOriginalExtension());
+                $filename = $path.$request->number.seo($idm_attach->getClientOriginalName()).'.'.$idm_attach->getClientOriginalExtension();
                 $data['idm_attachment'] = $filename;
             }
         }
@@ -821,12 +821,12 @@ class GrievanceController extends Controller
             $history->delete();
         } catch (QueryException $th) {
             return response()->json([
-                'status'    => false,
+                'success'    => false,
                 'message'   => 'Error delete data ' . $th->errorInfo[2]
             ], 400);
         }
         return response()->json([
-            'status'    => true,
+            'success'    => true,
             'message'   => 'Success delete data'
         ], 200);
     }

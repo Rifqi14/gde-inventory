@@ -133,6 +133,11 @@ Route::group(['prefix' => 'admin'], function () {
         Route::post('/grievance/report/update_status', 'Admin\GrievanceController@update_status_report')->name('grievance.report.update_status');
         Route::resource('/grievance', 'Admin\GrievanceController');
 
+        // Safeguard Incident
+        Route::get('/hseincident/read', 'Admin\SafeguardIncidentController@read')->name('hseincident.read');
+        Route::post('/hseincident/approved', 'Admin\SafeguardIncidentController@approved')->name('hseincident.approved');
+        Route::resource('/hseincident', 'Admin\SafeguardIncidentController');
+
         // Route Stock Adjustment
         Route::get('/stockadjustment/read', 'Admin\StockAdjustmentController@read')->name('stockadjustment.read');
         Route::get('/stockadjustment/getitemserial', 'Admin\StockAdjustmentController@getitemserial')->name('stockadjustment.getitemserial');
