@@ -31,17 +31,17 @@ class RoleController extends Controller
         $roles->limit($length); 
         $roles = $roles->get();
 
-        $data = [];
-        foreach ($roles as $key => $role) {
-            $data[] = $role;
-        }
-
         if(!$roles){
             return response()->json([
                 'status'    => Response::HTTP_BAD_REQUEST,
                 'message'   => 'Failed to get role data.'
             ],Response::HTTP_BAD_REQUEST);
         }
+
+        $data = [];
+        foreach ($roles as $key => $role) {
+            $data[] = $role;
+        }        
 
         return response()->json([
             'status' => Response::HTTP_OK,

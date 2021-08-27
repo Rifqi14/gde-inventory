@@ -27,18 +27,31 @@ use Illuminate\Support\Facades\Route;
 
 // Account and Auth
 Route::group([
-    'middleware' => 'api',
-    'prefix'     => 'account'
+    'middleware' => 'api'
 ],function(){
-    // Login
-    Route::post('/signin', 'API\Auth\LoginController@login');
-    // Register
-    Route::post('/signup', 'API\Auth\RegisterController@signup');
+    // Account and Auth
+    Route::group([
+        'prefix' => 'account'
+    ], function(){
+        // Login
+        Route::post('/signin', 'API\Auth\LoginController@login');
+        // Register
+        Route::post('/signup', 'API\Auth\RegisterController@signup');
 
-    Route::group(['middleware' => ['auth:api']], function(){       
-        // Logout 
-        Route::post('/signout', 'API\Auth\LoginController@logout');
-    });        
+        Route::group(['middleware' => ['auth:api']], function(){       
+            // Logout 
+            Route::post('/signout', 'API\Auth\LoginController@logout');
+        });        
+    });
+
+    // Role
+    Route::post('/role','API\RoleController@read');    
+
+    // Product
+    Route::group([
+        'middleware' => ['auth:api'],
+        'prefix' => 'product'
+    ], function(){
+        Route::post('/list', 'API\ProductController@read');
+    });
 });
-
-Route::post('/role','API\RoleController@read');
