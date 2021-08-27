@@ -28,11 +28,19 @@ class RoleController extends Controller
         $total = $rows->count();
 
         $roles->offset($start);
-        $roles->limit($length);
+        $roles->limit($length); 
+        $roles = $roles->get();
 
         $data = [];
-        foreach ($roles->get() as $key => $role) {
+        foreach ($roles as $key => $role) {
             $data[] = $role;
+        }
+
+        if(!$roles){
+            return response()->json([
+                'status'    => Response::HTTP_BAD_REQUEST,
+                'message'   => 'Failed to get role data.'
+            ],Response::HTTP_BAD_REQUEST);
         }
 
         return response()->json([
