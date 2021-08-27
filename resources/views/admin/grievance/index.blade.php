@@ -20,6 +20,7 @@
     <b><i class="fas fa-plus"></i></b> 
     Create
 </button>
+<div class="mb-2"></div>
 @endsection
 
 @section('content')
@@ -236,7 +237,7 @@
                                     <a class="dropdown-item ${(full.status=='waiting' || full.status=='approved' || full.status=='reject') ? 'disabled' : ''}" href="javascript:void(0);" onclick="edit(${full.id})">
                                         <i class="far fa-edit"></i>Update Data
                                     </a>
-                                    <a class="dropdown-item ${(full.status=='waiting' || full.status=='approved' || full.status=='reject') ? 'disabled' : ''}" href="javascript:void(0);" onclick="remove(this)" data-id="${full.id}">
+                                    <a class="dropdown-item ${(full.status=='waiting' || full.status=='approved' || full.status=='reject') ? 'disabled' : ''}" href="javascript:void(0);" onclick="destroy(${full.id})" data-id="${full.id}">
                                         <i class="far fa-trash-alt"></i> Delete Data
                                     </a>
                                 </div>
@@ -250,7 +251,7 @@
                                     <a class="dropdown-item disabled" href="javascript:void(0);" onclick="edit(${full.id})">
                                         <i class="far fa-edit"></i>Update Data
                                     </a>
-                                    <a class="dropdown-item disabled" href="javascript:void(0);" onclick="remove(this)" data-id="${full.id}">
+                                    <a class="dropdown-item disabled" href="javascript:void(0);" onclick="destroy(${full.id})" data-id="${full.id}">
                                         <i class="far fa-trash-alt"></i> Delete Data
                                     </a>
                                 </div>
@@ -497,5 +498,51 @@
             });
         });
     });
+
+function destroy(id) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "Erased data cannot be reversed.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3d9970',
+        confirmButtonText: "Yes, i am sure",
+        cancelButtonColor: '#d81b60',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.value) {
+            var data = { 
+                id: id,
+                _token: "{{ csrf_token() }}"
+            };
+            $.ajax({
+                url: '{{ route('grievance.index') }}/'+id,
+                dataType: 'json',
+                data: data,
+                type: 'DELETE',
+                success: function (response) {
+                    if (response.success) {
+                        Swal.fire(
+                            'Deleted!',
+                            'Data Successfully Erased.',
+                            'success'
+                        )
+                        setTimeout(() => {
+                            document.location = '{{ route('grievance.index') }}';
+                        }, 1000);
+                    }
+                    else {
+                        Swal.fire(
+                            'Error!',
+                            'Data Failed to Delete.',
+                            'error'
+                        )
+                    }
+                }
+            });
+
+        }
+    });
+}
 </script>
 @endsection
