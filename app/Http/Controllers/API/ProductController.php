@@ -57,7 +57,8 @@ class ProductController extends Controller
                 $qty = $qty +  $stock->stock;
             }                
 
-            $data[] = [                          
+            $data[] = [       
+                'id'         => $product->id,         
                 'product'    => $product->name,
                 'image'      => $product->image,                
                 'added_date' => date('d M Y', strtotime($product->created_at)),
@@ -70,5 +71,5 @@ class ProductController extends Controller
             'total'  => $total,
             'data'   => $data
         ], Response::HTTP_OK);
-    }
+    }    
 }
