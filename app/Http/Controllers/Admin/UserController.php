@@ -244,6 +244,10 @@ class UserController extends Controller
             }
         }
 
+        if ($request->group_id) {
+            $user->roles()->sync($request->group_id);
+        }
+
         if (!$user) {
             return response()->json([
                 'status' => false,
