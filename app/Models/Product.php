@@ -31,5 +31,10 @@ class Product extends Model
     public function receipts()
     {
         return $this->hasMany('App\Models\GoodsReceiptProduct','product_id','id');
-    }    
+    }
+    
+    public function stocks()
+    {
+        return $this->hasMany('App\Models\StockWarehouse','product_id','id');
+    }
 }

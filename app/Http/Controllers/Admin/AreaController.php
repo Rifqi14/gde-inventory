@@ -15,9 +15,11 @@ class AreaController extends Controller
     protected $actionmenu;
     function __construct() {
         $menu               = Menu::GetByRoute('area')->first();
-        $parent             = Menu::parent($menu->parent_id)->first();
-        View::share('menu_name', $menu->menu_name);
-        View::share('parent_name', $parent->menu_name);
+        if($menu){
+            $parent             = Menu::parent($menu->parent_id)->first();
+            View::share('menu_name', $menu->menu_name);
+            View::share('parent_name', $parent->menu_name);
+        }
         View::share('menu_active', url('admin/area'));
         $this->middleware('accessmenu', ['except' => ['select']]);
     }

@@ -66,4 +66,28 @@ class StockAdjustment extends Model
     {
         return $this->hasMany('App\Models\StockAdjustmentProductAsset', 'stock_adjustment_id', 'id');
     }
+
+    public function warehouse()
+    {
+        return $this->hasOne('App\Models\Warehouse', 'id', 'warehouse_id');
+    }
+
+    public function totalItems(){
+        
+    }
+
+    use AutoNumberTrait;
+
+    public function getAutoNumberOptions()
+    {
+        $code = 'ADJ';
+        $year = date('Y');
+
+        return [
+            'key_number' => [
+                'format' => "$code-$year-?",
+                'length' => 6
+            ]
+        ];
+    }
 }

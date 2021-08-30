@@ -123,9 +123,28 @@ Route::group(['prefix' => 'admin'], function () {
         Route::post('/purchasing/addnotes', 'Admin\PurchasingController@addnotes')->name('purchasing.addnotes');
         Route::get('/purchasing/test', 'Admin\PurchasingController@test');
         Route::resource('/purchasing', 'Admin\PurchasingController');
+
+        // Grievance
+        Route::get('/grievance/report/read', 'Admin\GrievanceController@reportread')->name('grievance.report.read');
+        Route::get('/grievance/read', 'Admin\GrievanceController@read')->name('grievance.read');
+        Route::post('/grievance/update_status', 'Admin\GrievanceController@update_status')->name('grievance.update_status');
+        Route::get('/grievance/report/{id}/edit', 'Admin\GrievanceController@edit_report')->name('grievance.report.edit');
+        Route::get('/grievance/report/{id}', 'Admin\GrievanceController@detail_report')->name('grievance.report.detail');
+        Route::post('/grievance/report/update/{id}', 'Admin\GrievanceController@update_report')->name('grievance.report.update');
+        Route::post('/grievance/report/update_status', 'Admin\GrievanceController@update_status_report')->name('grievance.report.update_status');
+        Route::resource('/grievance', 'Admin\GrievanceController');
+
+        // Safeguard Incident
+        Route::get('/hseincident/read', 'Admin\SafeguardIncidentController@read')->name('hseincident.read');
+        Route::post('/hseincident/approved', 'Admin\SafeguardIncidentController@approved')->name('hseincident.approved');
+        Route::resource('/hseincident', 'Admin\SafeguardIncidentController');
+
         // Route Stock Adjustment
         Route::get('/stockadjustment/read', 'Admin\StockAdjustmentController@read')->name('stockadjustment.read');
+        Route::get('/stockadjustment/getitemserial', 'Admin\StockAdjustmentController@getitemserial')->name('stockadjustment.getitemserial');
         Route::get('/stockadjustment/selectproduct', 'Admin\StockAdjustmentController@selectproduct')->name('stockadjustment.selectproduct');
+        Route::get('/stockadjustment/getuomproduct', 'Admin\StockAdjustmentController@getuomproduct')->name('stockadjustment.getuomproduct');
+        Route::get('/stockadjustment/getdetailserial', 'Admin\StockAdjustmentController@getdetailserial')->name('stockadjustment.getdetailserial');
         Route::resource('/stockadjustment', 'Admin\StockAdjustmentController');
         // Route Warehouse
         Route::get('/warehouse/read', 'Admin\WarehouseController@read')->name('warehouse.read');

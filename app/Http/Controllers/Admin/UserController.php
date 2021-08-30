@@ -285,11 +285,15 @@ class UserController extends Controller
         $start = $request->page ? $request->page - 1 : 0;
         $length = $request->limit;
         $name = strtoupper($request->name);
+        $exception_id = $request->exception_id;
 
         //Count Data
         $query = DB::table('users');
         $query->select('users.*');
         $query->whereRaw("upper(name) like '%$name%'");
+        if($exception_id){
+            $query->whereRaw("id <> $exception_id");
+        }
 
         $row = clone $query;
         $recordsTotal = $row->count();

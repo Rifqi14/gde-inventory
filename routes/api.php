@@ -14,21 +14,44 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::group([
-    'middleware' => 'api',
-    'prefix' => 'auth',
-], function() {
-    Route::post('/login', 'Auth\API\LoginController@login');
-    Route::post('/logout', 'Auth\API\LoginController@logout');
-    Route::post('/refresh', 'Auth\API\LoginController@refresh');
-    Route::post('/profile', 'Auth\API\LoginController@profile');    
+// Route::group([
+//     'middleware' => 'api',
+//     'prefix' => 'auth',
+// ], function() {
+//     Route::post('/login', 'Auth\API\LoginController@login');
+//     Route::post('/logout', 'Auth\API\LoginController@logout');
+//     Route::post('/refresh', 'Auth\API\LoginController@refresh');
+//     Route::post('/profile', 'Auth\API\LoginController@profile');    
     
-});
+// });
 
-// Account and Authentication
+// Account and Auth
 Route::group([
-    'prefix' => 'account'
+    'middleware' => 'api'
 ],function(){
-    // Register
-    Route::post('/signup','Api\RegisterController@signup');
+    // Account and Auth
+    Route::group([
+        'prefix' => 'account'
+    ], function(){
+        // Login
+        Route::post('/signin', 'API\Auth\LoginController@login');
+        // Register
+        Route::post('/signup', 'API\Auth\RegisterController@signup');
+
+        Route::group(['middleware' => ['auth:api']], function(){       
+            // Logout 
+            Route::post('/signout', 'API\Auth\LoginController@logout');
+        });        
+    });
+
+    // Role
+    Route::post('/role','API\RoleController@read');    
+
+    // Product
+    Route::group([
+        'middleware' => ['auth:api'],
+        'prefix'     => 'product'
+    ], function(){
+        Route::post('/list', 'API\ProductController@read');
+    });
 });
