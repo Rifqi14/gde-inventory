@@ -127,8 +127,8 @@ class BusinessTripController extends Controller
     public function show($id)
     {
         $businesstrip = BusinessTrip::with([
-            'departs',
-            'returns',
+            'departs.transportCurrency',
+            'returns.transportCurrency',
             'vehicles' => function($q){
                 $q->selectRaw("
                     business_trip_vehicles.*,                    
@@ -140,18 +140,50 @@ class BusinessTripController extends Controller
                 $q->leftJoin('request_vehicles','request_vehicles.id','=','business_trip_vehicles.request_vehicle_id');
                 $q->leftJoin('vehicles','vehicles.id','=','request_vehicles.vehicle_id');
             },
-            'lodgings',
-            'others'
+            'lodgings.lodgingCurrency',
+            'others.othersCurrency',
+            'issuedby.employees',
         ]);
         $businesstrip->selectRaw("
             business_trips.*,
             users.name as issued_name
         ");
         $businesstrip->leftJoin('users','users.id','=','business_trips.issued_by');
-        $businesstrip = $businesstrip->find($id);
+        $businesstrip = $businesstrip->find($id); 
+        
+        $currencies = Currency::all();
+        $total  = [];
+        foreach ($currencies as $key => $currency) {
+            $total[$currency->id]  = 0;
+            foreach ($businesstrip->departs as $key => $depart) {
+                if ($currency->id == $depart->currency_id) {
+                    $total[$currency->id]    += $depart->price;
+                }
+            }
+            foreach ($businesstrip->returns as $key => $depart) {
+                if ($currency->id == $depart->currency_id) {
+                    $total[$currency->id]    += $depart->price;
+                }
+            }
+            foreach ($businesstrip->lodgings as $key => $depart) {
+                if ($currency->id == $depart->currency_id) {
+                    $total[$currency->id]    += $depart->price;
+                }
+            }
+            foreach ($businesstrip->others as $key => $depart) {
+                if ($currency->id == $depart->currency_id) {
+                    $total[$currency->id]    += $depart->price;
+                }
+            }
+            if ($businesstrip->issuedby->employees) {
+                if ($currency->id == $businesstrip->issuedby->employees->rate_currency_id) {
+                    $total[$currency->id]    += $businesstrip->issuedby->employees->rate_business_trip;
+                }
+            }
+        }
         if ($businesstrip) {
             $data = $businesstrip;
-            return view('admin.business_trip.detail', compact('data'));
+            return view('admin.business_trip.detail', compact('data', 'total', 'currencies'));
         } else {
             abort(404);
         }
@@ -319,7 +351,6 @@ class BusinessTripController extends Controller
             'purpose'              => 'required',
             'location'             => 'required',
             'rate'                 => 'required',
-            'total_cost'           => 'required'
         ]);
 
         if($validator->fails()){
@@ -498,7 +529,6 @@ class BusinessTripController extends Controller
             'purpose'              => 'required',
             'location'             => 'required',
             'rate'                 => 'required',
-            'total_cost'           => 'required'
         ]);
 
         if($validator->fails()){
@@ -526,7 +556,7 @@ class BusinessTripController extends Controller
         $query->location       = $location;
         $query->rate           = $rate;
         $query->status         = $status;
-        $query->total_cost     = $total_cost;
+        $query->total_cost     = $total_cost ? $total_cost : 0;
         $query->update();
 
         if($query){

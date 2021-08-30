@@ -41,7 +41,7 @@ class DocumentCenterController extends Controller
     public function index(Request $request)
     {
         $categories = DcCategory::with(['menu', 'doctype'])->where('menu_id', $this->menu_id)->get();
-        if (in_array('create', $request->actionmenu)) {
+        if (in_array('read', $request->actionmenu)) {
             return view('admin.documentcenter.index', compact('categories'));
         }
         abort(403);

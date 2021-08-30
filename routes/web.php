@@ -38,6 +38,7 @@ Route::group(['prefix' => 'admin'], function () {
         Route::resource('/logrevise', 'Admin\LogReviseController');
         //Route User
         Route::get('/user/read', 'Admin\UserController@read')->name('user.read');
+        Route::post('/user/sync', 'Admin\UserController@sync')->name('user.sync');
         Route::get('/user/select', 'Admin\UserController@select')->name('user.select');
         Route::get('/user/spv-read', 'Admin\UserController@supervisor_read')->name('user.spv_read');
         Route::resource('/user', 'Admin\UserController');
@@ -458,5 +459,13 @@ Route::group(['prefix' => 'admin'], function () {
         Route::delete('/revision/destroyfile/{id}', 'Admin\DocumentExternal\RevisionController@destroyFile')->name('revision.destroyfile');
         Route::delete('/revision/destroy/{id}', 'Admin\DocumentExternal\RevisionController@destroy')->name('revision.destroy');
         Route::resource('/revision', 'Admin\DocumentExternal\RevisionController');
+
+        // Workflow
+        Route::get('/workflow/read', 'Admin\DocumentExternal\Workflow\WorkflowController@read')->name('workflow.read');
+        Route::get('/workflow/{id}', 'Admin\DocumentExternal\Workflow\WorkflowController@index')->name('workflow.workflow');
+        Route::resource('/workflow', 'Admin\DocumentExternal\Workflow\WorkflowController');
+
+        // Group Workflow
+        Route::resource('/groupworkflow', 'Admin\DocumentExternal\Workflow\GroupWorkflowController');
     });
 });

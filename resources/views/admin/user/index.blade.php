@@ -34,16 +34,17 @@ Registered User
                 <div class="card">
                     <div class="card-header">
                         @if(in_array('read',$actionmenu))
-                        <a class="btn btn-labeled btn-sm text-sm btn-default btn-flat legitRipple  float-right ml-1"
-                            onclick="filter()">
+                        <a class="btn btn-labeled btn-sm text-sm btn-default btn-flat legitRipple  float-right ml-1" onclick="filter()">
                             <b><i class="fas fa-search"></i></b> Search
                         </a>
                         @endif
                         @if(in_array('create',$actionmenu))
-                        <a href="{{ route('user.create') }}"
-                            class="btn btn-labeled btn-sm text-sm btn-success btn-flat legitRipple  float-right ml-1">
+                        <a href="{{ route('user.create') }}" class="btn btn-labeled btn-sm text-sm btn-success btn-flat legitRipple  float-right ml-1">
                             <b><i class="fas fa-plus"></i></b> Create
                         </a>
+                        <button type="button" href="#" class="btn btn-labeled btn-sm text-sm btn-success btn-flat legitRipple  float-right ml-1" onclick="synchronize()">
+                            <b><i class="fas fa-sync"></i></b> Sync
+                        </button>
                         @endif
                     </div>
                     <div class="card-body">
@@ -68,8 +69,7 @@ Registered User
 </section>
 <!-- /.content -->
 
-<div id="add-filter" class="modal fade" data-backdrop="static" tabindex="-1" role="dialog"
-    aria-labelledby="filter-modal" aria-hidden="true">
+<div id="add-filter" class="modal fade" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="filter-modal" aria-hidden="true">
     <div class="modal-dialog " role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -91,8 +91,7 @@ Registered User
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="control-label" for="username">Username</label>
-                                    <input type="text" id="username" name="username" class="form-control"
-                                        placeholder="Username">
+                                    <input type="text" id="username" name="username" class="form-control" placeholder="Username">
                                 </div>
                             </div>
                         </div>
@@ -100,8 +99,7 @@ Registered User
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="control-label" for="realname">Full Name</label>
-                                    <input type="text" id="realname" name="realname" class="form-control"
-                                        placeholder="Realname">
+                                    <input type="text" id="realname" name="realname" class="form-control" placeholder="Realname">
                                 </div>
                             </div>
                         </div>
@@ -109,11 +107,8 @@ Registered User
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-labeled  btn-danger btn-sm btn-sm btn-flat legitRipple"
-                    data-dismiss="modal"><b><i class="fas fa-times"></i></b> Cancel</button>
-                <button type="submit" form="form-search"
-                    class="btn btn-labeled  btn-default  btn-sm btn-flat legitRipple"><b><i
-                            class="fas fa-search"></i></b> Search</button>
+                <button type="button" class="btn btn-labeled  btn-danger btn-sm btn-sm btn-flat legitRipple" data-dismiss="modal"><b><i class="fas fa-times"></i></b> Cancel</button>
+                <button type="submit" form="form-search" class="btn btn-labeled  btn-default  btn-sm btn-flat legitRipple"><b><i class="fas fa-search"></i></b> Search</button>
             </div>
         </div>
     </div>
@@ -123,6 +118,7 @@ Registered User
 @section('scripts')
 <script>
     var actionmenu = JSON.parse('{!! json_encode($actionmenu) !!}');
+    var token = `{{ csrf_token() }}`;
 </script>
 <script type="text/javascript">
     $(function() {
@@ -138,6 +134,7 @@ Registered User
             filter: false,
             responsive: true,
             lengthChange: false,
+            pageLength: 50,
             order: [[ 3, "asc" ]],
             ajax: {
                 url: "{{route('user.read')}}",
@@ -218,6 +215,32 @@ Registered User
 			$('#add-filter').modal('hide');
 		});
 	});
+
+    const synchronize = () => {
+        $.ajax({
+            url: `{{ route('user.sync') }}`,
+            dataType: 'json',
+            data: {
+                _token: token,
+            },
+            type: 'post',
+            beforeSend: function(){
+                blockMessage('body', 'LOading ...', '#fff');
+            },
+        }).done(function(response){
+            $('body').unblock();
+            if (response.status) {
+                dataTable.draw();
+                return true;
+            }
+            toastr.warning(response.message);
+            return false;
+        }).fail(function(response){
+            $('body').unblock();
+            var response    = response.responseJSON;
+            toastr.error(response.message);
+        });
+    }
 
 	function edit(id)
 	{

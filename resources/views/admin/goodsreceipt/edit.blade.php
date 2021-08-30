@@ -36,7 +36,7 @@
                 <h5 class="text-md text-dark text-uppercase">{{ $menu_name }} Information</h5>
               </span>
               <div class="row">
-              <!-- Receipt Number -->
+                <!-- Receipt Number -->
                 <div class="col-sm-6">
                   <div class="form-group row">
                     <label for="receipt-number" class="col-md-12 col-xs-12 control-label">Receipt Number</label>
@@ -63,17 +63,17 @@
                       <div class="input-group">
                         <input type="text" name="receipt_date" id="receipt-date" class="form-control datepicker text-right" placeholder="Enter receipt date">
                         <div class="input-group-append">
-                            <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                          <span class="input-group-text"><i class="fas fa-calendar"></i></span>
                         </div>
-                      </div>                      
+                      </div>
                     </div>
                   </div>
                 </div>
-                 <!-- Product Category -->
-                 <div class="col-md-6">
+                <!-- Product Category -->
+                <div class="col-md-6">
                   <label for="product-category" class="control-label">Product Category</label>
                   <div class="controls">
-                      <select id="product-category" class="form-control select2" data-placeholder="Choose Product Category"></select>
+                    <select id="product-category" class="form-control select2" data-placeholder="Choose Product Category"></select>
                   </div>
                 </div>
                 <!-- Site -->
@@ -111,13 +111,13 @@
               <span class="title">
                 <hr>
                 <h5 class="text-md text-dark text-uppercase">Other Information</h5>
-              </span>              
+              </span>
               <div class="form-group row">
                 <label for="description" class="col-md-12 col-xs-12 control-label">Description</label>
                 <div class="col-sm-12 controls">
                   <textarea class="form-control summernote" name="description" id="description" rows="4" placeholder="Description">{{$data->description}}</textarea>
                 </div>
-              </div>              
+              </div>
             </div>
           </div>
         </div>
@@ -139,7 +139,7 @@
                     <tr>
                       <th width="100">Product</th>
                       <th width="100" style="white-space: nowrap;">Product Category</th>
-                      <th width="30" class="text-center">Has Serial</th>                      
+                      <th width="30" class="text-center">Has Serial</th>
                       <th width="20" class="text-right" style="white-space: nowrap;">Qty Order</th>
                       <th width="20" class="text-right" style="white-space: nowrap;">Qty Receipt</th>
                       <th width="100">Rack</th>
@@ -272,12 +272,12 @@
                   <thead>
                     <tr>
                       <th width="3%" class="text-center">No</th>
-                      <th width="5%" class="text-center">Date</th>                      
+                      <th width="5%" class="text-center">Date</th>
                       <th width="30%">Product</th>
                       <th width="50%">Product Category</th>
                       <th width="5%" class="text-center">Has Serial</th>
                       <th width="10%" class="text-center">UOM</th>
-                      <th width="5%" class="text-right">Qty</th>                      
+                      <th width="5%" class="text-right">Qty</th>
                       <th width="5%" class="text-center">Action</th>
                     </tr>
                   </thead>
@@ -288,12 +288,12 @@
                   <thead>
                     <tr>
                       <th width="3%" class="text-center">No</th>
-                      <th width="5%" class="text-center">Date</th>                      
+                      <th width="5%" class="text-center">Date</th>
                       <th width="30%">Product</th>
                       <th width="50%">Product Category</th>
                       <th width="5%" class="text-center">Has Serial</th>
                       <th width="10%" class="text-center">UOM</th>
-                      <th width="5%" class="text-right">Qty</th>                      
+                      <th width="5%" class="text-right">Qty</th>
                       <th width="5%" class="text-center">Action</th>
                     </tr>
                   </thead>
