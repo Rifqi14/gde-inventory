@@ -14,6 +14,9 @@ class AddKeyNumberInStockAdjustmentsTable extends Migration
     public function up()
     {
         Schema::table('stock_adjustments', function (Blueprint $table) {
+            $table->dropColumn('key_number');
+        });
+        Schema::table('stock_adjustments', function (Blueprint $table) {
             $table->string('key_number')->nullable();
         });
     }
@@ -25,6 +28,9 @@ class AddKeyNumberInStockAdjustmentsTable extends Migration
      */
     public function down()
     {
+        Schema::table('stock_adjustments', function (Blueprint $table) {
+            $table->string('key_number')->nullable();
+        });
         Schema::table('stock_adjustments', function (Blueprint $table) {
             $table->dropColumn('key_number');
         });
