@@ -125,4 +125,93 @@ return [
             'operate'           => 'Operate and Evaluate',
         ],
     ],
+    'document_category'     => [
+        'IFI'          => 'Issued For Information',
+        'IFU'          => 'Issued For Use',
+        'AB'           => 'As Built',
+    ],
+
+    'reviewer_matrix'   => [
+        'information'   => [
+            'label'     => 'Information',
+            'group'     => [
+                'max_tag'   => 8,
+            ],
+            'sla'       => null,
+            'days'      => null,
+            'required'  => true,
+        ],
+        'reviewer'   => [
+            'label'     => 'Reviewer',
+            'group'     => [
+                'max_tag'   => 4,
+            ],
+            'sla'       => null,
+            'days'      => null,
+            'required'  => true,
+        ],
+        'responsible_person'   => [
+            'label'     => 'Responsible Person',
+            'group'     => [
+                'max_tag'   => 1,
+            ],
+            'sla'       => null,
+            'days'      => null,
+            'required'  => true,
+        ],
+        'approver1'   => [
+            'label'     => 'Approver #1',
+            'group'     => [
+                'max_tag'   => 1,
+            ],
+            'sla'       => null,
+            'days'      => null,
+            'required'  => true,
+        ],
+        'approver2'   => [
+            'label'     => 'Approver #2',
+            'group'     => [
+                'max_tag'   => 1,
+            ],
+            'sla'       => null,
+            'days'      => null,
+            'required'  => false,
+        ],
+        'approver3'   => [
+            'label'     => 'Approver #3',
+            'group'     => [
+                'max_tag'   => 1,
+            ],
+            'sla'       => null,
+            'days'      => null,
+            'required'  => false,
+        ],
+    ],
+
+    'issue_status'      => [
+        'IFI'          => [
+            'parent'    => 'IFI',
+            'label'     => 'Issued For Information'
+        ],
+        'IFU'          => [
+            'parent'    => 'IFU',
+            'label'     => 'Issued For Use',
+        ],
+        'AB'           => [
+            'parent'    => 'AB',
+            'label'     => 'As Built'
+        ],
+        'IFA'          => [
+            'parent'    => 'IFI',
+            'label'     => 'Issued for Approval'
+        ],
+        'IFC'          => [
+            'parent'    => 'IFU',
+            'label'     => 'Issued for Construction'
+        ],
+        'AFC'          => [
+            'parent'    => 'AB',
+            'label'     => 'Approved for Construction',
+        ],
+    ]
 ];

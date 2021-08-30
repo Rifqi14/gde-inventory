@@ -42,6 +42,9 @@ Registered User
                         <a href="{{ route('user.create') }}" class="btn btn-labeled btn-sm text-sm btn-success btn-flat legitRipple  float-right ml-1">
                             <b><i class="fas fa-plus"></i></b> Create
                         </a>
+                        <button type="button" href="#" class="btn btn-labeled btn-sm text-sm btn-success btn-flat legitRipple  float-right ml-1" onclick="synchronize()">
+                            <b><i class="fas fa-sync"></i></b> Sync
+                        </button>
                         @endif
                     </div>
                     <div class="card-body">
@@ -115,6 +118,7 @@ Registered User
 @section('scripts')
 <script>
     var actionmenu = JSON.parse('{!! json_encode($actionmenu) !!}');
+    var token = `{{ csrf_token() }}`;
 </script>
 <script type="text/javascript">
     $(function() {
@@ -211,6 +215,32 @@ Registered User
 			$('#add-filter').modal('hide');
 		});
 	});
+
+    const synchronize = () => {
+        $.ajax({
+            url: `{{ route('user.sync') }}`,
+            dataType: 'json',
+            data: {
+                _token: token,
+            },
+            type: 'post',
+            beforeSend: function(){
+                blockMessage('body', 'LOading ...', '#fff');
+            },
+        }).done(function(response){
+            $('body').unblock();
+            if (response.status) {
+                dataTable.draw();
+                return true;
+            }
+            toastr.warning(response.message);
+            return false;
+        }).fail(function(response){
+            $('body').unblock();
+            var response    = response.responseJSON;
+            toastr.error(response.message);
+        });
+    }
 
 	function edit(id)
 	{

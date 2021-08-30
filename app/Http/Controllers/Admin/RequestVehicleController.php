@@ -179,7 +179,7 @@ class RequestVehicleController extends Controller
             $query->join('employees','employees.id','=','users.employee_id');
             $query->where([
                 ['request_vehicles.issued_by','=',$employeeid],
-                ['request_vehicles.status','=',2]
+                ['request_vehicles.status','=','APPROVED']
             ]);
             if($search){
                 $query->whereRaw("upper(vehicles.vehicle_name) like '%$search%'");
