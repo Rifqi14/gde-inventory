@@ -91,10 +91,13 @@ class DcCategoryController extends Controller
         DB::beginTransaction();
         try {
             foreach ($request->menu_id as $key => $menu) {
-                $dccategory = DcCategory::create([
-                    'menu_id'           => $menu,
-                    'document_type_id'  => $request->document_type_id,
-                ]);
+                $exists = DcCategory::where([['menu_id', '=', $menu], ['document_type_id', '=', $request->document_type_id]])->first();
+                if (!$exists) {
+                    $dccategory = DcCategory::create([
+                        'menu_id'           => $menu,
+                        'document_type_id'  => $request->document_type_id,
+                    ]);
+                }
             }
         } catch (\Illuminate\Database\QueryException $ex) {
             DB::rollBack();
@@ -106,7 +109,7 @@ class DcCategoryController extends Controller
         DB::commit();
         return response()->json([
             'status'    => true,
-            'results'   => route('documentcategory.index'),
+            'results'   => route('doccenterproperties.index'),
         ], 200);
     }
 
@@ -140,6 +143,14 @@ class DcCategoryController extends Controller
 
         DB::beginTransaction();
         try {
+            $exists     = DcCategory::where([['menu_id', '=', $request->menu_id], ['document_type_id', '=', $request->document_type_id], ['id', '<>', $id]])->first();
+            if ($exists) {
+                DB::rollBack();
+                return response()->json([
+                    'status'    => false,
+                    'message'   => "This data already exists",
+                ], 400);
+            }
             $dccategory = DcCategory::find($id);
             $dccategory->menu_id            = $request->menu_id;
             $dccategory->document_type_id   = $request->document_type_id;
@@ -154,7 +165,7 @@ class DcCategoryController extends Controller
         DB::commit();
         return response()->json([
             'status'     => true,
-            'results'     => route('documentcategory.index'),
+            'results'     => route('doccenterproperties.index'),
         ], 200);
     }
 
