@@ -13,8 +13,13 @@
 @endsection
 
 @section('button')
+@if (in_array('create', $actionmenu) && $employee_id->employees->payroll_type == 1)
+<button type="button" id="add-attendance-backdate" class="btn btn-labeled text-sm btn-sm btn-success btn-flat legitRipple" onclick="windowLocation('{{ route('attendance.create', ['backdate' => 'YES']) }}')">
+  <b><i class="fas fa-plus"></i></b> Create Backdate
+</button>
+@endif
 @if (in_array('create', $actionmenu) && !$attendanceToday && $employee_id->employees->payroll_type == 1)
-<button type="button" id="add-attendance" class="btn btn-labeled text-sm btn-sm btn-success btn-flat legitRipple" onclick="windowLocation('{{ route('attendance.create') }}')">
+<button type="button" id="add-attendance" class="btn btn-labeled text-sm btn-sm btn-success btn-flat legitRipple" onclick="windowLocation('{{ route('attendance.create', ['backdate' => 'NO']) }}')">
   <b><i class="fas fa-plus"></i></b> Create
 </button>
 @endif

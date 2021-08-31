@@ -99,16 +99,17 @@ class AttendanceController extends Controller
     /**
      * Show the form for creating a new resource.
      *
+     * @param string $backdate
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
-    public function create(Request $request)
+    public function create(Request $request, string $backdate = 'NO')
     {
         if (in_array('create', $request->actionmenu)) {
             $employee_id    = Auth::guard('admin')->user();
             $employee       = Employee::with(['workingshift'])->find($employee_id->employee_id);
             if ($employee) {
-                return view('admin.attendance.create', compact('employee'));
+                return view('admin.attendance.create', compact('employee', 'backdate'));
             } else {
                 abort(403);
             }
