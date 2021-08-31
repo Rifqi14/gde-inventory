@@ -291,8 +291,8 @@
                                     <div class="form-group">
                                         <label class="control-label" for="payroll">Payroll</label>
                                         <select class="form-control select2" name="payroll" id="payroll" data-placeholder="Yes/No">
-                                            <option value="1" @if ($data->payroll == '1') selected @endif>Yes</option>
-                                            <option value="0" @if ($data->payroll == '0') selected @endif>No</option>
+                                            <option value="1" @if ($data->payroll_type == '1') selected @endif>Yes</option>
+                                            <option value="0" @if ($data->payroll_type == '0') selected @endif>No</option>
                                         </select>
                                     </div>
                                 </div>

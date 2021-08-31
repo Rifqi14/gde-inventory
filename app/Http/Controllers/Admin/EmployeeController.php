@@ -101,20 +101,21 @@ class EmployeeController extends Controller
         $query   = $request->search['value'];
         $sort    = $request->columns[$request->order[0]['column']]['data'];
         $dir     = $request->order[0]['dir'];
-        $nik     = $request->employee_nik;
         $name    = strtoupper($request->employee_name);
-        $address = strtoupper($request->employee_address);
+        $position= strtoupper($request->position);
+        $email   = strtoupper($request->email);
 
         $employee = Employee::query();
-        $employee->selectRaw('id,nik,name,address');
+        $employee->selectRaw('employees.id as id,employees.name as name,employees.position as position, users.email as email');
+        $employee->leftJoin('users', 'users.employee_id', '=', 'employees.id');
         if ($name) {
-            $employee->whereRaw("upper(name) like '%$name%'");
+            $employee->whereRaw("upper(employees.name) like '%$name%'");
         }
-        if ($address) {
-            $employee->whereRaw("upper(address) like '%$address%'");
+        if ($position) {
+            $employee->whereRaw("upper(users.positon) like '%$position%'");
         }
-        if ($nik) {
-            $employee->whereRaw("nik like '%$nik%'");
+        if ($email) {
+            $employee->whereRaw("upper(users.email) like '%$email%'");
         }
 
         $rows  = clone $employee;
