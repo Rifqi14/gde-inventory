@@ -99,7 +99,6 @@
                 <label class="col-md-12 col-xs-12 control-label" for="employee">Employee</label>
                 <div class="col-sm-12 controls">
                   <select name="employee" id="employee" class="form-control select2">
-                    <option value="">Select Employee</option>
                   </select>
                 </div>
               </div>
@@ -336,13 +335,14 @@
     });
 
     $("#employee").select2({
+        placeholder: "Select employee",
         ajax: {
             url: "{{ route('employee.select') }}",
             type: "GET",
             dataType: "JSON",
             data: function(params) {
                 return {
-                    employee_id: `{{ Auth::user()->employee_id ? Auth::user()->employee_id : null }}`,
+                    employee_id: `{{ !in_array('approval', $actionmenu) ? Auth::user()->employee_id : null }}`,
                     name: params.term,
                     page: params.page,
                     limit: 30,
@@ -367,7 +367,7 @@
         allowClear: true,
     });
     
-    @if (Auth::user()->employee_id)
+    @if (!in_array('approval', $actionmenu) && Auth::user()->employee_id)
       $('#employee').select2('trigger', 'select', {
         data: {
           id: `{{ Auth::user()->employees->id }}`,
@@ -472,6 +472,8 @@
             }
         });
     });
+    
+    dataTable.draw();
   })
 </script>
 @endsection
