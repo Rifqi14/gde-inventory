@@ -78,6 +78,25 @@ class IclockTranscationController extends Controller
                     }
                     $sameAttendance->day_work       = $dayWork;
                     $sameAttendance->save();
+
+                    $checkLogIn = AttendanceLog::where([['type', 'IN'], ['attendance_id', $sameAttendance->id], ['attendance', $attendance->check_in]])->first();
+                    $checkLogOut= AttendanceLog::where([['type', 'IN'], ['attendance_id', $sameAttendance->id], ['attendance', $attendance->check_out]])->first();
+                    if (!$checkLogIn) {
+                        $logIn    = AttendanceLog::create([
+                            'attendance_id'     => $sameAttendance->id,
+                            'employee_id'       => $employee->id,
+                            'attendance'        => $attendance->check_in,
+                            'type'              => 'IN',
+                        ]);
+                    }
+                    if (!$checkLogOut) {
+                        $logOut    = AttendanceLog::create([
+                            'attendance_id'     => $sameAttendance->id,
+                            'employee_id'       => $employee->id,
+                            'attendance'        => $attendance->check_out,
+                            'type'              => 'OUT',
+                        ]);
+                    }
                 }
             }
         }
