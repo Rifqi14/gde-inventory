@@ -66,6 +66,18 @@ class IclockTranscationController extends Controller
                             ]);
                         }
                     }
+                } else {
+                    $sameAttendance->attendance_in  = $attendance->check_in;
+                    $sameAttendance->attendance_out = $attendance->check_out;
+                    $sameAttendance->working_time   = $this->countWorkingTime($sameAttendance->attendance_in, $sameAttendance->attendance_out) >= 8 ? 8 : $this->countWorkingTime($sameAttendance->attendance_in, $sameAttendance->attendance_out);
+                    $sameAttendance->over_time      = ($this->countWorkingTime($sameAttendance->attendance_in, $sameAttendance->attendance_out) - 8) >= 0 ? $this->countWorkingTime($sameAttendance->attendance_in, $sameAttendance->attendance_out) - 8 : 0;
+                    if ($sameAttendance->working_time >= 8 || ($employee->shift_type == 'hourly' && $sameAttendance->working_time > 0)) {
+                        $dayWork        = 1;
+                    } else {
+                        $dayWork        = 0.5;
+                    }
+                    $sameAttendance->day_work       = $dayWork;
+                    $sameAttendance->save();
                 }
             }
         }
@@ -100,8 +112,6 @@ class IclockTranscationController extends Controller
 
     public function read(Request $request)
     {
-        $page           = $request->page ?? 0;
-        $page_size      = $request->page_size ?? 100;
         $start_date     = $request->start_date ? Carbon::parse($request->start_date) : Carbon::now()->firstOfMonth();
         $end_date       = $request->end_date ? Carbon::parse($request->end_date) : Carbon::now()->endOfMonth();
         $departments    = $this->getAllDepartment();
@@ -115,13 +125,10 @@ class IclockTranscationController extends Controller
         $row            = clone $queryData;
         $recordsTotal   = $row->count();
 
-        $queryData->offset($page);
-        $queryData->limit($page_size);
         $transactions   = $queryData->get();
 
         $data           = [];
         foreach ($transactions as $key => $transaction) {
-            $transaction->no    = ++$page;
             $data[]             = [
                 'emp_code'      => $transaction->employee->emp_code,
                 'first_name'    => $transaction->employee->first_name,

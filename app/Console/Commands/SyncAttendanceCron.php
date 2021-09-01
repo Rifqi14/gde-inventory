@@ -43,8 +43,8 @@ class SyncAttendanceCron extends Command
         \Log::info("Cron is working fine!");
         $transaction    = new IclockTranscationController();
         $request        = new Request();
-        $request->start_date    = Carbon::createFromFormat('Y-m-d', '2021-08-01');
-        $request->finish_date   = Carbon::createFromFormat('Y-m-d', '2021-08-31');
+        // $request->start_date    = Carbon::createFromFormat('Y-m-d', '2021-08-01');
+        // $request->finish_date   = Carbon::createFromFormat('Y-m-d', '2021-08-31');
         $transaction->index($request);
     }
 }
