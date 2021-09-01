@@ -3,7 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Http\Controllers\Machine\IclockTranscationController;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Http\Request;
 
 class SyncAttendanceCron extends Command
 {
@@ -40,6 +42,9 @@ class SyncAttendanceCron extends Command
     {
         \Log::info("Cron is working fine!");
         $transaction    = new IclockTranscationController();
-        $transaction->index();
+        $request        = new Request();
+        $request->start_date    = Carbon::createFromFormat('Y-m-d', '2021-08-01');
+        $request->finish_date   = Carbon::createFromFormat('Y-m-d', '2021-08-31');
+        $transaction->index($request);
     }
 }

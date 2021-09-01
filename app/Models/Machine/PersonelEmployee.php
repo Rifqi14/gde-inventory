@@ -33,4 +33,14 @@ class PersonelEmployee extends Model
      * @var bool
      */
     public $timestamps = false;
+
+    public function payloads()
+    {
+        return $this->hasMany(\App\Models\Machine\AttPayloadpairing::class, 'emp_id', 'id');
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(\App\Models\Machine\PersonnelDepartment::class, 'department_id', 'id');
+    }
 }
