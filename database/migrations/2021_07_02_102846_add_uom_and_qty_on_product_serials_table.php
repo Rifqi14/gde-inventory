@@ -14,7 +14,7 @@ class AddUomAndQtyOnProductSerialsTable extends Migration
     public function up()
     {
         Schema::table('product_serials', function (Blueprint $table) {
-            $table->unsignedBigInteger('uom_id');
+            $table->unsignedBigInteger('uom_id')->nullable();
             $table->double('uom_qty')->default(0);
             $table->double('qty')->default(0);
             $table->text('position')->nullable();

@@ -6,6 +6,7 @@
     .overlay-wrapper {
         position: relative;
     }
+
     .dd-handle {
         display: block;
         height: auto;
@@ -17,21 +18,26 @@
         box-sizing: border-box;
         -moz-box-sizing: border-box;
     }
+
     .dd-handle span {
         font-weight: 500;
     }
+
     .dd-item>button {
         margin: 10px 0;
     }
+
     .item_actions {
         position: absolute;
         top: 8px;
         right: 10px;
     }
+
     .dd-handle {
         background: #fff;
         box-shadow: 0px 0px 9px -5px rgb(0 0 0 / 50%);
     }
+
     .dd-item .item_actions button {
         position: relative;
         width: 40px;
@@ -40,7 +46,9 @@
         display: inline-block;
         margin-top: 1px;
     }
-    .dd-item>button[data-action=collapse], .dd-item>button[data-action=expand] {
+
+    .dd-item>button[data-action=collapse],
+    .dd-item>button[data-action=expand] {
         font-size: 16px;
         margin: 0px;
         width: 25px;
@@ -54,8 +62,9 @@
         margin: 7px;
         transition-duration: 0.3s;
     }
-    .dd-item>button[data-action=collapse]:hover, 
-    .dd-item>button[data-action=expand]:hover{
+
+    .dd-item>button[data-action=collapse]:hover,
+    .dd-item>button[data-action=expand]:hover {
         background-color: #e9ecef;
     }
 </style>
@@ -106,7 +115,7 @@
             <div class="modal-header">
                 <h5 class="modal-title text-bold">Create Menu</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
+                    <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
@@ -142,11 +151,11 @@
 @endsection
 
 @section('scripts')
-    <script>
-        var create_url = '{{ url("") }}';
+<script>
+    var create_url = '{{ url("") }}';
         var menu_store = '{{ route("menu.store") }}';
         var token = '{{ csrf_token() }}';
-    </script>
-    <script src="{{ asset('assets/js/nestable/jquery.nestable.js') }}"></script>
-    <script src="{{ asset('js/menu.js') }}"></script>
+</script>
+<script src="{{ asset('assets/js/nestable/jquery.nestable.js') }}"></script>
+<script src="{{ asset('js/menu.js') }}"></script>
 @endsection

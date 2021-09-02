@@ -1,62 +1,29 @@
-@extends('admin.layouts.app')
-@section('title', 'Document Category')
-@section('stylesheets')
-
-@endsection
-
 @section('button')
-<button type="button" id="add-role" class="btn btn-labeled text-sm btn-sm btn-success btn-flat legitRipple" onclick="windowLocation('{{route('documentcategory.create')}}')">
+@parent
+<button type="button" id="add-dccategory" class="btn btn-labeled text-sm btn-sm btn-success btn-flat legitRipple d-none" onclick="windowLocation('{{route('documentcategory.create')}}')">
     <b><i class="fas fa-plus"></i></b> Create
 </button>
-<button type="button" id="filter-role" class="btn btn-labeled text-sm btn-sm btn-default btn-flat legitRipple" onclick="filter()">
+<button type="button" id="filter-dccategory" class="btn btn-labeled text-sm btn-sm btn-default btn-flat legitRipple d-none" onclick="filterDcCategory()">
     <b><i class="fas fa-search"></i></b> Filter
 </button>
 @endsection
 
-@section('breadcrumb')
-<div class="row mb-3 mt-3">
-    <div class="col-sm-4">
-        <h1 id="title-branch" class="m-0 text-dark">
-            Document Category
-        </h1>
-    </div>
-    <div class="col-sm-8">
-        <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
-            <li class="breadcrumb-item">Home</li>
-            <li class="breadcrumb-item">Document Category</li>
-        </ol>
+<div class="tab-pane fade show" id="dccategory" role="tabpanel" aria-labelledby="dccategory-tab">
+    <div class="table-responsive">
+        <table id="table-dccategory" class="table table-striped datatable" width="100%">
+            <thead>
+                <tr>
+                    <th width="5">No.</th>
+                    <th width="100">Sub Menu</th>
+                    <th width="100">Document Type</th>
+                    <th width="20" class="text-center">#</th>
+                </tr>
+            </thead>
+        </table>
     </div>
 </div>
-@endsection
-
-@section('content')
-<section class="content" id="content">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header">
-
-                    </div>
-                    <div class="card-body table-responsive p-0">
-                        <table id="table-dccategory" class="table table-striped datatable" width="100%">
-                            <thead>
-                                <tr>
-                                    <th width="5">No.</th>
-                                    <th width="100">Sub Menu</th>
-                                    <th width="100">Document Type</th>
-                                    <th width="20" class="text-center">#</th>
-                                </tr>
-                            </thead>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<div class="modal fade" id="form-filter">
+@push('filter')
+<div class="modal fade" id="form-filter-dccategory">
     <div class="modal-dialog modal-md">
         <div class="modal-content">
             <div class="modal-header">
@@ -66,7 +33,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form id="form-search" method="post" autocomplete="off">
+                <form id="form-search-dccategory" method="post" autocomplete="off">
                     {{ csrf_field() }}
                     <input type="hidden" name="_method" />
                     <div class="row">
@@ -98,24 +65,25 @@
     </div>
     <!-- /.modal-dialog -->
 </div>
-@endsection
+@endpush
 
 @section('scripts')
+@parent
 <script>
     var actionmenu  = @json(json_encode($actionmenu));
 
-    function filter() {
-        $('#form-filter').modal('show');
+    function filterDcCategory() {
+        $('#form-filter-dccategory').modal('show');
     }
-    function edit(id) {
+    function editDcCategory(id) {
         document.location = '{{route('documentcategory.index')}}/' + id + '/edit';
     }
-    function view(id) {
+    function viewDcCategory(id) {
         document.location = '{{route('documentcategory.index')}}/' + id;
     }
     $(function(){
         $(".select2").select2();
-        dataTable = $('.datatable').DataTable( {
+        dataTableDcCategory = $('#table-dccategory').DataTable( {
             processing: true,
             language: {
                 processing: `<div class="p-2 text-center">
@@ -131,8 +99,8 @@
                 url: "{{route('documentcategory.read')}}",
                 type: "GET",
                 data:function(data){
-                    var menu_id             = $('#form-search').find('select[name=menu_id]').val();
-                    var document_type_id    = $('#form-search').find('select[name=document_type_id]').val();
+                    var menu_id             = $('#form-search-dccategory').find('select[name=menu_id]').val();
+                    var document_type_id    = $('#form-search-dccategory').find('select[name=document_type_id]').val();
                     data.menu_id            = menu_id;
                     data.document_type_id   = document_type_id;
                 }
@@ -164,7 +132,7 @@
                     render: function ( data, type, row ) {
                         var button  = '';
                         if (actionmenu.indexOf('update') > 0) {
-                            button += `<a class="dropdown-item" href="javascript:void(0);" onclick="edit(${row.id})">
+                            button += `<a class="dropdown-item" href="javascript:void(0);" onclick="editDcCategory(${row.id})">
                                         <i class="far fa-edit"></i>Update Data
                                        </a>`;
                         }
@@ -192,10 +160,10 @@
             ]
         });
 
-        $('#form-search').submit(function (e) {
+        $('#form-search-dccategory').submit(function (e) {
             e.preventDefault();
-            dataTable.draw();
-            $('#form-filter').modal('hide');
+            dataTableDcCategory.draw();
+            $('#form-filter-dccategory').modal('hide');
         });
 
         $('#menu_id').select2({
@@ -311,7 +279,7 @@
                                     "hideMethod": "fadeOut"
                                 }
                                 toastr.success(response.message);
-                                dataTable.ajax.reload(null, false);
+                                dataTableDcCategory.ajax.reload(null, false);
                             }else {
                                 toastr.options = {
                                     "closeButton": false,

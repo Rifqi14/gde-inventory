@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\DocExternal\ReviewerMatrix\DocumentExternalMatrix;
 use Illuminate\Database\Eloquent\Model;
 
 class Role extends Model
@@ -29,5 +30,15 @@ class Role extends Model
     public function contractors()
     {
         return $this->hasMany('App\Models\DocExternal\DocumentExternal', 'role_id', 'id');
+    }
+
+    public function matrices()
+    {
+        return $this->belongsToMany(DocumentExternalMatrix::class, 'document_external_matrix_groups', 'role_id', 'matrix_id', 'id', 'id');
+    }
+
+    public function groupworkflows()
+    {
+        return $this->hasMany(\App\Models\DocExternal\Workflow\GroupWorkflow::class, 'role_id');
     }
 }

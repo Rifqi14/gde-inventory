@@ -8,6 +8,9 @@ use App\Models\RoleUser;
 use App\Models\SiteUser;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Employee;
+use App\Traits\InteractWithApiResponse;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -15,6 +18,7 @@ use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
+    use InteractWithApiResponse;
     function __construct()
     {
         View::share('menu_active', url('admin/' . 'user'));
@@ -104,6 +108,21 @@ class UserController extends Controller
                 'status' => false,
                 'message'     => "Cant create user"
             ], 200);
+        }
+
+        $employee = Employee::where('email', $user->email)->first();
+        if (!$employee) {
+            $employeeData   = [
+                'name'          => $user->name,
+                'email'         => $user->email,
+                'shift_type'    => 'shift',
+                'payroll_type'  => 1,
+                'status'        => 1,
+            ];
+
+            $employeeCreate = Employee::create($employeeData);
+            $user->employee_id  = $employeeCreate->id;
+            $user->save();
         }
 
         // $images = $request->file('images');
@@ -223,6 +242,10 @@ class UserController extends Controller
                     'user_id' => $user->id
                 ]);
             }
+        }
+
+        if ($request->group_id) {
+            $user->roles()->sync($request->group_id);
         }
 
         if (!$user) {
@@ -371,5 +394,27 @@ class UserController extends Controller
             'total' => $recordsTotal,
             'rows' => $data
         ], 200);
+    }
+
+    public function sync()
+    {
+        $users  = User::isActive()->get();
+        foreach ($users as $keyUser => $user) {
+            $employee   = Employee::where("email", $user->email)->first();
+            if (!$employee) {
+                $employeeData   = [
+                    'name'          => $user->name,
+                    'email'         => $user->email,
+                    'shift_type'    => 'shift',
+                    'payroll_type'  => 1,
+                    'status'        => 1,
+                ];
+
+                $employeeCreate = Employee::create($employeeData);
+                $user->employee_id  = $employeeCreate->id;
+                $user->save();
+            }
+        }
+        return $this->success(Response::HTTP_OK, "Success synchronize data.", null);
     }
 }

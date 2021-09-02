@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Auth\API;
+namespace App\Http\Requests\API;
 
 use App\Libraries\Facades\RateLimiter;
 use Illuminate\Foundation\Http\FormRequest;

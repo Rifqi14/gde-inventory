@@ -54,7 +54,7 @@
                                 <b><i class="fas fa-save"></i></b>
                                 Save
                             </button>
-                            <a href="{{route('documentcategory.index')}}" class="btn btn-sm btn-secondary color-palette btn-labeled legitRipple text-sm">
+                            <a href="{{route('doccenterproperties.index')}}" class="btn btn-sm btn-secondary color-palette btn-labeled legitRipple text-sm">
                                 <b><i class="fas fa-times"></i></b>
                                 Cancel
                             </a>
