@@ -52,6 +52,9 @@ Route::group([
         'middleware' => ['auth:api'],
         'prefix'     => 'product'
     ], function(){
+        // List 
         Route::post('/list', 'API\ProductController@read');
+        // Detail
+        Route::post('/detail','API\ProductController@show');
     });
 });
