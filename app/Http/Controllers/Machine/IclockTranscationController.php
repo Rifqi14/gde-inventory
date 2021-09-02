@@ -80,8 +80,8 @@ class IclockTranscationController extends Controller
                     $sameAttendance->save();
 
                     $checkLogIn = AttendanceLog::where([['type', 'IN'], ['attendance_id', $sameAttendance->id], ['attendance', $attendance->check_in]])->first();
-                    $checkLogOut= AttendanceLog::where([['type', 'IN'], ['attendance_id', $sameAttendance->id], ['attendance', $attendance->check_out]])->first();
-                    if (!$checkLogIn) {
+                    $checkLogOut= AttendanceLog::where([['type', 'OUT'], ['attendance_id', $sameAttendance->id], ['attendance', $attendance->check_out]])->first();
+                    if (!$checkLogIn && $attendance->check_in) {
                         $logIn    = AttendanceLog::create([
                             'attendance_id'     => $sameAttendance->id,
                             'employee_id'       => $employee->id,
@@ -89,7 +89,7 @@ class IclockTranscationController extends Controller
                             'type'              => 'IN',
                         ]);
                     }
-                    if (!$checkLogOut) {
+                    if (!$checkLogOut && $attendance->check_out) {
                         $logOut    = AttendanceLog::create([
                             'attendance_id'     => $sameAttendance->id,
                             'employee_id'       => $employee->id,
