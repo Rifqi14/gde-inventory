@@ -771,14 +771,14 @@ class ActivitieController extends Controller
         $view = DB::table('activities_curva_view');
         $view->select("id");
 		if ($loc) {
-            $query->where("parent_id", 0);
-            $query->whereRaw("lower(activity) = $act");
-            $query->where("location = $loc");
-            $menu = $query->get();
+            $view->where("parent_id", 0);
+            $view->where("location", $loc);
+            $view->whereRaw("lower(activity) = '$act'");
+            $menu = $view->get();
 		} else {
-            $query->where("parent_id", 0);
-            $query->whereRaw("lower(activity) = $act");
-            $menu = $query->get();
+            $view->where("parent_id", 0);
+            $view->whereRaw("lower(activity) = '$act'");
+            $menu = $view->get();
 		}
 		$data = [];
 		foreach ($menu as $row) {
@@ -792,7 +792,7 @@ class ActivitieController extends Controller
 	{
         $view = DB::table('activities_curva_view');
         $view->select("id");
-        $view->where("parent_id = $act_id");
+        $view->where("parent_id",$act_id);
         $menu = $view->get();
 		if (count($menu) > 0) {
 			foreach ($menu as $row) {

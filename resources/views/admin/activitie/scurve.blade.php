@@ -497,7 +497,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form id="form-act" action="{{ url('activitie/scurve') }}/{{ $location }}" enctype="multipart/form-data" method="GET">
+                <form id="form-act" action="{{ url('admin/activitie/scurve') }}/{{ $location }}" enctype="multipart/form-data" method="GET">
                     <div class="form-group row">
                         <label class="col-sm-4 col-form-label">Filter :</label>
                         <div class="col-sm-8">
