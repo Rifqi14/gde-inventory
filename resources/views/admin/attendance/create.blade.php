@@ -80,13 +80,13 @@
                 <div class="col-md-6">
                   <div class="form-group">
                     <label class="control-label" for="check_in">Check In</label>
-                    <input type="text" name="check_in" class="form-control" placeholder="Check In" disabled>
+                    <input type="text" name="check_in" class="form-control" placeholder="Check In" @if($backdate == 'NO') disabled @endif>
                   </div>
                 </div>
                 <div class="col-md-6">
                   <div class="form-group">
                     <label class="control-label" for="check_out">Check Out</label>
-                    <input type="text" name="check_out" class="form-control" placeholder="Check Out" disabled>
+                    <input type="text" name="check_out" class="form-control" placeholder="Check Out" @if($backdate == 'NO') disabled @endif>
                   </div>
                 </div>
                 <div class="col-md-6">

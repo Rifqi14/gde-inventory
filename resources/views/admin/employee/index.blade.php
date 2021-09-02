@@ -41,9 +41,9 @@
                                 <thead>
                                     <tr>
                                         <th class="text-center" width="10%">No.</th>
-                                        <th width="50">NIK</th>
                                         <th width="150">Employee Name</th>
-                                        <th width="200">Address</th>
+                                        <th width="50">Position</th>
+                                        <th width="50">Email</th>
                                         <th class="text-center" width="10%">Action</th>
                                     </tr>
                                 </thead>
@@ -70,8 +70,8 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label class="control-label" for="nik">NIK</label>
-                                    <input class="form-control" type="text" name="employee_nik" id="employee-nik" placeholder="NIK">
+                                    <label class="control-label" for="position">Position</label>
+                                    <input class="form-control" type="text" name="position" id="position" placeholder="Position">
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -82,8 +82,8 @@
                             </div>
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label class="control-label" for="employee-address">Address</label>
-                                    <input class="form-control" type="text" name="employee_address" id="employee-address" placeholder="Address">
+                                    <label class="control-label" for="email">Email</label>
+                                    <input class="form-control" type="text" name="email id=" email" placeholder="Email">
                                 </div>
                             </div>
                         </div>
@@ -138,13 +138,13 @@
                 url: "{{route('employee.read')}}",
                 type: "GET",
                 data: function(data) {
-                    var nik     = $('#form-search').find('input[name=employee_nik]').val(),
+                    var position= $('#form-search').find('input[name=position]').val(),
                         name    = $('#form-search').find('input[name=employee_name]').val(),
-                        address = $('#form-search').find('input[name=employee_address]').val();
+                        email   = $('#form-search').find('input[name=email]').val();
 
-                    data.employee_nik     = nik;
-                    data.employee_name    = name;
-                    data.employee_address = address;
+                    data.email          = position;
+                    data.employee_name  = name;
+                    data.email          = email;
                 }
             },
             columnDefs: [{
@@ -186,13 +186,16 @@
                     data: "no"
                 },
                 {
-                    data: "nik"
-                },
-                {
                     data: "name"
                 },
                 {
-                    data: "address"
+                    data: "position"
+                },
+                {
+                    data: "email"
+                },
+                {
+                    data: "id"
                 }
             ]
         });

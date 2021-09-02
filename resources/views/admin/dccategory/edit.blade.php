@@ -238,7 +238,7 @@
                     name: `{{ $dccategory->doctype->name }}`
                 }
             });
-            $('#name').val({{ $dccategory->doctype->name }});
+            $('#name').val(`{{ $dccategory->doctype->name }}`);
         @endif
     });
 </script>

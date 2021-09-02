@@ -13,8 +13,13 @@
 @endsection
 
 @section('button')
+@if (in_array('create', $actionmenu) && $employee_id->employees->payroll_type == 1)
+<button type="button" id="add-attendance-backdate" class="btn btn-labeled text-sm btn-sm btn-success btn-flat legitRipple" onclick="windowLocation('{{ route('attendance.create', ['backdate' => 'YES']) }}')">
+  <b><i class="fas fa-plus"></i></b> Create Backdate
+</button>
+@endif
 @if (in_array('create', $actionmenu) && !$attendanceToday && $employee_id->employees->payroll_type == 1)
-<button type="button" id="add-attendance" class="btn btn-labeled text-sm btn-sm btn-success btn-flat legitRipple" onclick="windowLocation('{{ route('attendance.create') }}')">
+<button type="button" id="add-attendance" class="btn btn-labeled text-sm btn-sm btn-success btn-flat legitRipple" onclick="windowLocation('{{ route('attendance.create', ['backdate' => 'NO']) }}')">
   <b><i class="fas fa-plus"></i></b> Create
 </button>
 @endif
@@ -94,7 +99,6 @@
                 <label class="col-md-12 col-xs-12 control-label" for="employee">Employee</label>
                 <div class="col-sm-12 controls">
                   <select name="employee" id="employee" class="form-control select2">
-                    <option value="">Select Employee</option>
                   </select>
                 </div>
               </div>
@@ -331,13 +335,14 @@
     });
 
     $("#employee").select2({
+        placeholder: "Select employee",
         ajax: {
             url: "{{ route('employee.select') }}",
             type: "GET",
             dataType: "JSON",
             data: function(params) {
                 return {
-                    employee_id: `{{ Auth::user()->employee_id ? Auth::user()->employee_id : null }}`,
+                    employee_id: `{{ !in_array('approval', $actionmenu) ? Auth::user()->employee_id : null }}`,
                     name: params.term,
                     page: params.page,
                     limit: 30,
@@ -362,7 +367,7 @@
         allowClear: true,
     });
     
-    @if (Auth::user()->employee_id)
+    @if (!in_array('approval', $actionmenu) && Auth::user()->employee_id)
       $('#employee').select2('trigger', 'select', {
         data: {
           id: `{{ Auth::user()->employees->id }}`,
@@ -467,6 +472,8 @@
             }
         });
     });
+    
+    dataTable.draw();
   })
 </script>
 @endsection
