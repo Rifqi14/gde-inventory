@@ -34,11 +34,15 @@
               <li class="nav-item">
                 <button type="button" onclick="activeTab('unitcode')" class="nav-link pl-4 pr-4" id="unitcode-tab" data-toggle="tab" data-target="#unitcode" role="tab" aria-controls="document" aria-selected="false"><b>Unit Code</b></button>
               </li>
+              <li class="nav-item">
+                <button type="button" onclick="activeTab('dccategory')" class="nav-link pl-4 pr-4" id="dccategory-tab" data-toggle="tab" data-target="#dccategory" role="tab" aria-controls="document" aria-selected="false"><b>Document Category</b></button>
+              </li>
             </ul>
             <div class="tab-content" id="propertiesTabContent">
               @include('admin.documenttype.index')
               @include('admin.organization.index')
               @include('admin.unitcode.index')
+              @include('admin.dccategory.index')
             </div>
           </div>
         </div>
@@ -70,6 +74,8 @@
         $('#filter-organization').addClass('d-none');
         $('#add-unitcode').addClass('d-none');
         $('#filter-unitcode').addClass('d-none');
+        $('#add-dccategory').addClass('d-none');
+        $('#filter-dccategory').addClass('d-none');
         break;
       case 'organizationcode':
         $('#add-documenttype').addClass('d-none');
@@ -78,6 +84,18 @@
         $('#filter-organization').removeClass('d-none');
         $('#add-unitcode').addClass('d-none');
         $('#filter-unitcode').addClass('d-none');
+        $('#add-dccategory').addClass('d-none');
+        $('#filter-dccategory').addClass('d-none');
+        break;
+      case 'dccategory':
+        $('#add-documenttype').addClass('d-none');
+        $('#filter-documenttype').addClass('d-none');
+        $('#add-organization').addClass('d-none');
+        $('#filter-organization').addClass('d-none');
+        $('#add-unitcode').addClass('d-none');
+        $('#filter-unitcode').addClass('d-none');
+        $('#add-dccategory').removeClass('d-none');
+        $('#filter-dccategory').removeClass('d-none');
         break;
     
       default:
@@ -87,6 +105,8 @@
         $('#filter-organization').addClass('d-none');
         $('#add-unitcode').removeClass('d-none');
         $('#filter-unitcode').removeClass('d-none');
+        $('#add-dccategory').addClass('d-none');
+        $('#filter-dccategory').addClass('d-none');
         break;
     }
   }

@@ -25,6 +25,8 @@ Route::get('/test', 'Admin\TestController@test')->name('test');
 Route::get('/businesstrip/rateprocess', 'Admin\BusinessTripController@rateprocess')->name('businesstrip.rateprocess');
 Route::get('/reimbursement/rateprocess', 'Admin\ReimbursementController@rateprocess')->name('reimbursement.rateprocess');
 
+Route::resource('/attendanceclock', 'Machine\IclockTranscationController');
+
 Route::get('/home', 'HomeController@index')->name('home');
 Route::group(['prefix' => 'admin'], function () {
     Route::get('/', 'Auth\AdminLoginController@showLoginForm')->name('admin.login');
@@ -255,7 +257,10 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/attendance/generate', 'Admin\AttendanceController@generateHeaderWhenNotAttend')->name('attendance.generate');
         Route::get('/attendance/attendance/{month}/{year}', 'Admin\AttendanceController@generateAttendanceAMonth')->name('attendance.attendance');
         Route::get('/attendance/read', 'Admin\AttendanceController@read')->name('attendance.read');
-        Route::resource('/attendance', 'Admin\AttendanceController');
+        Route::get('/attendance/create/{backdate}', 'Admin\AttendanceController@create')->name('attendance.create');
+        Route::resource('/attendance', 'Admin\AttendanceController')->except([
+            'create'
+        ]);
 
         // Attendance Log
         Route::get('/attendancelog/read', 'Admin\AttendanceLogController@read')->name('attendancelog.read');

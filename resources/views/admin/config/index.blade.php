@@ -75,7 +75,7 @@
                             <a class="btn btn-sm btn-default btn-block"><i class="fa fa-image"></i> Upload a Picture</a>
                             <input class="form-control" type="file" name="app_logo" id="app_logo" accept="image/*" value="{{ config('configs.app_logo') }}" />
                           </div>
-                          <p class="text-sm text-muted">File must be no more than 2 MB</p>
+                          <p class="text-sm text-muted">File must be no more than 10 MB</p>
                         </div>
                       </div>
                     </div>
@@ -97,7 +97,7 @@
                             <a class="btn btn-sm btn-default btn-block"><i class="fa fa-image"></i> Upload a Picture</a>
                             <input class="form-control" type="file" name="app_icon" id="app_icon" accept="image/*" value="{{ config('configs.app_icon') }}" />
                           </div>
-                          <p class="text-sm text-muted">File must be no more than 2 MB</p>
+                          <p class="text-sm text-muted">File must be no more than 10 MB</p>
                         </div>
                       </div>
                     </div>
@@ -119,7 +119,7 @@
                             <a class="btn btn-sm btn-default btn-block"><i class="fa fa-image"></i> Upload a Picture</a>
                             <input class="form-control" type="file" name="login_background" id="login_background" accept="image/*" value="{{ config('configs.login_background') }}" />
                           </div>
-                          <p class="text-sm text-muted">File must be no more than 2 MB</p>
+                          <p class="text-sm text-muted">File must be no more than 10 MB</p>
                         </div>
                       </div>
                     </div>

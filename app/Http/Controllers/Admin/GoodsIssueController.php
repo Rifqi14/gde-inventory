@@ -383,7 +383,7 @@ class GoodsIssueController extends Controller
             $this->issuedNumber($issued_id, $query->key_number, $query->created_at);
 
             if ($getProducts) {                
-                $this->approval($getProducts,$issued_id, $status);
+                $this->approval($getProducts, $issued_id, $status);
             }
 
             if (isset($documentNames)) {
@@ -488,7 +488,8 @@ class GoodsIssueController extends Controller
                 'qty_receive'      => $row->qty_receive,
                 'rack_id'          => $row->rack_id,
                 'bin_id'           => $row->bin_id,
-                'type'             => $row->type
+                'type'             => $row->type,
+                'status'           => $status=='approved'?'out':null
             ]);                                       
 
             if($row->has_serial && $row->type == 'borrowing'){                
@@ -591,7 +592,8 @@ class GoodsIssueController extends Controller
                         'qty_receive'      => $row->qty_receive,
                         'rack_id'          => $row->rack_id,
                         'bin_id'           => $row->bin_id,
-                        'type'             => $row->type
+                        'type'             => $row->type,
+                        'status'           => $status=='approved'?'out':null,
                     ]);
                     
                     if (!$query) {
