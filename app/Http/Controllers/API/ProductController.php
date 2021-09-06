@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Exceptions\ProductException;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Response;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\API\ProductRequest;
+use App\Http\Resources\ProductResource;
 
 use App\Models\Product;
 
@@ -71,5 +74,25 @@ class ProductController extends Controller
             'total'  => $total,
             'data'   => $data
         ], Response::HTTP_OK);
-    }    
+    } 
+    
+    public function show(Request $request)
+    {       
+        $id = $request->id;    
+
+        if(!$id){
+            throw new ProductException('The given data was invalid.');
+        }
+
+        return new ProductResource(
+            Product::with([
+                'stocks' => function($stock) {                                        
+                    $stock->join('warehouses','warehouses.id','=','stock_warehouses.warehouse_id');           
+                },
+                'borrowed' => function($borrow){
+                    $borrow->selectRaw("goods_issue_products.*");
+                }
+            ])->findorFail($id)
+        );
+    }
 }

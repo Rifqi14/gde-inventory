@@ -151,3 +151,26 @@ if (!function_exists('countDateDiff')) {
         return date_diff($date1, $date2, true);
     }
 }
+
+if (!function_exists('sortDateArray')) {
+    function sortDateArray($date)
+    {
+        function date_sort($a, $b)
+        {
+            return strtotime($a) - strtotime($b);
+        }
+        usort($date, "date_sort");
+
+        return $date;
+    }
+}
+if (!function_exists('getFullMonth')) {
+    function getFullMonth($month)
+    {
+        $monthNum  = $month;
+        $dateObj   = DateTime::createFromFormat('!m', $monthNum);
+        $monthName = $dateObj->format('F'); // March
+
+        return $monthName;
+    }
+}

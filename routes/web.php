@@ -95,6 +95,20 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/budgetary/edit/{id}', 'Admin\BudgetController@editing');
         Route::get('/budgetary/delete/{id}', 'Admin\BudgetController@destroy')->name('budgetary.delete');
         Route::resource('/budgetary', 'Admin\BudgetController');
+
+        //Route Activitie
+        Route::get('/activitie/scurve/dieng', 'Admin\ActivitieController@dieng')->name('scurve.dieng');
+        Route::get('/activitie/scurve/patuha', 'Admin\ActivitieController@patuha')->name('scurve.patuha');
+        Route::post('/activitie/scurve/chart', 'Admin\ActivitieController@chart')->name('scurve.chart');
+        Route::post('/activitie/scurve/get_progress', 'Admin\ActivitieController@get_progress')->name('scurve.get_progress');
+        Route::post('/activitie/updateact', 'Admin\ActivitieController@updateact')->name('activitie.updateact');
+        Route::post('/activitie/destroyact', 'Admin\ActivitieController@destroyact')->name('activitie.destroyact');
+        Route::post('/activitie/order', 'Admin\ActivitieController@order')->name('activitie.order');
+        Route::post('/activitie/import', 'Admin\ActivitieController@import')->name('activitie.import');
+        Route::post('/activitie/getdetail', 'Admin\ActivitieController@getDetail')->name('activitie.get.detail');
+        Route::post('/activitie/add-type', 'Admin\ActivitieController@addType')->name('activitie.add.type');
+        Route::resource('/activitie', 'Admin\ActivitieController');
+
         //Route Contract
         Route::get('/contract/read', 'Admin\ContractController@read')->name('contract.read');
         Route::get('/contract/product', 'Admin\ContractController@product')->name('contract.product');
