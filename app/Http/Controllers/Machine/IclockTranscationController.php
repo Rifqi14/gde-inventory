@@ -131,8 +131,8 @@ class IclockTranscationController extends Controller
 
     public function read(Request $request)
     {
-        $start_date     = $request->start_date ? Carbon::parse($request->start_date) : Carbon::now()->firstOfMonth();
-        $end_date       = $request->end_date ? Carbon::parse($request->end_date) : Carbon::now()->endOfMonth();
+        $start_date     = $request->start_date ? Carbon::parse($request->start_date) : Carbon::now()->subDays(2);
+        $end_date       = $request->end_date ? Carbon::parse($request->end_date) : Carbon::now();
         $departments    = $this->getAllDepartment();
         $areas          = -1;
         $groups         = -1;
