@@ -153,6 +153,11 @@ class ActivitieController extends Controller
         $userid = Auth::guard('admin')->user()->id;
 		$table = 'activities_curva';
 
+        $request->start_date = str_replace("/","-",$request->start_date);
+        $request->finish_date = str_replace("/","-",$request->finish_date);
+        $request->start_date = date("Y-m-d", strtotime($request->start_date));
+        $request->finish_date = date("Y-m-d", strtotime($request->finish_date));
+
         $data = array(
 			'parent_id' => 0,
 			'activity' => $request->activity,
@@ -207,6 +212,11 @@ class ActivitieController extends Controller
         $data = $request;
         $userid = Auth::guard('admin')->user()->id;
 		$table = 'activities_curva';
+
+        $request->start_date = str_replace("/","-",$request->start_date);
+        $request->finish_date = str_replace("/","-",$request->finish_date);
+        $request->start_date = date("Y-m-d", strtotime($request->start_date));
+        $request->finish_date = date("Y-m-d", strtotime($request->finish_date));
 
         $data = array(
 			'parent_id' => 0,
@@ -604,40 +614,47 @@ class ActivitieController extends Controller
         $location = 'dieng';
 		$type = '';
 		$table = 'activities_curva';
-        $start = $this->daterange($location, $type);
-		$start = sortDateArray($start);
-        $start_date = $start[0];
-		$finish_date = end($start);
-        $range_data = getDatesFromRange($start_date, $finish_date, 'Y/m', '1 month');
-		$range_year = getDatesFromRange($start_date, $finish_date, 'Y', '1 month');
-        $ranges_data = $range_data;
-        $ranges_year = array_unique($range_year);
-
-        $act_parent = $this->get_actparent('dieng','plan');
-
-        $real_name = Auth::guard('admin')->user()->name;
-
+        $ranges_data = "";
+        $ranges_year = "";
+        $ranges = "";
         $plan = "";
-        $ranges = [];
+        $type = "";
+        $real_name = Auth::guard('admin')->user()->name;
+        $act_parent = "";
+        $start = $this->daterange($location, $type);
+        if($start){
+            $start = sortDateArray($start);
+            $start_date = $start[0];
+            $finish_date = end($start);
+            $range_data = getDatesFromRange($start_date, $finish_date, 'Y/m', '1 month');
+            $range_year = getDatesFromRange($start_date, $finish_date, 'Y', '1 month');
+            $ranges_data = $range_data;
+            $ranges_year = array_unique($range_year);
 
-        if ($filter) {
-            if (!$get['startYear'] or !$get['startMonth'] or !$get['finishYear'] or !$get['finishMonth']) {
-				return view('admin.activitie.scurve', compact('ranges_data','ranges_year','ranges','plan','type','filter','get','location', 'real_name','act_parent'));
-			}
+            $act_parent = $this->get_actparent('dieng','plan');
 
-            $start_date = $get['startYear'] . '-' . $get['startMonth'] . '-1';
-			$finish_date = $get['finishYear'] . '-' . $get['finishMonth'] . '-1';
-			$range = getDatesFromRange($start_date, $finish_date, 'Y/m', '1 month');
-            $ranges = $range;
+            $plan = "";
+            $ranges = [];
 
-            $location = 'dieng';
-			$type = '';
-			$range = $range;
-			$act = strtolower($get['act']);
-			$table = 'activities_curva_view';
-            $plan = $this->rows($act, $location, $range);
+            if ($filter) {
+                if (!$get['startYear'] or !$get['startMonth'] or !$get['finishYear'] or !$get['finishMonth']) {
+                    return view('admin.activitie.scurve', compact('ranges_data','ranges_year','ranges','plan','type','filter','get','location', 'real_name','act_parent'));
+                }
 
-            $type = $this->activity_type('dieng');
+                $start_date = $get['startYear'] . '-' . $get['startMonth'] . '-1';
+                $finish_date = $get['finishYear'] . '-' . $get['finishMonth'] . '-1';
+                $range = getDatesFromRange($start_date, $finish_date, 'Y/m', '1 month');
+                $ranges = $range;
+
+                $location = 'dieng';
+                $type = '';
+                $range = $range;
+                $act = strtolower($get['act']);
+                $table = 'activities_curva_view';
+                $plan = $this->rows($act, $location, $range);
+
+                $type = $this->activity_type('dieng');
+            }
         }
         $filter = $filter;
         $get = $get;
@@ -654,40 +671,49 @@ class ActivitieController extends Controller
         $location = 'patuha';
 		$type = '';
 		$table = 'activities_curva';
-        $start = $this->daterange($location, $type);
-		$start = sortDateArray($start);
-        $start_date = $start[0];
-		$finish_date = end($start);
-        $range_data = getDatesFromRange($start_date, $finish_date, 'Y/m', '1 month');
-		$range_year = getDatesFromRange($start_date, $finish_date, 'Y', '1 month');
-        $ranges_data = $range_data;
-        $ranges_year = array_unique($range_year);
-
-        $act_parent = $this->get_actparent('patuha','plan');
-
-        $real_name = Auth::guard('admin')->user()->name;
-
+        $ranges_data = "";
+        $ranges_year = "";
+        $ranges = "";
         $plan = "";
-        $ranges = [];
+        $type = "";
+        $real_name = Auth::guard('admin')->user()->name;
+        $act_parent = "";
+        $start = $this->daterange($location, $type);
+        if($start){
+            $start = sortDateArray($start);
+            $start_date = $start[0];
+            $finish_date = end($start);
+            $range_data = getDatesFromRange($start_date, $finish_date, 'Y/m', '1 month');
+            $range_year = getDatesFromRange($start_date, $finish_date, 'Y', '1 month');
+            $ranges_data = $range_data;
+            $ranges_year = array_unique($range_year);
 
-        if ($filter) {
-            if (!$get['startYear'] or !$get['startMonth'] or !$get['finishYear'] or !$get['finishMonth']) {
-				return view('admin.activitie.scurve', compact('ranges_data','ranges_year','ranges','plan','type','filter','get','location', 'real_name','act_parent'));
-			}
+            $act_parent = $this->get_actparent('patuha','plan');
 
-            $start_date = $get['startYear'] . '-' . $get['startMonth'] . '-1';
-			$finish_date = $get['finishYear'] . '-' . $get['finishMonth'] . '-1';
-			$range = getDatesFromRange($start_date, $finish_date, 'Y/m', '1 month');
-            $ranges = $range;
+            $real_name = Auth::guard('admin')->user()->name;
 
-            $location = 'patuha';
-			$type = 'plan';
-			$range = $range;
-			$act = strtolower($get['act']);
-			$table = 'activities_curva_view';
-            $plan = $this->rows($act, $location, $range);
+            $plan = "";
+            $ranges = [];
 
-            $type = $this->activity_type('patuha');
+            if ($filter) {
+                if (!$get['startYear'] or !$get['startMonth'] or !$get['finishYear'] or !$get['finishMonth']) {
+                    return view('admin.activitie.scurve', compact('ranges_data','ranges_year','ranges','plan','type','filter','get','location', 'real_name','act_parent'));
+                }
+
+                $start_date = $get['startYear'] . '-' . $get['startMonth'] . '-1';
+                $finish_date = $get['finishYear'] . '-' . $get['finishMonth'] . '-1';
+                $range = getDatesFromRange($start_date, $finish_date, 'Y/m', '1 month');
+                $ranges = $range;
+
+                $location = 'patuha';
+                $type = 'plan';
+                $range = $range;
+                $act = strtolower($get['act']);
+                $table = 'activities_curva_view';
+                $plan = $this->rows($act, $location, $range);
+
+                $type = $this->activity_type('patuha');
+            }
         }
         $filter = $filter;
         $get = $get;
