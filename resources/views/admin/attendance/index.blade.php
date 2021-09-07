@@ -256,7 +256,7 @@
                     workingday = `<small class="badge badge-info">Not Completed</small>`;
                     break;
                 }
-                html  = `<b>WT: </b> ${row.working_time ? row.working_time : 0}<br><b>OT: </b> ${row.over_time ? row.over_time : 0}<br><b>Working Day: </b> ${workingday}`;
+                html  = `<b>WT: </b> ${row.working_time ? row.working_time : 0}<br><b class="${row.over_time > 0 ? 'text-danger' : ''}" >OT: </b> ${row.over_time > 0 ? '<span class="text-danger">'+row.over_time+'</span>' : 0}<br><b>Working Day: </b> ${workingday}`;
                 return html;
               }, targets: [5]
             },

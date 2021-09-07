@@ -140,6 +140,7 @@ class IclockTranscationController extends Controller
 
         // Query Data
         $queryData      = AttPayloadpairing::with(['employee.department'])->whereBetween('att_date', [$start_date, $end_date]);
+        $att            = new AttPayloadpairing();
 
         $row            = clone $queryData;
         $recordsTotal   = $row->count();

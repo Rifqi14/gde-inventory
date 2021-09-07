@@ -75,12 +75,11 @@
                 <div class="card dashboard-item-overview">
                     <div class="card-body">
                         <p id="welcome">WELCOME,</p>
-                        <p id="fullname">DEVELOPMENT APPLICATION!</p>
+                        <p id="fullname">{{ strtoupper(auth()->user()->name) }}!</p>
                         <br>
                         <p id="ps" class="text-muted">
                             Thank you for accessing Project Management & Monitoring Systems.<br>
-                            Have you got the User's Manual? You can always download it <a id="link" href="#"
-                                target="_blank" download>here</a>
+                            Have you got the User's Manual? You can always download it <a id="link" href="#" target="_blank" download>here</a>
                         </p>
                         <div id="bgks" class="text-right">
                             <img id="logo" src="{{asset('assets/logo.png')}}" />

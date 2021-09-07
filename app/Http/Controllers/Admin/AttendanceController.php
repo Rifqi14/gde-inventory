@@ -156,6 +156,7 @@ class AttendanceController extends Controller
                 'remarks'           => $request->description,
                 'working_shift_id'  => $request->working_shift_id ? $request->working_shift_id : $request->shift,
                 'day'               => date('D'),
+                'day_work'          => Employee::find($request->employee_id)->shift_type == 'hourly' ? 1 : null,
             ]);
 
             if ($create) {
@@ -209,7 +210,7 @@ class AttendanceController extends Controller
     {
         if (in_array('update', $request->actionmenu)) {
             $attendance     = Attendance::with(['employee'])->find($id);
-            // dd(($attendance->employee->user->spv_id != Auth::guard('admin')->user()->id) && in_array('approval', $request->actionmenu));
+            // dd((Auth::guard('admin')->user()->id) && in_array('approval', $request->actionmenu));
             if ($attendance) {
                 $countDayDiff   = Carbon::parse($attendance->attendance_date)->diffInDays(Carbon::now());
                 return view('admin.attendance.edit', compact('attendance', 'countDayDiff'));
@@ -250,16 +251,14 @@ class AttendanceController extends Controller
 
                 $attendance->attendance_in      = $request->check_in;
                 $attendance->attendance_out     = $request->check_out;
-                $attendance->working_time       = $this->countWorkingTime($attendance->attendance_in, $attendance->attendance_out);
-                $attendance->over_time          = $this->countOvertime($attendance->working_time, $attendance->working_shift_id);
+                $attendance->working_time       = $this->countWorkingTime($attendance->attendance_in, $attendance->attendance_out) >= 8 ? 8 : $this->countWorkingTime($attendance->attendance_in, $attendance->attendance_out);
+                $attendance->over_time          = ($this->countWorkingTime($attendance->attendance_in, $attendance->attendance_out) - 8) >= 0 ? $this->countWorkingTime($attendance->attendance_in, $attendance->attendance_out) - 8 : 0;
                 $attendance->working_shift_id   = $attendance->employee->shift_type == 'hourly' ? null : $attendance->working_shift_id;
                 $attendance->remarks            = $request->description;
-                if ($shift) {
-                    if ($attendance->working_time >= $shift->total_working_time) {
-                        $dayWork        = 1;
-                    } else {
-                        $dayWork        = 0.5;
-                    }
+                if (0 < $attendance->working_time && $attendance->working_time < 8) {
+                    $dayWork        = 0.5;
+                } elseif ($attendance->working_time >= 8) {
+                    $dayWork        = 1;
                 }
                 if (($attendance->attendance_in && !$attendance->attendance_out) || (!$attendance->attendance_in && $attendance->attendance_out)) {
                     $dayWork    = null;
@@ -301,9 +300,6 @@ class AttendanceController extends Controller
                 $attendance     = Attendance::find($id);
                 $shift          = WorkingShift::find($attendance->working_shift_id);
                 $dayWork        = 0;
-                if ($shift) {
-                    
-                }
                 
                 $attendance->attendance_out = $time->toDateTime();
                 $attendance->working_time   = $this->countWorkingTime($attendance->attendance_in, $attendance->attendance_out) >= 8 ? 8 : $this->countWorkingTime($attendance->attendance_in, $attendance->attendance_out);
@@ -313,7 +309,7 @@ class AttendanceController extends Controller
                 $attendance->status         = 'APPROVED';
                 if ($attendance->working_time >= 8) {
                     $dayWork        = 1;
-                } else {
+                } elseif (0 < $attendance->working_time && $attendance->working_time < 8) {
                     $dayWork        = 0.5;
                 }
                 $attendance->day_work       = $dayWork;
@@ -323,7 +319,7 @@ class AttendanceController extends Controller
                     $log        = AttendanceLog::create([
                         'attendance_id'     => $attendance->id,
                         'employee_id'       => $request->employee_id,
-                        'attendance'        => $time->toDateTime(),
+                        'attendance'        => $attendance->attendance_out,
                         'type'              => 'OUT',
                     ]);
                 }

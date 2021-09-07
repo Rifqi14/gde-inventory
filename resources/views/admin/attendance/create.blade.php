@@ -32,6 +32,7 @@
                 <hr>
                 <h5 class="text-md text-dark text-bold">{{ $menu_name }} Information</h5>
               </span>
+              <input type="hidden" name="backdate" value="{{ $backdate }}">
               <div class="mt-5"></div>
               <div class="row">
                 <div class="col-md-6">
@@ -80,13 +81,13 @@
                 <div class="col-md-6">
                   <div class="form-group">
                     <label class="control-label" for="check_in">Check In</label>
-                    <input type="text" name="check_in" class="form-control" placeholder="Check In" @if($backdate == 'NO') disabled @endif>
+                    <input type="text" name="check_in" class="form-control datepicker" placeholder="Check In" @if($backdate=='NO' ) disabled @endif>
                   </div>
                 </div>
                 <div class="col-md-6">
                   <div class="form-group">
                     <label class="control-label" for="check_out">Check Out</label>
-                    <input type="text" name="check_out" class="form-control" placeholder="Check Out" @if($backdate == 'NO') disabled @endif>
+                    <input type="text" name="check_out" class="form-control datepicker" placeholder="Check Out" @if($backdate=='NO' ) disabled @endif>
                   </div>
                 </div>
                 <div class="col-md-6">
@@ -104,7 +105,7 @@
                 <div class="col-md-12">
                   <div class="form-group">
                     <label class="control-label" for="description">Note</label>
-                    <textarea class="form-control summernote" name="description" id="description" rows="4" placeholder="Description..."></textarea>
+                    <textarea class="form-control summernote" name="description" id="description" rows="4" placeholder="Description..." required></textarea>
                   </div>
                 </div>
               </div>
@@ -116,7 +117,10 @@
               <button type="button" class="btn bg-olive color-palette btn-labeled legitRipple text-sm btn-sm checkout d-none" data-check="out" onclick="saveAttendance(this)">
                 <b><i class="fas fa-save"></i></b> Check Out
               </button>
-              <a href="{{ route('attendancemachine.index') }}" class="btn btn-sm btn-secondary color-palette btn-labeled legitRipple text-sm">
+              <button type="button" class="btn bg-olive color-palette btn-labeled legitRipple text-sm btn-sm backdate d-none" data-check="backdate" onclick="saveAttendance(this)">
+                <b><i class="fas fa-save"></i></b> Save
+              </button>
+              <a href="{{ route('attendance.index') }}" class="btn btn-sm btn-secondary color-palette btn-labeled legitRipple text-sm">
                 <b><i class="fas fa-times"></i></b> Cancel
               </a>
             </div>
@@ -130,6 +134,7 @@
 
 @section('scripts')
 <script>
+  var backdate  = `{{ $backdate }}`;
   const timeDiff = (time1, time2) => {
     var diff = (time1.getTime() - time2.getTime()) / 1000;
     diff /= (60 * 60);
@@ -150,12 +155,20 @@
       if (timeDiffIn < timeDiffOut) {
         $('.checkin').removeClass('d-none');
         $('.checkout').addClass('d-none');
+        $('.backdate').addClass('d-none');
       } else {
         $('.checkout').removeClass('d-none');
         $('.checkin').addClass('d-none');
+        $('.backdate').addClass('d-none');
       }
     } else {
       $('.checkin').removeClass('d-none');
+      $('.checkout').addClass('d-none');
+      $('.backdate').addClass('d-none');
+    }
+    if (backdate == 'YES') {
+      $('.backdate').removeClass('d-none');
+      $('.checkin').addClass('d-none');
       $('.checkout').addClass('d-none');
     }
   }
@@ -164,6 +177,10 @@
     var post = new FormData($('#form')[0]),
         type = $(a).data('check');
     post.append('type', type);
+    if (backdate == 'YES' && post.description == null) {
+      toastr.warning('Please fill note form');
+      return;
+    }
     $.ajax({
         url:$('#form').attr('action'),
         method:'post',
@@ -242,6 +259,37 @@
   $(function() {
     $('input[name="shift_type"]').val() == 'Hourly' ? $('#shift').parent().parent().parent().addClass('d-none') : $('#shift').parent().parent().parent().removeClass('d-none');
     $('input[name="shift_type"]').val() == 'Hourly' ? $('.checkin').removeClass('d-none') : $('.checkout').addClass('d-none');
+    if (backdate == 'YES') {
+      $('.backdate').removeClass('d-none');
+      $('.checkin').addClass('d-none');
+      $('.checkout').addClass('d-none');
+      var date = new Date();
+      $('[name=check_in]').daterangepicker({
+        minDate: new Date(date.setDate(date.getDate() - 30)),
+        maxDate: new Date(),
+        singleDatePicker: true,
+        timePicker: true,
+        timePickerIncrement: 30,
+        timePicker24Hour: true,
+        locale: {
+            format: 'DD/MM/YYYY hh:mm'
+        }
+      }).on('apply.daterangepicker', function(ev, picker) {
+        $('[name=check_out]').val(picker.minDate.set(new Date($(this).val())).format('DD/MM/YYYY hh:mm'));
+      }).on('cancel.daterangepicker', function(ev, picker) {
+        $(this).val('');
+      });
+      $('[name=check_out]').daterangepicker({
+        maxDate: new Date(),
+        singleDatePicker: true,
+        timePicker: true,
+        timePickerIncrement: 30,
+        timePicker24Hour: true,
+        locale: {
+            format: 'DD/MM/YYYY hh:mm'
+        }
+      });
+    }
     summernote();
     $("#shift").select2({
         ajax: {

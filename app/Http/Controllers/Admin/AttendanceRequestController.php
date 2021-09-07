@@ -72,8 +72,8 @@ class AttendanceRequestController extends Controller
                     $data['value_before']       = $attendance->working_shift_id;
                     break;
                 case 'checkin':
-                    $data['request_date']       = $request->attendance_in;
-                    $data['value_before']       = $attendance->attendance_in;
+                    $data['request_date']       = changeDateFormat('Y-m-d H:i:s', changeSlash($request->attendance_in));
+                    $data['value_before']       = changeDateFormat('Y-m-d H:i:s', changeSlash($attendance->attendance_in));
                     break;
                 case 'checkout':
                     $data['request_date']       = $request->attendance_out;
@@ -273,6 +273,8 @@ class AttendanceRequestController extends Controller
                 'message'   => $validator->errors()->first()
             ], 400);
         }
+
+        $type   = '';
 
         DB::beginTransaction();
         try {

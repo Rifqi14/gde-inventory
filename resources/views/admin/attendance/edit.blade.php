@@ -141,13 +141,13 @@
                 <div class="col-md-6">
                   <div class="form-group">
                     <label class="control-label" for="check_in">Check In</label>
-                    <input type="text" name="check_in" class="form-control datepicker check-in spv-access" placeholder="Check In" value="{{ @$attendance->attendance_in }}">
+                    <input type="text" name="check_in" class="form-control datepicker check-in spv-access" placeholder="Check In">
                   </div>
                 </div>
                 <div class="col-md-6">
                   <div class="form-group">
                     <label class="control-label" for="check_out">Check Out</label>
-                    <input type="text" name="check_out" class="form-control datepicker check-out spv-access" placeholder="Check Out" value="{{ @$attendance->attendance_out }}">
+                    <input type="text" name="check_out" class="form-control datepicker check-out spv-access" placeholder="Check Out">
                   </div>
                 </div>
                 <div class="col-md-6">
@@ -173,7 +173,7 @@
             <div class="card-footer text-right">
               <input type="hidden" name="status">
               <input type="hidden" name="type">
-              @if (in_array('approval', $actionmenu) && ($attendance->employee->user->spv_id == Auth::guard('admin')->user()->id) && $attendance->status == 'WAITING')
+              @if (in_array('approval', $actionmenu) && $attendance->status == 'WAITING')
               <button type="button" onclick="submitTest(`approved`)" class="btn btn-success btn-labeled legitRipple btn-sm text-sm" data-type="approved">
                 <b><i class="fas fa-check-circle"></i></b>
                 Approved
@@ -183,7 +183,7 @@
                 Save
               </button>
               @endif
-              @if (($attendance->attendance_date == date('Y-m-d')) && ($attendance->employee->user->id == Auth::guard('admin')->user()->id || $attendance->employee->user->spv_id == Auth::guard('admin')->user()->id) && ($attendance->status != 'APPROVED')) <button type="submit" class="btn bg-olive color-palette btn-labeled legitRipple text-sm btn-sm checkout">
+              @if (($attendance->attendance_date == date('Y-m-d')) && !in_array('approval', $actionmenu) && ($attendance->status != 'APPROVED')) <button type="submit" class="btn bg-olive color-palette btn-labeled legitRipple text-sm btn-sm checkout">
                 <b><i class="fas fa-save"></i></b> Check Out
               </button>
               @endif
@@ -207,7 +207,7 @@
         </button>
       </div>
       <div class="modal-body">
-        <form action="{{ route('attendancerequest.store') }}" id="form-request" method="post">
+        <form action="{{ route('attendancerequest.store') }}" id="form-request" method="post" autocomplete="off">
           <div class="container-fluid">
             @csrf
             <input type="hidden" name="_method">
@@ -269,9 +269,63 @@
 @section('scripts')
 <script>
   var actionmenu  = JSON.parse('{!! json_encode($actionmenu) !!}');
+  var dbDate;
+  var date;
+  var attendance_out;
+  var check_out;
 
   const request = () => {
     $('#add-request').modal('show');
+    $('#form-request')[0].reset();
+    $('#type_request').val('').change();
+    $('#request_reason').summernote('code', '');
+    $('#form-request select[name=type_request]').prop('disabled', false);
+    $('#form-request [name=attendance_in]').prop('readonly', false);
+    $('#form-request [name=attendance_out]').prop('readonly', false);
+    $('#form-request #request_reason').summernote('enable');
+    $('#submit-request').prop('disabled', false);
+    
+    dbDate = `{{ $attendance->attendance_in }}`.split(/[- :]/);
+    date = new Date(dbDate[0], dbDate[1] -1, dbDate[2], 23, 59, 59);
+    $('.attendance-in').daterangepicker({
+      minDate: new Date(date.setDate(date.getDate() - 1)),
+      maxDate: new Date(date.setDate(date.getDate() + 1)),
+      singleDatePicker: true,
+      timePicker: true,
+      timePickerIncrement: 1,
+      timePicker24Hour: true,
+      autoUpdateInput: false,
+      drops: 'auto',
+      opens: 'center',
+      locale: {
+        format: 'DD/MM/YYYY HH:mm'
+      }
+    }).on('apply.daterangepicker', function(ev, picker) {
+      $(this).val(picker.startDate.format('DD/MM/YYYY HH:mm'));
+    }).on('cancel.daterangepicker', function(ev, picker) {
+      $(this).val('');
+    });
+    attendance_out  = `{{ $attendance->attendance_out }}`.split(/[- :]/);
+    var check_in_val= $('.check-in').val().split(/[/ :]/);
+    check_out       = attendance_out.length > 1 ? new Date(attendance_out[0], attendance_out[1] - 1, attendance_out[2], 23, 59, 59) : new Date(check_in_val[2], check_in_val[1] - 1, check_in_val[0], 23, 59, 59);
+    $('.attendance-out').daterangepicker({
+      minDate: new Date(check_out.setDate(check_out.getDate())),
+      maxDate: new Date(check_out.setDate(check_out.getDate() + 1)),
+      singleDatePicker: true,
+      timePicker: true,
+      timePickerIncrement: 1,
+      timePicker24Hour: true,
+      autoUpdateInput: attendance_out.length > 1 ? true : false,
+      drops: 'auto',
+      opens: 'center',
+      locale: {
+        format: 'DD/MM/YYYY HH:mm'
+      }
+    }).on('apply.daterangepicker', function(ev, picker) {
+      $(this).val(picker.startDate.format('DD/MM/YYYY HH:mm'));
+    }).on('cancel.daterangepicker', function(ev, picker) {
+      $(this).val('');
+    });
   }
 
   const changeType = (e) => {
@@ -458,10 +512,8 @@
     }).done(function(response){
       $('#add-request').unblock();
       if (response.status) {
-        var spv_id  = `{!! $attendance->employee->user->spv_id !!}`;
-        var user_id = `{!! Auth::guard('admin')->user()->id !!}`;
         var type    = response.data.type;
-        if (response.data.status == 'WAITING' && actionmenu.indexOf('approval') > 0 && spv_id == user_id) {
+        if (response.data.status == 'WAITING' && actionmenu.indexOf('approval') > 0) {
           console.log(response.data);
           $('#add-request .modal-title').html('Edit Exception');
           $('#add-request').modal('show');
@@ -577,59 +629,50 @@
     $('#type_request').trigger('change');
     $('.spv-access').prop('disabled', true)
     $('#description').summernote('disable');
-    @if (($attendance->employee->user->spv_id == Auth::guard('admin')->user()->id) && in_array('approval', $actionmenu))
+    @if (in_array('approval', $actionmenu))
       $('#description').summernote('enable');
       $('.spv-access').prop('disabled', false)
     @endif
     $('.select2').select2();
-    $('.datepicker').daterangepicker({
-      singleDatePicker: true,
-      timePicker: true,
-      timePickerIncrement: 1,
-      timePicker24Hour: true,
-      timePickerSeconds: false,
-      autoUpdateInput: false,
-      drops: 'auto',
-      opens: 'center',
-      locale: {
-        format: 'YYYY-MM-DD HH:mm:ss'
-      }
-    }).on('apply.daterangepicker', function(ev, picker) {
-      $(this).val(picker.startDate.format('YYYY-MM-DD HH:mm:ss'));
-    }).on('cancel.daterangepicker', function(ev, picker) {
-      $(this).val('');
-    });
+    dbDate = `{{ $attendance->attendance_in }}`.split(/[- :]/);
+    date = new Date(dbDate[0], dbDate[1] -1, dbDate[2], dbDate[3] || 0, dbDate[4] || 0, dbDate[5] || 0);
     $('.check-in').daterangepicker({
+      startDate: new Date(date.setDate(date.getDate())),
+      minDate: new Date(date.setDate(date.getDate() - 1)),
+      maxDate: new Date(date.setDate(date.getDate() + 1)),
       singleDatePicker: true,
       timePicker: true,
       timePickerIncrement: 1,
       timePicker24Hour: true,
-      timePickerSeconds: false,
-      autoUpdateInput: false,
       drops: 'auto',
       opens: 'center',
       locale: {
-        format: 'YYYY-MM-DD HH:mm:ss'
+        format: 'DD/MM/YYYY HH:mm'
       }
     }).on('apply.daterangepicker', function(ev, picker) {
-      $(this).val(picker.startDate.format('YYYY-MM-DD HH:mm:ss'));
+      $(this).val(picker.startDate.format('DD/MM/YYYY HH:mm'));
     }).on('cancel.daterangepicker', function(ev, picker) {
       $(this).val('');
     });
+    attendance_out  = `{{ $attendance->attendance_out }}`.split(/[- :]/);
+    var check_in_val= $('.check-in').val().split(/[/ :]/);
+    check_out       = attendance_out.length > 1 ? new Date(attendance_out[0], attendance_out[1] - 1, attendance_out[2], attendance_out[3] || 0, attendance_out[4] || 0, attendance_out[5] || 0) : new Date(check_in_val[2], check_in_val[1] - 1, check_in_val[0], check_in_val[3] || 0, check_in_val[4] || 0, check_in_val[5] || 0);
     $('.check-out').daterangepicker({
+      startDate: new Date(check_out.setDate(check_out.getDate())),
+      minDate: new Date(check_out.setDate(check_out.getDate())),
+      maxDate: new Date(check_out.setDate(check_out.getDate() + 1)),
       singleDatePicker: true,
       timePicker: true,
       timePickerIncrement: 1,
       timePicker24Hour: true,
-      timePickerSeconds: false,
-      autoUpdateInput: false,
+      autoUpdateInput: attendance_out.length > 1 ? true : false,
       drops: 'auto',
       opens: 'center',
       locale: {
-        format: 'YYYY-MM-DD HH:mm:ss'
+        format: 'DD/MM/YYYY HH:mm'
       }
     }).on('apply.daterangepicker', function(ev, picker) {
-      $(this).val(picker.startDate.format('YYYY-MM-DD HH:mm:ss'));
+      $(this).val(picker.startDate.format('DD/MM/YYYY HH:mm'));
     }).on('cancel.daterangepicker', function(ev, picker) {
       $(this).val('');
     });
@@ -1060,10 +1103,8 @@
               width: "10%",
               render: function(data, type, row) {
                 html = '';
-                var spv_id  = `{!! $attendance->employee->user->spv_id !!}`;
-                var user_id = `{!! Auth::guard('admin')->user()->id !!}`;
                 
-                if (row.status == 'WAITING' && (spv_id == user_id) && actionmenu.indexOf('approval')) {
+                if (row.status == 'WAITING' && actionmenu.indexOf('approval')) {
                   html = `<button type="button" id="approve-request" class="btn text-sm btn-sm btn-success btn-flat legitRipple" onclick="approveRequest(${row.id}, 'APPROVED')" data-toggle="tooltip" data-placement="top" title="Approved Request">
                               <b><i class="fas fa-check"></i></b>
                           </button>
