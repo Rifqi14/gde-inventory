@@ -35,7 +35,7 @@ class IclockTranscationController extends Controller
                         'attendance_date'   => $attendance->att_date,
                         'attendance_in'     => $attendance->check_in,
                         'attendance_out'    => $attendance->check_out,
-                        'status'            => 'APPROVED',
+                        'status'            => $attendance->check_out ? 'APPROVED' : 'WAITING',
                         'day'               => $attendance->weekday,
                     ]);
                     $create->working_time   = $this->countWorkingTime($create->attendance_in, $create->attendance_out) >= 8 ? 8 : $this->countWorkingTime($create->attendance_in, $create->attendance_out);
@@ -131,8 +131,8 @@ class IclockTranscationController extends Controller
 
     public function read(Request $request)
     {
-        $start_date     = $request->start_date ? Carbon::parse($request->start_date) : Carbon::now()->firstOfMonth();
-        $end_date       = $request->end_date ? Carbon::parse($request->end_date) : Carbon::now()->endOfMonth();
+        $start_date     = $request->start_date ? Carbon::parse($request->start_date) : Carbon::now()->subDays(2);
+        $end_date       = $request->end_date ? Carbon::parse($request->end_date) : Carbon::now();
         $departments    = $this->getAllDepartment();
         $areas          = -1;
         $groups         = -1;
