@@ -153,6 +153,11 @@ class ActivitieController extends Controller
         $userid = Auth::guard('admin')->user()->id;
 		$table = 'activities_curva';
 
+        $request->start_date = str_replace("/","-",$request->start_date);
+        $request->finish_date = str_replace("/","-",$request->finish_date);
+        $request->start_date = date("Y-m-d", strtotime($request->start_date));
+        $request->finish_date = date("Y-m-d", strtotime($request->finish_date));
+
         $data = array(
 			'parent_id' => 0,
 			'activity' => $request->activity,
@@ -207,6 +212,11 @@ class ActivitieController extends Controller
         $data = $request;
         $userid = Auth::guard('admin')->user()->id;
 		$table = 'activities_curva';
+
+        $request->start_date = str_replace("/","-",$request->start_date);
+        $request->finish_date = str_replace("/","-",$request->finish_date);
+        $request->start_date = date("Y-m-d", strtotime($request->start_date));
+        $request->finish_date = date("Y-m-d", strtotime($request->finish_date));
 
         $data = array(
 			'parent_id' => 0,
