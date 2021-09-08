@@ -140,18 +140,25 @@ class AttendanceController extends Controller
         DB::beginTransaction();
         try {
             $time   = Carbon::now();
-            $sameAttendance = Attendance::date($time->toDateTime())->getByEmployee($request->employee_id)->first();
+            $timeCheck  = $request->type == 'backdate' ? dbDate($request->check_in) : $time->toDateTime();
+            $sameAttendance = Attendance::date($timeCheck)->getByEmployee($request->employee_id)->first();
             if ($sameAttendance) {
                 return response()->json([
                     'status'        => false,
                     'message'       => 'You already fill attendance form today. Please update the existing data.'
                 ], 400);
             }
+            $check_in   = null;
+            $check_out  = null;
+            if ($request->type == 'backdate') {
+                $check_in   = changeDateFormat('Y-m-d H:i:s', changeSlash($request->check_in));
+                $check_out  = changeDateFormat('Y-m-d H:i:s', changeSlash($request->check_out));
+            }
             $create     = Attendance::create([
                 'employee_id'       => $request->employee_id,
-                'attendance_date'   => date('Y-m-d'),
-                'attendance_in'     => $request->type == 'in' ? $time->toDateTime() : null,
-                'attendance_out'    => $request->type == 'out' ? $time->toDateTime() : null,
+                'attendance_date'   => $request->type == 'backdate' ? dbDate($request->check_in) : date('Y-m-d'),
+                'attendance_in'     => $request->type == 'in' && $request->type != 'out' ? $time->toDateTime() : $check_in,
+                'attendance_out'    => $request->type == 'out' && $request->type != 'in' ? $time->toDateTime() : $check_out,
                 'status'            => 'WAITING',
                 'remarks'           => $request->description,
                 'working_shift_id'  => $request->working_shift_id ? $request->working_shift_id : $request->shift,
@@ -160,12 +167,44 @@ class AttendanceController extends Controller
             ]);
 
             if ($create) {
-                $log    = AttendanceLog::create([
-                    'attendance_id'     => $create->id,
-                    'employee_id'       => $request->employee_id,
-                    'attendance'        => $time->toDateTime(),
-                    'type'              => $request->type == 'in' ? 'IN' : 'OUT',
-                ]);
+                $workingtime    = 0;
+                $overtime       = 0;
+                if ($this->countWorkingTime($create->attendance_in, $create->attendance_out) < 6) {
+                    $workingtime    = $this->countWorkingTime($create->attendance_in, $create->attendance_out);
+                }
+                if ($this->countWorkingTime($create->attendance_in, $create->attendance_out) >= 6 && $this->countWorkingTime($create->attendance_in, $create->attendance_out) <= 8) {
+                    $workingtime    = $this->countWorkingTime($create->attendance_in, $create->attendance_out) - 1;
+                }
+                if ($this->countWorkingTime($create->attendance_in, $create->attendance_out) > 8) {
+                    $workingtime    = 7;
+                    $overtime       = $this->countWorkingTime($create->attendance_in, $create->attendance_out) - 8;
+                }
+                $create->breaktime      = $this->countWorkingTime($create->attendance_in, $create->attendance_out) >= 6 ? 1 : 0;
+                $create->working_time   = $workingtime;
+                $create->over_time      = $overtime;
+                $create->save();
+                if ($request->type != 'backdate') {
+                    $log    = AttendanceLog::create([
+                        'attendance_id'     => $create->id,
+                        'employee_id'       => $request->employee_id,
+                        'attendance'        => $time->toDateTime(),
+                        'type'              => $request->type == 'in' ? 'IN' : 'OUT',
+                    ]);
+                } else {
+                    $data[]   = [
+                        'attendance_id'     => $create->id,
+                        'employee_id'       => $create->employee_id,
+                        'attendance'        => $create->attendance_in,
+                        'type'              => 'IN',
+                    ];
+                    $data[]   = [
+                        'attendance_id'     => $create->id,
+                        'employee_id'       => $create->employee_id,
+                        'attendance'        => $create->attendance_out,
+                        'type'              => 'OUT',
+                    ];
+                    $log = $create->logs()->createMany($data);
+                }
                 if (!$log) {
                     DB::rollBack();
                     return response()->json([

@@ -141,13 +141,13 @@
                 <div class="col-md-6">
                   <div class="form-group">
                     <label class="control-label" for="check_in">Check In</label>
-                    <input type="text" name="check_in" class="form-control datepicker check-in spv-access" placeholder="Check In">
+                    <input type="text" name="check_in" class="form-control datepicker check-in spv-access" placeholder="Check In" disabled>
                   </div>
                 </div>
                 <div class="col-md-6">
                   <div class="form-group">
                     <label class="control-label" for="check_out">Check Out</label>
-                    <input type="text" name="check_out" class="form-control datepicker check-out spv-access" placeholder="Check Out">
+                    <input type="text" name="check_out" class="form-control datepicker check-out spv-access" placeholder="Check Out" disabled>
                   </div>
                 </div>
                 <div class="col-md-6">
@@ -286,10 +286,10 @@
     $('#submit-request').prop('disabled', false);
     
     dbDate = `{{ $attendance->attendance_in }}`.split(/[- :]/);
-    date = new Date(dbDate[0], dbDate[1] -1, dbDate[2], 23, 59, 59);
+    date = new Date(dbDate[0], dbDate[1] -1, dbDate[2]);
     $('.attendance-in').daterangepicker({
-      minDate: new Date(date.setDate(date.getDate() - 1)),
-      maxDate: new Date(date.setDate(date.getDate() + 1)),
+      minDate: new Date(date.getFullYear(), date.getMonth(), date.getDate() - 1, 0, 00, 00),
+      maxDate: new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59),
       singleDatePicker: true,
       timePicker: true,
       timePickerIncrement: 1,
@@ -309,13 +309,13 @@
     var check_in_val= $('.check-in').val().split(/[/ :]/);
     check_out       = attendance_out.length > 1 ? new Date(attendance_out[0], attendance_out[1] - 1, attendance_out[2], 23, 59, 59) : new Date(check_in_val[2], check_in_val[1] - 1, check_in_val[0], 23, 59, 59);
     $('.attendance-out').daterangepicker({
-      minDate: new Date(check_out.setDate(check_out.getDate())),
-      maxDate: new Date(check_out.setDate(check_out.getDate() + 1)),
+      minDate: new Date(check_out.getFullYear(), check_out.getMonth(), check_out.getDate(), 0, 00, 00),
+      maxDate: new Date(check_out.getFullYear(), check_out.getMonth(), check_out.getDate() + 1, 23, 59, 59),
       singleDatePicker: true,
       timePicker: true,
       timePickerIncrement: 1,
       timePicker24Hour: true,
-      autoUpdateInput: attendance_out.length > 1 ? true : false,
+      autoUpdateInput: false,
       drops: 'auto',
       opens: 'center',
       locale: {
@@ -629,10 +629,6 @@
     $('#type_request').trigger('change');
     $('.spv-access').prop('disabled', true)
     $('#description').summernote('disable');
-    @if (in_array('approval', $actionmenu))
-      $('#description').summernote('enable');
-      $('.spv-access').prop('disabled', false)
-    @endif
     $('.select2').select2();
     dbDate = `{{ $attendance->attendance_in }}`.split(/[- :]/);
     date = new Date(dbDate[0], dbDate[1] -1, dbDate[2], dbDate[3] || 0, dbDate[4] || 0, dbDate[5] || 0);

@@ -33,6 +33,11 @@ class Attendance extends Model
         return $this->belongsTo('App\Models\WorkingShift', 'working_shift_id', 'id');
     }
 
+    public function logs()
+    {
+        return $this->hasMany('App\Models\AttendanceLog', 'attendance_id', 'id');
+    }
+
     /**
      * Scope a query to only include date
      *

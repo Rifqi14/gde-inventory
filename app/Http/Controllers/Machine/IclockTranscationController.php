@@ -38,8 +38,22 @@ class IclockTranscationController extends Controller
                         'status'            => $attendance->check_out ? 'APPROVED' : 'WAITING',
                         'day'               => $attendance->weekday,
                     ]);
-                    $create->working_time   = $this->countWorkingTime($create->attendance_in, $create->attendance_out) >= 8 ? 8 : $this->countWorkingTime($create->attendance_in, $create->attendance_out);
-                    $create->over_time      = ($this->countWorkingTime($create->attendance_in, $create->attendance_out) - 8) >= 0 ? $this->countWorkingTime($create->attendance_in, $create->attendance_out) - 8 : 0;
+
+                    $workingtime    = 0;
+                    $overtime       = 0;
+                    if ($this->countWorkingTime($create->attendance_in, $create->attendance_out) < 6) {
+                        $workingtime    = $this->countWorkingTime($create->attendance_in, $create->attendance_out);
+                    }
+                    if ($this->countWorkingTime($create->attendance_in, $create->attendance_out) >= 6 && $this->countWorkingTime($create->attendance_in, $create->attendance_out) <= 8) {
+                        $workingtime    = $this->countWorkingTime($create->attendance_in, $create->attendance_out) - 1;
+                    }
+                    if ($this->countWorkingTime($create->attendance_in, $create->attendance_out) > 8) {
+                        $workingtime    = 7;
+                        $overtime       = $this->countWorkingTime($create->attendance_in, $create->attendance_out) - 8;
+                    }
+                    $create->breaktime      = $this->countWorkingTime($create->attendance_in, $create->attendance_out) >= 6 ? 1 : 0;
+                    $create->working_time   = $workingtime;
+                    $create->over_time      = $overtime;
                     if ($create->working_time >= 8 || ($employee->shift_type == 'hourly' && $create->working_time > 0)) {
                         $dayWork        = 1;
                     } else {
@@ -69,8 +83,21 @@ class IclockTranscationController extends Controller
                 } else {
                     $sameAttendance->attendance_in  = $attendance->check_in;
                     $sameAttendance->attendance_out = $attendance->check_out;
-                    $sameAttendance->working_time   = $this->countWorkingTime($sameAttendance->attendance_in, $sameAttendance->attendance_out) >= 8 ? 8 : $this->countWorkingTime($sameAttendance->attendance_in, $sameAttendance->attendance_out);
-                    $sameAttendance->over_time      = ($this->countWorkingTime($sameAttendance->attendance_in, $sameAttendance->attendance_out) - 8) >= 0 ? $this->countWorkingTime($sameAttendance->attendance_in, $sameAttendance->attendance_out) - 8 : 0;
+                    $workingtime    = 0;
+                    $overtime       = 0;
+                    if ($this->countWorkingTime($sameAttendance->attendance_in, $sameAttendance->attendance_out) < 6) {
+                        $workingtime    = $this->countWorkingTime($sameAttendance->attendance_in, $sameAttendance->attendance_out);
+                    }
+                    if ($this->countWorkingTime($sameAttendance->attendance_in, $sameAttendance->attendance_out) >= 6 && $this->countWorkingTime($sameAttendance->attendance_in, $sameAttendance->attendance_out) <= 8) {
+                        $workingtime    = $this->countWorkingTime($sameAttendance->attendance_in, $sameAttendance->attendance_out) - 1;
+                    }
+                    if ($this->countWorkingTime($sameAttendance->attendance_in, $sameAttendance->attendance_out) > 8) {
+                        $workingtime    = 7;
+                        $overtime       = $this->countWorkingTime($sameAttendance->attendance_in, $sameAttendance->attendance_out) - 8;
+                    }
+                    $sameAttendance->breaktime      = $this->countWorkingTime($sameAttendance->attendance_in, $sameAttendance->attendance_out) >= 6 ? 1 : 0;
+                    $sameAttendance->working_time   = $workingtime;
+                    $sameAttendance->over_time      = $overtime;
                     if ($sameAttendance->working_time >= 8 || ($employee->shift_type == 'hourly' && $sameAttendance->working_time > 0)) {
                         $dayWork        = 1;
                     } else {

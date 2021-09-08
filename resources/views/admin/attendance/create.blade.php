@@ -135,6 +135,8 @@
 @section('scripts')
 <script>
   var backdate  = `{{ $backdate }}`;
+  var date;
+  var minDateCehckout;
   const timeDiff = (time1, time2) => {
     var diff = (time1.getTime() - time2.getTime()) / 1000;
     diff /= (60 * 60);
@@ -177,7 +179,7 @@
     var post = new FormData($('#form')[0]),
         type = $(a).data('check');
     post.append('type', type);
-    if (backdate == 'YES' && post.description == null) {
+    if (backdate == 'YES' && post.get('description') == '') {
       toastr.warning('Please fill note form');
       return;
     }
@@ -263,7 +265,18 @@
       $('.backdate').removeClass('d-none');
       $('.checkin').addClass('d-none');
       $('.checkout').addClass('d-none');
-      var date = new Date();
+      date = new Date();
+      minDateCehckout;
+      $('[name=check_out]').daterangepicker({
+        maxDate: new Date(),
+        singleDatePicker: true,
+        timePicker: true,
+        timePickerIncrement: 30,
+        timePicker24Hour: true,
+        locale: {
+            format: 'DD/MM/YYYY HH:mm'
+        }
+      });
       $('[name=check_in]').daterangepicker({
         minDate: new Date(date.setDate(date.getDate() - 30)),
         maxDate: new Date(),
@@ -272,22 +285,26 @@
         timePickerIncrement: 30,
         timePicker24Hour: true,
         locale: {
-            format: 'DD/MM/YYYY hh:mm'
+            format: 'DD/MM/YYYY HH:mm'
         }
       }).on('apply.daterangepicker', function(ev, picker) {
-        $('[name=check_out]').val(picker.minDate.set(new Date($(this).val())).format('DD/MM/YYYY hh:mm'));
+        $('[name=check_out]').daterangepicker('destroy');
+        console.log(picker.startDate.format('YYYY/MM/DD HH:mm'));
+        minDateCehckout = new Date(picker.startDate.format('YYYY/MM/DD HH:mm'));
+        $('[name=check_out]').daterangepicker({
+          startDate: new Date(minDateCehckout.setDate(minDateCehckout.getDate())),
+          minDate: new Date(minDateCehckout.setDate(minDateCehckout.getDate())),
+          maxDate: new Date(minDateCehckout.setDate(minDateCehckout.getDate() + 1)),
+          singleDatePicker: true,
+          timePicker: true,
+          timePickerIncrement: 30,
+          timePicker24Hour: true,
+          locale: {
+              format: 'DD/MM/YYYY HH:mm'
+          }
+        });
       }).on('cancel.daterangepicker', function(ev, picker) {
         $(this).val('');
-      });
-      $('[name=check_out]').daterangepicker({
-        maxDate: new Date(),
-        singleDatePicker: true,
-        timePicker: true,
-        timePickerIncrement: 30,
-        timePicker24Hour: true,
-        locale: {
-            format: 'DD/MM/YYYY hh:mm'
-        }
       });
     }
     summernote();

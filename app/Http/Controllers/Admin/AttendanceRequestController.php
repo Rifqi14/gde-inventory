@@ -84,6 +84,13 @@ class AttendanceRequestController extends Controller
                     return false;
                     break;
             }
+            if ($attendance->employee->shift_type == 'hourly' && $type == 'shift') {
+                DB::rollBack();
+                return response()->json([
+                    'status'    => false,
+                    'message'   => "Sorry you can't change shift because your shift type is hourly"
+                ], 400);
+            }
             AttendanceRequest::create($data);
         } catch (\Illuminate\Database\QueryException $ex) {
             DB::rollBack();
