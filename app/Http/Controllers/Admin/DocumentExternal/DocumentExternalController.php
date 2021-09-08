@@ -139,14 +139,17 @@ class DocumentExternalController extends Controller
                 
                 $matrixData     = [];
                 foreach ($request->reviewer_matrix as $key => $value) {
-                    $matrixData[]   = [
+                    $matrixData   = [
                         'document_external_id'  => $document->id,
-                        'matrix_label'          => $value->label,
-                        'matrix_sla'            => $value->sla == 'on' ? 'true' : 'false',
-                        'matrix_days'           => $value->days,
+                        'matrix_label'          => $value['label'],
+                        'matrix_sla'            => $value['sla'] == 'on' ? 'true' : 'false',
+                        'matrix_days'           => $value['days'],
                     ];
+                    $matrix = DocumentExternalMatrix::create($matrixData);
+                    foreach ($value['group'] as $keyGroup => $group) {
+                        $matrix->groups()->attach($group);
+                    }
                 }
-                dd($matrixData);
             } catch (\Illuminate\Database\QueryException $ex) {
                 throw new PropertiesException("Error create data: {$ex->errorInfo[2]}", 400);
             }
