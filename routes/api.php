@@ -39,6 +39,8 @@ Route::group([
         Route::post('/signup', 'API\Auth\RegisterController@signup');
 
         Route::group(['middleware' => ['auth:api']], function(){       
+            // Profile
+            Route::post('/me','API\Auth\ProfileController');
             // Logout 
             Route::post('/signout', 'API\Auth\LoginController@logout');
         });        
