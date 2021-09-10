@@ -84,7 +84,7 @@ class StockMovementResource extends JsonResource
         return [
             'total_in'   => $in,
             'total_out'  => $out,
-            'data'       => $data,            
+            'history'    => $data,            
         ];
     }    
 }
