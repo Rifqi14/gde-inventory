@@ -49,7 +49,8 @@ class StockMovementResource extends JsonResource
                 $out = $out + $row->qty;
             }
 
-            $data[] = [
+            $data[] = [                
+                'product_id'      => $row->product_id,
                 'product' => $row->product,
                 'image'   => $row->image,
                 'date'    => date('d M Y', strtotime($row->date)),
@@ -58,6 +59,27 @@ class StockMovementResource extends JsonResource
                 'issued_by' => $row->issued_by
             ];
         }
+
+        $data = [
+            [
+                'product_id' => 1,
+                'product' => 'Flange Adapter 12" 900#',
+                'image' => null,
+                'date' => date('d M Y'),
+                'qty'   => 4,
+                'status' => 'in',
+                'issued_by' => 'Admin'
+            ],
+            [
+                'product_id' => 2,
+                'product' => 'Gate Valve 3-1/8" 3000#',
+                'image' => null,
+                'date' => date('d M Y'),
+                'qty'   => 4,
+                'status' => 'out',
+                'issued_by' => 'Anonim'
+            ]
+        ];
 
         return [
             'total_in'   => $in,
