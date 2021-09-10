@@ -85,10 +85,12 @@ class StockMovementController extends Controller
         ];
 
         return response()->json([
-            'status'     => Response::HTTP_OK,
-            'total_in'   => $in,
-            'total_out'  => $out,
-            'data'       => $data
+            'status'     => Response::HTTP_OK,            
+            'data'       => [
+                'total_in'   => $in,
+                'total_out'  => $out,
+                'history'    => $data
+            ]
         ],Response::HTTP_OK);
     }
 }
