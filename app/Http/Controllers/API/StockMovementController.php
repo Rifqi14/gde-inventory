@@ -88,7 +88,7 @@ class StockMovementController extends Controller
             'status'     => Response::HTTP_OK,
             'total_in'   => $in,
             'total_out'  => $out,
-            'history'    => $data
+            'data'       => $data
         ],Response::HTTP_OK);
     }
 }
