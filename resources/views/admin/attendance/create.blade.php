@@ -271,7 +271,7 @@
         maxDate: new Date(),
         singleDatePicker: true,
         timePicker: true,
-        timePickerIncrement: 30,
+        timePickerIncrement: 1,
         timePicker24Hour: true,
         locale: {
             format: 'DD/MM/YYYY HH:mm'
@@ -282,7 +282,7 @@
         maxDate: new Date(),
         singleDatePicker: true,
         timePicker: true,
-        timePickerIncrement: 30,
+        timePickerIncrement: 1,
         timePicker24Hour: true,
         locale: {
             format: 'DD/MM/YYYY HH:mm'
@@ -297,7 +297,7 @@
           maxDate: new Date(minDateCehckout.setDate(minDateCehckout.getDate() + 1)),
           singleDatePicker: true,
           timePicker: true,
-          timePickerIncrement: 30,
+          timePickerIncrement: 1,
           timePicker24Hour: true,
           locale: {
               format: 'DD/MM/YYYY HH:mm'

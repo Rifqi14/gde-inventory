@@ -76,8 +76,8 @@ class AttendanceRequestController extends Controller
                     $data['value_before']       = changeDateFormat('Y-m-d H:i:s', changeSlash($attendance->attendance_in));
                     break;
                 case 'checkout':
-                    $data['request_date']       = $request->attendance_out;
-                    $data['value_before']       = $attendance->attendance_out;
+                    $data['request_date']       = changeDateFormat('Y-m-d H:i:s', changeSlash($request->attendance_out));
+                    $data['value_before']       = changeDateFormat('Y-m-d H:i:s', changeSlash($request->attendance_out));
                     break;
                 
                 default:
@@ -282,6 +282,7 @@ class AttendanceRequestController extends Controller
         }
 
         $type   = '';
+        $value  = '';
 
         DB::beginTransaction();
         try {
@@ -294,8 +295,30 @@ class AttendanceRequestController extends Controller
                 switch ($attendanceRequest->type) {
                     case 'checkin':
                         $attendances->attendance_in = $attendanceRequest->request_date;
-                        $attendances->working_time  = $this->countWorkingTime($attendances->attendance_in, $attendances->attendance_out);
-                        $attendances->over_time     = $this->countOvertime($attendances->working_time, $attendances->working_shift_id);
+                        $workingtimeTotal           = $this->countWorkingTime($attendances->attendance_in, $attendances->attendance_out);
+                        $workingtime    = 0;
+                        $breaktime      = 0;
+                        $overtime       = 0;
+                        $workday        = null;
+                        if ($workingtimeTotal < 6) {
+                            $workingtime    = $workingtimeTotal;
+                            $workday        = 0.5;
+                        }
+                        if ($workingtimeTotal >= 6 && $workingtimeTotal <= 9) {
+                            $breaktime      = 1;
+                            $workingtime    = $workingtimeTotal - $breaktime;
+                            $workday        = $workingtime >= 8 ? 1 : 0.5;
+                        }
+                        if ($workingtimeTotal > 9) {
+                            $workingtime    = 8.0;
+                            $breaktime      = 1;
+                            $overtime       = $workingtimeTotal - $workingtime - $breaktime;
+                            $workday        = 1;
+                        }
+                        $attendances->working_time  = $workingtime;
+                        $attendances->over_time     = $overtime;
+                        $attendances->breaktime     = $breaktime;
+                        $attendances->day_work      = $workday;
                         $type       = $attendanceRequest->type;
                         $value      = $attendanceRequest->request_date;
                         AttendanceLog::create([
@@ -306,22 +329,44 @@ class AttendanceRequestController extends Controller
                         ]);
                         break;
                     case 'checkout':
-                        $attendances->attendance_out = $attendanceRequest->request_date ;
-                        $attendances->working_time  = $this->countWorkingTime($attendances->attendance_in, $attendances->attendance_out);
-                        $attendances->over_time     = $this->countOvertime($attendances->working_time, $attendances->working_shift_id);
+                        $attendances->attendance_out = $attendanceRequest->request_date;
+                        $workingtimeTotal    = $this->countWorkingTime($attendances->attendance_in, $attendances->attendance_out);
+                        $workingtime    = 0;
+                        $breaktime      = 0;
+                        $overtime       = 0;
+                        $workday        = null;
+                        if ($workingtimeTotal < 6) {
+                            $workingtime    = $workingtimeTotal;
+                            $workday        = 0.5;
+                        }
+                        if ($workingtimeTotal >= 6 && $workingtimeTotal <= 9) {
+                            $breaktime      = 1;
+                            $workingtime    = $workingtimeTotal - $breaktime;
+                            $workday        = $workingtime >= 8 ? 1 : 0.5;
+                        }
+                        if ($workingtimeTotal > 9) {
+                            $workingtime    = 8.0;
+                            $breaktime      = 1;
+                            $overtime       = $workingtimeTotal - $workingtime - $breaktime;
+                            $workday        = 1;
+                        }
+                        $attendances->working_time  = $workingtime;
+                        $attendances->over_time     = $overtime;
+                        $attendances->breaktime     = $breaktime;
+                        $attendances->day_work      = $workday;
                         $type       = $attendanceRequest->type;
                         $value      = $attendanceRequest->request_date;
-                        AttendanceLog::create([
-                            'attendance_id'     => $attendances->id,
-                            'employee_id'       => $attendances->employee_id,
-                            'attendance'        => $attendanceRequest->request_date,
-                            'type'              => 'OUT',
-                        ]);
+                        if ($attendanceRequest->request_date) {
+                            AttendanceLog::create([
+                                'attendance_id'     => $attendances->id,
+                                'employee_id'       => $attendances->employee_id,
+                                'attendance'        => $attendanceRequest->request_date,
+                                'type'              => 'OUT',
+                            ]);
+                        }
                         break;
                     case 'shift':
                         $attendances->working_shift_id = $attendanceRequest->working_shift_id;
-                        $attendances->working_time  = $this->countWorkingTime($attendances->attendance_in, $attendances->attendance_out);
-                        $attendances->over_time     = $this->countOvertime($attendances->working_time, $attendances->working_shift_id);
                         $shift              = WorkingShift::find($attendances->working_shift_id);
                         $type       = $attendanceRequest->type;
                         $value      = [
@@ -371,7 +416,7 @@ class AttendanceRequestController extends Controller
     public function countWorkingTime($attendanceIn, $attendanceOut)
     {
         if ($attendanceIn && $attendanceOut) {
-            $count      = Carbon::parse($attendanceIn)->diffInHours($attendanceOut);
+            $count      = floor(Carbon::parse($attendanceIn)->floatDiffInHours($attendanceOut) * 2) / 2;
             return $count;
         } else {
             return 0;

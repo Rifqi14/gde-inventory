@@ -74,7 +74,7 @@
               </div>
             </div>
           </div>
-          @if (in_array('approval', $actionmenu))
+          @if (in_array('create', $actionmenu))
           <div class="card">
             <div class="card-body text-right">
               <span class="title">
@@ -82,9 +82,11 @@
                 <h5 class="text-md text-dark text-bold">{{ $menu_name }} Log</h5>
               </span>
               <div class="mt-2"></div>
+              @if (auth()->user()->employee_id == $attendance->employee->id)
               <button type="button" id="request-attendance" class="btn text-sm btn-sm btn-warning btn-flat legitRipple" onclick="request()">
                 <b><i class="fas fa-book-open"></i></b>
               </button>
+              @endif
               <div class="mt-2"></div>
               <ul class="nav nav-tabs" id="attendanceTab" role="tablist">
                 <li class="nav-item">
@@ -150,13 +152,19 @@
                     <input type="text" name="check_out" class="form-control datepicker check-out spv-access" placeholder="Check Out" disabled>
                   </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                   <div class="form-group">
                     <label class="control-label" for="working_time">Working Time</label>
                     <input type="text" name="working_time" class="form-control" disabled placeholder="Working Time" value="{{ @$attendance->working_time }}">
                   </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label class="control-label" for="breaktime">Break Time</label>
+                    <input type="text" name="breaktime" class="form-control" disabled placeholder="Break Time" value="{{ @$attendance->breaktime }}">
+                  </div>
+                </div>
+                <div class="col-md-4">
                   <div class="form-group">
                     <label class="control-label" for="over_time">Over Time</label>
                     <input type="text" name="over_time" class="form-control" disabled placeholder="Over Time" value="{{ @$attendance->over_time }}">
@@ -981,7 +989,7 @@
         filter: false,
         responsive: true,
         lengthChange: false,
-        order: [[ 1, "asc" ]],
+        order: [[ 5, "desc" ]],
         ajax: {
             url: "{{route('attendancerequest.read')}}",
             type: "GET",
@@ -1100,7 +1108,7 @@
               render: function(data, type, row) {
                 html = '';
                 
-                if (row.status == 'WAITING' && actionmenu.indexOf('approval')) {
+                if (row.status == 'WAITING' && actionmenu.indexOf('approval') > 0) {
                   html = `<button type="button" id="approve-request" class="btn text-sm btn-sm btn-success btn-flat legitRipple" onclick="approveRequest(${row.id}, 'APPROVED')" data-toggle="tooltip" data-placement="top" title="Approved Request">
                               <b><i class="fas fa-check"></i></b>
                           </button>

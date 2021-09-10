@@ -35,7 +35,7 @@ class IclockTranscationController extends Controller
                         'attendance_date'   => $attendance->att_date,
                         'attendance_in'     => $attendance->check_in,
                         'attendance_out'    => $attendance->check_out,
-                        'status'            => $attendance->check_out ? 'APPROVED' : 'WAITING',
+                        'status'            => 'APPROVED',
                         'day'               => $attendance->weekday,
                     ]);
 

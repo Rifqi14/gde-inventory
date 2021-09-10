@@ -209,7 +209,7 @@
               render: function(data, type, row) {
                 html  = '';
                 hourly  = '';
-                if (row.diff_in != null) {
+                if (row.diff_in) {
                   if (row.diff_in.diff_type == 'late') {
                     html = `<b>${row.attendance_in}</b><br><small class="text-danger">${row.diff_in.diff_format}</small>`;
                   } else {
