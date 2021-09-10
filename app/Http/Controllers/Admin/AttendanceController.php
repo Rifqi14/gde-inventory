@@ -159,7 +159,7 @@ class AttendanceController extends Controller
                 'attendance_date'   => $request->type == 'backdate' ? dbDate($request->check_in) : date('Y-m-d'),
                 'attendance_in'     => $request->type == 'in' && $request->type != 'out' ? $time->toDateTime() : $check_in,
                 'attendance_out'    => $request->type == 'out' && $request->type != 'in' ? $time->toDateTime() : $check_out,
-                'status'            => 'WAITING',
+                'status'            => 'APPROVED',
                 'remarks'           => $request->description,
                 'working_shift_id'  => $request->working_shift_id ? $request->working_shift_id : $request->shift,
                 'day'               => date('D'),
@@ -167,21 +167,31 @@ class AttendanceController extends Controller
             ]);
 
             if ($create) {
+                $workingtimeTotal    = $this->countWorkingTime($create->attendance_in, $create->attendance_out);
                 $workingtime    = 0;
+                $breaktime      = 0;
                 $overtime       = 0;
-                if ($this->countWorkingTime($create->attendance_in, $create->attendance_out) < 6) {
-                    $workingtime    = $this->countWorkingTime($create->attendance_in, $create->attendance_out);
+                $workday        = null;
+
+                if ($workingtimeTotal < 6) {
+                    $workingtime    = $workingtimeTotal;
+                    $workday        = 0.5;
                 }
-                if ($this->countWorkingTime($create->attendance_in, $create->attendance_out) >= 6 && $this->countWorkingTime($create->attendance_in, $create->attendance_out) <= 8) {
-                    $workingtime    = $this->countWorkingTime($create->attendance_in, $create->attendance_out) - 1;
+                if ($workingtimeTotal >= 6 && $workingtimeTotal <= 9) {
+                    $breaktime      = 1;
+                    $workingtime    = $workingtimeTotal - $breaktime;
+                    $workday        = $workingtime >= 8 ? 1 : 0.5;
                 }
-                if ($this->countWorkingTime($create->attendance_in, $create->attendance_out) > 8) {
-                    $workingtime    = 7;
-                    $overtime       = $this->countWorkingTime($create->attendance_in, $create->attendance_out) - 8;
+                if ($workingtimeTotal > 9) {
+                    $workingtime    = 8.0;
+                    $breaktime      = 1;
+                    $overtime       = $workingtimeTotal - $workingtime - $breaktime;
+                    $workday        = 1;
                 }
-                $create->breaktime      = $this->countWorkingTime($create->attendance_in, $create->attendance_out) >= 6 ? 1 : 0;
+                $create->breaktime      = $breaktime;
                 $create->working_time   = $workingtime;
                 $create->over_time      = $overtime;
+                $create->day_work       = Employee::find($request->employee_id)->shift_type == 'hourly' ? 1 : $workday;
                 $create->save();
                 if ($request->type != 'backdate') {
                     $log    = AttendanceLog::create([
@@ -428,7 +438,7 @@ class AttendanceController extends Controller
     public function countWorkingTime($attendanceIn, $attendanceOut)
     {
         if ($attendanceIn && $attendanceOut) {
-            $count      = Carbon::parse($attendanceIn)->diffInHours($attendanceOut);
+            $count      = floor(Carbon::parse($attendanceIn)->floatDiffInHours($attendanceOut) * 2) / 2;
             return $count;
         } else {
             return 0;
