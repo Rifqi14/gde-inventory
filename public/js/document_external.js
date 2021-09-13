@@ -2,6 +2,18 @@ $(function () {
     $(".select2").select2({
         allowClear: true,
     });
+
+    $(document).on("input keydown keyup mousedown mouseup select contextmenu drop", ".numberfield", function() {
+        if (/^\d*$/.test(this.value)) {
+            this.oldValue = this.value;
+            this.oldSelectionStart = this.selectionStart;
+            this.oldSelectionEnd = this.selectionEnd;
+        } else if (this.hasOwnProperty("oldValue")) {
+            this.value = this.oldValue;
+            this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
+        }
+    });
+
     $.each(needSelect2Tag, function (index, item) {
         if ($(item).attr("data-sub_url")) {
             $(item)
@@ -1294,21 +1306,24 @@ const initReviewerMatrix = (e) => {
                                 ? true
                                 : false;
                         $(`#${index}_sla`).prop("checked", checked);
+                        if(checked){
+                            $(`#${index}_days`).parent().parent().removeClass("d-none");
+                        }
                         $(`#${index}_days`).val(
                             ReviewerMatrixChecked[0].matrix_days
                         );
 
-                        if (ReviewerMatrixChecked[0].groups.length > 0) {
+                        if (ReviewerMatrixChecked[0].group_users.length > 0) {
                             $.each(
-                                ReviewerMatrixChecked[0].groups,
-                                function (indexGroup, group) {
+                                ReviewerMatrixChecked[0].group_users,
+                                function (indexGroup, user) {
                                     $(`#${index}`).select2(
                                         "trigger",
                                         "select",
                                         {
                                             data: {
-                                                id: group.id,
-                                                text: `${group.name}`,
+                                                id: user.id,
+                                                text: `${user.name}`,
                                             },
                                         }
                                     );
@@ -1358,14 +1373,14 @@ const summernote = () => {
 };
 
 const checkedSLA = (e) => {
-    // if (!e[0].checked) {
-    //     e.parent()
-    //         .next()
-    //         .addClass("d-none")
-    //         .find($('input[type="text"]'))
-    //         .val(null);
-    //     return false;
-    // }
+    if (!e[0].checked) {
+        e.parent()
+            .next()
+            .addClass("d-none")
+            .find($('input[type="text"]'))
+            .val(null);
+        return false;
+    }
     e.parent().next().removeClass("d-none");
     return true;
 };
@@ -1378,7 +1393,7 @@ const userGroupSelectInit = (e) => {
             ? e.attr("data-max_tag")
             : 1,
         ajax: {
-            url: routeRoleSelect,
+            url: routeUserSelect,
             type: "GET",
             dataType: "json",
             data: function (params) {

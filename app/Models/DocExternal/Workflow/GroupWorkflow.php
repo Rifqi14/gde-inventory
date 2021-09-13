@@ -2,6 +2,7 @@
 
 namespace App\Models\DocExternal\Workflow;
 
+use App\User;
 use Illuminate\Database\Eloquent\Model;
 
 class GroupWorkflow extends Model
@@ -21,5 +22,10 @@ class GroupWorkflow extends Model
     public function role()
     {
         return $this->belongsTo(\App\Models\Role::class, 'role_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

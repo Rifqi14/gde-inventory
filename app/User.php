@@ -69,7 +69,7 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
-     * Scope a query to only include 
+     * Scope a query to only include
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
      * @return \Illuminate\Database\Eloquent\Builder
@@ -81,7 +81,7 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
-     * Scope a query to only include 
+     * Scope a query to only include
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
      * @return \Illuminate\Database\Eloquent\Builder
@@ -89,5 +89,15 @@ class User extends Authenticatable implements JWTSubject
     public function scopeIsActive($query)
     {
         return $query->where('is_active', 1);
+    }
+
+    public function matrices()
+    {
+        return $this->belongsToMany(DocumentExternalMatrix::class, 'document_external_matrix_groups', 'user_id', 'matrix_id', 'id', 'id');
+    }
+
+    public function groupworkflows()
+    {
+        return $this->hasMany(\App\Models\DocExternal\Workflow\GroupWorkflow::class, 'user_id');
     }
 }

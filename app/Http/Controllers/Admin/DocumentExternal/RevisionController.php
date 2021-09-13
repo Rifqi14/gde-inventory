@@ -79,12 +79,12 @@ class RevisionController extends Controller
                 $no       = 1;
                 $created_date_group = ['Information', 'Reviewer'];
                 foreach ($matrices as $key => $matrix) {
-                    if ($matrix->groups) {
-                        foreach ($matrix->groups as $keyGroup => $group) {
+                    if ($matrix->groupUsers) {
+                        foreach ($matrix->groupUsers as $keyGroup => $group) {
                             $order  = "#$no";
                             $data[] = [
                                 'workflow_id'   => $workflow->id,
-                                'role_id'       => $group->id,
+                                'user_id'       => $group->id,
                                 'label_group'   => in_array($matrix->matrix_label, $created_date_group) ? "$matrix->matrix_label $order" : $matrix->matrix_label,
                                 'need_approval' => in_array($matrix->matrix_label, $created_date_group) ? false : true,
                                 'sla'           => $matrix->matrix_sla == 'true' ? true : false,
@@ -236,7 +236,7 @@ class RevisionController extends Controller
                         ];
                         $revision->supersede()->create($data);
                         break;
-                    
+
                     default:
                         $revision->supersede()->delete();
                         $revision->void()->delete();

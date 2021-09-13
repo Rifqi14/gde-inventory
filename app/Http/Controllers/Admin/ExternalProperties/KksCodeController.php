@@ -196,7 +196,7 @@ class KksCodeController extends Controller
         // Count Data
         $query  = DocumentExternalKksCode::with(['category'])->where('code', 'like', "%$code%");
         if ($category) {
-            $query->where('document_external_kks_categories_id', $category);
+            $query->where('document_external_kks_category_id', $category);
         }
 
         $row    = clone $query;
