@@ -8,6 +8,8 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Str;
+use App\Jobs\MovementProcess;
 
 use App\Models\Menu;
 use App\Models\GoodsIssue;
@@ -20,6 +22,8 @@ use App\Models\ProductTransferDetail;
 use App\Models\ProductBorrowingDetail;
 use App\Models\ProductSerial;
 use App\Models\StockWarehouse;
+use App\Models\StockMovement;
+use App\Models\Warehouse;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Phpoffice\PhpSpreadsheet\Worksheet\Worksheet;
@@ -363,6 +367,9 @@ class GoodsIssueController extends Controller
         $description = $request->description;
         $status      = $request->status;
         $issuedby    = $request->issuedby;
+        $getProducts = $request->products;
+
+        $this->checkStock($getProducts);
 
         $query = GoodsIssue::create([
             'date_issued'   => $issueddate,
@@ -374,8 +381,7 @@ class GoodsIssueController extends Controller
 
         if($query){
             $now           = date('Y-m-d');
-            $issued_id     = $query->id;
-            $getProducts   = $request->products;
+            $issued_id     = $query->id;            
             $documentNames = $request->document_name;
             $photoNames    = $request->photo_name;
             $documents     = [];
@@ -383,7 +389,7 @@ class GoodsIssueController extends Controller
             $this->issuedNumber($issued_id, $query->key_number, $query->created_at);
 
             if ($getProducts) {                
-                $this->approval($getProducts, $issued_id, $status);
+                $this->approval($getProducts, $issued_id, $status, $query->issued_number);
             }
 
             if (isset($documentNames)) {
@@ -446,7 +452,7 @@ class GoodsIssueController extends Controller
                         'message' => 'Failed to save document file.'
                     ], 400);
                 }
-            }
+            }            
 
             $result = [
                 'status'    => true,
@@ -465,75 +471,7 @@ class GoodsIssueController extends Controller
             'status'    => $result['status'],
             'message'   => $result['message']
         ],$result['point']);
-    }       
-
-    // Data approval process
-    public function approval($products, $issued_id, $status)    
-    {        
-        $referenceID = [];
-        $type        = '';
-        $warehouseID = 0;
-
-        foreach (json_decode($products) as $key => $row) {                                        
-            $type        = $row->type;
-            $warehouseID = $row->warehouse_id;
-            array_push($referenceID, $row->reference_id);
-
-            $query = GoodsIssueProduct::create([
-                'goods_issue_id'   => $issued_id,
-                'reference_id'     => $row->reference_id,
-                'product_id'       => $row->product_id,
-                'uom_id'           => $row->uom_id,
-                'qty_request'      => $row->qty_request,
-                'qty_receive'      => $row->qty_receive,
-                'rack_id'          => $row->rack_id,
-                'bin_id'           => $row->bin_id,
-                'type'             => $row->type,
-                'status'           => $status=='approved'?'out':null
-            ]);                                       
-
-            if($row->has_serial && $row->type == 'borrowing'){                
-                $this->insertSerial($query->id,$row->serials,$status);                                                
-
-                if(!$query){
-                    return response()->json([
-                        'status'    => false,
-                        'message'   => 'Failed to create detail data.'
-                    ], 400);
-                }
-            }
-
-            if (!$query) {
-                return response()->json([
-                    'status'    => false,
-                    'message'   => 'Failed to create detail data.'
-                ], 400);
-            }
-        }
-
-        if($type == 'borrowing' && $status == 'rejected'){                    
-            $item = ProductBorrowingDetail::whereIn('product_borrowing_details.product_borrowing_id', $referenceID)->get();
-            
-            foreach($item as $key => $row){
-                $warehouse = StockWarehouse::where([
-                    'warehouse_id' => $warehouseID,
-                    'product_id'   => $row->product_id
-                ])->first();                       
-
-                $warehouse->stock = $warehouse->stock + $row->qty_requested;
-                $warehouse->save();
-
-                if(!$warehouse){
-                    return response()->json([
-                        'status'    => false,
-                        'message'   => 'Failed to recalculate stock on warehouse.'
-                    ],400);
-                }
-            }            
-        };        
-
-        $query = ProductBorrowing::whereIn('id', $referenceID)->update(['status' => $status=='approved'?'borrowed':'rejected']);
-    }    
+    }  
 
     /**
      * Update the specified resource in storage.
@@ -755,21 +693,171 @@ class GoodsIssueController extends Controller
                 'message'   => 'Failed to delete data.'
             ], 400);
         }
-    }        
+    }    
+
+    // Data approval process
+    public function approval($products, $issued_id, $status, $issued_number)    
+    {        
+        $referenceID = [];
+        $type        = '';
+        $warehouseID = 0;
+
+        foreach (json_decode($products) as $key => $row) {                                        
+            $type        = $row->type;
+            $warehouseID = $row->warehouse_id;
+            array_push($referenceID, $row->reference_id);
+
+            $query = GoodsIssueProduct::create([
+                'goods_issue_id'   => $issued_id,
+                'reference_id'     => $row->reference_id,
+                'product_id'       => $row->product_id,
+                'uom_id'           => $row->uom_id,
+                'qty_request'      => $row->qty_request,
+                'qty_receive'      => $row->qty_receive,
+                'rack_id'          => $row->rack_id,
+                'bin_id'           => $row->bin_id,
+                'type'             => $row->type,
+                'status'           => $status=='approved'?'out':null
+            ]);                                       
+
+            if($row->has_serial && $row->type == 'borrowing'){                
+                $this->insertSerial($query->id,$row->serials,$status);                                                
+
+                if(!$query){
+                    return response()->json([
+                        'status'    => false,
+                        'message'   => 'Failed to create detail data.'
+                    ], 400);
+                }
+            }
+
+            if (!$query) {
+                return response()->json([
+                    'status'    => false,
+                    'message'   => 'Failed to create detail data.'
+                ], 400);
+            }
+
+            if($status == 'approved'){
+                switch($row->type){
+                    case 'consumable' :
+                        $description    = 'Goods Usage';
+                        $source_id      = $row->origin_id;
+                        $destination_id = Warehouse::where([
+                            ['site_id','=',$row->origin_site_id],
+                            ['type','=','virtual']
+                        ]);
+                        break;
+                    case 'transfer' : 
+                        $description    = 'Product Transfer';
+                        $source_id      = $row->origin_id;
+                        $destination_id = $row->destination_id;
+                        break;
+                    case 'borrowing' : 
+                        $description = 'Product Borrowing';
+                        $source_id      = $row->origin_id;
+                        $destination_id = Warehouse::where([
+                            ['site_id','=',$row->origin_site_id],
+                            ['type','=','virtual']
+                        ]);
+                        break;
+                    default : 
+                    $description = 'Goods Issue';
+                }
+
+                $movement = StockMovement::create([
+                    'reference'      => $issued_number,
+                    'description'    => 'Goods Issue.',
+                    'uom_id'         => $row->uom_id,                    
+                    'qty'            => $row->qty_receive,
+                    'source_id'      => $source_id,
+                    'destination_id' => $destination_id,
+                    'site_id'        => $row->origin_site_id,
+                    'date'           => Carbon::now(),                    
+                    'proceed'        => 0,
+                    'type'           => 'out',
+                    'creation_user'  => $row->issued_by,
+                    'product_id'     => $row->product_id
+                ]);
+            }
+        }
+
+        if($type == 'borrowing' && $status == 'rejected'){                    
+            $item = ProductBorrowingDetail::whereIn('product_borrowing_details.product_borrowing_id', $referenceID)->get();
+            
+            foreach($item as $key => $row){
+                $warehouse = StockWarehouse::where([
+                    'warehouse_id' => $row->origin_site_id,
+                    'product_id'   => $row->product_id
+                ])->first();                       
+
+                $warehouse->stock = $warehouse->stock + $row->qty_requested;
+                $warehouse->save();
+
+                if(!$warehouse){
+                    return response()->json([
+                        'status'    => false,
+                        'message'   => 'Failed to recalculate stock on warehouse.'
+                    ],400);
+                }
+            }            
+        };            
+
+        $query = ProductBorrowing::whereIn('id', $referenceID)->update(['status' => $status=='approved'?'borrowed':'rejected']);
+    }    
+        
+    public function checkStock($products)
+    {
+        if($products){
+            foreach (json_decode($products) as $key => $row) {                
+                
+                $movements = StockMovement::where([
+                    ['product_id', '=', $row->product_id],
+                    ['proceed', '=', 0]
+                ])->get();
+
+                foreach($movements as $movement){
+                    dispatch(new MovementProcess($movement->id));
+                }                               
+
+                $stock = StockWarehouse::selectRaw("
+                    stock_warehouses.*,
+                    products.name as product
+                ");
+                $stock->where([
+                    ['product_id', '=', $row->product_id],
+                    ['warehouse_id' , '=', $row->warehouse_id]
+                ]);
+                $stock->join('products', 'products.id','=', 'stock_warehouses.product_id');
+                $stock = $stock->first();
+
+                if($stock->stock <= 0){
+                    return response()->json([
+                        'status'  => false,
+                        'message' => "$stock->product out of stock."
+                    ], 400);
+                }   
+            }
+        }
+    }
 
     public function consumableproducts(Request $request)
-    {
-        $draw        = $request->draw;
-        $start       = $request->start;
-        $length      = $request->length;
-        $query       = $request->search['value'];
-        $sort        = $request->columns[$request->order[0]['column']]['data'];
-        $dir         = $request->order[0]['dir'];
-        $except      = $request->except;
-        $category_id = $request->category_id;
+    { 
+        $draw         = $request->draw;
+        $start        = $request->start;
+        $length       = $request->length;
+        $query        = $request->search['value'];
+        $sort         = $request->columns[$request->order[0]['column']]['data'];
+        $dir          = $request->order[0]['dir'];
+        $except       = $request->except;
+        $category_id  = $request->category_id;
+        $site_id      = $request->site_id;
+        $warehouse_id = $request->warehouse_id;
 
         $query = ProductConsumableDetail::selectRaw("
             product_consumables.consumable_number,
+            product_consumables.site_id as origin_site_id,
+            product_consumables.warehouse_id as origin_warehouse_id,
             TO_CHAR(product_consumables.consumable_date,'DD/MM/YYYY') as date_consumable,
             product_consumable_details.product_consumable_id,
             product_consumable_details.product_id,
@@ -778,13 +866,23 @@ class GoodsIssueController extends Controller
             products.name as product,
             products.is_serial,
             product_categories.path as category,
-            uoms.name as uom
-        ");
-        $query->leftJoin('product_consumables','product_consumables.id','=','product_consumable_details.product_consumable_id');
-        $query->leftJoin('products','products.id','=','product_consumable_details.product_id');
-        $query->leftJoin('product_categories','product_categories.id','=','products.product_category_id');
-        $query->leftJoin('uoms','uoms.id','=','product_consumable_details.uom_id');
+            uoms.name as uom,
+            sites.name as origin_site,
+            warehouses.name as origin_warehouse
+        ");        
+        $query->join('product_consumables','product_consumables.id','=','product_consumable_details.product_consumable_id');
+        $query->join('products','products.id','=','product_consumable_details.product_id');
+        $query->join('product_categories','product_categories.id','=','products.product_category_id');
+        $query->join('uoms','uoms.id','=','product_consumable_details.uom_id');
+        $query->join('warehouses', 'warehouses.id','=','product_consumables.warehouse_id');
+        $query->join('sites','sites.id','=','product_consumables.site_id');
         $query->where('product_consumables.status','approved');
+        if($site_id){
+            $query->where('product_consumables.site_id', $site_id);
+        }
+        if($warehouse_id){
+            $query->where('product_consumables.warehouse_id', $warehouse_id);
+        }
         if($category_id){
             $query->where('product_categories.id',$category_id);
         }
@@ -821,16 +919,22 @@ class GoodsIssueController extends Controller
 
     public function transferproducts(Request $request)
     {
-        $draw        = $request->draw;
-        $start       = $request->start;
-        $length      = $request->length;
-        $query       = $request->search['value'];
-        $sort        = $request->columns[$request->order[0]['column']]['data'];
-        $dir         = $request->order[0]['dir'];
-        $except      = $request->except;
-        $category_id = $request->category_id;
+        $draw         = $request->draw;
+        $start        = $request->start;
+        $length       = $request->length;
+        $query        = $request->search['value'];
+        $sort         = $request->columns[$request->order[0]['column']]['data'];
+        $dir          = $request->order[0]['dir'];
+        $except       = $request->except;
+        $category_id  = $request->category_id;
+        $site_id      = $request->site_id;
+        $warehouse_id = $request->warehouse_id;
 
         $query = ProductTransferDetail::selectRaw("
+            product_transfers.origin_site_id,
+            product_transfers.origin_warehouse_id,
+            product_transfers.destination_site_id,
+            product_transfers.destination_warehouse_id,
             product_transfers.transfer_number,
             TO_CHAR(product_transfers.date_transfer,'DD/MM/YYYY') as transfer_date,
             product_transfer_details.product_transfer_id,
@@ -840,13 +944,21 @@ class GoodsIssueController extends Controller
             products.name as product,
             products.is_serial,
             product_categories.path as category,
-            uoms.name as uom
+            uoms.name as uom,
+            sites.name as origin_site,
+            warehouses.name as origin_warehouse
         ");
-        $query->leftJoin('product_transfers','product_transfers.id','=','product_transfer_details.product_transfer_id');
-        $query->leftJoin('products','products.id','=','product_transfer_details.product_id');
-        $query->leftJoin('product_categories','product_categories.id','=','products.product_category_id');
-        $query->leftJoin('uoms','uoms.id','=','product_transfer_details.uom_id');
+        $query->join('product_transfers','product_transfers.id','=','product_transfer_details.product_transfer_id');
+        $query->join('products','products.id','=','product_transfer_details.product_id');
+        $query->join('product_categories','product_categories.id','=','products.product_category_id');
+        $query->join('uoms','uoms.id','=','product_transfer_details.uom_id');
+        $query->join('sites','sites.id','=','product_transfers.origin_site_id');
+        $query->join('warehouses','warehouses.id','=','product_transfers.origin_warehouse_id');        
         $query->where('product_transfers.status','approved');
+        // if($site_id){
+        //     $query->where('product_transfers.origin_site_id', $site_id);
+        // }
+        $query->where('product_transfers.origin_warehouse_id', $warehouse_id);
         if($category_id){
             $query->where('product_categories.id',$category_id);
         }
@@ -886,6 +998,7 @@ class GoodsIssueController extends Controller
         $query        = $request->search['value'];
         $sort         = $request->columns[$request->order[0]['column']]['data'];
         $dir          = $request->order[0]['dir'];
+        $site_id      = $request->site_id;
         $warehouse_id = $request->warehouse_id;
         $except       = $request->except;
         
@@ -893,19 +1006,30 @@ class GoodsIssueController extends Controller
             product_borrowing_details.*,
             TO_CHAR(product_borrowings.borrowing_date,'DD/MM/YYYY') as date_borrowing,
             product_borrowings.borrowing_number,
+            product_borrowings.site_id,
+            product_borrowings.warehouse_id,
             products.name as product,
             products.is_serial,
             product_categories.path as category,
-            uoms.name as uom
-        ");
-        $query->leftJoin('product_borrowings','product_borrowings.id','=','product_borrowing_details.product_borrowing_id');
-        $query->leftJoin('products','products.id','=','product_borrowing_details.product_id');
-        $query->leftJoin('product_categories','product_categories.id','=','product_borrowing_details.product_category_id');
-        $query->leftJoin('uoms','uoms.id','=','product_borrowing_details.uom_id');        
+            uoms.name as uom,
+            sites.name as site,
+            warehouses.name as warehouse
+        ");                                        
+        $query->join('product_borrowings','product_borrowings.id','=','product_borrowing_details.product_borrowing_id');
+        $query->join('products','products.id','=','product_borrowing_details.product_id');
+        $query->join('product_categories','product_categories.id','=','product_borrowing_details.product_category_id');
+        $query->join('uoms','uoms.id','=','product_borrowing_details.uom_id');                        
+        $query->join('sites','sites.id','=','product_borrowings.site_id');
+        $query->join('warehouses','warehouses.id','=','product_borrowings.warehouse_id');
         if($except){
             $query->whereNotIn('product_borrowing_details.product_id',$except);
         }
-        $query->where('product_borrowings.warehouse_id','=',$warehouse_id);        
+        if($site_id){
+            $query->where('product_borrowings.site_id',$site_id);
+        }
+        if($warehouse_id){
+            $query->where('product_borrowings.warehouse_id',$warehouse_id);        
+        }
         $query->whereIn('product_borrowings.status',['waiting','approved']);
 
         $rows  = clone $query;
@@ -918,16 +1042,16 @@ class GoodsIssueController extends Controller
         $queries = $query->get();
 
         $data = [];
-        foreach ($queries as $key => $row) {
-            $row->no = ++$start;
-            $row->category = str_replace('->',' <i class="fas fa-angle-right"></i> ',$row->category);                        
-            $data[]  = $row;
+        foreach ($queries as $key => $row) {                        
+            $row->no       = ++$start;
+            $row->category = str_replace('->',' <i class="fas fa-angle-right"></i> ',$row->category);                                                                                    
+            $data[]        = $row;
         }
 
         return response()->json([
             'draw'              => $draw,
             'recordsTotal'      => $total,
-            'recordsFiltered'   => $total,
+            'recordsFiltered'   => $total,            
             'data'              => $data
         ], 200);        
     }

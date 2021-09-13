@@ -55,7 +55,7 @@ Route::group([
         'prefix'     => 'product'
     ], function(){
         // List 
-        Route::post('/list', 'API\ProductController@read');
+        Route::get('/list', 'API\ProductController@read');
         // Detail
         Route::post('/detail','API\ProductController@show');
         // History

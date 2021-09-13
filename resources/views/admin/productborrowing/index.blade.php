@@ -278,6 +278,12 @@
                 {
                     render: function(data, type, row) {
                         var button = '';
+                        // read
+                        if(actionmenu.indexOf('read') >= 0){
+                            button += `<a class="dropdown-item" href="javascript:void(0);" onclick="show(${row.id})">
+                                        <i class="far fa-eye"></i>View Data
+                                    </a>`;
+                        }
                         // update
                         if (actionmenu.indexOf('update') > 0) {
                             var disabled = row.status=='draft'?'':'disabled';
