@@ -284,7 +284,7 @@
                     </div>
                     <div class="col-md-9">
                       <div class="input-group col-md-12">
-                        <input type="text" name="reviewer_matrix[{{ $key }}][days]" id="{{ $key }}_days" class="form-control text-right" placeholder="Calendar Days ...">
+                        <input type="text" name="reviewer_matrix[{{ $key }}][days]" id="{{ $key }}_days" class="form-control text-right numberfield" placeholder="Calendar Days ...">
                         <div class="input-group-append">
                           <span class="input-group-text">Calendar Days</span>
                         </div>
@@ -318,6 +318,7 @@
   var reviewerMatrixData;
   var dataForm  = [];
   var routeRoleSelect = "{{ route('role.select') }}";
+  var routeUserSelect = "{{ route('user.select') }}";
   var baseUrl         = "{{ url('admin/docexternalproperties') }}";
   var phaseCode       = @json($phase);
   var needSelect2Tag = $("#form").find("[data-sub_url]");
