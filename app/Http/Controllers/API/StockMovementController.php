@@ -9,6 +9,9 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 
 use App\Models\StockMovement;
+use App\Models\ProductConsumable;
+use App\Models\ProductTransfer;
+use App\Models\ProductBorrowing;
 
 class StockMovementController extends Controller
 {
@@ -92,5 +95,51 @@ class StockMovementController extends Controller
                 'history'    => $data
             ]
         ],Response::HTTP_OK);
+    }
+
+    public function total(Request $request)
+    {
+        $date = isset($request->date)?date('Y-m-d', strtotime($request->date)):Carbon::now();
+
+        $transfers = ProductTransfer::selectRaw('product_transfers.*');
+        $transfers->where('status','approved');
+        $transfers->whereDate('date_transfer', $date);
+
+        $totalTransfer = $transfers->get()->count();
+        
+        $consumes = ProductConsumable::selectRaw('product_consumables.*');
+        $consumes->where('status','approved');
+        $consumes->whereDate('consumable_date', $date);
+
+        $totalConsume = $consumes->get()->count();            
+
+        $borrowings = ProductBorrowing::selectRaw('product_borrowings.*');
+        $borrowings->where(function ($shape)
+        {
+            $shape->where('status','approved');
+            $shape->orWhere('status','borrowed');
+        });
+        $borrowings->whereDate('borrowing_date', $date);
+
+        $totalBorrow = $borrowings->get()->count();        
+
+        $data = [
+            'transfers'     => $totalTransfer,
+            'consumables'   => $totalConsume,
+            'borrowings'    => $totalBorrow,
+            'inventories'   => $totalTransfer + $totalConsume + $totalBorrow
+        ];
+
+        $dummy = [
+            'transfers'     => 7,
+            'consumables'   => 8,
+            'borrowings'    => 5,
+            'inventories'   => 7+8+5
+        ];
+
+        return response()->json([
+            'status' => Response::HTTP_OK,
+            'data'   => $dummy
+        ], Response::HTTP_OK);
     }
 }
