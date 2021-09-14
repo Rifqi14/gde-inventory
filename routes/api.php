@@ -60,5 +60,6 @@ Route::group([
         Route::post('/detail','API\ProductController@show');
         // History
         Route::get('/history', 'API\StockMovementController@read');
+        Route::post('/totalhistory', 'API\StockMovementController@total');
     });
 });
