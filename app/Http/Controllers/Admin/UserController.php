@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Employee;
 use App\Traits\InteractWithApiResponse;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\DB;
@@ -188,7 +189,7 @@ class UserController extends Controller
         $query->join('site_users', 'site_users.user_id', '=', 'users.id');
         $query->join('sites', 'sites.id', '=', 'site_users.site_id');
         $query->where('users.id', '=', $id);
-        $user = $query->get()->first();
+        $user   = $query->first();
 
         $url    = route('user.update', ['id' => $user->id]);
         if ($user) {
@@ -289,12 +290,16 @@ class UserController extends Controller
         $start = $request->page ? $request->page - 1 : 0;
         $length = $request->limit;
         $name = strtoupper($request->name);
-        $exception_id = $request->exception_id;
+        $exception_id   = $request->exception_id;
+        $role_id        = $request->role_id;
 
         //Count Data
-        $query = DB::table('users');
-        $query->select('users.*');
-        $query->whereRaw("upper(name) like '%$name%'");
+        $query  = User::whereRaw("upper(name) like '%$name%'");
+        if ($role_id) {
+            $query->whereHas('roles', function(Builder $query) use ($role_id){
+                $query->where('role_id', $role_id);
+            });
+        }
         if($exception_id){
             $query->whereRaw("id <> $exception_id");
         }

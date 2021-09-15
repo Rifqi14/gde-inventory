@@ -83,6 +83,9 @@ class DocumentCenterLogController extends Controller
                 $document = DocumentCenterDocument::find($create->document_center_document_id);
                 $document->status   = $create->status;
                 $document->save();
+
+                $email = new DocumentCenterDocumentController();
+                $email->sendEmail($create->document_center_document_id);
             }
         } catch (\Illuminate\Database\QueryException $ex) {
             DB::rollBack();

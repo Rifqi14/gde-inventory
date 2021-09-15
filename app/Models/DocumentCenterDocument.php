@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Alfa6661\AutoNumber\AutoNumberTrait;
+use App\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
@@ -71,6 +72,16 @@ class DocumentCenterDocument extends Model
     public function documentCenter()
     {
         return $this->belongsTo('App\Models\DocumentCenter', 'document_center_id', 'id');
+    }
+
+    public function distributors()
+    {
+        return $this->belongsToMany(Role::class, 'document_center_distributors', 'document_id', 'distributor_id');
+    }
+
+    public function approver()
+    {
+        return $this->belongsTo(User::class, 'approver_id', 'id');
     }
 
     /**

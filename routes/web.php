@@ -24,6 +24,7 @@ Auth::routes();
 Route::get('/test', 'Admin\TestController@test')->name('test');
 Route::get('/businesstrip/rateprocess', 'Admin\BusinessTripController@rateprocess')->name('businesstrip.rateprocess');
 Route::get('/reimbursement/rateprocess', 'Admin\ReimbursementController@rateprocess')->name('reimbursement.rateprocess');
+Route::resource('/documentmail', 'Admin\DocumentCenterMailController');
 
 Route::resource('/attendanceclock', 'Machine\IclockTranscationController');
 

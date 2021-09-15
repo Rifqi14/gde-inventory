@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\DocExternal\ReviewerMatrix\DocumentExternalMatrix;
+use App\User;
 use Illuminate\Database\Eloquent\Model;
 
 class Role extends Model
@@ -11,7 +12,7 @@ class Role extends Model
 
     public function users()
     {
-        return $this->belongsToMany('App\User', 'role_users', 'user_id', 'role_id');
+        return $this->belongsToMany(User::class, 'role_users', 'role_id', 'user_id');
     }
 
     public function employeeNotNull()
@@ -40,5 +41,10 @@ class Role extends Model
     public function groupworkflows()
     {
         return $this->hasMany(\App\Models\DocExternal\Workflow\GroupWorkflow::class, 'role_id');
+    }
+
+    public function roleDistributors()
+    {
+        return $this->belongsToMany(DocumentCenterDocument::class, 'document_center_distributors', 'distributors_id', 'document_id');
     }
 }
