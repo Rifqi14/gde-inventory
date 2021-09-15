@@ -57,7 +57,7 @@ Route::group([
         // List 
         Route::get('/list', 'API\ProductController@read');
         // Detail
-        Route::post('/detail','API\ProductController@show');
+        Route::get('/detail/{id}','API\ProductController@show');
         // History
         Route::get('/history', 'API\StockMovementController@read');
         Route::post('/totalhistory', 'API\StockMovementController@total');
