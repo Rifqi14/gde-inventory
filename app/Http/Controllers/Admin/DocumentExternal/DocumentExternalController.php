@@ -49,17 +49,17 @@ class DocumentExternalController extends Controller
         $this->page = $page;
     }
 
-    function getPage() 
+    function getPage()
     {
         return $this->page;
     }
-    
+
     function setType($type)
     {
         $this->type = $type;
     }
 
-    function getType() 
+    function getType()
     {
         return $this->type;
     }
@@ -69,7 +69,7 @@ class DocumentExternalController extends Controller
         $this->menu_id = $menu_id;
     }
 
-    function getMenu() 
+    function getMenu()
     {
         return $this->menu_id;
     }
@@ -136,18 +136,19 @@ class DocumentExternalController extends Controller
                     'menu'                          => $request->page,
                 ];
                 $document   = DocumentExternal::create($data);
-                
+
                 $matrixData     = [];
+                // dd($request->reviewer_matrix);
                 foreach ($request->reviewer_matrix as $key => $value) {
                     $matrixData   = [
                         'document_external_id'  => $document->id,
                         'matrix_label'          => $value['label'],
-                        'matrix_sla'            => $value['sla'] == 'on' ? 'true' : 'false',
+                        'matrix_sla'            => (isset($value['sla']) && $value['sla'] == 'on') ? 'true' : 'false',
                         'matrix_days'           => $value['days'],
                     ];
                     $matrix = DocumentExternalMatrix::create($matrixData);
                     foreach ($value['group'] as $keyGroup => $group) {
-                        $matrix->groups()->attach($group);
+                        $matrix->groupUsers()->attach($group);
                     }
                 }
             } catch (\Illuminate\Database\QueryException $ex) {
@@ -179,6 +180,7 @@ class DocumentExternalController extends Controller
         if (in_array('create', $request->actionmenu)) {
             $external   = DocumentExternal::with(['matrix'])->find($id);
             // dd($external->matrix()->with(['groups'])->get());
+            // dd($external);
             if ($external) {
                 return view('admin.docexternal.edit', compact('external'));
             }
@@ -228,16 +230,15 @@ class DocumentExternalController extends Controller
                     $matrixData     = [
                         'document_external_id'  => $external->id,
                         'matrix_label'          => $value['label'],
-                        'matrix_sla'            => $value['sla'] == 'on' ? 'true' : 'false',
+                        'matrix_sla'            => (isset($value['sla']) && $value['sla'] == 'on') ? 'true' : 'false',
                         'matrix_days'           => $value['days'],
                     ];
 
-                    
-                    $matrix = DocumentExternalMatrix::create($matrixData);
 
+                    $matrix = DocumentExternalMatrix::create($matrixData);
                     $matrixGroup    = [];
                     foreach ($value['group'] as $keyGroup => $group) {
-                        $matrix->groups()->attach($group);
+                        $matrix->groupUsers()->attach($group);
                     }
                 }
             } catch (\Illuminate\Database\QueryException $th) {
@@ -268,7 +269,7 @@ class DocumentExternalController extends Controller
                             array_push($groupId, $group);
                         }
                     }
-                    $matrix->groups()->sync($groupId);
+                    $matrix->groupUsers()->sync($groupId);
                     $matrix->save();
                 }
             } catch (\Illuminate\Database\QueryException $th) {
@@ -280,7 +281,7 @@ class DocumentExternalController extends Controller
 
     public function readMatrix($page, $id)
     {
-        $matrixs     = DocumentExternalMatrix::with(['groups'])->where('document_external_id', $id)->get();
+        $matrixs     = DocumentExternalMatrix::with(['groupUsers'])->where('document_external_id', $id)->get();
 
         $data   = [];
         foreach ($matrixs as $keyMatrix => $matrix) {

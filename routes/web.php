@@ -331,6 +331,7 @@ Route::group(['prefix' => 'admin'], function () {
         Route::resource('/goodsissue','Admin\GoodsIssueController');
 
         // Stock Movement
+        Route::get('/stockmovement/read','Admin\StockMovementController@read')->name('stockmovement.read');
         Route::resource('/stockmovement','Admin\StockMovementController');
 
         // Stock Adjustment 

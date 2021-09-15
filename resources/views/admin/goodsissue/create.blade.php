@@ -577,8 +577,10 @@
                 url: "{{route('goodsissue.consumableproducts')}}",
                 type: "GET",
                 data: function(data) {
-                    data.except = issuedProduct;
-                    data.category_id = $('#form').find('#product-category').find('option:selected').val();
+                    data.site_id      = $('#unit').find('option:selected').val();
+                    data.warehouse_id = $('#warehouse').find('option:selected').val();
+                    data.except       = issuedProduct;
+                    data.category_id  = $('#form').find('#product-category').find('option:selected').val();
                 }
             },
             columnDefs: [{
@@ -617,16 +619,20 @@
                 },
                 {
                     render: function(data, type, row) {
-                        var referenceID = row.product_consumable_id,
-                            reference   = row.consumable_number,
-                            productID   = row.product_id,
-                            product     = row.product,
-                            category    = row.category,
-                            uomID       = row.uom_id,
-                            isSerial    = row.is_serial,
-                            qty         = row.qty ? row.qty : 0;
+                        var referenceID       = row.product_consumable_id,
+                            reference         = row.consumable_number,
+                            productID         = row.product_id,
+                            product           = row.product,                            
+                            originSiteID      = row.origin_site_id,
+                            originSite        = row.origin_site,
+                            originWarehouseID = row.origin_warehouse_id,
+                            originWarehouse   = row.origin_warehouse,
+                            category          = row.category,
+                            uomID             = row.uom_id,
+                            isSerial          = row.is_serial,
+                            qty               = row.qty ? row.qty : 0;
 
-                        return `<button class="btn btn-sm text-xs btn-success btn-flat legitRipple" onclick="addProduct($(this),'consumable')" type="button" data-reference-id="${referenceID}" data-reference="${reference}" data-product-id="${productID}" data-product="${product}" data-uom-id="${uomID}" data-qty="${qty}" data-has-serial="${isSerial}">
+                        return `<button class="btn btn-sm text-xs btn-success btn-flat legitRipple" onclick="addProduct($(this),'consumable')" type="button" data-reference-id="${referenceID}" data-reference="${reference}" data-product-id="${productID}" data-product="${product}" data-uom-id="${uomID}" data-qty="${qty}" data-has-serial="${isSerial}" data-origin-site-id="${originSiteID}" data-origin-site="${originSite}" data-origin-warehouse-id="${originWarehouseID}" data-origin-warehouse="${originWarehouse}">
                                     <i class="fas fa-plus"></i>
                                 </button>`;
                     },
@@ -677,8 +683,10 @@
                 url: "{{route('goodsissue.transferproducts')}}",
                 type: "GET",
                 data: function(data) {
-                    data.except = issuedProduct;
-                    data.category_id = $('#form').find('#product-category').find('option:selected').val();
+                    data.site_id      = $('#unit').find('option:selected').val();
+                    data.warehouse_id = $('#warehouse').find('option:selected').val();
+                    data.except       = issuedProduct;
+                    data.category_id  = $('#form').find('#product-category').find('option:selected').val();
                 }
             },
             columnDefs: [{
@@ -717,16 +725,22 @@
                 },
                 {
                     render: function(data, type, row) {
-                        var referenceID = row.product_transfer_id,
-                            reference   = row.transfer_number,
-                            productID   = row.product_id,
-                            product     = row.product,
-                            category    = row.category,
-                            isSerial    = row.is_serial,
-                            uomID       = row.uom_id,
-                            qty         = row.qty ? row.qty : 0;
+                        var referenceID            = row.product_transfer_id,
+                            reference              = row.transfer_number,
+                            productID              = row.product_id,
+                            product                = row.product,
+                            category               = row.category,
+                            isSerial               = row.is_serial,
+                            uomID                  = row.uom_id,
+                            qty                    = row.qty ? row.qty : 0,
+                            originSiteID           = row.origin_site_id,
+                            originSite             = row.origin_site,
+                            originWarehouseID      = row.origin_warehouse_id,
+                            originWarehouse        = row.origin_warehouse,
+                            destinationSiteID      = row.destination_site_id,
+                            destinationWarehouseID = row.destination_warehouse_id;
 
-                        return `<button class="btn btn-sm text-xs btn-success btn-flat legitRipple" onclick="addProduct($(this),'transfer')" type="button" data-reference-id="${referenceID}" data-reference="${reference}" data-product-id="${productID}" data-product="${product}" data-uom-id="${uomID}" data-qty="${qty}" dat-has-serial="${isSerial}">
+                        return `<button class="btn btn-sm text-xs btn-success btn-flat legitRipple" onclick="addProduct($(this),'transfer')" type="button" data-reference-id="${referenceID}" data-reference="${reference}" data-product-id="${productID}" data-product="${product}" data-uom-id="${uomID}" data-qty="${qty}" data-has-serial="${isSerial}" data-origin-site-id="${originSiteID}" data-origin-site="${originSite}" data-origin-warehouse-id="${originWarehouseID}" data-origin-warehouse="${originWarehouse}" data-destination-site-id="${destinationSiteID}" data-destination-warehouse-id="${destinationWarehouseID}">
                                     <i class="fas fa-plus"></i>
                                 </button>`;
                     },
@@ -777,6 +791,7 @@
                 url: "{{route('goodsissue.borrowingproducts')}}",
                 type: "GET",
                 data: function(data) {
+                    data.site_id      = $('#unit').find('option:selected').val();
                     data.warehouse_id = $('#warehouse').find('option:selected').val();
                     data.except       = issuedProduct;
                     data.category_id  = $('#form').find('#product-category').find('option:selected').val();
@@ -818,16 +833,21 @@
                 },
                 {
                     render: function(data, type, row) {
-                        var referenceID = row.product_borrowing_id,
-                            reference   = row.borrowing_number,
-                            productID   = row.product_id,
-                            product     = row.product,
-                            category    = row.category,
-                            isSerial    = row.is_serial,
-                            uomID       = row.uom_id,
-                            qty         = row.qty_requested ? row.qty_requested : 0;
+                        var referenceID             = row.product_borrowing_id,
+                            reference               = row.borrowing_number,
+                            productID               = row.product_id,
+                            product                 = row.product,                            
+                            category                = row.category,
+                            isSerial                = row.is_serial,
+                            originSiteID            = row.site_id,
+                            originSite              = row.site,
+                            originWarehouseID       = row.warehouse_id,
+                            originWarehouse         = row.warehouse,
+                            destinationWarehouseID  = 0,
+                            uomID                   = row.uom_id,
+                            qty                     = row.qty_requested ? row.qty_requested : 0;
 
-                        return `<button class="btn btn-sm text-xs btn-success btn-flat legitRipple" onclick="addProduct($(this),'borrowing')" type="button" data-reference-id="${referenceID}" data-reference="${reference}" data-product-id="${productID}" data-product="${product}" data-uom-id="${uomID}" data-qty="${qty}" data-has-serial="${isSerial}">
+                        return `<button class="btn btn-sm text-xs btn-success btn-flat legitRipple" onclick="addProduct($(this),'borrowing')" type="button" data-reference-id="${referenceID}" data-reference="${reference}" data-product-id="${productID}" data-product="${product}" data-uom-id="${uomID}" data-qty="${qty}" data-has-serial="${isSerial}" data-origin-site-id="${originSiteID}" data-origin-site="${originSite}" data-origin-warehouse-id="${originWarehouseID}" data-origin-warehouse="${originWarehouse}" data-destination-warehouse-id="${destinationWarehouseID}">
                                     <i class="fas fa-plus"></i>
                                 </button>`;
                     },
@@ -1072,38 +1092,45 @@
                 var data        = new FormData($('#form')[0]),
                     warehouseID = $('#warehouse').find('option:selected').val();
                     issuedDate  = $('#form').find('#date').data('daterangepicker').startDate.format('YYYY-MM-DD'),
+                    issuedBy    = $('#form').find('input[name=issuedby]').val();
                     products    = [],
                     zeroValue   = false;
 
                 $.each($('#table-product > tbody > .product-item'), function(index, value) {
-                    var product     = $(this).find('.item-product'),
-                        product_id  = product.val(),
-                        referenceID = product.attr('data-reference-id'),
-                        uomID       = product.attr('data-uom-id'),
-                        qtyRequest  = product.attr('data-qty-request'),
-                        qtyReceive  = $(this).find('.qty-receive').val(),                        
-                        rackID      = product.parents('.product-item').find('.rack-warehouse > option:selected').val(),
-                        binID       = product.parents('.product-item').find('.bin-warehouse > option:selected').val(),
-                        type        = product.attr('data-type'),
-                        hasSerial   = product.attr('data-has-serial')=='1'?true:false,
-                        serials     = [];
+                    var product       = $(this).find('.item-product'),
+                        product_id    = product.val(),
+                        referenceID   = product.attr('data-reference-id'),
+                        uomID         = product.attr('data-uom-id'),
+                        qtyRequest    = product.attr('data-qty-request'),
+                        qtyReceive    = $(this).find('.qty-receive').val(),                        
+                        rackID        = product.parents('.product-item').find('.rack-warehouse > option:selected').val(),
+                        binID         = product.parents('.product-item').find('.bin-warehouse > option:selected').val(),
+                        type          = product.attr('data-type'),
+                        hasSerial     = product.attr('data-has-serial')=='1'?true:false,
+                        originSiteID  = product.attr('data-origin-site-id'),
+                        originID      = product.attr('data-origin-warehouse-id'),
+                        destinationID = product.attr('data-destination-warehouse-id'),
+                        serials       = [];
 
                     if(hasSerial){
                         serials = dataProducts.filter(param => param.product_id == product_id)[0].serials;
                     }
 
                     products.push({
-                        warehouse_id : warehouseID,
-                        product_id   : product_id,
-                        reference_id : referenceID,
-                        uom_id       : uomID,
-                        qty_request  : qtyRequest,
-                        qty_receive  : qtyReceive ? qtyReceive : 0,                        
-                        rack_id      : rackID,
-                        bin_id       : binID,
-                        type         : type,
-                        has_serial   : hasSerial,
-                        serials      : serials
+                        product_id      : parseInt(product_id),
+                        reference_id    : parseInt(referenceID),
+                        origin_site_id  : parseInt(originSiteID),
+                        origin_id       : parseInt(originID),
+                        destination_id  : parseInt(destinationID),
+                        uom_id          : parseInt(uomID),
+                        qty_request     : parseInt(qtyRequest),
+                        qty_receive     : qtyReceive ? parseInt(qtyReceive) : 0,                        
+                        rack_id         : parseInt(rackID),
+                        bin_id          : parseInt(binID),
+                        type            : type,
+                        issued_by       : parseInt(issuedBy),
+                        has_serial      : hasSerial,
+                        serials         : serials
                     });
 
                 });      
@@ -1319,23 +1346,26 @@
             $('li.consumable-reference').show();
             $('li.transfer-reference').show();
             $('li.borrowing-reference').show();
-        }
-
-        console.log({role : productRole});
+        }        
 
         $('#form-reference').modal('show');
     }
 
     const addProduct = (that, type) => {
-        var referenceID = that.attr('data-reference-id'),
-            reference   = that.attr('data-reference'),
-            productID   = that.attr('data-product-id'),
-            product     = that.attr('data-product'),
-            category    = that.parents('tr').find('td.category').html(),
-            uomID       = that.attr('data-uom-id'),
-            qty         = that.attr('data-qty'),            
-            isSerial    = that.attr('data-has-serial'),
-            table       = $('#table-product > tbody');
+        var referenceID            = that.attr('data-reference-id'),
+            reference              = that.attr('data-reference'),
+            productID              = that.attr('data-product-id'),
+            product                = that.attr('data-product'),
+            category               = that.parents('tr').find('td.category').html(),
+            uomID                  = that.attr('data-uom-id'),
+            qty                    = that.attr('data-qty'),            
+            isSerial               = that.attr('data-has-serial'),
+            originSiteID           = that.attr('data-origin-site-id'),
+            originSite             = that.attr('data-origin-site'),
+            originWarehouseID      = that.attr('data-origin-warehouse-id'),
+            originWarehouse        = that.attr('data-origin-warehouse'),
+            destinationWarehouseID = that.attr('data-destination-warehouse-id'), 
+            table                  = $('#table-product > tbody');        
 
         switch (isSerial) {
             case '1':
@@ -1352,7 +1382,7 @@
         var serial = `<span class="badge ${badge} text-md"><i class="${icon}" style="size: 1x;"></i></span>`;
 
         var html = `<tr class="product-item">
-                        <input type="hidden" class="item-product" value="${productID}" data-reference-id="${referenceID}" data-uom-id="${uomID}" data-qty-request="${qty}" data-type="${type}" data-has-serial="${isSerial}">                        
+                        <input type="hidden" class="item-product" value="${productID}" data-reference-id="${referenceID}" data-uom-id="${uomID}" data-qty-request="${qty}" data-type="${type}" data-has-serial="${isSerial}" data-origin-site-id="${originSiteID}" data-origin-warehouse-id="${originWarehouseID}" data-destination-warehouse-id="${destinationWarehouseID}">                        
                         <td width="100"><p>${product}<br><b style="font-size: 10pt;">${reference}</b></p></td>
                         <td width="100">${category}</td>
                         <td width="30" class="text-center">${serial}</td>
@@ -1375,7 +1405,7 @@
                             </div>                    
                         </td>
                         <td class="text-center" width="10">
-                            <button class="btn btn-sm text-xs btn-warning btn-flat legitRipple ${type=='borrowing'&&isSerial=='1'?'':'disabled'}" type="button" onclick="showSerial($(this),${productID})"><i class="fas fa-bars"></i></button>
+                            <button class="btn btn-sm text-xs btn-warning btn-flat legitRipple ${type=='borrowing'&&isSerial=='1'?'':'disabled'}" type="button" onclick="showSerial($(this),${productID}, ${type=='borrowing'&&isSerial=='1'?false:true})"><i class="fas fa-bars"></i></button>
                             <button class="btn btn-sm text-xs btn-danger btn-flat legitRipple" type="button" onclick="removeProduct($(this),${productID})"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>`;
@@ -1389,36 +1419,48 @@
 
         if(obj.length == 0){
             dataProducts.push({
-                product_id   : productID,
-                product      : product,
-                category     : category,
-                rack_id      : null,
-                bin_id       : null,                
-                reference_id : referenceID,
-                reference    : reference,
-                max_qty      : qty,                
-                has_serial   : isSerial=='1'?true:false,
-                serials      : isSerial=='1'?[]:null,
-            });   
+                product_id      : productID,
+                product         : product,
+                origin_id       : originWarehouseID,
+                destination_id  : destinationWarehouseID,
+                category        : category,
+                rack_id         : null,
+                bin_id          : null,                
+                reference_id    : referenceID,
+                reference       : reference,
+                max_qty         : qty,                
+                has_serial      : isSerial=='1'?true:false,
+                serials         : isSerial=='1'?[]:null,
+            });     
         }            
 
         initBin();
         initRack();
 
         productRole = type;
-
+        
+        if(originWarehouseID){
+            $('#warehouse').select2('trigger', 'select', {
+                data : {
+                    id      : originWarehouseID,
+                    text    : originWarehouse,
+                    site_id : originSiteID,
+                    site    : originSite
+                } 
+            });
+        }        
         if (productRole == 'consumable') {
             $('li.transfer-reference').hide();
             $('li.borrowing-reference').hide();
-            consumableTable.ajax.reload(null, false);
+            consumableTable.ajax.reload(null, false);            
         } else if (productRole == 'transfer') {
             $('li.consumable-reference').hide();
             $('li.borrowing-reference').hide();
-            transferTable.ajax.reload(null, false);
+            transferTable.ajax.reload(null, false);            
         }else if(productRole == 'borrowing'){
             $('li.consumable-reference').hide();
             $('li.transfer-reference').hide();
-            borrowingTable.ajax.reload(null, false);
+            borrowingTable.ajax.reload(null, false);            
         }        
     }
 
@@ -1510,7 +1552,11 @@
         }
     }
 
-    const showSerial = (that, productID) => {
+    const showSerial = (that, productID, disabled) => {
+        if(disabled){
+            return false;
+        }
+
         $('#table-select-serial').attr('data-product-id',productID);
         $('#table-selected-serial').attr('data-product-id',productID);
         tableSelectSerial.draw();
@@ -1547,7 +1593,7 @@
 
         if(serial.length == 0){
             product[0].serials.push({
-                serial_id     : serialID,
+                serial_id     : parseInt(serialID),
                 serial_number : serialNumber
             });
         }                   

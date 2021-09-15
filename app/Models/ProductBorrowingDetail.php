@@ -3,7 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
+use App\Models\Warehouse;
+use App\Models\ProductBorrowing;
 class ProductBorrowingDetail extends Model
 {
     protected $guarded = [];
@@ -16,5 +17,10 @@ class ProductBorrowingDetail extends Model
     public function serials()
     {
         return $this->hasMany('App\Models\ProductBorrowingSerial','borrowing_detail_id');
+    }
+
+    public function parent()
+    {
+        return $this->belongsTo(ProductBorrowing::class, 'product_borrowing_id');
     }
 }

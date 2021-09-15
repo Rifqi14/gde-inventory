@@ -5,9 +5,10 @@ namespace App\Http\Controllers\Admin;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\View;
+use Illuminate\Http\Response;
 
 use App\Models\Menu;
-
+use App\Models\StockMovement;
 class StockMovementController extends Controller
 {
 
@@ -61,7 +62,26 @@ class StockMovementController extends Controller
      */
     public function show($id)
     {
-        //
+        if($id){
+            $query = StockMovement::selectRaw("
+                stock_movements.*,
+                products.name as product,
+                users.name as issued_by,
+                TO_CHAR(stock_movements.created_at, 'DD/MM/YYYY HH24:MI:SS') as movement_date
+            ");
+            $query->join('products','products.id','=','stock_movements.product_id');
+            $query->join('users','users.id','=','stock_movements.creation_user');
+            $data = $query->find($id);
+            
+            if(!$data){
+                abort(404);
+            }
+
+            return view('admin.stockmovement.detail',compact('data'));
+
+        }else{
+            abort(404);
+        }
     }
 
     /**
@@ -96,5 +116,51 @@ class StockMovementController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function read(Request $request)
+    {
+        $start  = $request->start;
+        $length = $request->length;
+        $draw   = $request->draw;
+        $sort   = $request->columns[$request->order[0]['column']]['data'];
+        $dir    = $request->order[0]['dir'];
+
+        $query = StockMovement::selectRaw("
+            stock_movements.id,
+            stock_movements.reference,
+            stock_movements.description,
+            stock_movements.type,
+            stock_movements.qty,
+            stock_movements.status,
+            TO_CHAR(stock_movements.created_at, 'DD/MM/YYYY HH24:MI') as movement_date,
+            products.name as product,
+            users.name as issued_by
+        ");
+        $query->join('products','products.id','=','stock_movements.product_id');
+        $query->join('users','users.id','=','stock_movements.creation_user');
+        $query->orderBy('stock_movements.date', 'desc');
+
+        $rows  = clone $query;
+        $total = $rows->count();
+
+        $query->offset($start);
+        $query->limit($length);
+        $query->orderBy($sort, $dir);
+
+        $queries = $query->get();
+
+        $data = [];
+        $no   = 0;
+        foreach ($queries as $key => $row) {
+            $row->no = ++$no;
+            $data[]  = $row;
+        }
+        return response()->json([
+            'draw'              => $draw,
+            'recordsTotal'      => $total,
+            'recordsFiltered'   => $total,
+            'data'              => $data
+        ], Response::HTTP_OK);
     }
 }

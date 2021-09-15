@@ -77,9 +77,9 @@ class ProductController extends Controller
     } 
     
     public function show(Request $request)
-    {       
-        $id = $request->id;    
-
+    {                  
+        $id = $request->id;
+        
         if(!$id){
             throw new ProductException('The given data was invalid.');
         }

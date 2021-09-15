@@ -687,13 +687,14 @@
 <script>
   var reviewerMatrixData;
   var actionmenu      = @json(json_encode($actionmenu));
+  var routeUserSelect = "{{ route('user.select') }}";
   var routeRoleSelect = "{{ route('role.select') }}";
   var base            = "{{ url('admin') }}";
   var externalUrl     = "{{ url('admin/documentcenterexternal') }}";
   var baseUrl         = "{{ url('admin/docexternalproperties') }}";
   var phaseCode       = @json($phase);
   var needSelect2Tag  = $("#form").find("[data-sub_url]");
-  var matrixData      = @json($external->matrix()->with(['groups'])->get());
+  var matrixData      = @json($external->matrix()->with(['groupUsers'])->get());
   var matrixEnums     = @json(config('enums.reviewer_matrix'));
   var documentCategory= $("[name=document_category_id]").val();
   var issueStatus     = @json(config('enums.issue_status'));
@@ -734,7 +735,7 @@
               name: `{!! $external->sitecode->name !!}`,
             }
           });
-          @endif   
+          @endif
           break;
         case 'disciplinecode':
           @if ($external->disciplinecode)
@@ -745,7 +746,7 @@
               name: `{!! $external->disciplinecode->name !!}`,
             }
           });
-          @endif   
+          @endif
           break;
         case 'documenttypeext':
           @if ($external->documenttype)
@@ -767,9 +768,9 @@
               name: `{!! $external->originatorcode->name !!}`,
             }
           });
-          @endif   
+          @endif
           break;
-      
+
         default:
           break;
       }
@@ -790,7 +791,7 @@
           id: {!! $external->kkscode->id !!},
           text: `{!! $external->kkscode->code !!}`,
           name: `{!! $external->kkscode->name !!}`,
-          category: {!! $external->kkscode->category !!},
+          category: `{!! $external->kkscode->category !!}`,
         }
       });
     @endif

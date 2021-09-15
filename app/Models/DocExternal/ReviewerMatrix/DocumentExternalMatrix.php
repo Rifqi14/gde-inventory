@@ -24,8 +24,13 @@ class DocumentExternalMatrix extends Model
         return $this->belongsToMany(Role::class, 'document_external_matrix_groups', 'matrix_id', 'role_id', 'id', 'id')->withTimestamps();
     }
 
+    public function groupUsers()
+    {
+        return $this->belongsToMany('App\User', 'document_external_matrix_groups', 'matrix_id', 'user_id', 'id', 'id')->withTimestamps();
+    }
+
     /**
-     * Scope a query to only include 
+     * Scope a query to only include
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
      * @return \Illuminate\Database\Eloquent\Builder
