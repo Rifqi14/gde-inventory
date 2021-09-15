@@ -369,7 +369,14 @@ class GoodsIssueController extends Controller
         $issuedby    = $request->issuedby;
         $getProducts = $request->products;
 
-        $this->checkStock($getProducts);
+        $check = $this->checkStock($getProducts);                
+
+        if($check['stock'] == 0){
+            return response()->json([
+                'status'    => false,
+                'message'   => $check['product'].' out of stock.'
+            ], 400);
+        }        
 
         $query = GoodsIssue::create([
             'date_issued'   => $issueddate,
@@ -386,10 +393,10 @@ class GoodsIssueController extends Controller
             $photoNames    = $request->photo_name;
             $documents     = [];
 
-            $this->issuedNumber($issued_id, $query->key_number, $query->created_at);
+           $issued_number = $this->issuedNumber($issued_id, $query->key_number, $query->created_at);
 
             if ($getProducts) {                
-                $this->approval($getProducts, $issued_id, $status, $query->issued_number);
+                $this->approval($getProducts, $issued_id, $status, $issued_number);
             }
 
             if (isset($documentNames)) {
@@ -499,6 +506,16 @@ class GoodsIssueController extends Controller
         $warehouse   = $request->warehouse;
         $description = $request->description;
         $status      = $request->status;
+        $getProducts = $request->products;
+
+        $check = $this->checkStock($getProducts);                
+
+        if($check['stock'] == 0){
+            return response()->json([
+                'status'    => false,
+                'message'   => $check['product'].' out of stock.'
+            ], 400);
+        } 
 
         $query = GoodsIssue::find($id);
         $query->warehouse_id = $warehouse;
@@ -509,8 +526,7 @@ class GoodsIssueController extends Controller
 
         if($query){
             $now           = date('Y-m-d');
-            $issued_id     = $query->id;
-            $getProducts   = $request->products;
+            $issued_id     = $query->id;            
             $documentNames = $request->document_name;
             $photoNames    = $request->photo_name;
             $updateDoc     = $request->documents;
@@ -703,8 +719,8 @@ class GoodsIssueController extends Controller
         $warehouseID = 0;
 
         foreach (json_decode($products) as $key => $row) {                                        
-            $type        = $row->type;
-            $warehouseID = $row->warehouse_id;
+            $type        = $row->type;    
+            $issued_number= $issued_number;    
             array_push($referenceID, $row->reference_id);
 
             $query = GoodsIssueProduct::create([
@@ -743,42 +759,51 @@ class GoodsIssueController extends Controller
                     case 'consumable' :
                         $description    = 'Goods Usage';
                         $source_id      = $row->origin_id;
-                        $destination_id = Warehouse::where([
+                        $destination_id = Warehouse::select('id')->where([
                             ['site_id','=',$row->origin_site_id],
                             ['type','=','virtual']
-                        ]);
+                        ])->first();
                         break;
                     case 'transfer' : 
                         $description    = 'Product Transfer';
                         $source_id      = $row->origin_id;
-                        $destination_id = $row->destination_id;
+                        $virtual        = $row->destination_id;
                         break;
                     case 'borrowing' : 
                         $description = 'Product Borrowing';
                         $source_id      = $row->origin_id;
-                        $destination_id = Warehouse::where([
+                        $virtual = Warehouse::select('id')->where([
                             ['site_id','=',$row->origin_site_id],
                             ['type','=','virtual']
-                        ]);
+                        ])->first();
                         break;
                     default : 
                     $description = 'Goods Issue';
-                }
+                }                
 
                 $movement = StockMovement::create([
                     'reference'      => $issued_number,
-                    'description'    => 'Goods Issue.',
+                    'description'    => $description,
                     'uom_id'         => $row->uom_id,                    
                     'qty'            => $row->qty_receive,
                     'source_id'      => $source_id,
-                    'destination_id' => $destination_id,
+                    'destination_id' => $virtual->id,
                     'site_id'        => $row->origin_site_id,
                     'date'           => Carbon::now(),                    
                     'proceed'        => 0,
                     'type'           => 'out',
                     'creation_user'  => $row->issued_by,
                     'product_id'     => $row->product_id
-                ]);
+                ]);                    
+
+                if(!$movement){
+                    return response()->json([
+                        'status'    => false,
+                        'message'   => $query
+                    ],400);
+                }
+
+                MovementProcess::dispatchNow($movement);
             }
         }
 
@@ -807,38 +832,21 @@ class GoodsIssueController extends Controller
     }    
         
     public function checkStock($products)
-    {
-        if($products){
-            foreach (json_decode($products) as $key => $row) {                
-                
-                $movements = StockMovement::where([
-                    ['product_id', '=', $row->product_id],
-                    ['proceed', '=', 0]
-                ])->get();
-
-                foreach($movements as $movement){
-                    dispatch(new MovementProcess($movement->id));
-                }                               
-
-                $stock = StockWarehouse::selectRaw("
-                    stock_warehouses.*,
+    {                    
+            foreach (json_decode($products) as $key => $row) {                                    
+                $stocks = StockWarehouse::selectRaw("
+                    stock_warehouses.stock::INTEGER,
                     products.name as product
                 ");
-                $stock->where([
+                $stocks->where([
                     ['product_id', '=', $row->product_id],
-                    ['warehouse_id' , '=', $row->warehouse_id]
+                    ['warehouse_id' , '=', $row->origin_id]
                 ]);
-                $stock->join('products', 'products.id','=', 'stock_warehouses.product_id');
-                $stock = $stock->first();
-
-                if($stock->stock <= 0){
-                    return response()->json([
-                        'status'  => false,
-                        'message' => "$stock->product out of stock."
-                    ], 400);
-                }   
-            }
-        }
+                $stocks->join('products', 'products.id','=', 'stock_warehouses.product_id');
+                $stocks = $stocks->first();                
+                
+                return $stocks;
+            }                         
     }
 
     public function consumableproducts(Request $request)
@@ -1023,12 +1031,12 @@ class GoodsIssueController extends Controller
         $query->join('warehouses','warehouses.id','=','product_borrowings.warehouse_id');
         if($except){
             $query->whereNotIn('product_borrowing_details.product_id',$except);
+        }        
+        if($warehouse_id){
+            $query->where('product_borrowings.warehouse_id',$warehouse_id);        
         }
         if($site_id){
             $query->where('product_borrowings.site_id',$site_id);
-        }
-        if($warehouse_id){
-            $query->where('product_borrowings.warehouse_id',$warehouse_id);        
         }
         $query->whereIn('product_borrowings.status',['waiting','approved']);
 
@@ -1123,6 +1131,8 @@ class GoodsIssueController extends Controller
         $query = GoodsIssue::find($id);
         $query->issued_number = $number;
         $query->save();
+
+        return $query->issued_number;
     }
 
     public function insertSerial($primary_id, $serials, $status)

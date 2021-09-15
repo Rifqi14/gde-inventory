@@ -1117,27 +1117,26 @@
                     }
 
                     products.push({
-                        warehouse_id    : warehouseID,
-                        product_id      : product_id,
-                        reference_id    : referenceID,
-                        origin_site_id  : originSiteID,
-                        origin_id       : originID,
-                        detination_id   : destinationID,
-                        uom_id          : uomID,
-                        qty_request     : qtyRequest,
-                        qty_receive     : qtyReceive ? qtyReceive : 0,                        
-                        rack_id         : rackID,
-                        bin_id          : binID,
+                        product_id      : parseInt(product_id),
+                        reference_id    : parseInt(referenceID),
+                        origin_site_id  : parseInt(originSiteID),
+                        origin_id       : parseInt(originID),
+                        destination_id  : parseInt(destinationID),
+                        uom_id          : parseInt(uomID),
+                        qty_request     : parseInt(qtyRequest),
+                        qty_receive     : qtyReceive ? parseInt(qtyReceive) : 0,                        
+                        rack_id         : parseInt(rackID),
+                        bin_id          : parseInt(binID),
                         type            : type,
-                        issued_by       : issuedBy,
+                        issued_by       : parseInt(issuedBy),
                         has_serial      : hasSerial,
                         serials         : serials
                     });
 
                 });      
 
-                console.log({products : products});
-                return false;
+                // console.log({products : products});
+                // return false;
 
                 if (products.length == 0) {
                     toastr.warning('Select the product first. at least one product');
@@ -1557,7 +1556,7 @@
         if(disabled){
             return false;
         }
-        
+
         $('#table-select-serial').attr('data-product-id',productID);
         $('#table-selected-serial').attr('data-product-id',productID);
         tableSelectSerial.draw();
@@ -1594,7 +1593,7 @@
 
         if(serial.length == 0){
             product[0].serials.push({
-                serial_id     : serialID,
+                serial_id     : parseInt(serialID),
                 serial_number : serialNumber
             });
         }                   
