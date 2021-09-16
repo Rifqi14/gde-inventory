@@ -4,9 +4,9 @@ namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\StockMovementResource;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\DateFactory;
 
 use App\Models\StockMovement;
 use App\Models\ProductConsumable;
@@ -17,7 +17,7 @@ class StockMovementController extends Controller
 {
     public function read(Request $request)
     {         
-        if(!$request){
+        if(!isset($request)){
             return response()->json([
                 'status'    => Response::HTTP_UNPROCESSABLE_ENTITY,
                 'message'   => 'The given data was invalid.'
@@ -25,8 +25,8 @@ class StockMovementController extends Controller
         }
 
         $limit      = $request->limit > 0 ? $request->limit : 10;
-        $startDate  = $request->startDate ? $request->startDate : Carbon::now();
-        $endDate    = $request->endDate ? $request->endDate : Carbon::now();        
+        $range      = isset($request->range)?$request->range:'day';
+        $date       = isset($request->date)?date('Y-m-d', strtotime($request->date)):date('Y-m-d');
 
         $movement = StockMovement::selectRaw("
             stock_movements.*,
@@ -37,7 +37,21 @@ class StockMovementController extends Controller
         $movement->join('products','products.id','=','stock_movements.product_id');
         $movement->join('users','users.id','=','stock_movements.creation_user');        
         $movement->where('stock_movements.status','complete');
-        $movement->whereBetween('stock_movements.date',[$startDate, $endDate]);
+        if($range == 'week' || $range == 'month'){
+            switch ($range) {
+                case 'month':
+                    $startDate = date('Y-m-01', strtotime($date));
+                    $endDate   = date('Y-m-t', strtotime($date));
+                    break;                
+                default:
+                    $startDate = date('Y-m-d', strtotime('monday this week', strtotime($date)));
+                    $endDate   = date('Y-m-d', strtotime('sunday this week', strtotime($date)));
+                    break;
+            }
+            $movement->whereBetween('date', [$startDate,$endDate]);
+        }else{
+            $movement->whereDate('date', $date);
+        }
         $movement->orderBy('date','desc');        
 
         $movement->limit($limit);        
@@ -88,7 +102,7 @@ class StockMovementController extends Controller
         ];
 
         return response()->json([
-            'status'     => Response::HTTP_OK,            
+            'status'     => Response::HTTP_OK,              
             'data'       => [
                 'total_in'   => $in,
                 'total_out'  => $out,
