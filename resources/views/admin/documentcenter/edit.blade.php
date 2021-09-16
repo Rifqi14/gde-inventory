@@ -273,7 +273,7 @@
                 <div class="init-data"></div>
                 <div class="initInput">
                   <div class="input-group">
-                    <input type="text" name="document_name[]" class="form-control" placeholder="File Name">
+                    <input type="text" name="document_name[]" class="form-control lock-revision" placeholder="File Name">
                     <div class="custom-file ml-3">
                       <input type="file" class="custom-file-input lock-revision" name="document_upload[]" onchange="initInputFile()">
                       <label class="custom-file-label form-control" for="document_upload">Attach a document</label>
@@ -343,6 +343,28 @@
                   </div>
                   <input type="text" name="updated_at" class="form-control text-right datepicker" id="updated_at" disabled>
                 </div>
+              </div>
+            </div>
+          </div>
+          <div class="row" id="notification-form">
+            <div class="col-md-12">
+              <div class="mt-5"></div>
+              <span class="title">
+                <hr>
+                <h5 class="text-md text-dark text-bold">Notification Properties</h5>
+              </span>
+              <div class="mt-3"></div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="approver_id" class="col-form-label">Approver</label>
+                <select name="approver_id" id="approver_id" class="approver_id form-control select2 lock-revision"></select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="disribution_id" class="col-form-label">Distribution</label>
+                <select name="distribution_id[]" id="distribution_id" class="distribution_id from-control select2 lock-revision" multiple="multiple"></select>
               </div>
             </div>
           </div>
@@ -649,6 +671,7 @@
   var actionmenu    = @json(json_encode($actionmenu));
   var global_status = JSON.parse(`{!! json_encode(config('enums.global_status')) !!}`);
   var status        = `{{ $document->status }}`;
+  let originator = @json($document->originator);
   toastr.options = {
                     "closeButton": false,
                     "debug": false,
@@ -689,6 +712,11 @@
         format: 'DD/MM/YYYY'
       }
     });
+    if (originator) { 
+      $('#distribution_id').empty().trigger('change');
+      var option = new Option(originator.name, originator.id, true, true);
+      $('#distribution_id').append(option).trigger('change');
+    }
     lockRevisionProperties('DRAFT');
     $('.initInput').removeClass('d-none');
   }
@@ -795,6 +823,20 @@
         text: `For ${e.data.issue_purpose}`
       }
     });
+    $('#form-upload').find('select[name="approver_id"]').select2('trigger', 'select', {
+      data: {
+        id: `${e.data.approver_id}`,
+        text: `${e.data.approver.name}`
+      }
+    });
+    if (e.data.distributors) {
+      var option = [];
+      $.each(e.data.distributors, function(index, item){
+        option.push(new Option(item.name, item.id, true, true))
+      });
+      $('#distribution_id').empty().trigger('change');
+      $('#distribution_id').append(option).trigger('change');
+    }
     $('#form-upload').find('.init-data').empty();
     $('#form-upload').find('.init-data').append(initInputData(e.data.docdetail));
     $('.add-on').remove();
@@ -1280,7 +1322,7 @@
       filter: false,
       responsive: true,
       lengthChange: false,
-      order: [[1, "asc"]],
+      order: [[0, "asc"]],
       ajax: {
         url: "{{ route('centerdocument.read') }}",
         type: "GET",
@@ -1457,6 +1499,73 @@
       {
         data: "attachment_name"
       },]
+    });
+
+    $('#approver_id').select2({
+      placeholder: "Choose Approver...",
+      ajax: {
+        url: "{{ route('user.select') }}",
+        type: "GET",
+        dataType: "JSON",
+        data: function(params) {
+          return {
+            name: params.term,
+            page: params.page,
+            role_id: $('#originator_id').val(),
+            limit: 30,
+          };
+        },
+        processResults: function(data, params) {
+          params.page = params.page || 1;
+          var more    = (params.page * 30) < data.total;
+          var option  = [];
+          $.each(data.rows, function(index, item) {
+            option.push({
+              id: item.id,
+              text: item.name,
+            });
+          });
+          return { results: option, more: more, };
+        },
+      },
+      allowClear: true,
+      tags: true,
+    });
+
+    $('#distribution_id').select2({
+      placeholder: "Choose Approver...",
+      ajax: {
+        url: "{{ route('role.select') }}",
+        type: "GET",
+        dataType: "JSON",
+        data: function(params) {
+          return {
+            name: params.term,
+            page: params.page,
+            limit: 30,
+          };
+        },
+        processResults: function(data, params) {
+          params.page = params.page || 1;
+          var more    = (params.page * 30) < data.total;
+          var option  = [];
+          $.each(data.rows, function(index, item) {
+            option.push({
+              id: item.id,
+              text: item.name,
+            });
+          });
+          return { results: option, more: more, };
+        },
+      },
+      allowClear: true,
+      tags: true,
+      multiple: true,
+    }).on("select2:unselecting", function (e) {
+      if(e.params.args.data.text == originator.name) {
+        toastr.warning('You cant remove this distributor');
+        e.preventDefault();
+      }
     });
 
     $('.datepicker').daterangepicker({

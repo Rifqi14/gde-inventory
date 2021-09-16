@@ -6,11 +6,13 @@ use App\Models\DocumentCenterSupersede;
 use App\Models\DocumentCenterVoid;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Mail\DocumentCenterMail;
 use App\Models\DocumentCenterDocument;
 use App\Models\Menu;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
 
@@ -70,6 +72,7 @@ class DocumentCenterDocumentController extends Controller
                 'status'                => $request->status,
                 'remark'                => $request->revision_remark,
                 'issue_purpose'         => $request->issue_purpose,
+                'approver_id'           => $request->approver_id
             ];
             $document   = DocumentCenterDocument::create($data);
             if ($document && $request->document_upload) {
@@ -103,7 +106,9 @@ class DocumentCenterDocumentController extends Controller
                     $no++;
                 }
 
+                $document->distributors()->sync($request->distribution_id);
                 $createDetail   = $document->docdetail()->createMany($dataDocument);
+                $this->sendEmail($document->id);
                 if (!$createDetail) {
                     DB::rollBack();
                     return response()->json([
@@ -145,7 +150,7 @@ class DocumentCenterDocumentController extends Controller
      */
     public function edit($id)
     {
-        $center     = DocumentCenterDocument::with(['createdBy', 'updatedBy', 'docdetail', 'supersede', 'void', 'supersede.docno'])->find($id);
+        $center     = DocumentCenterDocument::with(['createdBy', 'updatedBy', 'docdetail', 'supersede', 'void', 'supersede.docno', 'approver', 'distributors'])->find($id);
         $center->created_date   = date('d/m/Y', strtotime($center->created_at));
         $center->last_modified  = date('d/m/Y', strtotime($center->updated_at));
         if ($center) {
@@ -192,6 +197,8 @@ class DocumentCenterDocumentController extends Controller
             $document->issue_purpose        = $request->issue_purpose ? $request->issue_purpose : $document->issue_purpose;
             $document->transmittal_status   = $document->status == 'DRAFT' || $document->status == 'WAITING' ? 'Waiting for Issue' : 'Issued';
             $saveDoc                        = $document->save();
+
+            $document->distributors()->sync($request->distribution_id);
             if ($saveDoc && $request->document_upload) {
                 $dataDocument   = [];
                 $no             = 1;
@@ -287,6 +294,9 @@ class DocumentCenterDocumentController extends Controller
                 $document->document_type    = null;
                 $document->save();
             }
+            if (!$request->undo) {
+                $this->sendEmail($document->id);
+            }
         } catch (\Illuminate\Database\QueryException $ex) {
             DB::rollBack();
             return response()->json([
@@ -379,4 +389,58 @@ class DocumentCenterDocumentController extends Controller
     
         return round($bytes, $precision) . ' ' . $units[$pow]; 
     } 
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function sendEmail($id)
+    {
+        $data   = $this->emailData($id);
+        Mail::to($data->to)->cc($data->cc)->send(new DocumentCenterMail($id, $data));
+    }
+
+    public function emailData($id)
+    {
+        $document   = DocumentCenterDocument::with(['approver', 'createdBy', 'updatedBy', 'documentCenter.doctype', 'docdetail', 'supersede.docno', 'void', 'distributors.users', 'log'])->find($id);
+        $data       = [
+            'to'                => [$document->approver->email, @$document->updatedBy->email],
+            'cc'                => [],
+            'subject'           => "$document->transmittal_no $document->transmittal_status",
+            'updated_at'        => date('D, d M Y H:i:s', strtotime($document->updated_at)),
+            'updated_by'        => $document->updatedBy->name,
+            'remark'            => "",
+            'additional'        => "",
+            'issue_purpose'     => $document->issue_purpose,
+            'document_no'       => $document->documentCenter->document_number,
+            'title'             => $document->documentCenter->title,
+            'type'              => $document->documentCenter->doctype->name,
+            'rev_no'            => $document->revision,
+            'issued_by'         => $document->createdBy->name,
+            'status'            => ucwords($document->status),
+            'link'              => route('documentcenter.edit', ['id' => $document->documentCenter->id, 'page'              => $document->documentCenter->menu]),
+        ];
+        if ($document->document_type) {
+            $data['remark'] = $document->document_type == 'SUPERSEDE' ? "<b>Supersede Remark:</b> {$document->supersede->supersede_remark}" : "<b>Void Remark:</b> {$document->void->void_remark}";
+        } else {
+            if ($document->status == "REVISED") {
+                $data['additional'] = "Please revise the document";
+                $data['remark'] = "<b>Revision Remark:</b> {$document->log()->orderBy('revise_number', 'desc')->first()->reason}";
+            }
+            if ($document->status == "WAITING" || $document->status == "DRAFT" || $document->status == "APPROVED") {
+                $data['additional'] = "Please approve the issue of the document";
+                $data['remark'] = "<b>Remark:</b> $document->remark";
+            }
+        }
+        foreach ($document->distributors as $key => $distributor) {
+            foreach ($distributor->users as $keyUser => $user) {
+                if (!in_array($user->email, $data['to']) && ($document->status == 'APPROVED' || $document->status == 'REJECTED' || $document->document_type == 'SUPERSEDE' || $document->document_type == 'VOID')) {
+                    $data['cc'][]   = $user->email;
+                }
+            }
+        }
+
+        return (object) $data;
+    }
 }
