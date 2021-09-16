@@ -294,7 +294,7 @@ class DocumentCenterDocumentController extends Controller
                 $document->document_type    = null;
                 $document->save();
             }
-            if (!$request->undo) {
+            if (!$request->undo || $request->undo == "null") {
                 $this->sendEmail($document->id);
             }
         } catch (\Illuminate\Database\QueryException $ex) {
