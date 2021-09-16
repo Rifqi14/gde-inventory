@@ -82,6 +82,7 @@ class DocumentCenterLogController extends Controller
                 }
                 $document = DocumentCenterDocument::find($create->document_center_document_id);
                 $document->status   = $create->status;
+                $document->transmittal_status = $document->status == 'DRAFT' || $document->status == 'WAITING' ? 'Waiting for Issue' : 'Issued';
                 $document->save();
 
                 $email = new DocumentCenterDocumentController();

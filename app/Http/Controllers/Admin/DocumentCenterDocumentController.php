@@ -197,6 +197,8 @@ class DocumentCenterDocumentController extends Controller
             $document->issue_purpose        = $request->issue_purpose ? $request->issue_purpose : $document->issue_purpose;
             $document->transmittal_status   = $document->status == 'DRAFT' || $document->status == 'WAITING' ? 'Waiting for Issue' : 'Issued';
             $saveDoc                        = $document->save();
+
+            $document->distributors()->sync($request->distribution_id);
             if ($saveDoc && $request->document_upload) {
                 $dataDocument   = [];
                 $no             = 1;
@@ -401,7 +403,7 @@ class DocumentCenterDocumentController extends Controller
 
     public function emailData($id)
     {
-        $document   = DocumentCenterDocument::with(['approver', 'createdBy', 'updatedBy', 'documentCenter.doctype', 'docdetail', 'supersede.docno', 'void', 'distributors.users'])->find($id);
+        $document   = DocumentCenterDocument::with(['approver', 'createdBy', 'updatedBy', 'documentCenter.doctype', 'docdetail', 'supersede.docno', 'void', 'distributors.users', 'log'])->find($id);
         $data       = [
             'to'                => [$document->approver->email, @$document->updatedBy->email],
             'cc'                => [],
@@ -422,13 +424,14 @@ class DocumentCenterDocumentController extends Controller
         if ($document->document_type) {
             $data['remark'] = $document->document_type == 'SUPERSEDE' ? "<b>Supersede Remark:</b> {$document->supersede->supersede_remark}" : "<b>Void Remark:</b> {$document->void->void_remark}";
         } else {
-            $data['remark'] = "<b>Remark:</b> $document->remark";
-        }
-        if ($document->status == "REVISED") {
-            $data['additional'] = "Please revise the document";
-        }
-        if ($document->status == "WAITING" || $document->status == "DRAFT") {
-            $data['additional'] = "Please approve the issue of the document";
+            if ($document->status == "REVISED") {
+                $data['additional'] = "Please revise the document";
+                $data['remark'] = "<b>Revision Remark:</b> {$document->log()->orderBy('revise_number', 'desc')->first()->reason}";
+            }
+            if ($document->status == "WAITING" || $document->status == "DRAFT" || $document->status == "APPROVED") {
+                $data['additional'] = "Please approve the issue of the document";
+                $data['remark'] = "<b>Remark:</b> $document->remark";
+            }
         }
         foreach ($document->distributors as $key => $distributor) {
             foreach ($distributor->users as $keyUser => $user) {
