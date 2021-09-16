@@ -351,7 +351,7 @@
               <div class="mt-5"></div>
               <span class="title">
                 <hr>
-                <h5 class="text-md text-dark text-bold">Revision Properties</h5>
+                <h5 class="text-md text-dark text-bold">Notification Properties</h5>
               </span>
               <div class="mt-3"></div>
             </div>
