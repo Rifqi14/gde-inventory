@@ -17,7 +17,8 @@ class ProductController extends Controller
     {
         $start   = $request->page ? $request->page - 1 : 0;
         $length  = $request->limit ? $request->limit : 10;   
-        $order   = $request->order ? $request->order : 'asc';
+        $order   = $request->order ? $request->order :null;
+        $created = $request->created?$request->created:null;
         $search  = $request->search;
 
         $products = Product::selectRaw("products.*");
@@ -35,9 +36,16 @@ class ProductController extends Controller
             $products->whereRaw("
                 products.name like '%$search%'
             ");
-        }
-        $products->orderBy('products.name', $order);
-        $products->orderBy('created_at','desc');
+        }                        
+        if($created){
+            if($created == 'oldest'){
+                $products->oldest();
+            }else{
+                $products->latest();
+            }
+        }else {
+            $products->orderBy('products.name', $order?$order:'asc');
+        }                
 
         $rows  = clone $products;
         $total = $rows->count();
