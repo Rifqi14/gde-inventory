@@ -294,7 +294,7 @@ class DocumentCenterDocumentController extends Controller
                 $document->document_type    = null;
                 $document->save();
             }
-            if (!$request->undo) {
+            if (!$request->undo || $request->undo == "null") {
                 $this->sendEmail($document->id);
             }
         } catch (\Illuminate\Database\QueryException $ex) {
@@ -407,7 +407,7 @@ class DocumentCenterDocumentController extends Controller
         $data       = [
             'to'                => [$document->approver->email, @$document->updatedBy->email],
             'cc'                => [],
-            'subject'           => "$document->transmittal_no $document->transmittal_status",
+            'subject'           => "[Document Issue Notice] $document->transmittal_no $document->transmittal_status",
             'updated_at'        => date('D, d M Y H:i:s', strtotime($document->updated_at)),
             'updated_by'        => $document->updatedBy->name,
             'remark'            => "",
@@ -422,11 +422,11 @@ class DocumentCenterDocumentController extends Controller
             'link'              => route('documentcenter.edit', ['id' => $document->documentCenter->id, 'page'              => $document->documentCenter->menu]),
         ];
         if ($document->document_type) {
-            $data['remark'] = $document->document_type == 'SUPERSEDE' ? "<b>Supersede Remark:</b> {$document->supersede->supersede_remark}" : "<b>Void Remark:</b> {$document->void->void_remark}";
+            $data['remark'] = $document->document_type == 'SUPERSEDE' ? "<b>Remark:</b> {$document->supersede->supersede_remark}" : "<b>Remark:</b> {$document->void->void_remark}";
         } else {
             if ($document->status == "REVISED") {
                 $data['additional'] = "Please revise the document";
-                $data['remark'] = "<b>Revision Remark:</b> {$document->log()->orderBy('revise_number', 'desc')->first()->reason}";
+                $data['remark'] = "<b>Comment:</b> {$document->log()->orderBy('revise_number', 'desc')->first()->reason}";
             }
             if ($document->status == "WAITING" || $document->status == "DRAFT" || $document->status == "APPROVED") {
                 $data['additional'] = "Please approve the issue of the document";
