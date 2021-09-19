@@ -1099,6 +1099,7 @@
                 $.each($('#table-product > tbody > .product-item'), function(index, value) {
                     var product       = $(this).find('.item-product'),
                         product_id    = product.val(),
+                        reference     = product.attr('data-reference'),
                         referenceID   = product.attr('data-reference-id'),
                         uomID         = product.attr('data-uom-id'),
                         qtyRequest    = product.attr('data-qty-request'),
@@ -1119,6 +1120,7 @@
                     products.push({
                         product_id      : parseInt(product_id),
                         reference_id    : parseInt(referenceID),
+                        reference       : reference,
                         origin_site_id  : parseInt(originSiteID),
                         origin_id       : parseInt(originID),
                         destination_id  : parseInt(destinationID),
@@ -1382,7 +1384,7 @@
         var serial = `<span class="badge ${badge} text-md"><i class="${icon}" style="size: 1x;"></i></span>`;
 
         var html = `<tr class="product-item">
-                        <input type="hidden" class="item-product" value="${productID}" data-reference-id="${referenceID}" data-uom-id="${uomID}" data-qty-request="${qty}" data-type="${type}" data-has-serial="${isSerial}" data-origin-site-id="${originSiteID}" data-origin-warehouse-id="${originWarehouseID}" data-destination-warehouse-id="${destinationWarehouseID}">                        
+                        <input type="hidden" class="item-product" value="${productID}" data-reference-id="${referenceID}" data-reference="${reference}" data-uom-id="${uomID}" data-qty-request="${qty}" data-type="${type}" data-has-serial="${isSerial}" data-origin-site-id="${originSiteID}" data-origin-warehouse-id="${originWarehouseID}" data-destination-warehouse-id="${destinationWarehouseID}">                        
                         <td width="100"><p>${product}<br><b style="font-size: 10pt;">${reference}</b></p></td>
                         <td width="100">${category}</td>
                         <td width="30" class="text-center">${serial}</td>

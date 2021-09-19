@@ -620,7 +620,7 @@
     const initData = () => {
         var products = @json($data->products);
         var files    = @json($data->files);
-        var images   = @json($data->images);        
+        var images   = @json($data->images);                
 
         if(products.length > 0){
             var html    = '',
@@ -630,6 +630,7 @@
                 var id           = value.product_id,
                      productName = value.product_name,
                      categoryID  = value.product_category_id,
+                     category    = value.category,
                      uomID       = value.uom_id,
                      uom         = value.uom_name,
                      qtySystem   = value.qty_system,
@@ -637,7 +638,10 @@
                      
                     html += `<tr class="product-item">
                                 <input type="hidden" class="item-product" value="${id}" data-category-id="${categoryID}" data-uom-id="${uomID}" data-qty-system="${qtySystem}" data-qty-consume="${qtyConsume}">
-                                <td width="100">${productName}</td>
+                                <td width="100">
+                                    <b>${productName}</b>
+                                    <p>${category}</p>
+                                </td>
                                 <td class="text-center" width="15">${uom}</td>
                                 <td class="text-center" width="15">${qtySystem}</td>
                                 <td class="text-center" width="15">${qtyConsume}</td>                                

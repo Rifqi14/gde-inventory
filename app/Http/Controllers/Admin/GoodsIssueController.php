@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Str;
+use Illuminate\Support\Facades\DB;
 use App\Jobs\MovementProcess;
 
 use App\Models\Menu;
@@ -16,14 +17,17 @@ use App\Models\GoodsIssue;
 use App\Models\GoodsIssueProduct;
 use App\Models\GoodsIssueDocument;
 use App\Models\GoodsIssueSerial;
-use App\Models\ProductBorrowing;
+use App\Models\ProductConsumable;
 use App\Models\ProductConsumableDetail;
+use App\Models\ProductTransfer;
 use App\Models\ProductTransferDetail;
+use App\Models\ProductBorrowing;
 use App\Models\ProductBorrowingDetail;
 use App\Models\ProductSerial;
 use App\Models\StockWarehouse;
 use App\Models\StockMovement;
 use App\Models\Warehouse;
+use App\Models\Product;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Phpoffice\PhpSpreadsheet\Worksheet\Worksheet;
@@ -369,14 +373,16 @@ class GoodsIssueController extends Controller
         $issuedby    = $request->issuedby;
         $getProducts = $request->products;
 
-        $check = $this->checkStock($getProducts);                
+        if($status == 'approved'){
+            $check = $this->checkStock($getProducts);                             
 
-        if($check['stock'] == 0){
-            return response()->json([
-                'status'    => false,
-                'message'   => $check['product'].' out of stock.'
-            ], 400);
-        }        
+            if($check['stock'] == 0){
+                return response()->json([
+                    'status'    => false,
+                    'message'   => $check['product'].' out of stock.'
+                ], 400);
+            }        
+        }
 
         $query = GoodsIssue::create([
             'date_issued'   => $issueddate,
@@ -396,7 +402,7 @@ class GoodsIssueController extends Controller
            $issued_number = $this->issuedNumber($issued_id, $query->key_number, $query->created_at);
 
             if ($getProducts) {                
-                $this->approval($getProducts, $issued_id, $status, $issued_number);
+                $this->approval($getProducts, $issued_id, $status, $issued_number);                
             }
 
             if (isset($documentNames)) {
@@ -510,7 +516,7 @@ class GoodsIssueController extends Controller
 
         $check = $this->checkStock($getProducts);                
 
-        if($check['stock'] == 0){
+        if($check['stock'] == 0 || $check['stock'] == null){
             return response()->json([
                 'status'    => false,
                 'message'   => $check['product'].' out of stock.'
@@ -719,8 +725,8 @@ class GoodsIssueController extends Controller
         $warehouseID = 0;
 
         foreach (json_decode($products) as $key => $row) {                                        
-            $type        = $row->type;    
-            $issued_number= $issued_number;    
+            $type          = $row->type;    
+            $issued_number = $issued_number;    
             array_push($referenceID, $row->reference_id);
 
             $query = GoodsIssueProduct::create([
@@ -734,18 +740,7 @@ class GoodsIssueController extends Controller
                 'bin_id'           => $row->bin_id,
                 'type'             => $row->type,
                 'status'           => $status=='approved'?'out':null
-            ]);                                       
-
-            if($row->has_serial && $row->type == 'borrowing'){                
-                $this->insertSerial($query->id,$row->serials,$status);                                                
-
-                if(!$query){
-                    return response()->json([
-                        'status'    => false,
-                        'message'   => 'Failed to create detail data.'
-                    ], 400);
-                }
-            }
+            ]); 
 
             if (!$query) {
                 return response()->json([
@@ -759,7 +754,7 @@ class GoodsIssueController extends Controller
                     case 'consumable' :
                         $description    = 'Goods Usage';
                         $source_id      = $row->origin_id;
-                        $destination_id = Warehouse::select('id')->where([
+                        $virtual = Warehouse::select('id')->where([
                             ['site_id','=',$row->origin_site_id],
                             ['type','=','virtual']
                         ])->first();
@@ -776,13 +771,24 @@ class GoodsIssueController extends Controller
                             ['site_id','=',$row->origin_site_id],
                             ['type','=','virtual']
                         ])->first();
+
+                        if($row->has_serial && $row->type == 'borrowing'){                
+                            $this->insertSerial($query->id,$row->serials,$status);                                                
+            
+                            if(!$query){
+                                return response()->json([
+                                    'status'    => false,
+                                    'message'   => 'Failed to create detail data.'
+                                ], 400);
+                            }
+                        }
                         break;
                     default : 
                     $description = 'Goods Issue';
                 }                
 
                 $movement = StockMovement::create([
-                    'reference'      => $issued_number,
+                    'reference'      => $row->reference,
                     'description'    => $description,
                     'uom_id'         => $row->uom_id,                    
                     'qty'            => $row->qty_receive,
@@ -803,49 +809,65 @@ class GoodsIssueController extends Controller
                     ],400);
                 }
 
-                MovementProcess::dispatchNow($movement);
+                MovementProcess::dispatchNow($movement, $row->type);
             }
         }
 
-        if($type == 'borrowing' && $status == 'rejected'){                    
-            $item = ProductBorrowingDetail::whereIn('product_borrowing_details.product_borrowing_id', $referenceID)->get();
-            
-            foreach($item as $key => $row){
-                $warehouse = StockWarehouse::where([
-                    'warehouse_id' => $row->origin_site_id,
-                    'product_id'   => $row->product_id
-                ])->first();                       
+        $this->referenceApproval([
+            'reference_id'  => $referenceID,
+            'status'        => $status,
+            'role'          => $type            
+        ]);    
+    }
+    
+    public function referenceApproval($params)
+    {
+        $referenceID = $params['reference_id'];
+        $status      = $params['status'];
+        $role        = $params['role'];
 
-                $warehouse->stock = $warehouse->stock + $row->qty_requested;
-                $warehouse->save();
+        if($role == 'consumable'){
+            $status = $status == 'approved'?'complete':'rejected';
+            $query  = ProductConsumable::whereIn('id', $referenceID);
+        }else if($role == 'transfer'){            
+            $status = $status == 'approved'?'complete':'rejected';
+            $query  = ProductTransfer::whereIn('id', $referenceID);
+        }else if($role == 'borrowing'){                             
+            $status = $status=='approved'?'borrowed':'rejected';
+            $query  = ProductBorrowing::whereIn('id', $referenceID);
+        }
 
-                if(!$warehouse){
-                    return response()->json([
-                        'status'    => false,
-                        'message'   => 'Failed to recalculate stock on warehouse.'
-                    ],400);
-                }
-            }            
-        };            
-
-        $query = ProductBorrowing::whereIn('id', $referenceID)->update(['status' => $status=='approved'?'borrowed':'rejected']);
-    }    
+        $query->update(['status' => $status]);
+    }
         
     public function checkStock($products)
     {                    
-            foreach (json_decode($products) as $key => $row) {                                    
-                $stocks = StockWarehouse::selectRaw("
-                    stock_warehouses.stock::INTEGER,
-                    products.name as product
+            foreach (json_decode($products) as $key => $row) {   
+                $product_id   = $row->product_id;
+                $warehouse_id = $row->origin_id;
+
+                // $stocks = StockWarehouse::selectRaw("
+                //     stock_warehouses.stock::INTEGER,
+                //     products.name as product
+                // ");
+                // $stocks->where([
+                //     ['product_id', '=', $product_id],
+                //     ['warehouse_id' , '=', $origin_id]
+                // ]);
+                // $stocks->rightJoin('products', 'products.id','=', 'stock_warehouses.product_id');
+                // $stocks = $stocks->first();    
+
+                $product = Product::selectRaw("
+                    products.id,
+                    products.name as product,
+                    stock_warehouses.stock
                 ");
-                $stocks->where([
-                    ['product_id', '=', $row->product_id],
-                    ['warehouse_id' , '=', $row->origin_id]
-                ]);
-                $stocks->join('products', 'products.id','=', 'stock_warehouses.product_id');
-                $stocks = $stocks->first();                
+                $product->leftJoin('stock_warehouses', function($join) use ($warehouse_id){
+                    $join->on('products.id','=','stock_warehouses.product_id')->where('stock_warehouses.warehouse_id', $warehouse_id);
+                });                
+                $product = $product->find($product_id);
                 
-                return $stocks;
+                return $product;
             }                         
     }
 
@@ -885,18 +907,18 @@ class GoodsIssueController extends Controller
         $query->join('warehouses', 'warehouses.id','=','product_consumables.warehouse_id');
         $query->join('sites','sites.id','=','product_consumables.site_id');
         $query->where('product_consumables.status','approved');
-        if($site_id){
-            $query->where('product_consumables.site_id', $site_id);
+        if($except){
+            $query->whereNotIn('product_consumable_details.product_id',$except);
         }
         if($warehouse_id){
             $query->where('product_consumables.warehouse_id', $warehouse_id);
         }
+        if($site_id){
+            $query->where('product_consumables.site_id', $site_id);
+        }        
         if($category_id){
             $query->where('product_categories.id',$category_id);
-        }
-        if($except){
-            $query->whereNotIn('product_consumable_details.product_id',$except);
-        }
+        }        
         
         $rows  = clone $query;
         $total = $rows->count();

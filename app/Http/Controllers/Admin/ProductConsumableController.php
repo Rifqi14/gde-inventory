@@ -68,30 +68,39 @@ class ProductConsumableController extends Controller
     public function edit(Request $request, $id)
     {
         if (in_array('update', $request->actionmenu)) {
-            $data = ProductConsumable::with([
+            $query = ProductConsumable::with([
                 'products' => function($product){
                     $product->selectRaw("
                         product_consumable_details.*,
                         products.name as product_name,
-                        uoms.name as uom_name
+                        uoms.name as uom_name,
+                        product_categories.path as category
                     ");
                     $product->leftJoin('products','products.id','=','product_consumable_details.product_id');
                     $product->leftJoin('uoms','uoms.id','=','product_consumable_details.uom_id');
+                    $product->leftJoin('product_categories','product_categories.id','=','products.product_category_id');
                 },
                 'files',
                 'images'
             ]);
-            $data->selectRaw("
+            $query->selectRaw("
                 product_consumables.*,
                 TO_CHAR(product_consumables.consumable_date,'DD/MM/YYYY') as date_consumable,
                 sites.name as site,
                 warehouses.name as warehouse
             ");
-            $data->leftJoin('sites','sites.id','=','product_consumables.site_id');
-            $data->leftJoin('warehouses','warehouses.id','=','product_consumables.warehouse_id');
-            $data = $data->find($id);
+            $query->leftJoin('sites','sites.id','=','product_consumables.site_id');
+            $query->leftJoin('warehouses','warehouses.id','=','product_consumables.warehouse_id');
+            $data = $query->find($id);
 
             if ($data) {
+                $products = [];
+                foreach($data->products as $product){
+                    $product->category = str_replace('->',' <i class="fas fa-angle-right"></i> ',$product->category);                                                                                    
+                    $products[] = $product;
+                }
+                $data->products = $products;
+
                 return view('admin.consumable.edit', compact('data'));
             } else {
                 abort(404);
@@ -115,10 +124,12 @@ class ProductConsumableController extends Controller
                     $product->selectRaw("
                         product_consumable_details.*,
                         products.name as product_name,
-                        uoms.name as uom_name
+                        uoms.name as uom_name,
+                        product_categories.path as category
                     ");
                     $product->leftJoin('products','products.id','=','product_consumable_details.product_id');
                     $product->leftJoin('uoms','uoms.id','=','product_consumable_details.uom_id');
+                    $product->leftJoin('product_categories','product_categories.id','=','products.product_category_id');
                 },
                 'files',
                 'images'
@@ -134,6 +145,13 @@ class ProductConsumableController extends Controller
             $data = $data->find($id);
 
             if ($data) {
+                $products = [];
+                foreach($data->products as $product){
+                    $product->category = str_replace('->',' <i class="fas fa-angle-right"></i> ',$product->category);                                                                                    
+                    $products[] = $product;
+                }
+                $data->products = $products;
+
                 return view('admin.consumable.detail', compact('data'));
             } else {
                 abort(404);
@@ -177,7 +195,11 @@ class ProductConsumableController extends Controller
             $query->whereRaw("upper(product_consumables.consumable_number) like '%$number%'");
         }
         if($status){
-            $query->where('product_consumables.status',$status);
+            if($status == 'approved'){
+                $query->whereIn('product_consumables.status',['approved','complete']);
+            }else{
+                $query->where('product_consumables.status',$status);
+            }
         }
         if($startdate && $finishdate){
             $query->whereBetween('product_consumables.consumable_date',[$startdate,$finishdate]);
@@ -275,6 +297,7 @@ class ProductConsumableController extends Controller
         $documents     = [];
 
         if(isset($getProducts)){
+            $consumable_id = $consumable_id;
             $products = [];
             foreach (json_decode($getProducts) as $key => $row) {
                 $products[] = [
@@ -287,7 +310,7 @@ class ProductConsumableController extends Controller
                     'created_at'            => $now,
                     'updated_at'            => $now
                 ];
-            }
+            }            
 
             if(count($products) > 0){
                 $query = ProductConsumableDetail::insert($products);
