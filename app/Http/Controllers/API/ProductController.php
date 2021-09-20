@@ -101,4 +101,50 @@ class ProductController extends Controller
             ])->findorFail($id)
         );
     }
+
+    public function latest(Request $request)
+    {
+        $length  = $request->limit ? $request->limit : 10;   
+
+        $products = Product::selectRaw("products.*");
+        $products->with([
+            'stocks' => function($stock){
+                $stock->selectRaw("
+                    stock_warehouses.id,
+                    stock_warehouses.product_id,
+                    stock_warehouses.warehouse_id,
+                    stock_warehouses.stock
+                ");
+            }
+        ]);
+        $products->latest();
+
+        $rows  = clone $products;
+        $total = $rows->count();
+        
+        $products->limit($length);
+        $products = $products->get();
+
+        $data  = [];        
+        foreach ($products as $key => $product) {
+            $qty = 0;
+            foreach($product->stocks as $stock){
+                $qty = $qty +  $stock->stock;
+            }                
+
+            $data[] = [       
+                'product_id' => $product->product_id, 
+                'product'    => $product->name,
+                'image'      => $product->image,                
+                'added_date' => date('d M Y', strtotime($product->created_at)),
+                'qty'        => $qty
+            ];
+        }        
+
+        return response()->json([
+            'status' =>  Response::HTTP_OK,
+            'total'  => $total,
+            'data'   => $data
+        ], Response::HTTP_OK);
+    }
 }

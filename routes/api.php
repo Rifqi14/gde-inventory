@@ -56,6 +56,8 @@ Route::group([
     ], function(){
         // List 
         Route::get('/list', 'API\ProductController@read');
+        // Latest Product 
+        Route::get('/latest','API\ProductController@latest');
         // Detail
         Route::post('/detail','API\ProductController@show');
         // History
