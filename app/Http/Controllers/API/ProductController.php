@@ -19,7 +19,7 @@ class ProductController extends Controller
         $length  = $request->limit ? $request->limit : 10;   
         $order   = $request->order ? $request->order :null;
         $created = $request->created?$request->created:null;
-        $search  = $request->search;
+        $search  = strtoupper($request->search);
 
         $products = Product::selectRaw("products.*");
         $products->with([
@@ -34,7 +34,7 @@ class ProductController extends Controller
         ]);
         if($search){
             $products->whereRaw("
-                products.name like '%$search%'
+                upper(products.name) like '%$search%'
             ");
         }                        
         if($created){
