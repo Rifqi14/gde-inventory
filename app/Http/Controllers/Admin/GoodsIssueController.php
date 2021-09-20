@@ -296,7 +296,7 @@ class GoodsIssueController extends Controller
         $enddate    = $request->enddate;
         $number     = strtoupper($request->number);
         $products   = $request->products;
-        $status     = strtolower($request->status);
+        $status     = strtoupper($request->status);
 
         $query = GoodsIssue::selectRaw("
             goods_issues.*,
@@ -563,7 +563,7 @@ class GoodsIssueController extends Controller
                         ], 400);
                     }
 
-                    if($row->has_serial && $row->type == 'borrowing'){
+                    if($row->has_serial){
                         $this->insertSerial($query->id,$row->serials,$status);
 
                         if($status == 'approved'){
@@ -740,7 +740,7 @@ class GoodsIssueController extends Controller
                 'bin_id'           => $row->bin_id,
                 'type'             => $row->type,
                 'status'           => $status=='approved'?'out':null
-            ]); 
+            ]);             
 
             if (!$query) {
                 return response()->json([
@@ -758,6 +758,7 @@ class GoodsIssueController extends Controller
                             ['site_id','=',$row->origin_site_id],
                             ['type','=','virtual']
                         ])->first();
+                        $virtual = $virtual->id;
                         break;
                     case 'transfer' : 
                         $description    = 'Product Transfer';
@@ -770,22 +771,16 @@ class GoodsIssueController extends Controller
                         $virtual = Warehouse::select('id')->where([
                             ['site_id','=',$row->origin_site_id],
                             ['type','=','virtual']
-                        ])->first();
-
-                        if($row->has_serial && $row->type == 'borrowing'){                
-                            $this->insertSerial($query->id,$row->serials,$status);                                                
-            
-                            if(!$query){
-                                return response()->json([
-                                    'status'    => false,
-                                    'message'   => 'Failed to create detail data.'
-                                ], 400);
-                            }
-                        }
+                        ])->first();                        
+                        $virtual = $virtual->id;
                         break;
                     default : 
                     $description = 'Goods Issue';
-                }                
+                }     
+
+                if($row->has_serial){
+                    $this->insertSerial($query->id,$row->serials,$row->type);
+                }           
 
                 $movement = StockMovement::create([
                     'reference'      => $row->reference,
@@ -793,7 +788,7 @@ class GoodsIssueController extends Controller
                     'uom_id'         => $row->uom_id,                    
                     'qty'            => $row->qty_receive,
                     'source_id'      => $source_id,
-                    'destination_id' => $virtual->id,
+                    'destination_id' => $virtual,
                     'site_id'        => $row->origin_site_id,
                     'date'           => Carbon::now(),                    
                     'proceed'        => 0,
@@ -830,7 +825,7 @@ class GoodsIssueController extends Controller
             $status = $status == 'approved'?'complete':'rejected';
             $query  = ProductConsumable::whereIn('id', $referenceID);
         }else if($role == 'transfer'){            
-            $status = $status == 'approved'?'complete':'rejected';
+            $status = $status == 'approved'?'processed':'rejected';
             $query  = ProductTransfer::whereIn('id', $referenceID);
         }else if($role == 'borrowing'){                             
             $status = $status=='approved'?'borrowed':'rejected';
@@ -1157,7 +1152,7 @@ class GoodsIssueController extends Controller
         return $query->issued_number;
     }
 
-    public function insertSerial($primary_id, $serials, $status)
+    public function insertSerial($primary_id, $serials, $type)
     {
         $now       = date('Y-m-d H:i:s');
         $data      = [];
@@ -1176,7 +1171,7 @@ class GoodsIssueController extends Controller
 
         $query = GoodsIssueSerial::insert($data);
 
-        if($query && $status == 'approved'){
+        if($query){
             $query = ProductSerial::whereIn('id',$serial_id)->update(['movement' => 'out']);
 
             if(!$query){

@@ -1390,7 +1390,7 @@
                         <td width="30" class="text-center">${serial}</td>
                         <td class="text-right qty-order" width="30">${qty}</td>
                         <td class="text-right" width="30">
-                            <input type="number" class="form-control numberfield text-right qty-receive" placeholder="0" min="1" max="${qty}" ${type=='borrowing' && isSerial=='1'?'readonly':''}>
+                            <input type="number" class="form-control numberfield text-right qty-receive" placeholder="0" min="1" max="${qty}" ${isSerial=='1'?'readonly':''}>
                         </td>
                         <td width="100">
                             <div class="form-group">
@@ -1407,7 +1407,7 @@
                             </div>                    
                         </td>
                         <td class="text-center" width="10">
-                            <button class="btn btn-sm text-xs btn-warning btn-flat legitRipple ${type=='borrowing'&&isSerial=='1'?'':'disabled'}" type="button" onclick="showSerial($(this),${productID}, ${type=='borrowing'&&isSerial=='1'?false:true})"><i class="fas fa-bars"></i></button>
+                            <button class="btn btn-sm text-xs btn-warning btn-flat legitRipple ${isSerial=='1'?'':'disabled'}" type="button" onclick="showSerial($(this),${productID}, ${isSerial=='1'?false:true})"><i class="fas fa-bars"></i></button>
                             <button class="btn btn-sm text-xs btn-danger btn-flat legitRipple" type="button" onclick="removeProduct($(this),${productID})"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>`;

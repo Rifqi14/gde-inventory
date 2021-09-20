@@ -24,15 +24,15 @@ class MovementProcess implements ShouldQueue
      */
     public function __construct($movement, $role)
     {
-        $this->movement     = $movement;
-        $this->id           = $movement->id;
-        $this->product_id   = $movement->product_id;
-        $this->type         = $movement->type;        
-        $this->source_id    = $movement->source_id;
+        $this->movement       = $movement;
+        $this->id             = $movement->id;
+        $this->product_id     = $movement->product_id;
+        $this->type           = $movement->type;        
+        $this->source_id      = $movement->source_id;
         $this->destination_id = $movement->destination_id;
-        $this->qty          = $movement->qty;
-        $this->proceed      = $movement->proceed;
-        $this->role         = $role; // Movement type (consumable, borrowing, contract etc.)
+        $this->qty            = $movement->qty;
+        $this->proceed        = $movement->proceed;
+        $this->role           = $role; // Movement type (consumable, borrowing, contract etc.)
     }
 
     /**
@@ -92,18 +92,7 @@ class MovementProcess implements ShouldQueue
 
             $originStock = $origin->stock - $this->qty;
 
-            $out = $this->updateStock($origin->id, $originStock);
-
-            $destination = StockWarehouse::where([
-                ['warehouse_id','=', $this->destination_id],
-                ['product_id','=',$this->product_id]
-            ])->first();
-
-            $destinationStock = $destination->stock + $this->qty;
-
-            $in = $this->updateStock($destination->id, $destinationStock);
-
-            if($out && $in){
+            if($this->updateStock($origin->id, $originStock)){
                 return true;
             }
         }
