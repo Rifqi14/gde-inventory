@@ -49,6 +49,15 @@ Route::group([
     // Role
     Route::post('/role','API\RoleController@read');    
 
+    // Dashboard
+    Route::group([
+        'middleware' => ['auth:api'],
+        'prefix'     => 'dashboard'
+    ], function(){
+        // Activity History
+        Route::get('/activityhistory', 'API\StockMovementController@read');
+    }); 
+
     // Product
     Route::group([
         'middleware' => ['auth:api'],
