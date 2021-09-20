@@ -14,8 +14,7 @@ use App\Models\Product;
 class ProductController extends Controller
 {
     public function read(Request $request)
-    {
-        $start   = $request->page ? $request->page - 1 : 0;
+    {        
         $length  = $request->limit ? $request->limit : 10;   
         $order   = $request->order ? $request->order :null;
         $created = isset($request->created)?$request->created:null;
@@ -49,8 +48,7 @@ class ProductController extends Controller
 
         $rows  = clone $products;
         $total = $rows->count();
-
-        $products->offset($start);
+        
         $products->limit($length);
         $products = $products->get();
 
