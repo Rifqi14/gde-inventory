@@ -11,6 +11,9 @@
 |
 */
 
+use App\Http\Controllers\Admin\Transmittal\TransmittalProperties\CategoryContractorController;
+use App\Http\Controllers\Admin\Transmittal\TransmittalProperties\OrganizationCodeController;
+use App\Http\Controllers\Admin\Transmittal\TransmittalProperties\TransmittalPropertiesController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -488,5 +491,14 @@ Route::group(['prefix' => 'admin'], function () {
 
         // Group Workflow
         Route::resource('/groupworkflow', 'Admin\DocumentExternal\Workflow\GroupWorkflowController');
+
+        // Transmittal Menu
+        Route::group(['prefix' => 'transmittalproperties', 'as' => 'transmittalproperties.', 'namespace' => 'Admin\Transmittal\TransmittalProperties'], function() {
+            Route::resource('/', 'TransmittalPropertiesController');
+            Route::get('readcontractor', 'CategoryContractorController@read')->name('readcontractor');
+            Route::get('readcode', 'OrganizationCodeController@read')->name('readcode');
+            Route::resource('categorycontractor', 'CategoryContractorController');
+            Route::resource('organizationcode', 'OrganizationCodeController');
+        });
     });
 });

@@ -25,11 +25,16 @@ class RoleController extends Controller
         $start = $request->page ? $request->page - 1 : 0;
         $length = $request->limit;
         $name = strtoupper($request->name);
+        $eliminate = $request->eliminate;
 
         //Count Data
-        $query = DB::table('roles');
-        $query->select('roles.*');
-        $query->whereRaw("upper(name) like '%$name%'");
+        // $query = DB::table('roles');
+        // $query->select('roles.*');
+        // $query->whereRaw("upper(name) like '%$name%'");
+        $query = Role::whereRaw("upper(name) like '%$name%'");
+        if ($eliminate == 'true') {
+            $query->doesnthave('category_contractors');
+        }
 
         $row = clone $query;
         $recordsTotal = $row->count();

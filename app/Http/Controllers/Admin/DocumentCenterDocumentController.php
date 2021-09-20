@@ -426,10 +426,11 @@ class DocumentCenterDocumentController extends Controller
         } else {
             if ($document->status == "REVISED") {
                 $data['additional'] = "Please revise the document";
+                $data['subject'] = "[Request to Revise] $document->transmittal_no $document->transmittal_status";
                 $data['remark'] = "<b>Comment:</b> {$document->log()->orderBy('revise_number', 'desc')->first()->reason}";
             }
             if ($document->status == "WAITING" || $document->status == "DRAFT" || $document->status == "APPROVED") {
-                $data['additional'] = "Please approve the issue of the document";
+                $data['additional'] = $document->status == "APPROVED" ? '' : "Please approve the issue of the document";
                 $data['remark'] = "<b>Remark:</b> $document->remark";
             }
         }
