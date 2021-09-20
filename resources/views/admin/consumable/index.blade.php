@@ -54,6 +54,7 @@
     </div>
   </div>
 </section>
+
 <div id="add-filter" class="modal fade" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="filter-modal" aria-hidden="true">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
@@ -116,6 +117,7 @@
 @section('scripts')
 <script>
   var actionmenu = JSON.parse(`{!! json_encode($actionmenu) !!}`);
+  
   toastr.options = {
     "closeButton": false,
     "debug": false,
@@ -243,6 +245,10 @@
                 badge = 'badge-warning';
                 break;
               case 'approved':
+                status = 'Approved';
+                badge = 'badge-info';
+                break;
+              case 'complete':
                 status = 'Approved';
                 badge = 'badge-info';
                 break;

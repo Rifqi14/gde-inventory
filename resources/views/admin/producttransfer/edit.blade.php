@@ -108,7 +108,7 @@
                                     </div>
                                     <div class="form-group">
                                         <label for="description" class="control-label">Description</label>
-                                        <textarea name="description" id="description" class="form-control summernote editable" placeholder="Enter description" disabled>{{$data->description}}</textarea>
+                                        <textarea name="description" id="description" class="form-control summernote editable" placeholder="Enter description" disabled></textarea>
                                     </div>
                                     <div class="form-group form-status">
                                         <label for="status" class="control-label">Status</label>
@@ -270,6 +270,7 @@
     }
 
     var deletedDoc = [];
+    var selectedProducts = [];
 
     const editable = (e) => {
         if ($(e).data('action') == 'open') {
@@ -406,53 +407,7 @@
             }
         }).on('select2:clearing', function() {
             $('#product').val(null).trigger('change');
-        });
-
-        $("#product").select2({
-            ajax: {
-                url: "{{route('productborrowing.selectproduct')}}",
-                type: 'GET',
-                dataType: 'json',
-                data: function(params) {
-                    var productCategory = $('#product_category_id').select2('val');
-                    var products = [];
-
-                    $.each($('#table-product > tbody > .product-item'), function(index, value) {
-                        var product = $(this).find('.item-product'),
-                        product_id = product.val();
-
-                        products.push(product_id);
-
-                    });
-                    return {
-                        name: params.term,
-                        page: params.page,
-                        product_category_id: productCategory,
-                        products: products,
-                        limit: 30,
-                    };
-                },
-                processResults: function(data, params) {
-                    var more = (params.page * 30) < data.total;
-                    var option = [];
-                    $.each(data.rows, function(index, item) {
-                        option.push({
-                            id: item.id,
-                            text: item.name,
-                            uom_id: item.uom_id,
-                            uom: item.uom,
-                            product_category_id: item.product_category_id,
-                            qty_system: item.qty_system
-                        });
-                    });
-                    return {
-                        results: option,
-                        more: more,
-                    };
-                },
-            },
-            allowClear: true,
-        });
+        });        
 
         $("#origin-unit").select2({
             ajax: {
@@ -610,6 +565,61 @@
             }
         });
 
+        $("#product").select2({
+            ajax: {
+                url: "{{route('productborrowing.selectproduct')}}",
+                type: 'GET',
+                dataType: 'json',
+                data: function(params) {
+                    var productCategory = $('#product_category_id').select2('val');                    
+                    var warehouseID = $('#origin-warehouse').find('option:selected').val();
+
+                    if(!warehouseID){
+                        toastr.warning('Select origin warehouse first.');
+                        return false;
+                    }
+                    
+                    return {
+                        name                : params.term,
+                        page                : params.page,
+                        product_category_id : productCategory,
+                        warehouse_id        : warehouseID,
+                        products            : selectedProducts,
+                        limit               : 30,
+                    };
+                },
+                processResults: function(data, params) {
+                    var more = (params.page * 30) < data.total;
+                    var option = [];
+                    $.each(data.rows, function(index, item) {
+                        option.push({
+                            id                  : item.id,
+                            text                : item.name,
+                            uom_id              : item.uom_id,
+                            uom                 : item.uom,
+                            product_category_id : item.product_category_id,
+                            category            : item.category,
+                            qty_system          : item.stock
+                        });
+                    });
+                    return {
+                        results: option,
+                        more: more,
+                    };
+                },
+            },
+            escapeMarkup: function (text) { return text; },
+            templateResult : function(data){
+                if(!data.id){
+                    return data.text;
+                }
+                return `<b>${data.text}</b>
+                        <span style="float: right;">Stock : ${data.qty_system}</span>
+                        <p style="margin-top: 1px;">${data.category}</p>`;
+            }, 
+            allowClear: true,
+        });
+
         if(transferDate){
             $('#transfer-date').data('daterangepicker').setStartDate(`${transferDate}`);
             $('#transfer-date').data('daterangepicker').setEndDate(`${transferDate}`);
@@ -660,6 +670,8 @@
             var qty = $(this).val();
             $(this).parents('.product-item').find('.item-product').attr('data-qty-transfer', qty);
         });
+
+        $('#description').summernote('code',@json($data->description));
 
         $("#form").validate({
             rules: {},
@@ -818,25 +830,31 @@
 
             $.each(products, function (index, value) { 
                 var id          = value.product_id,
-                     productName = value.product_name,
-                     categoryID  = value.product_category_id,
-                     uomID       = value.uom_id,
-                     uom         = value.uom_name,
-                     qtySystem   = value.qty_system,
-                     qtyRequest  = value.qty_requested;
+                    productName = value.product_name,
+                    categoryID  = value.product_category_id,
+                    category    = value.category,
+                    uomID       = value.uom_id,
+                    uom         = value.uom_name,
+                    qtySystem   = value.qty_system,
+                    qtyRequest  = value.qty_requested;
                      
                     html += `<tr class="product-item">
                                 <input type="hidden" class="item-product" value="${id}" data-category-id="${categoryID}" data-uom-id="${uomID}" data-qty-system="${qtySystem}" data-qty-transfer="${qtyRequest}">
-                                <td width="100">${productName}</td>
+                                <td width="100">
+                                    <b>${productName}</b>
+                                    <p>${category}</p>
+                                </td>
                                 <td class="text-center" width="15">${uom}</td>
                                 <td class="text-right" width="15">${qtySystem}</td>
                                 <td class="text-center" width="15">
                                     <input type="number" name="qty_transfer" class="form-control numberfield text-right qty-transfer editable" placeholder="0" value="${qtyRequest}" required readonly>
                                 </td>
                                 <td class="text-center" width="15">
-                                    <button class="btn btn-md text-xs btn-danger btn-flat legitRipple editable" type="button" onclick="removeProduct($(this))" disabled><i class="fas fa-trash"></i></button>
+                                    <button class="btn btn-sm text-xs btn-danger btn-flat legitRipple editable" type="button" onclick="removeProduct($(this), ${id})" disabled><i class="fas fa-trash"></i></button>
                                 </td>
                             </tr>`;
+
+                    selectedProducts.push(parseInt(id));                
             });
 
             table.find('.no-available-data').remove();
@@ -866,7 +884,7 @@
                                 </a>                             
                             </td>
                             <td class="text-center">
-                                <button class="btn btn-md text-xs btn-danger btn-flat legitRipple" onclick="removeDoc($(this),${id})" type="button"><i class="fas fa-trash"></i></button>                                
+                                <button class="btn btn-sm text-xs btn-danger btn-flat legitRipple" onclick="removeDoc($(this),${id})" type="button"><i class="fas fa-trash"></i></button>                                
                             </td>
                         </tr>`;
             });
@@ -896,7 +914,7 @@
                                 </a>                      
                             </td>
                             <td class="text-center">
-                                <button class="btn btn-md text-xs btn-danger btn-flat legitRipple" onclick="removePhoto($(this),${id})" type="button"><i class="fas fa-trash"></i></button>                                
+                                <button class="btn btn-sm text-xs btn-danger btn-flat legitRipple" onclick="removePhoto($(this),${id})" type="button"><i class="fas fa-trash"></i></button>                                
                             </td>
                         </tr>`;
             });
@@ -920,6 +938,7 @@
         var id          = product.id,
             productName = product.text,
             categoryID  = product.product_category_id,
+            category    = product.category,
             uomID       = product.uom_id,
             uom         = product.uom,
             qtySystem   = product.qty_system,
@@ -931,23 +950,26 @@
 
         var html = `<tr class="product-item">
                         <input type="hidden" class="item-product" value="${id}" data-category-id="${categoryID}" data-uom-id="${uomID}" data-qty-system="${qtySystem}" data-qty-transfer="0">
-                        <td width="100">${productName}</td>
+                        <td width="100">
+                            <b>${productName}</b>
+                            <p>${category}</p>
+                        </td>
                         <td class="text-center" width="15">${uom}</td>
                         <td class="text-right" width="15">${qtySystem}</td>
                         <td class="text-center" width="15">
                             <input type="number" name="qty_transfer" class="form-control numberfield text-right qty-transfer" placeholder="0" required>
                         </td>
                         <td class="text-center" width="15">
-                            <button class="btn btn-md text-xs btn-danger btn-flat legitRipple" type="button" onclick="removeProduct($(this))"><i class="fas fa-trash"></i></button>
+                            <button class="btn btn-sm text-xs btn-danger btn-flat legitRipple" type="button" onclick="removeProduct($(this), ${id})"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>`;
 
         table.append(html);
         $('#product').val(null).trigger('change');
-
+        selectedProducts.push(parseInt(id));
     }
 
-    const removeProduct = (that) => {
+    const removeProduct = (that, productID) => {
         that.closest('.product-item').remove();
         if($('#table-product > tbody > .product-item').length == 0){
             var html = `<tr class="no-available-data">
@@ -955,6 +977,8 @@
                             </tr>`;
                 $('#table-product > tbody').append(html);                
         }        
+
+        selectedProducts.splice($.inArray(productID, selectedProducts), 1);                
     }
 
     const initInputFile = () => {
@@ -984,7 +1008,7 @@
                             </div>
                         </td>
                         <td class="text-center">
-                            <button class="btn btn-md text-xs btn-danger btn-flat legitRipple" type="button" onclick="removeDoc($(this))"><i class="fas fa-trash"></i></button>
+                            <button class="btn btn-sm text-xs btn-danger btn-flat legitRipple" type="button" onclick="removeDoc($(this))"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>`;
         $('#table-document > tbody').append(html);
@@ -1031,7 +1055,7 @@
                             </div>
                         </td>
                         <td class="text-center">
-                            <button class="btn btn-md text-xs btn-danger btn-flat legitRipple" type="button" onclick="removePhoto($(this))"><i class="fas fa-trash"></i></button>
+                            <button class="btn btn-sm text-xs btn-danger btn-flat legitRipple" type="button" onclick="removePhoto($(this))"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>`;
         $('#table-photo > tbody').append(html);

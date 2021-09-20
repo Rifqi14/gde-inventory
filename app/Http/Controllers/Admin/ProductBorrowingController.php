@@ -425,7 +425,7 @@ class ProductBorrowingController extends Controller
             }    
             
             // Calculate and move stock warehouse when status waiting or approved                
-            $calculate = $this->calculateStock($getProducts, $status);
+            // $calculate = $this->calculateStock($getProducts, $status)
     
             if(isset($documentNames)){                                
                 foreach ($documentNames as $key => $row) {
@@ -772,19 +772,20 @@ class ProductBorrowingController extends Controller
         $warehouse_id        = $request->warehouse_id;
     
         $query = Product::selectRaw("
-            products.*,            
-            (case
-                when stock_warehouses.stock is not null then stock_warehouses.stock::INTEGER
-                else 0
-            end) as stock,
+            products.*,                        
             product_uoms.uom_id,
             product_categories.path as category,
-            uoms.name as uom
+            uoms.name as uom,
+            stock_warehouses.stock
         ");                
-        $query->leftJoin('product_categories','product_categories.id','=','products.product_category_id');
-        $query->leftJoin('product_uoms','product_uoms.product_id','=','products.id');
-        $query->leftJoin('uoms','uoms.id','=','product_uoms.uom_id');                
+        $query->join('product_categories','product_categories.id','=','products.product_category_id');
+        $query->join('product_uoms','product_uoms.product_id','=','products.id');
+        $query->join('uoms','uoms.id','=','product_uoms.uom_id');                
         $query->join('stock_warehouses','stock_warehouses.product_id','=','products.id');                
+        $query->where([
+            ['stock_warehouses.warehouse_id','=',$warehouse_id],
+            ['stock_warehouses.stock','>',0]
+        ]);
         if($name){
             $query->whereRaw("
                 upper(products.name) like '%$name%'
@@ -792,8 +793,7 @@ class ProductBorrowingController extends Controller
         }
         if ($products) {
             $query->whereNotIn('products.id', $products);
-        }
-        $query->where('stock_warehouses.warehouse_id',$warehouse_id);
+        }        
         if($product_category_id){
             $query->where('product_category_id',$product_category_id);
         }

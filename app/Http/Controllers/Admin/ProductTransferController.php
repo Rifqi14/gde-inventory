@@ -85,10 +85,12 @@ class ProductTransferController extends Controller
                 $product->selectRaw("
                     product_transfer_details.*,
                     products.name as product_name,
-                    uoms.name as uom_name
+                    uoms.name as uom_name,
+                    product_categories.path as category
                 ");
                 $product->leftJoin('products','products.id','=','product_transfer_details.product_id');                
                 $product->leftJoin('uoms','uoms.id','=','product_transfer_details.uom_id');
+                $product->leftJoin('product_categories','product_categories.id','=','products.product_category_id');
             },
             'files' => function($files){
                 $files->orderBy('id');
@@ -104,6 +106,13 @@ class ProductTransferController extends Controller
         $data = $data->find($id);
 
         if ($data) {
+            $products = [];
+            foreach ($data->products as $key => $product) {               
+                $product->category = str_replace('->',' <i class="fas fa-angle-right"></i> ',$product->category);
+                $products[] = $product;
+            }
+            $data->products = $products;
+
             return view('admin.producttransfer.edit',compact('data'));
         }else{
             abort(404);
@@ -147,10 +156,12 @@ class ProductTransferController extends Controller
                 $product->selectRaw("
                     product_transfer_details.*,
                     products.name as product_name,
-                    uoms.name as uom_name
+                    uoms.name as uom_name,
+                    product_categories.path as category
                 ");
                 $product->leftJoin('products','products.id','=','product_transfer_details.product_id');                
                 $product->leftJoin('uoms','uoms.id','=','product_transfer_details.uom_id');
+                $product->leftJoin('product_categories','product_categories.id','=','products.product_category_id');
             },
             'files',
             'images',            
@@ -162,6 +173,13 @@ class ProductTransferController extends Controller
         $data = $data->find($id);
 
         if($data){
+            $products = [];
+            foreach ($data->products as $key => $product) {               
+                $product->category = str_replace('->',' <i class="fas fa-angle-right"></i> ',$product->category);
+                $products[] = $product;
+            }
+            $data->products = $products;
+
             return view('admin.producttransfer.detail',compact('data'));
         }else{
             abort(404);
@@ -253,7 +271,11 @@ class ProductTransferController extends Controller
             $query->where('employees.id',$issuedBy);
         }
         if($status){
-            $query->where('product_transfers.status',$status);
+            if($status == 'approved'){
+                $query->whereIn('product_transfers.status',['approved','complete']);    
+            }else{
+                $query->where('product_transfers.status',$status);
+            }
         }else{
             $query->whereNotIn('product_transfers.status',['approved','archived']);
         }

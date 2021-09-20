@@ -85,7 +85,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="description" class="control-label">Description</label>
-                                    <textarea name="description" id="description" class="form-control summernote" placeholder="Enter description">{{$data->description}}</textarea>
+                                    <textarea name="description" id="description" class="form-control summernote" placeholder="Enter description"></textarea>
                                 </div>
                                 <div class="form-group form-status">
                                     <label for="status" class="control-label">Status</label>
@@ -111,8 +111,8 @@
                                         <tr>
                                             <th width="200">Product Name</th>
                                             <th width="15" class="text-center">UOM</th>
-                                            <th width="15" class="text-center">Qty System</th>
-                                            <th width="10" class="text-center">Qty Transfer</th>
+                                            <th width="15" class="text-right">Qty System</th>
+                                            <th width="10" class="text-right">Qty Transfer</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -447,6 +447,8 @@
                 }
             });
         }
+
+        $('#description').summernote('code',@json($data->description));
     });
 
     function initDocuments() {
@@ -463,6 +465,7 @@
                  var id          = value.product_id,
                      productName = value.product_name,
                      categoryID  = value.product_category_id,
+                     category    = value.category,
                      uomID       = value.uom_id,
                      uom         = value.uom_name,
                      qtySystem   = value.qty_system,
@@ -470,7 +473,10 @@
 
                  html += `<tr class="product-item">
                             <input type="hidden" class="item-product" value="${id}" data-category-id="${categoryID}" data-uom-id="${uomID}" data-qty-system="${qtySystem}" data-qty-request="0">
-                            <td width="100">${productName}</td>
+                            <td width="100">
+                                <b>${productName}</b>
+                                <p>${category}</p>
+                            </td>
                             <td class="text-center" width="15">${uom}</td>
                             <td class="text-right" width="15">${qtySystem}</td>
                             <td class="text-right" width="15">${qtyRequest}</td>                            

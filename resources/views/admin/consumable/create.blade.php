@@ -234,6 +234,8 @@
 
 @section('scripts')
 <script>
+  var selectedProducts = [];      
+
   toastr.options = {
     "closeButton": false,
     "debug": false,
@@ -411,22 +413,20 @@
         type: 'GET',
         dataType: 'json',
         data: function(params) {
-          var productCategory = $('#product-category-id').select2('val');
-          var products = [];
+          var productCategory = $('#product-category-id').select2('val');            
+          var warehouseID     = $('#warehouse').find('option:selected').val();                    
+          if(!warehouseID){
+              toastr.warning('Select warehouse first.');
+              return false;
+          }   
 
-          $.each($('#table-products > tbody > .product-item'), function(index, value) {
-            var product = $(this).find('.item-product'),
-              product_id = product.val();
-
-            products.push(product_id);
-
-          });
           return {
-            name: params.term,
-            product_category_id: productCategory,
-            products: products,
-            page: params.page,
-            limit: 30,
+            name                : params.term,
+            product_category_id : productCategory,
+            warehouse_id        : warehouseID,
+            page                : params.page,
+            products            : selectedProducts,
+            limit               : 30,
           };
         },
         processResults: function(data, params) {
@@ -434,12 +434,14 @@
           var option = [];
           $.each(data.rows, function(index, item) {
             option.push({
-              id: item.id,
-              text: item.name,
-              uom_id: item.uom_id,
-              uom: item.uom,
-              product_category_id: item.product_category_id,
-              qty_system: item.qty_system
+              id          : item.id,
+              text        : item.name,
+              uom_id      : item.uom_id,
+              uom         : item.uom,
+              category_id : item.product_category_id,
+              category    : item.category,
+              is_serial   : item.is_serial=='1'?true:false,
+              stock       : item.stock>=0?item.stock:0
             });
           });
           return {
@@ -448,6 +450,15 @@
           };
         },
       },
+      escapeMarkup: function (text) { return text; },
+      templateResult : function(data){
+          if(!data.id){
+              return data.text;
+          }
+          return `<b>${data.text}</b>
+                  <span style="float: right;">Stock : ${data.stock}</span>
+                  <p style="margin-top: 1px;">${data.category}</p>`;
+      }, 
       allowClear: true,
     });
 
@@ -596,13 +607,14 @@
     }
 
     product = product[0];
-    var id = product.id,
-      productName = product.text,
-      categoryID = product.product_category_id,
-      uomID = product.uom_id,
-      uom = product.uom,
-      qtySystem = product.qty_system,
-      table = $('#table-products > tbody');
+    var id          = product.id,
+        productName = product.text,
+        categoryID  = product.category_id,
+        category    = product.category,
+        uomID       = product.uom_id,
+        uom         = product.uom,
+        qtySystem   = product.stock,
+        table       = $('#table-products > tbody');
 
     if (table.find('.no-available-data').length > 0) {
       table.find('.no-available-data').remove();
@@ -610,22 +622,26 @@
 
     var html = `<tr class="product-item">
                         <input type="hidden" class="item-product" value="${id}" data-category-id="${categoryID}" data-uom-id="${uomID}" data-qty-system="${qtySystem}" data-qty-consume="0">
-                        <td width="100">${productName}</td>
+                        <td width="100">
+                            <b>${productName}</b>
+                            <p>${category}</p>
+                        </td>
                         <td class="text-center" width="15">${uom}</td>
                         <td class="text-center" width="15">${qtySystem}</td>
                         <td class="text-center" width="15">
                             <input type="number" name="qty_consume" class="form-control numberfield text-right qty-consume" placeholder="0" min="0" max="${qtySystem}" data-qty_system="${qtySystem}" required>
                         </td>
                         <td class="text-center" width="15">
-                            <button class="btn btn-md text-xs btn-danger btn-flat legitRipple" onclick="removeProduct($(this))" type="button"><i class="fas fa-trash"></i></button>
+                            <button class="btn btn-md text-xs btn-danger btn-flat legitRipple" onclick="removeProduct($(this), ${id})" type="button"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>`;
 
     table.append(html);
     $('#product').val(null).trigger('change');
+    selectedProducts.push(parseInt(id));         
   }
 
-  const removeProduct = (that) => {
+  const removeProduct = (that, productID) => {
     that.closest('.product-item').remove();
     if ($('#table-products > tbody > .product-item').length == 0) {
       var html = `<tr class="no-available-data">
@@ -633,6 +649,8 @@
                        </tr>`;
       $('#table-products > tbody').append(html);
     }
+
+    selectedProducts.splice($.inArray(productID, selectedProducts), 1);                
   }
 
   const addDocument = () => {

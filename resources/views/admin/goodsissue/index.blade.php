@@ -45,7 +45,7 @@
                                 <tr>
                                     <th width="5" class="text-center">No</th>
                                     <th width="30" class="text-center">Date</th>
-                                    <th width="200">Issued Number</th>
+                                    <th width="200">Issued Number</th>                                    
                                     <th width="20" class="text-right">Product</th>
                                     <th width="30" class="text-center">Status</th>
                                     <th width="10" class="text-center">Action</th>

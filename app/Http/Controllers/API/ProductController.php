@@ -14,12 +14,11 @@ use App\Models\Product;
 class ProductController extends Controller
 {
     public function read(Request $request)
-    {
-        $start   = $request->page ? $request->page - 1 : 0;
+    {        
         $length  = $request->limit ? $request->limit : 10;   
         $order   = $request->order ? $request->order :null;
-        $created = $request->created?$request->created:null;
-        $search  = $request->search;
+        $created = isset($request->created)?$request->created:null;
+        $search  = strtoupper($request->search);
 
         $products = Product::selectRaw("products.*");
         $products->with([
@@ -34,7 +33,7 @@ class ProductController extends Controller
         ]);
         if($search){
             $products->whereRaw("
-                products.name like '%$search%'
+                upper(products.name) like '%$search%'
             ");
         }                        
         if($created){
@@ -49,8 +48,7 @@ class ProductController extends Controller
 
         $rows  = clone $products;
         $total = $rows->count();
-
-        $products->offset($start);
+        
         $products->limit($length);
         $products = $products->get();
 
@@ -102,5 +100,51 @@ class ProductController extends Controller
                 }
             ])->findorFail($id)
         );
+    }
+
+    public function latest(Request $request)
+    {
+        $length  = $request->limit ? $request->limit : 10;   
+
+        $products = Product::selectRaw("products.*");
+        $products->with([
+            'stocks' => function($stock){
+                $stock->selectRaw("
+                    stock_warehouses.id,
+                    stock_warehouses.product_id,
+                    stock_warehouses.warehouse_id,
+                    stock_warehouses.stock
+                ");
+            }
+        ]);
+        $products->latest();
+
+        $rows  = clone $products;
+        $total = $rows->count();
+        
+        $products->limit($length);
+        $products = $products->get();
+
+        $data  = [];        
+        foreach ($products as $key => $product) {
+            $qty = 0;
+            foreach($product->stocks as $stock){
+                $qty = $qty +  $stock->stock;
+            }                
+
+            $data[] = [       
+                'product_id' => $product->product_id, 
+                'product'    => $product->name,
+                'image'      => $product->image,                
+                'added_date' => date('d M Y', strtotime($product->created_at)),
+                'qty'        => $qty
+            ];
+        }        
+
+        return response()->json([
+            'status' =>  Response::HTTP_OK,
+            'total'  => $total,
+            'data'   => $data
+        ], Response::HTTP_OK);
     }
 }

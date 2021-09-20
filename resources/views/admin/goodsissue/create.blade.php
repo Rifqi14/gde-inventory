@@ -1099,6 +1099,7 @@
                 $.each($('#table-product > tbody > .product-item'), function(index, value) {
                     var product       = $(this).find('.item-product'),
                         product_id    = product.val(),
+                        reference     = product.attr('data-reference'),
                         referenceID   = product.attr('data-reference-id'),
                         uomID         = product.attr('data-uom-id'),
                         qtyRequest    = product.attr('data-qty-request'),
@@ -1119,6 +1120,7 @@
                     products.push({
                         product_id      : parseInt(product_id),
                         reference_id    : parseInt(referenceID),
+                        reference       : reference,
                         origin_site_id  : parseInt(originSiteID),
                         origin_id       : parseInt(originID),
                         destination_id  : parseInt(destinationID),
@@ -1382,13 +1384,13 @@
         var serial = `<span class="badge ${badge} text-md"><i class="${icon}" style="size: 1x;"></i></span>`;
 
         var html = `<tr class="product-item">
-                        <input type="hidden" class="item-product" value="${productID}" data-reference-id="${referenceID}" data-uom-id="${uomID}" data-qty-request="${qty}" data-type="${type}" data-has-serial="${isSerial}" data-origin-site-id="${originSiteID}" data-origin-warehouse-id="${originWarehouseID}" data-destination-warehouse-id="${destinationWarehouseID}">                        
+                        <input type="hidden" class="item-product" value="${productID}" data-reference-id="${referenceID}" data-reference="${reference}" data-uom-id="${uomID}" data-qty-request="${qty}" data-type="${type}" data-has-serial="${isSerial}" data-origin-site-id="${originSiteID}" data-origin-warehouse-id="${originWarehouseID}" data-destination-warehouse-id="${destinationWarehouseID}">                        
                         <td width="100"><p>${product}<br><b style="font-size: 10pt;">${reference}</b></p></td>
                         <td width="100">${category}</td>
                         <td width="30" class="text-center">${serial}</td>
                         <td class="text-right qty-order" width="30">${qty}</td>
                         <td class="text-right" width="30">
-                            <input type="number" class="form-control numberfield text-right qty-receive" placeholder="0" min="1" max="${qty}" ${type=='borrowing' && isSerial=='1'?'readonly':''}>
+                            <input type="number" class="form-control numberfield text-right qty-receive" placeholder="0" min="1" max="${qty}" ${isSerial=='1'?'readonly':''}>
                         </td>
                         <td width="100">
                             <div class="form-group">
@@ -1405,7 +1407,7 @@
                             </div>                    
                         </td>
                         <td class="text-center" width="10">
-                            <button class="btn btn-sm text-xs btn-warning btn-flat legitRipple ${type=='borrowing'&&isSerial=='1'?'':'disabled'}" type="button" onclick="showSerial($(this),${productID}, ${type=='borrowing'&&isSerial=='1'?false:true})"><i class="fas fa-bars"></i></button>
+                            <button class="btn btn-sm text-xs btn-warning btn-flat legitRipple ${isSerial=='1'?'':'disabled'}" type="button" onclick="showSerial($(this),${productID}, ${isSerial=='1'?false:true})"><i class="fas fa-bars"></i></button>
                             <button class="btn btn-sm text-xs btn-danger btn-flat legitRipple" type="button" onclick="removeProduct($(this),${productID})"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>`;
