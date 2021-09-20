@@ -18,7 +18,7 @@ class ProductController extends Controller
         $start   = $request->page ? $request->page - 1 : 0;
         $length  = $request->limit ? $request->limit : 10;   
         $order   = $request->order ? $request->order :null;
-        $created = $request->created?$request->created:null;
+        $created = isset($request->created)?$request->created:null;
         $search  = strtoupper($request->search);
 
         $products = Product::selectRaw("products.*");
