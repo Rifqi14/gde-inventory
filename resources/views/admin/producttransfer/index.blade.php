@@ -405,12 +405,10 @@
                     render: function(data, type, row){
                         var badge = '',
                             status = row.status;
-                        if (status == 'draft') {
-                            badge = 'bg-gray';
-                        } else if (status == 'waiting') {
-                            badge = 'badge-warning';
-                        } else if (status == 'approved') {
-                            badge = 'badge-info';
+
+                        if (status == 'approved' || status == 'complete') {
+                            badge  = 'badge-info';
+                            status = 'Approved';
                         }
 
                         return `<span class="badge ${badge} text-sm" style="text-transform: capitalize;">${status}</span>`;
