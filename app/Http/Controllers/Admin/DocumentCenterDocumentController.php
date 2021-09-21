@@ -431,6 +431,9 @@ class DocumentCenterDocumentController extends Controller
             }
             if ($document->status == "WAITING" || $document->status == "DRAFT" || $document->status == "APPROVED") {
                 $data['additional'] = $document->status == "APPROVED" ? '' : "Please approve the issue of the document";
+                if ($document->status == "WAITING") {
+                    $data['subject'] = "[Issue Request] $document->transmittal_no $document->transmittal_status";
+                }
                 $data['remark'] = "<b>Remark:</b> $document->remark";
             }
         }
