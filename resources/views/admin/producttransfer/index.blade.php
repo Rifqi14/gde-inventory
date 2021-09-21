@@ -403,13 +403,23 @@
                 },
                 {
                     render: function(data, type, row){
-                        var badge = '',
-                            status = row.status;
+                        var status = row.status;
 
-                        if (status == 'approved' || status == 'complete') {
-                            badge  = 'badge-info';
-                            status = 'Approved';
-                        }
+                        switch (status) {
+                            case 'approved':
+                                badge = 'badge-info';
+                                break;
+                            case 'processed':
+                                badge = 'badge-success';
+                                break
+                            case 'complete':
+                                badge = 'badge-danger';
+                                break;
+                            default:
+                                badge  = ''
+                                status = '';
+                                break;
+                        }                       
 
                         return `<span class="badge ${badge} text-sm" style="text-transform: capitalize;">${status}</span>`;
                     }, targets : [5]

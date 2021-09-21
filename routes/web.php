@@ -264,6 +264,7 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/goodsreceipt/read','Admin\GoodsReceiptController@read')->name('goodsreceipt.read');
         Route::get('/goodsreceipt/contractproducts','Admin\GoodsReceiptController@contractproducts')->name('goodsreceipt.contractproducts');
         Route::get('/goodsreceipt/borrowingproducts','Admin\GoodsReceiptController@borrowingproducts')->name('goodsreceipt.borrowingproducts');
+        Route::get('/goodsreceipt/transferproducts','Admin\GoodsReceiptController@transferproducts')->name('goodsreceipt.transferproducts');
         Route::get('/goodsreceipt/readserial','Admin\GoodsReceiptController@readserial')->name('goodsreceipt.readserial');        
         Route::get('/goodsreceipt/export','Admin\GoodsReceiptController@export')->name('goodsreceipt.export');
         Route::resource('/goodsreceipt', 'Admin\GoodsReceiptController');
