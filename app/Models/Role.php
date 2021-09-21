@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\DocExternal\ReviewerMatrix\DocumentExternalMatrix;
+use App\Models\Transmittal\TransmittalProperties\CategoryContractor;
 use App\User;
 use Illuminate\Database\Eloquent\Model;
 
@@ -46,5 +47,10 @@ class Role extends Model
     public function roleDistributors()
     {
         return $this->belongsToMany(DocumentCenterDocument::class, 'document_center_distributors', 'distributors_id', 'document_id');
+    }
+
+    public function category_contractors()
+    {
+        return $this->belongsToMany(CategoryContractor::class, 'category_contractor_groups', 'role_id', 'category_contractor_id');
     }
 }
