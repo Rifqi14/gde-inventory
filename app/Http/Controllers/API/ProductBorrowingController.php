@@ -34,9 +34,9 @@ class ProductBorrowingController extends Controller
         }                        
         if($created){
             if($created == 'oldest'){
-                $query->oldest();
+                $query->orderBy('product_borrowings.created_at', 'asc');
             }else{
-                $query->latest();
+                $query->orderBy('product_borrowings.created_at', 'desc');
             }
         }else {
             $query->orderBy('product_borrowings.borrowing_number', $order?$order:'asc');
