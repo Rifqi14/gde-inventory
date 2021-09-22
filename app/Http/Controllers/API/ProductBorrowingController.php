@@ -24,7 +24,7 @@ class ProductBorrowingController extends Controller
             product_borrowings.borrowing_date,
             product_borrowings.status,
             count(product_borrowing_details.id) as number_of_products,
-            product_borrowings.created_at,
+            product_borrowings.created_at
         ");
         $query->join('product_borrowing_details','product_borrowing_details.product_borrowing_id','=','product_borrowings.id');
         if($search){
