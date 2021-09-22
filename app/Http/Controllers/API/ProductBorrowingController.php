@@ -64,6 +64,23 @@ class ProductBorrowingController extends Controller
             $data[] = $row;
         }
 
+        $data = [
+            [
+                "id" => 78,
+                "borrowing_number" => "BRW-2021-09-000033",
+                "borrowing_date" => "22 Sep 2021",
+                "status" => "waiting",
+                "number_of_products" =>  1
+            ],
+            [
+                "id" => 75,
+                "borrowing_number" => "BRW-2021-09-000030",
+                "borrowing_date" => "22 Sep 2021",
+                "status" => "draft",
+                "number_of_products" => 2
+            ]
+        ];
+
         return response()->json([
             'status' => Response::HTTP_OK,
             'total'  => $total,            
