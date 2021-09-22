@@ -90,16 +90,26 @@ class ProductController extends Controller
             throw new ProductException('The given data was invalid.');
         }
 
-        return new ProductResource(
-            Product::with([
-                'stocks' => function($stock) {                                        
-                    $stock->join('warehouses','warehouses.id','=','stock_warehouses.warehouse_id');           
-                },
-                'borrowed' => function($borrow){
-                    $borrow->selectRaw("goods_issue_products.*");
-                }
-            ])->findorFail($id)
-        );
+        $query = Product::with([
+            'stocks' => function($stock) {                                        
+                $stock->join('warehouses','warehouses.id','=','stock_warehouses.warehouse_id');           
+            },
+            'borrowed' => function($borrow){
+                $borrow->selectRaw("goods_issue_products.*");
+            }
+        ])->findorFail($id);
+        if($query){
+            return response()->json([
+                'status' => Response::HTTP_OK,
+                'data'   => new ProductResource($query)
+            ], Response::HTTP_OK);
+        }else{
+            return response()->json([
+                'status'    => Response::HTTP_UNPROCESSABLE_ENTITY,
+                'message'   => 'Failed to get data.'
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+        
     }
 
     public function latest(Request $request)

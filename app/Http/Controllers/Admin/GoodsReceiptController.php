@@ -6,6 +6,7 @@ use App\Models\Menu;
 use App\Models\GoodsReceipt;
 use App\Models\ContractProduct;
 use App\Models\ProductBorrowingDetail;
+use App\Models\ProductTransferDetail;
 use App\Models\GoodsReceiptProduct;
 use App\Models\GoodsReceiptAsset;
 use App\Models\Site;
@@ -743,6 +744,74 @@ class GoodsReceiptController extends Controller
         ], 200);
     }
 
+    public function transferproducts(Request $request){
+        $draw        = $request->draw;
+        $start       = $request->start;
+        $length      = $request->length;
+        $query       = $request->search['value'];
+        $sort        = $request->columns[$request->order[0]['column']]['data'];
+        $dir         = $request->order[0]['dir'];
+        $except      = $request->except;
+        $category_id = $request->category_id;
+
+        $query = GoodsIssueProduct::selectRaw("
+            goods_issue_products.id as detail_id,
+            goods_issue_products.reference_id,
+            goods_issue_products.product_id,
+            goods_issue_products.uom_id,
+            goods_issue_products.qty_receive as qty,
+            product_transfers.transfer_number,
+            TO_CHAR(product_transfers.date_transfer, 'DD/MM/YYYY') as transfer_date,
+            products.name as product,
+            products.is_serial,
+            uoms.name as uom,
+            product_categories.path as category
+        "); 
+        $query->with([
+            'serials' => function($serial){
+                $serial->selectRaw("
+                    goods_issue_serials.*,
+                    product_serials.serial_number
+                ");
+                $serial->join('product_serials', function($join){
+                    $join->on('product_serials.id','=','goods_issue_serials.serial_id')->where('product_serials.movement','out');
+                });
+            }
+        ]);
+        $query->join('product_transfers',function($join){
+            $join->on('product_transfers.id','=','goods_issue_products.reference_id')->where('product_transfers.status','processed');
+        });     
+        $query->join('products','products.id','=','goods_issue_products.product_id');
+        $query->join('product_categories','product_categories.id','=','products.product_category_id');
+        $query->join('uoms','uoms.id','=','goods_issue_products.uom_id');
+        $query->where([
+            ['goods_issue_products.type','=','transfer']
+        ]);
+
+        $rows  = clone $query;
+        $total = $rows->count();
+
+        $query->offset($start);
+        $query->limit($length);
+        $query->orderBy($sort, $dir);
+
+        $queries = $query->get();
+
+        $data = [];
+        foreach ($queries as $key => $row) {
+            $row->no = ++$start;
+            $row->category = str_replace('->',' <i class="fas fa-angle-right"></i> ',$row->category);                        
+            $data[]  = $row;
+        }
+
+        return response()->json([
+            'draw'              => $draw,
+            'recordsTotal'      => $total,
+            'recordsFiltered'   => $total,
+            'data'              => $data
+        ], 200);
+    }
+
     public function borrowingproducts(Request $request)
     {
         $draw        = $request->draw;
@@ -979,11 +1048,7 @@ class GoodsReceiptController extends Controller
             }
 
         }
-    }
-
-    function insertOrUpdateSerial(){ 
-
-    }
+    }    
 
     function generateWarehouseVirtual($site_id)
     {

@@ -272,12 +272,12 @@ class ProductTransferController extends Controller
         }
         if($status){
             if($status == 'approved'){
-                $query->whereIn('product_transfers.status',['approved','complete']);    
+                $query->whereIn('product_transfers.status',['approved','processed','complete']);
             }else{
                 $query->where('product_transfers.status',$status);
             }
         }else{
-            $query->whereNotIn('product_transfers.status',['approved','archived']);
+            $query->whereNotIn('product_transfers.status',['approved','processed', 'complete','archived']);
         }
 
         $rows  = clone $query;

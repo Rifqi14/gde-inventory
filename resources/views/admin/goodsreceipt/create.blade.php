@@ -262,6 +262,9 @@
               <li class="nav-item contract-reference">
                 <a href="#add-contract-reference" class="nav-link active" id="add-contract-reference-tab" data-toggle="pill" role="tab" aria-controls="add-contract-reference" aria-selected="false">Contract</a>
               </li>
+              <li class="nav-item transfer-reference">
+                <a href="#add-transfer" class="nav-link" id="add-transfer-tab" data-toggle="pill" role="tab" aria-controls="add-transfer" aria-selected="false">Product Transfer</a>
+              </li>
               <li class="nav-item borrowing-reference">
                 <a href="#add-return" class="nav-link" id="add-return-tab" data-toggle="pill" role="tab" aria-controls="add-return" aria-selected="false">Product Borrowing</a>
               </li>
@@ -271,6 +274,22 @@
             <div class="tab-content" id="reference-tab">
               <div class="tab-pane fade show active table-responsive" id="add-contract-reference" role="tabpanel" aria-labelledby="add-contract-reference-tab">
                 <table id="table-contract" class="table table-striped datatable" width="100%">
+                  <thead>
+                    <tr>
+                      <th width="3%" class="text-center">No</th>
+                      <th width="5%" class="text-center">Date</th>                      
+                      <th width="30%">Product</th>
+                      <th width="50%">Product Category</th>
+                      <th width="5%" class="text-center">Has Serial</th>
+                      <th width="10%" class="text-center">UOM</th>
+                      <th width="5%" class="text-right">Qty</th>                      
+                      <th width="5%" class="text-center">Action</th>
+                    </tr>
+                  </thead>
+                </table>
+              </div>
+              <div class="tab-pane fade show active table-responsive" id="add-transfer" role="tabpanel" aria-labelledby="add-transfer-tab">
+                <table id="table-transfer" class="table table-striped datatable" width="100%">
                   <thead>
                     <tr>
                       <th width="3%" class="text-center">No</th>
@@ -650,6 +669,113 @@
       ]
     });
 
+    transferTable = $('#table-transfer').DataTable({
+      processing: true,
+      language: {
+        processing: `<div class="p-2 text-center">
+                            <i class="fas fa-circle-notch fa-spin fa-fw"></i> Loading...
+                            </div>`
+      },
+      serverSide: true,
+      filter: false,
+      responsive: true,
+      lengthChange: false,
+      order: [
+        [1, "asc"]
+      ],
+      ajax: {
+        url: "{{route('goodsreceipt.transferproducts')}}",
+        type: "GET",
+        data: function(data) {                    
+          var exception = [];
+          // var item      = receiptProduct.filter(param => param.type == 'transfer');
+
+          // $.each(item, function (index, value) { 
+          //    exception.push(value.detail_id);
+          // });
+          
+          data.except       = exception;
+          data.category_id  = $('#form').find('#product-category').find('option:selected').val();
+        }
+      },
+      columnDefs: [{
+          orderable: false,
+          targets: [0, 7]
+        },
+        {
+          className: "text-center",
+          targets: [0, 1, 4, 5, 7]
+        },
+        {
+          className: "text-right",
+          targets: [6]
+        },
+        {
+          render: function(data, type, row) {
+            return `<p>${row.product}<br><b>${row.transfer_number}</b></p>`;
+          },
+          targets: [2]
+        },
+        {
+          render: function(data, type, row){
+                switch (row.is_serial) {
+                  case '1':
+                    badge = 'badge-info';
+                    icon  = 'fas fa-check';                    
+                    break;
+                
+                  default:
+                    badge = 'bg-red';
+                    icon  = 'fas fa-times';                    
+                    break;
+                }
+            return `<span class="badge ${badge} text-md"><i class="${icon}" style="size: 2x;"></i></span>`;
+          }, targets: [4]
+        },
+        {
+          render: function(data, type, row) {
+            var referenceID   = row.reference_id,
+                reference     = row.transfer_number,
+                detailID      = row.detail_id,
+                productID     = row.product_id,
+                product       = row.product,
+                category      = row.category,
+                isSerial      = row.is_serial,
+                uomID         = row.uom_id,
+                order         = row.qty ? row.qty : 0;                
+
+            return `<button class="btn btn-sm text-xs btn-success btn-flat legitRipple btn-add-product" onclick="addProduct($(this),'borrowing')" type="button" data-reference-id="${referenceID}" data-detail-id="${detailID}" data-reference="${reference}" data-product-id="${productID}" data-product="${product}" data-serial="${isSerial}" data-uom-id="${uomID}" data-order="${order}">
+                      <i class="fas fa-plus"></i>
+                    </button>`;
+          },
+          targets: [7]
+        }
+      ],
+      columns: [{
+          data: "no"
+        },
+        {
+          data: "transfer_date"
+        },        
+        {
+          data: "product"
+        },
+        {
+          data: "category",
+          className: 'product-category'
+        },
+        {
+          data: "is_serial"
+        },
+        {
+          data: "uom"
+        },
+        {
+          data: "qty"
+        }        
+      ]
+    });
+
     borrowingTable = $('#table-borrowing').DataTable({
       processing: true,
       language: {
@@ -725,7 +851,7 @@
                 uomID         = row.uom_id,
                 order         = row.qty ? row.qty : 0;                
 
-            return `<button class="btn btn-sm text-xs btn-success btn-flat legitRipple btn-add-product" onclick="addProduct($(this),'borrowing')" type="button" data-reference-id="${referenceID}" data-detail-id="${detailID}" data-reference="${reference}" data-product-id="${productID}" data-product="${product}" data-serial="${isSerial}" data-uom-id="${uomID}" data-order="${order}">
+            return `<button class="btn btn-sm text-xs btn-success btn-flat legitRipple btn-add-product" onclick="addProduct($(this),'transfer')" type="button" data-reference-id="${referenceID}" data-detail-id="${detailID}" data-reference="${reference}" data-product-id="${productID}" data-product="${product}" data-serial="${isSerial}" data-uom-id="${uomID}" data-order="${order}">
                       <i class="fas fa-plus"></i>
                     </button>`;
           },
@@ -1211,13 +1337,21 @@
     if (productRole == 'contract') {
       contractTable.draw();
       $('li.borrowing-reference').hide();
+      $('li.transfer-reference').hide();
+    }else if(productRole == 'transfer'){
+      transferTable.draw();
+      $('li.borrowing-reference').hide();
+      $('li.contract-reference').hide();
     } else if (productRole == 'borrowing') {
       borrowingTable.draw();
       $('li.contract-reference').hide();
+      $('li.transfer-reference').hide();
     } else {
       contractTable.draw();
+      transferTable.draw();
       borrowingTable.draw();
       $('li.borrowing-reference').show();
+      $('li.transfer-reference').show();
       $('li.contract-reference').show();
     }
 

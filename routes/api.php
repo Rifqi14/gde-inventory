@@ -25,7 +25,6 @@ use Illuminate\Support\Facades\Route;
     
 // });
 
-// Account and Auth
 Route::group([
     'middleware' => 'api'
 ],function(){
@@ -72,5 +71,14 @@ Route::group([
         // History
         Route::get('/history', 'API\StockMovementController@read');
         Route::post('/totalhistory', 'API\StockMovementController@total');
+    });
+
+    // Product Borrowing
+    Route::group([
+        'middleware' => ['auth:api'],
+        'prefix'     => 'borrowing'
+    ], function(){
+        // List
+        Route::get('/list', 'API\ProductBorrowingController@read');
     });
 });
