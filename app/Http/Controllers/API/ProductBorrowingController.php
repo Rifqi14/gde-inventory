@@ -5,12 +5,17 @@ namespace App\Http\Controllers\API;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Resources\ProductBorrowingResource;
+use Illuminate\Support\Facades\Route;
 
+use App\Models\Menu;
 use App\Models\ProductBorrowing;
 use App\Models\ProductBorrowingDetail;
 
 class ProductBorrowingController extends Controller
-{
+{    
+    
     public function read(Request $request)
     {
         $length  = $request->limit ? $request->limit : 10;   
@@ -88,7 +93,7 @@ class ProductBorrowingController extends Controller
         ], Response::HTTP_OK);
     }
 
-    public function edit($id)
+    public function edit(Request $request, $id)
     {
         if(!$id){
             return response()->json([
@@ -96,5 +101,45 @@ class ProductBorrowingController extends Controller
                 'mesage' => 'The given data was invalid'
             ], Response::HTTP_BAD_REQUEST);
         }    
+
+        $data = [];
+
+        if($request->actionmenu->approval){
+            $query = ProductBorrowing::selectRaw("
+                product_borrowings.id,
+                product_borrowings.borrowing_number,
+                TO_CHAR(product_borrowings.borrowing_date, 'DD Mon YYYY') as borrowing_date
+            ");
+            $query->with([  
+                'products' => function($product){
+                    $product->selectRaw("
+                        product_borrowing_details.id,
+                        product_borrowing_details.product_borrowing_id,
+                        product_borrowing_details.product_id,                    
+                        product_borrowing_details.uom_id,
+                        product_borrowing_details.qty_system,
+                        product_borrowing_details.qty_requested,
+                        products.name as product,
+                        uoms.name as uom
+                    ");
+                    $product->join('products','products.id','=','product_borrowing_details.product_id');
+                    $product->join('uoms','uoms.id','=','product_borrowing_details.uom_id');
+                }
+            ]);
+
+            $data = $query->find($id);
+
+            if(!$data){
+                return response()->json([
+                    'status'    => Response::HTTP_UNPROCESSABLE_ENTITY,
+                    'message'   => 'Failed to get data.',
+                ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+        }
+
+        return response()->json([
+            'status' => Response::HTTP_OK,
+            'data'   => $data,                        
+        ], Response::HTTP_OK);
     }
 }
