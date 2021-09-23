@@ -434,6 +434,9 @@ class DocumentCenterDocumentController extends Controller
                 if ($document->status == "WAITING") {
                     $data['subject'] = "[Issue Request] $document->transmittal_no: {$document->documentCenter->title}";
                 }
+                if ($document->status == "DRAFT") {
+                    $data['subject'] = "[Document Issue Notice] -> [Issue Draft] $document->transmittal_no: {$document->documentCenter->title}";
+                }
                 $data['remark'] = "<b>Remark:</b> $document->remark";
             }
         }
