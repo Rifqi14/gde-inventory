@@ -407,7 +407,7 @@ class DocumentCenterDocumentController extends Controller
         $data       = [
             'to'                => [$document->approver->email, @$document->updatedBy->email],
             'cc'                => [],
-            'subject'           => "[Document Issue Notice] $document->transmittal_no $document->transmittal_status",
+            'subject'           => "[Document Issue Notice] $document->transmittal_no: {$document->documentCenter->title}",
             'updated_at'        => date('D, d M Y H:i:s', strtotime($document->updated_at)),
             'updated_by'        => $document->updatedBy->name,
             'remark'            => "",
@@ -426,13 +426,16 @@ class DocumentCenterDocumentController extends Controller
         } else {
             if ($document->status == "REVISED") {
                 $data['additional'] = "Please revise the document";
-                $data['subject'] = "[Request to Revise] $document->transmittal_no $document->transmittal_status";
+                $data['subject'] = "[Request to Revise] $document->transmittal_no: {$document->documentCenter->title}";
                 $data['remark'] = "<b>Comment:</b> {$document->log()->orderBy('revise_number', 'desc')->first()->reason}";
             }
             if ($document->status == "WAITING" || $document->status == "DRAFT" || $document->status == "APPROVED") {
                 $data['additional'] = $document->status == "APPROVED" ? '' : "Please approve the issue of the document";
                 if ($document->status == "WAITING") {
-                    $data['subject'] = "[Issue Request] $document->transmittal_no $document->transmittal_status";
+                    $data['subject'] = "[Issue Request] $document->transmittal_no: {$document->documentCenter->title}";
+                }
+                if ($document->status == "DRAFT") {
+                    $data['subject'] = "[Document Issue Notice] -> [Issue Draft] $document->transmittal_no: {$document->documentCenter->title}";
                 }
                 $data['remark'] = "<b>Remark:</b> $document->remark";
             }
