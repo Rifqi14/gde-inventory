@@ -37,7 +37,7 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
-                        
+
                     </div>
                     <div class="card-body table-responsive p-0">
                         <table id="table-purchasing" class="table table-striped datatable" width="100%">
@@ -80,6 +80,7 @@
         filter: false,
         responsive: true,
         lengthChange: false,
+        pageLength: 50,
         order: [[ 0, "asc" ]],
         ajax: {
             url: "{{route('purchasing.read')}}",
@@ -127,7 +128,7 @@
                 },
                 targets: [3]
             },
-            {   
+            {
                 width: "10%",
                 render: function ( data, type, row ) {
                 return `<div class="btn-group">

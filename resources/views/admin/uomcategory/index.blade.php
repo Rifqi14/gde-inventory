@@ -121,6 +121,7 @@
             filter: false,
             responsive: true,
             lengthChange: false,
+            pageLength: 50,
             order: [
                 [1, "asc"]
             ],

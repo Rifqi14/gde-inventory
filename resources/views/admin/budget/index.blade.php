@@ -184,7 +184,8 @@ Budgetary Data
             aaSorting: [],
             filter: false,
             responsive: true,
-            lengthChange: false, 
+            lengthChange: false,
+            pageLength: 50,
             order: [[ 1, "asc" ]],
             ajax: {
                 url: "{{route('budgetary.read')}}",
@@ -208,8 +209,8 @@ Budgetary Data
             },
             columns: [
                 { "data": "no", "name": "no", width:10, className:"text-center" },
-                {  
-                    "data": "name", 
+                {
+                    "data": "name",
                     "name": "name",
                     width: 100,
                     sortable: false,
@@ -222,7 +223,7 @@ Budgetary Data
                     }
                 },
                 { "data": "description", "name": "description", width:200, sortable:false },
-                {  
+                {
                     width: 100,
                     sortable: false,
                     className:'text-right',
@@ -240,7 +241,7 @@ Budgetary Data
                             return accounting.formatMoney(full.amount, curr, 2, ".", ",");
                         }
                     },
-                {  
+                {
                     width: 100,
                     sortable: false,
                     className:'text-center',
@@ -262,9 +263,9 @@ Budgetary Data
                         return type
                     }
                 },
-                { 
-                    width:30, 
-                    className:"text-center", 
+                {
+                    width:30,
+                    className:"text-center",
                     sortable: false,
                     render: function( data, type, full, meta ) {
                         return `<div class="btn-group">
@@ -419,7 +420,7 @@ Budgetary Data
                 };
 				$.ajax({
 					url: `{{url('admin/budgetary/delete')}}/${id}`,
-					dataType: 'json', 
+					dataType: 'json',
 					data:data,
 					type:'GET',
 					success:function(response){
@@ -435,7 +436,7 @@ Budgetary Data
 							)
 						}
 				}});
-				
+
 			}
 		});
 	}

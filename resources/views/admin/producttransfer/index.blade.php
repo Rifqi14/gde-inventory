@@ -240,7 +240,7 @@
                         more: more,
                     };
                 },
-            },            
+            },
             allowClear: true,
         });
 
@@ -255,6 +255,7 @@
             filter: false,
             responsive: true,
             lengthChange: false,
+            pageLength: 50,
             order: [
                 [1, "asc"]
             ],
@@ -322,7 +323,7 @@
                             button += `<a class="dropdown-item" href="javascript:void(0);" onclick="destroy(${row.id})">
                                         <i class="fa fa-trash-alt"></i> Delete Data
                                     </a>`;
-                        }                        
+                        }
                         return `<div class="btn-group">
                                 <button type="button" class="btn btn-flat btn-sm dropdown-toggle" data-toggle="dropdown">
                                     <i class="fas fa-bars"></i>
@@ -354,8 +355,8 @@
                     data: "status"
                 }
             ]
-        }); 
-        
+        });
+
         approvedTable = $('#table-approved').DataTable({
             processing: true,
             language: {
@@ -367,6 +368,7 @@
             filter: false,
             responsive: true,
             lengthChange: false,
+            pageLength: 50,
             order: [
                 [1, "asc"]
             ],
@@ -419,7 +421,7 @@
                                 badge  = ''
                                 status = '';
                                 break;
-                        }                       
+                        }
 
                         return `<span class="badge ${badge} text-sm" style="text-transform: capitalize;">${status}</span>`;
                     }, targets : [5]
@@ -428,7 +430,7 @@
                     render: function(data, type, row) {
                         var button = `<a class="dropdown-item" href="javascript:void(0);" onclick="detail(${row.id})">
                                         <i class="far fa-eye"></i>View Data
-                                    </a>`;                    
+                                    </a>`;
                         return `<div class="btn-group">
                                 <button type="button" class="btn btn-flat btn-sm dropdown-toggle" data-toggle="dropdown">
                                     <i class="fas fa-bars"></i>
@@ -473,6 +475,7 @@
             filter: false,
             responsive: true,
             lengthChange: false,
+            pageLength: 50,
             order: [
                 [1, "asc"]
             ],
@@ -508,7 +511,7 @@
                     }, targets : [2]
                 },
                 {
-                    render: function(data, type, row){                        
+                    render: function(data, type, row){
                         return `<span class="badge bg-red text-sm" style="text-transform: capitalize;">Archived</span>`;
                     }, targets : [5]
                 },
@@ -516,7 +519,7 @@
                     render: function(data, type, row) {
                         var button = `<a class="dropdown-item" href="javascript:void(0);" onclick="archived(${row.id})">
                                         <i class="far fa-eye"></i>View Data
-                                    </a>`;                    
+                                    </a>`;
                         return `<div class="btn-group">
                                 <button type="button" class="btn btn-flat btn-sm dropdown-toggle" data-toggle="dropdown">
                                     <i class="fas fa-bars"></i>
@@ -561,7 +564,7 @@
             }
             $('#add-filter').modal('hide');
         });
-    });    
+    });
 
     const edit = (id) => {
         document.location = `{{ route('producttransfer.index') }}/${id}/edit`;
@@ -599,7 +602,7 @@
                             blockMessage('#content', 'Loading', '#fff');
                         }
                     }).done(function(response) {
-                        $('#content').unblock();                        
+                        $('#content').unblock();
                         if (response.status) {
                             toastr.success(response.message);
                             generalTable.ajax.reload(null, false);
@@ -619,7 +622,7 @@
 
     const archived = (id) => {
         document.location = `{{url('admin/producttransfer/archive/${id}')}}`;
-    }    
+    }
 
     const filter = () => {
         if (tab == 'general') {
@@ -654,10 +657,10 @@
     }
 
     const resetTable = () => {
-        var dates = $('#form-search').find('#dates').data('daterangepicker');            
+        var dates = $('#form-search').find('#dates').data('daterangepicker');
             dates.setStartDate(moment().startOf('month'));
             dates.setEndDate(moment().endOf('month'));
-        $('#form-search').find('#transfer-number').val(''),        
+        $('#form-search').find('#transfer-number').val(''),
         $('#form-search').find('#issued-by').val(null).trigger('change');
         $('#general-status').val(null).trigger('change');
 

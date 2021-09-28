@@ -83,7 +83,7 @@
                   <div class="input-group-append">
                       <span class="input-group-text"><i class="fas fa-calendar"></i></span>
                   </div>
-                </div>                
+                </div>
               </div>
             </div>
             <div class="col-md-6">
@@ -91,7 +91,7 @@
                 <label class="control-label" for="receipt_number">Receipt Number</label>
                 <input type="text" id="receipt-number" class="form-control" placeholder="Enter receipt number">
               </div>
-            </div>            
+            </div>
             <div class="col-md-6">
               <div class="form-group">
                 <label for="products" class="control-label">Products</label>
@@ -132,7 +132,7 @@
       allowClear: true
     });
 
-    $('.datepicker').daterangepicker({      
+    $('.datepicker').daterangepicker({
       timePicker: false,
       timePickerIncrement: 30,
       drops: 'auto',
@@ -155,6 +155,7 @@
       filter: false,
       responsive: true,
       lengthChange: false,
+      pageLength: 50,
       order: [
         [2, "desc"]
       ],
@@ -164,7 +165,7 @@
         data: function(data) {
           var search = $('#form-search'),
               dates  = search.find('#date').data('daterangepicker');
-          
+
           data.startdate = dates.startDate.format('YYYY-MM-DD');
           data.enddate   = dates.endDate.format('YYYY-MM-DD');
           data.number    = search.find('#receipt-number').val();
@@ -179,7 +180,7 @@
         {
           className: "text-center",
           targets: [0, 1, 4, 5]
-        },        
+        },
         {
           className: "text-right",
           targets: [3]
@@ -200,7 +201,7 @@
           render: function(data, type, row) {
             var status = '';
             var badge = '';
-            switch (row.status) {        
+            switch (row.status) {
               case 'approved':
                 status = 'Approved';
                 badge = 'badge-info';
@@ -241,7 +242,7 @@
 
             if (actionmenu.indexOf('export') >= 0 && row.status == 'approved') {
               button += `<a class="dropdown-item" href="javascript:void(0);" onclick="ekspor(${row.id})">
-                            <i class="fas fa-file-export"></i>Export Data                                        
+                            <i class="fas fa-file-export"></i>Export Data
                         </a>`;
             }
             return `<div class="btn-group">
@@ -358,7 +359,7 @@
                 download.remove();
             }else{
                 toastr.warning(response.message);
-            }             
+            }
         }
     });
   }

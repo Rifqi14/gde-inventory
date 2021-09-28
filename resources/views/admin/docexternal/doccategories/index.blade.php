@@ -169,6 +169,7 @@
       filter: false,
       responsive: true,
       lengthChange: false,
+      pageLength: 50,
       order: [[ 1, "asc" ]],
       ajax: {
         url: "{{route('documentcategoriesexternal.read')}}",
@@ -200,7 +201,7 @@
             return row.disciplinecode ? `${row.disciplinecode.code} - ${row.disciplinecode.name}` : '';
           },targets: [2]
         },
-        {   
+        {
           width: "10%",
           render: function ( data, type, row ) {
             var button  = '';
@@ -221,7 +222,7 @@
         { data: "id" },
       ]
     });
-    
+
     $('#form-search').submit(function(e){
       e.preventDefault();
       dataTable.draw();

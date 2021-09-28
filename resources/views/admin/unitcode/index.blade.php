@@ -78,7 +78,7 @@
 @parent
 <script>
   var actionmenu  = @json(json_encode($actionmenu));
-  
+
   toastr.options = {
                           "closeButton": false,
                           "debug": false,
@@ -163,6 +163,7 @@
       filter: false,
       responsive: true,
       lengthChange: false,
+      pageLength: 50,
       order: [[ 1, "asc" ]],
       ajax: {
         url: "{{route('unitcode.read')}}",
@@ -179,13 +180,13 @@
       columnDefs:[
         { orderable: false,targets:[0,4] },
         { className: "text-center", targets: [0,4] },
-        {   
+        {
           width: "25%",
           render: function ( data, type, row ) {
           return row.organization ? `<b>${row.organization.code}</b> - ${row.organization.name}` : '';
           },targets: [3]
         },
-        {   
+        {
           width: "3%",
           render: function ( data, type, row ) {
             var button = '';

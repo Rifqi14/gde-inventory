@@ -135,6 +135,7 @@
         filter: false,
         responsive: true,
         lengthChange: false,
+        pageLength: 50,
         order: [[ 1, "asc" ]],
         ajax: {
             url: "{{route('uom.read')}}",
@@ -166,7 +167,7 @@
                     return row.category ? row.category.name : '-';
                 },targets: [2]
             },
-            {   
+            {
                 width: "10%",
                 render: function ( data, type, row ) {
                   var button = '';
@@ -224,7 +225,7 @@
             var option = [];
             $.each(data.rows,function(index,item){
                 option.push({
-                    id:item.id,  
+                    id:item.id,
                     text: item.name
                 });
             });

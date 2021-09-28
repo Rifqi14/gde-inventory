@@ -165,6 +165,7 @@
       filter: false,
       responsive: true,
       lengthChange: false,
+      pageLength: 50,
       order: [[1, "asc"]],
       ajax: {
         url: "{{ route('documentcenter.read') }}",

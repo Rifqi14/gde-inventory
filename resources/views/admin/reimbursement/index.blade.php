@@ -360,6 +360,7 @@
       filter: false,
       responsive: true,
       lengthChange: false,
+      pageLength: 50,
       order: [
         [1, "asc"]
       ],
@@ -424,20 +425,20 @@
           targets: [4]
         },
         {
-          render: function(data, type, row) {      
+          render: function(data, type, row) {
           var button = `<a class="dropdown-item" href="javascript:void(0);" onclick="detail(${row.business_trip_id},'table-bt-approved')">
                           <i class="fa fa-eye"></i> View Data
-                        </a>`;      
+                        </a>`;
             if(actionmenu.indexOf('print') > 0){
               button += `<a class="dropdown-item" href="javascript:void(0);" onclick="">
                           <i class="fa fa-print"></i> Print Data
                         </a>`;
-            }          
+            }
             if (actionmenu.indexOf('delete') > 0) {
               button += `<a class="dropdown-item" href="javascript:void(0);" onclick="deleteDeclare(${row.id})">
                                         <i class="fa fa-trash-alt"></i> Delete Data
                                     </a>`;
-            }  
+            }
             return `<div class="btn-group">
                                 <button type="button" class="btn btn-flat btn-sm dropdown-toggle" data-toggle="dropdown">
                                     <i class="fas fa-bars"></i>
@@ -698,15 +699,15 @@
 
     tableFilter = param;
     schedule.setStartDate(moment().startOf('month'));
-    schedule.setEndDate(moment().endOf('month'));    
+    schedule.setEndDate(moment().endOf('month'));
     if (param == 'general') {
       $('.status-approved').hide();
       $('.status-general').show();
       $('.general-status').val(null).trigger('change');
     } else {
       $('.status-general').hide();
-      $('.status-approved').show();            
-    }    
+      $('.status-approved').show();
+    }
 
     $('#add-filter').modal('show');
   }
