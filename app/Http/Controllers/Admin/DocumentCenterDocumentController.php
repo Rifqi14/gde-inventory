@@ -198,7 +198,9 @@ class DocumentCenterDocumentController extends Controller
             $document->transmittal_status   = $document->status == 'DRAFT' || $document->status == 'WAITING' ? 'Waiting for Issue' : 'Issued';
             $saveDoc                        = $document->save();
 
-            $document->distributors()->sync($request->distribution_id);
+            if ($request->distribution_id) {
+                $document->distributors()->sync($request->distribution_id);
+            }
             if ($saveDoc && $request->document_upload) {
                 $dataDocument   = [];
                 $no             = 1;
