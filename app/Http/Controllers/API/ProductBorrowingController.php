@@ -150,6 +150,30 @@ class ProductBorrowingController extends Controller
             $data = $query;
         }        
 
+        $user = [
+            "employee_name" => "Anonim",
+            "photo" => null,
+            "role" => "Admin"
+        ];
+
+        $data = [            
+                "id" =>  1,
+                "borrowing_number" => "BRW-2021-09-000001",
+                "borrowing_date" => "28 Sep 2021",
+                "products" => [
+                    [
+                        "id" => 1,
+                        "product_borrowing_id"=> 1,
+                        "product_id"=> 3,
+                        "uom_id"=> 2,
+                        "qty_system"=> 5,
+                        "qty_requested"=> 2,
+                        "product"=> "Pipe Plug 1/2\"",
+                        "uom"=> "each"
+                    ]
+                ]            
+        ];
+
         return response()->json([
             'status' => Response::HTTP_OK,            
             'data'   => [
