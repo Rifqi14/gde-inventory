@@ -133,6 +133,7 @@ class ProductBorrowingController extends Controller
                         product_borrowing_details.qty_system,
                         product_borrowing_details.qty_requested,
                         products.name as product,
+                        products.image,
                         uoms.name as uom
                     ");
                     $product->join('products','products.id','=','product_borrowing_details.product_id');
@@ -170,7 +171,8 @@ class ProductBorrowingController extends Controller
                         "qty_system"=> 5,
                         "qty_requested"=> 2,
                         "product"=> "Pipe Plug 1/2\"",
-                        "uom"=> "each"
+                        "uom"=> "each",
+                        "image"=> null
                     ]
                 ]            
         ];
