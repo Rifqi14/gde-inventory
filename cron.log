@@ -1,0 +1,1 @@
+Running scheduled command: '/opt/cpanel/ea-php73/root/usr/bin/php' 'artisan' attendance:sync > '/dev/null' 2>&1
