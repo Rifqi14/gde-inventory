@@ -421,7 +421,7 @@
                             id              : item.id,
                             text            : item.name,
                             category_id     : item.product_category_id,
-                            category        : item.category,
+                            category        : item.path,
                             uom_id          : item.uom_id,                            
                             uom             : item.uom,
                             sku             : item.sku,  
@@ -436,6 +436,16 @@
                     };
                 },
             },
+            escapeMarkup: function (text) { return text; },
+            templateResult : function(data){
+                if(!data.id){
+                    return data.text;
+                }
+
+                return `<b>${data.text}</b>
+                        <span style="float: right;">Stock : ${data.stock_warehouse}</span>
+                        <p style="margin-top: 1px;">${data.category}</p>`;
+            },    
             allowClear: true,
         }).on('select2:select', function(e) {
             var data = e.params.data;

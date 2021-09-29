@@ -22,7 +22,7 @@ class ActionMenu
     {              
         if(Auth::guard('api')->check()){            
             $user_id = Auth::guard('api')->user()->id;
-            $route = explode('.',Route::currentRouteName())[0];        
+            $route   = explode('.',Route::currentRouteName())[0];        
 
             $menu = MenuRole::selectRaw("                
                 (case when menu_roles.create = '1' then true else false end) as create,
