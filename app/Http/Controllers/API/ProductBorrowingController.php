@@ -141,13 +141,14 @@ class ProductBorrowingController extends Controller
             ]);
             $query = $query->find($id);
 
-            if(!$query){
-                return response()->json([
-                    'status'    => Response::HTTP_UNPROCESSABLE_ENTITY,
-                    'message'   => 'Failed to get data.',
-                ], Response::HTTP_UNPROCESSABLE_ENTITY);
-            }
-            $data = $query;
+            if($query){
+                // return response()->json([
+                //     'status'    => Response::HTTP_UNPROCESSABLE_ENTITY,
+                //     'message'   => 'Failed to get data.',
+                // ], Response::HTTP_UNPROCESSABLE_ENTITY);
+
+                $data = $query;
+            }            
         }        
 
         $user = [
