@@ -3,18 +3,23 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\MovementProcess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Carbon;
 
 use App\Models\Menu;
+use App\Models\Site;
+use App\Models\Warehouse;
 use App\Models\Product;
 use App\Models\ProductSerial;
 use App\Models\StockAdjustment;
 use App\Models\StockAdjustmentProduct;
 use App\Models\StockAdjustmentLog;
+use App\Models\StockMovement;
 use App\Models\StockWarehouse;
 
 class StockAdjusmentController extends Controller
@@ -202,6 +207,7 @@ class StockAdjusmentController extends Controller
         if($status){
             $query->where('stock_adjustments.status','=',$status);
         }
+        $query->orderBy('stock_adjustments.created_at','desc');
         $query->groupBy('stock_adjustments.id','warehouses.name');
 
         $rows  = clone $query;
@@ -372,67 +378,19 @@ class StockAdjusmentController extends Controller
         $query->status          = $status;
         $query->save();
 
-        if($query){
-            $now = date('Y-m-d H:i:s');
+        if($query){            
             $getProducts = $request->products;            
 
-            $cleared = StockAdjustmentProduct::where('stock_adjustment_id',$id)->delete();
+            StockAdjustmentProduct::where('stock_adjustment_id',$id)->delete();
+
             if($getProducts){
-                $products        = [];                
+                $adjustID  = $query->id;
+                $adjustNum = $query->adjustment_number;
 
-                foreach (json_decode($getProducts) as $key => $row) {                    
-                    $products[] = [
-                        'stock_adjustment_id' => $id,
-                        'product_id'          => $row->product_id,
-                        'uom_id'              => $row->uom_id,
-                        'product_serial'      => $row->serial,
-                        'qty_before'          => $row->qty_before?$row->qty_before:0,
-                        'qty_after'           => $row->qty_after?$row->qty_after:0,
-                        'created_at'          => $now,
-                        'updated_at'          => $now
-                    ];               
+                $this->approval($getProducts,$adjustID,$adjustNum,$site, $warehouse, $status, $issuedby);                                             
+            }           
 
-                    if($status == 'approved' && isset($row->serial)){
-                        $lastkey         = 0;
-                        $productsSerials = [];
-
-                        foreach(json_decode($row->serial) as $index => $bar){
-                            $productsSerials[] = [
-                                'product_id'    => $row->product_id,
-                                'warehouse_id'  => $warehouse,
-                                'serial_number' => $bar->number,               
-                                'status'        => 1,
-                                'created_at'    => $now,
-                                'updated_at'    => $now
-                            ];
-                            $lastkey = $bar->key;
-                        }    
-                        
-                        $serial = ProductSerial::insert($productsSerials);
-                        if($serial){
-                            $query = Product::find($row->product_id);
-                            $query->last_serial = $lastkey;
-                            $query->save();
-                        }
-                        
-                    }
-                }
-
-                $query = StockAdjustmentProduct::insert($products);
-
-                if(!$query){
-                    return response()->json([
-                        'status'    => false,
-                        'message'   => 'Failed to create detail products.'
-                    ],400);
-                }                
-            }
-
-            if($status == 'approved'){
-                $this->calculateStock($warehouse,$getProducts);
-            }
-
-            $log = StockAdjustmentLog::create([
+            StockAdjustmentLog::create([
                 'stock_adjustment_id'   => $id,
                 'issued_by'             => $issuedby,
                 'log_description'       => 'Stock Adjusment has been updated.'
@@ -483,6 +441,105 @@ class StockAdjusmentController extends Controller
         }else{
             abort(403);
         }
+    }
+
+    public function approval($getProducts,$adjustID,$adjustNum,$siteID,$warehouseID,$status, $issuedBy)
+    {   
+        $virtual = Warehouse::select('id')
+                   ->where([
+                       ['site_id','=',$siteID],
+                       ['type','=','virtual']
+                   ])->first();
+
+        if(!$virtual){
+            $site     = Site::find($siteID);
+            $sitecode = strtoupper($site->code);
+            $sitename = $site->name;
+
+            $virtual = Warehouse::create([
+                'code'          => "$sitecode - WV",
+                'name'          => "$sitename - Warehouse Virtual",
+                'type'          => 'virtual',
+                'site_id'       => $siteID,
+                'description'   => "Warehouse virtual of Unit or Site $sitename",
+                'postal_code'   => 0,
+                'address'       => '---',
+                'status'        => 'active'
+            ]);
+        }
+
+        foreach (json_decode($getProducts) as $key => $row) {  
+            $qtyBefore = $row->qty_before?$row->qty_before:0;
+            $qtyAfter  = $row->qty_after?$row->qty_after:0;                  
+
+            $product = StockAdjustmentProduct::create([
+                'stock_adjustment_id' => $adjustID,
+                'product_id'          => $row->product_id,
+                'uom_id'              => $row->uom_id,
+                'product_serial'      => $row->serial,
+                'qty_before'          => $qtyBefore,
+                'qty_after'           => $qtyAfter
+            ]);            
+
+            if(!$product){
+                return response()->json([
+                    'status'    => false,
+                    'message'   => 'Failed to adjust stock.'
+                ], 400);
+            }
+
+           if($product && $status == 'approved'){
+               if(isset($row->serial)){
+                    $lastkey = 0;
+                    $serials = [];
+    
+                    foreach(json_decode($row->serial) as $index => $bar){
+                        $serials[] = [
+                            'product_id'    => $row->product_id,
+                            'warehouse_id'  => $warehouseID,
+                            'serial_number' => $bar->number,               
+                            'status'        => 1,
+                            'created_at'    => Carbon::now(),
+                            'updated_at'    => Carbon::now()
+                        ];
+                        
+                        $lastkey = $bar->key;
+                    }    
+                            
+                    $serial = ProductSerial::insert($serials);
+
+                    if($serial){
+                        $query = Product::find($row->product_id);
+                        $query->last_serial = $lastkey;
+                        $query->save();
+                    }else{
+                        return response()->json([
+                            'status'    => false,
+                            'message'   => 'Failed to create some product serials.'
+                        ], 400);
+                    }
+               }
+            
+               $movement = StockMovement::create([
+                'reference'      => $adjustNum,
+                'description'    => 'Adjustment',
+                'uom_id'         => $row->uom_id,                    
+                'qty'            => $product->qty_after,
+                'source_id'      => $virtual->id,
+                'destination_id' => $warehouseID,
+                'site_id'        => $siteID,
+                'date'           => Carbon::now(),                    
+                'proceed'        => 0,
+                'type'           => 'adjustment',
+                'creation_user'  => $issuedBy,
+                'product_id'     => $row->product_id
+               ]);
+
+               if($movement){
+                MovementProcess::dispatchNow($movement, $movement->type);        
+               }
+            }
+        }                
     }
 
     public function adjustmentNumber($id, $key_number, $created_at)

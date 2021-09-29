@@ -69,7 +69,7 @@ class CurrencyController extends Controller
 
         // Count Data
         $query          = Currency::with(['country'])->whereRaw("upper(currency) like '%$name%'");
-        
+
         $row            = clone $query;
         $recordsTotal   = $row->count();
 
@@ -102,7 +102,7 @@ class CurrencyController extends Controller
      * Show the form for creating a new resource.
      *
      * @param \Illuminate\Http\Request $request
-     * 
+     *
      * @return \Illuminate\Http\Response
      */
     public function create(Request $request)

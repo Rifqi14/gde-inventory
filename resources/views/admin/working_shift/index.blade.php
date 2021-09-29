@@ -129,6 +129,7 @@
             filter: false,
             responsive: true,
             lengthChange: false,
+            pageLength: 50,
             order: [[ 2, "asc" ]],
             ajax: {
                 url: "{{route('workingshift.read')}}",
@@ -154,7 +155,7 @@
                     }
                 },
                 {
-                    "data": "shift_name", 
+                    "data": "shift_name",
                     "name": "shift_name",
                     width: 150,
                     render: function(data, type, full, meta) {

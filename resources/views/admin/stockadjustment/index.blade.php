@@ -77,7 +77,7 @@
                     <div class="input-group-append">
                         <span class="input-group-text"><i class="fas fa-calendar"></i></span>
                     </div>
-                </div>                
+                </div>
               </div>
             </div>
             <div class="col-md-6">
@@ -85,7 +85,7 @@
                 <label class="control-label" for="adjustment-number">Adjustment Number</label>
                 <input type="text" id="adjustment-number" class="form-control" placeholder="Enter adjustment number">
               </div>
-            </div>            
+            </div>
             <div class="col-md-6">
               <div class="form-group">
                 <label for="products" class="control-label">Products</label>
@@ -142,7 +142,7 @@
             allowClear: true
         });
 
-        $('.datepicker').daterangepicker({      
+        $('.datepicker').daterangepicker({
             timePicker: false,
             timePickerIncrement: 30,
             drops: 'auto',
@@ -153,7 +153,7 @@
             startDate: new moment().startOf('month'),
             endDate: new moment().endOf('month')
         });
-        
+
         dataTable = $('#table-adjustment').DataTable({
             processing: true,
             language: {
@@ -165,16 +165,17 @@
             filter: false,
             responsive: true,
             lengthChange: false,
+            pageLength: 50,
             order: [
                 [1, "asc"]
             ],
             ajax: {
                 url: "{{route('stockadjustment.read')}}",
                 type: "GET",
-                data: function(data) {   
-                    var search = $('#form-search'),                 
+                data: function(data) {
+                    var search = $('#form-search'),
                         date   = search.find('#date').data('daterangepicker');
-                    
+
                     data.startdate = date.startDate.format('YYYY-MM-DD');
                     data.enddate   = date.endDate.format('YYYY-MM-DD');
                     data.products  = search.find('#products').val();
@@ -349,7 +350,7 @@
             }
         }
         });
-        
+
     }
 
     const filter = () => {
@@ -358,9 +359,9 @@
     }
 
     const resetfilter = () => {
-        var search = $('#form-search'),                 
+        var search = $('#form-search'),
             date   = search.find('#date').data('daterangepicker');
-                    
+
         date.setStartDate(new moment().startOf('month'));
         date.setEndDate(new moment().endOf('month'));
         search.find('#adjustment-number').val('');

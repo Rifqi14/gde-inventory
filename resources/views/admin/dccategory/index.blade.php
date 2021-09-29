@@ -94,6 +94,7 @@
             filter: false,
             responsive: true,
             lengthChange: false,
+            pageLength: 50,
             order: [[ 1, "asc" ]],
             ajax: {
                 url: "{{route('documentcategory.read')}}",
@@ -127,7 +128,7 @@
                         return row.doctype ? row.doctype.code : '';
                     },targets: [2]
                 },
-                {   
+                {
                     width: "10%",
                     render: function ( data, type, row ) {
                         var button  = '';

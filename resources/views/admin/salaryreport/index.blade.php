@@ -186,7 +186,7 @@
 @section('scripts')
 <script>
   var actionmenu = @json($actionmenu);
-  
+
   toastr.options = {
     "closeButton": false,
     "debug": false,
@@ -212,7 +212,7 @@
   const generate = () => {
     $('#form-generate').modal('show');
   }
-  
+
   const filter = () => {
     $('#form-filter').modal('show');
   }
@@ -274,7 +274,7 @@
         $('.employee-select').addClass('d-none');
         $('.role-select').removeClass('d-none');
         break;
-    
+
       default:
         $('.employee-select').addClass('d-none');
         $('.role-select').addClass('d-none');
@@ -373,6 +373,7 @@
       responsive: true,
       lengthChange: false,
       order: [[ 1, 'asc' ]],
+      pageLength: 50,
       ajax: {
         url: "{{ route('salaryreport.read') }}",
         type: "GET",
@@ -453,20 +454,20 @@
                 error.insertAfter(element);
             }
         },
-        submitHandler: function() { 
+        submitHandler: function() {
             $.ajax({
                 url:$('#form').attr('action'),
                 method:'post',
                 data: new FormData($('#form')[0]),
                 processData: false,
                 contentType: false,
-                dataType: 'json', 
+                dataType: 'json',
                 beforeSend:function(){
                     blockMessage('#content', 'Loading', '#fff');
                 }
             }).done(function(response){
                 $('#content').unblock();
-                if(response.status){	
+                if(response.status){
                   toastr.options = {
                         "closeButton": false,
                         "debug": false,
@@ -487,7 +488,7 @@
                   toastr.success(response.message);
                   $('#form-generate').modal('hide');
                   dataTable.ajax.reload(null, false);
-                }else{	
+                }else{
                     toastr.options = {
                         "closeButton": false,
                         "debug": false,
@@ -529,7 +530,7 @@
                     "hideMethod": "fadeOut"
                 }
                 toastr.warning(response.message);
-            })	
+            })
         }
     });
   });

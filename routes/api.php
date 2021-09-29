@@ -81,6 +81,6 @@ Route::group([
         // List
         Route::get('/list', 'API\ProductBorrowingController@read');
         // Edit Product Borrowing
-        Route::get('/edit/{id}', 'API\ProductBorrowingController@edit')->name('productborrowing.edit');
+        Route::get('/edit/{id}', 'API\ProductBorrowingController@edit')->name('productborrowing.edit');        
     });
 });

@@ -137,6 +137,7 @@
             filter: false,
             responsive: true,
             lengthChange: false,
+            pageLength: 50,
             order: [[ 1, "asc" ]],
             ajax: {
                 url: "{{route('vehicle.read')}}",
@@ -219,7 +220,7 @@
 				 var option = [];
 				 $.each(data.rows,function(index,item){
 					option.push({
-						id:item.id,  
+						id:item.id,
 						text: item.name
 					});
 				 });
@@ -359,7 +360,7 @@
                 };
 				$.ajax({
 					url: `{{url('admin/vehicle')}}/${id}`,
-					dataType: 'json', 
+					dataType: 'json',
 					data:data,
 					type:'DELETE',
 					success:function(response){
@@ -374,7 +375,7 @@
 							)
 						}
 				}});
-				
+
 			}
 		});
 	}

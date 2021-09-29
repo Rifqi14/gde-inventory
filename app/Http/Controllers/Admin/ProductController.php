@@ -371,7 +371,8 @@ class ProductController extends Controller
             products.*,            
             product_uoms.uom_id,
             uoms.name as uom,
-            product_categories.name as category
+            product_categories.name as category,
+            product_categories.path
         ");        
         $query->leftJoin('product_uoms','product_uoms.product_id','=','products.id');
         $query->leftJoin('uoms','uoms.id','=','product_uoms.uom_id');
@@ -404,7 +405,8 @@ class ProductController extends Controller
         $queries = $query->get();
     
         $data = [];
-        foreach ($queries as $key => $row) {                    
+        foreach ($queries as $key => $row) {   
+            $row->path = str_replace('->',' <i class="fas fa-angle-right"></i> ',$row->path);                 
             $data[] = $row;
         }
     

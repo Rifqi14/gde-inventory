@@ -4,11 +4,14 @@ namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ProductBorrowingResource;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Resources\ProductBorrowingResource;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Carbon;
+use App\Http\Requests\API\ProductBorrowingRequest;
 
+use App\User;
 use App\Models\Menu;
 use App\Models\ProductBorrowing;
 use App\Models\ProductBorrowingDetail;
@@ -99,12 +102,21 @@ class ProductBorrowingController extends Controller
         if(!$id){
             return response()->json([
                 'status' => Response::HTTP_BAD_REQUEST,
-                'mesage' => 'The given data was invalid'
+                'message' => 'The given data was invalid'
             ], Response::HTTP_BAD_REQUEST);
-        }    
+        }            
 
-        $data = [];
+        $user = User::selectRaw("
+                        employees.name as employee_name,
+                        employees.photo,
+                        roles.name as role    
+                    ")
+                    ->join('employees','employees.id','=','users.employee_id')
+                    ->join('role_users','role_users.user_id','=','users.id')
+                    ->join('roles','roles.id','=','role_users.role_id')
+                    ->find(Auth::guard('api')->user()->id);
 
+        $data = [];        
         if($request->actionmenu->approval){
             $query = ProductBorrowing::selectRaw("
                 product_borrowings.id,
@@ -127,20 +139,79 @@ class ProductBorrowingController extends Controller
                     $product->join('uoms','uoms.id','=','product_borrowing_details.uom_id');
                 }
             ]);
+            $query = $query->find($id);
 
-            $data = $query->find($id);
-
-            if(!$data){
+            if(!$query){
                 return response()->json([
                     'status'    => Response::HTTP_UNPROCESSABLE_ENTITY,
                     'message'   => 'Failed to get data.',
                 ], Response::HTTP_UNPROCESSABLE_ENTITY);
             }
-        }
+            $data = $query;
+        }        
 
         return response()->json([
-            'status' => Response::HTTP_OK,
-            'data'   => $data,                        
+            'status' => Response::HTTP_OK,            
+            'data'   => [
+                'employee'  => $user,
+                'borrowing' => $data?$data:[]
+            ],                        
         ], Response::HTTP_OK);
+    }
+
+    public function update(ProductBorrowingRequest $request, $id)
+    {   
+        if(!$id)    {
+            return response()->json([
+                'status'    => Response::HTTP_BAD_REQUEST,
+                'message'   => 'The given data was invalid.'
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        if($request->actionmenu->approval){
+
+            $products  = $request->products;
+            $status    = $request->status;
+            
+            $query = ProductBorrowing::where('id', $id)->update(['status' => $status]);
+
+            if($query){
+                ProductBorrowingDetail::where('product_borrowing_id', $id)->delete();
+                
+                $items = [];
+                foreach ($products as $key => $product) {
+                    $items[] = [
+                        'product_borrowing_id' => $id,
+                        'product_id'           => $product->product_id,
+                        'product_category_id'  => $product->product_category_id,
+                        'uom_id'               => $product->uom_id,
+                        'qty_system'           => $product->qty_system,
+                        'qty_requested'        => $product->qty_requested,
+                        'created_at'           => Carbon::now(),
+                        'updated_at'           => Carbon::now()
+                    ];
+                }
+
+                $query = ProductBorrowingDetail::insert($items);
+
+                if(!$query){
+                    return response()->json([
+                        'status'    => Response::HTTP_UNPROCESSABLE_ENTITY,
+                        'message'   => 'Failed to update data.'
+                    ], Response::HTTP_UNPROCESSABLE_ENTITY);
+                }
+            }
+
+            return response()->json([
+                'status'  => Response::HTTP_OK,
+                'message' => 'Successfully update data.'
+            ], Response::HTTP_OK);
+
+        }else{
+            return response()->json([
+                'status'    => Response::HTTP_FORBIDDEN,
+                'message'   => 'Forbidden access.'
+            ],Response::HTTP_FORBIDDEN);
+        }
     }
 }

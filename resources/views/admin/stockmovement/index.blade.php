@@ -141,6 +141,9 @@
                             case 'out':
                                 badge = 'badge-danger';
                                 break;
+                            case 'adjustment':
+                                badge = 'badge-info';                                
+                                break;
                             default:
                                 badge = '';
                                 break;

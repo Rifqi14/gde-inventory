@@ -8,6 +8,12 @@
         height: 22px;
         cursor: pointer;
     }
+
+    table.floatThead-table {
+		border-top: none;
+		border-bottom: none;
+		background-color: #fff;
+	}
 </style>
 @endsection
 
@@ -22,7 +28,7 @@
         <ol class="breadcrumb float-sm-right text-danger mr-2 text-sm">
             <li class="breadcrumb-item">Home</li>
             <li class="breadcrumb-item">Role</li>
-            <li class="breadcrumb-item">View</li> 
+            <li class="breadcrumb-item">View</li>
         </ol>
     </div>
 </div>
@@ -66,7 +72,7 @@
                                 <h5 class="text-md text-dark text-bold">Access</h5>
                             </span>
                             <div class="form-group row mt-5">
-                                <table class="table table-bordered table-striped" id="table-access">
+                                <table class="table table-bordered table-striped table-fixed" id="table-access">
                                     <thead>
                                         <tr>
                                             <th style="text-align:center" width="10">#</th>
@@ -83,7 +89,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @php 
+                                        @php
                                             $no = 1;
                                         @endphp
                                         @foreach($rolemenus as $rolemenu)
@@ -177,8 +183,15 @@
 
 @section('scripts')
 <script src="{{ asset('assets/js/jquery.inputmask.js') }}"></script>
+<script src="{{ asset('assets/plugins/floatThead/dist/jquery.floatThead.min.js') }}"></script>
 <script>
     $(function(){
+
+        $(".table-fixed").floatThead({
+			// top:50
+			position: 'fixed'
+		});
+
         $('body table tbody input[type=checkbox]').on('change', function () {
             var type = $(this).attr('class');
             $.ajax({
