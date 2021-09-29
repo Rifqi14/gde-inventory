@@ -102,7 +102,7 @@ class ProductBorrowingController extends Controller
         if(!$id){
             return response()->json([
                 'status' => Response::HTTP_BAD_REQUEST,
-                'message' => 'The given data was invalid'
+                'message' => 'The given data was invalid.'
             ], Response::HTTP_BAD_REQUEST);
         }            
 
