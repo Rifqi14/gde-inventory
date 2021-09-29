@@ -116,6 +116,7 @@
       filter: false,
       responsive: true,
       lengthChange: false,
+      pageLength: 50,
       order: [[1, "asc"]],
       ajax: {
         url: "{{ route('kkscode.read') }}",
@@ -128,13 +129,13 @@
       columnDefs: [
         { orderable: false, targets: [0, 4] },
         { className: "text-center", targets: [0, 4] },
-        {   
+        {
           width: "25%",
           render: function ( data, type, row ) {
           return `${row.category ? row.category.name : '-'}`;
           },targets: [3]
         },
-        {   
+        {
           width: "10%",
           render: function ( data, type, row ) {
             var button = '';

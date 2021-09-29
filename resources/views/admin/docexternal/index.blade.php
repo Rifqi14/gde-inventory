@@ -190,7 +190,8 @@
       serverSide: true,
       filter: false,
       responsive: true,
-      lengthChange: false,
+      lengthChange: true,
+      pageLength: 50,
       order: [[1, "asc"]],
       ajax: {
         url: "{{ route('documentcenterexternal.read') }}",

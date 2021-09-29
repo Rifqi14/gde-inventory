@@ -17,7 +17,7 @@
 
 @section('button')
 <button type="button" id="add" class="btn btn-labeled text-sm btn-sm btn-success btn-flat legitRipple" onclick="windowLocation('{{ route('hseincident.create') }}')">
-    <b><i class="fas fa-plus"></i></b> 
+    <b><i class="fas fa-plus"></i></b>
     Create
 </button>
 <div class="mb-2"></div>
@@ -65,6 +65,7 @@ $(function () {
         filter:false,
         info:false,
         lengthChange:false,
+        pageLength: 50,
         responsive: true,
         order: [[ 0, "asc" ]],
         ajax: {
@@ -162,7 +163,7 @@ function destroy(id) {
         cancelButtonText: 'Cancel'
     }).then((result) => {
         if (result.value) {
-            var data = { 
+            var data = {
                 id: id,
                 _token: "{{ csrf_token() }}"
             };

@@ -198,7 +198,9 @@ class DocumentCenterDocumentController extends Controller
             $document->transmittal_status   = $document->status == 'DRAFT' || $document->status == 'WAITING' ? 'Waiting for Issue' : 'Issued';
             $saveDoc                        = $document->save();
 
-            $document->distributors()->sync($request->distribution_id);
+            if ($request->distribution_id) {
+                $document->distributors()->sync($request->distribution_id);
+            }
             if ($saveDoc && $request->document_upload) {
                 $dataDocument   = [];
                 $no             = 1;
@@ -423,6 +425,7 @@ class DocumentCenterDocumentController extends Controller
         ];
         if ($document->document_type) {
             $data['remark'] = $document->document_type == 'SUPERSEDE' ? "<b>Remark:</b> {$document->supersede->supersede_remark}" : "<b>Remark:</b> {$document->void->void_remark}";
+            $data['subject'] = $document->document_type == 'SUPERSEDE' ? "[Supersede Document Issue Notice] $document->transmittal_no: {$document->documentCenter->title}" : "[Void Document Issue Notice] $document->transmittal_no: {$document->documentCenter->title}";
         } else {
             if ($document->status == "REVISED") {
                 $data['additional'] = "Please revise the document";

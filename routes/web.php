@@ -11,11 +11,8 @@
 |
 */
 
-use App\Http\Controllers\Admin\Transmittal\TransmittalProperties\CategoryContractorController;
-use App\Http\Controllers\Admin\Transmittal\TransmittalProperties\OrganizationCodeController;
-use App\Http\Controllers\Admin\Transmittal\TransmittalProperties\TransmittalPropertiesController;
 use App\Http\Resources\Transmittal\TransmittalProperties\OrganizationCodeCollection;
-use App\Models\OrganizationCode;
+use App\Models\Transmittal\TransmittalProperties\TransmittalOrganizationCode;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -501,7 +498,7 @@ Route::group(['prefix' => 'admin'], function () {
             Route::get('readcontractor', 'CategoryContractorController@read')->name('readcontractor');
             Route::get('readcode', 'OrganizationCodeController@read')->name('readcode');
             Route::get('getall', function () {
-                return new OrganizationCodeCollection(OrganizationCode::all());
+                return new OrganizationCodeCollection(TransmittalOrganizationCode::orderBy('code')->get());
             })->name('getall');
             Route::resource('categorycontractor', 'CategoryContractorController');
             Route::resource('organizationcode', 'OrganizationCodeController');
@@ -512,7 +509,13 @@ Route::group(['prefix' => 'admin'], function () {
 
         // Outcoming Route
         Route::group(['prefix' => 'outcoming', 'as' => 'outcoming.', 'namespace' => 'Admin\Transmittal'], function() {
-            Route::resource('/', 'OutcomingController');
+            Route::get('/{code}/create', 'OutcomingController@create')->name('create');
+            Route::post('/defaultdata', 'OutcomingController@defaultData')->name('defaultdata');
+            Route::get('/cc/select', 'OutcomingController@selectCC')->name('selectcc');
+            Route::resource('/', 'OutcomingController')->except([
+                'create',
+                'edit',
+            ]);
         });
     });
 });

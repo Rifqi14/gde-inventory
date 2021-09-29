@@ -20,6 +20,6 @@ class DocumentExternalKksCode extends Model
 
     public function category()
     {
-        return $this->belongsTo('App\Models\DocExternal\Properties\DocumentExternalKksCategory', 'document_external_kks_categories_id', 'id');
+        return $this->belongsTo('App\Models\DocExternal\Properties\DocumentExternalKksCategory', 'document_external_kks_category_id', 'id');
     }
 }

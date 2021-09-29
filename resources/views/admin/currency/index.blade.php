@@ -166,6 +166,7 @@
         filter: false,
         responsive: true,
         lengthChange: false,
+        pageLength: 50,
         order: [[ 1, "asc" ]],
         ajax: {
             url: "{{route('currency.read')}}",
@@ -195,7 +196,7 @@
                 return row.countries_id ? `<span class="flag-icon flag-icon-${row.country.code.toLowerCase()} flag-icon-squared"></span> <span>${row.country.country}</span>` : `-`;
               }, targets: [2]
             },
-            {   
+            {
                 width: "10%",
                 render: function ( data, type, row ) {
                   var button = '';

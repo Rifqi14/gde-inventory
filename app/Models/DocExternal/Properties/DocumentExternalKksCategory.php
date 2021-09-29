@@ -20,6 +20,6 @@ class DocumentExternalKksCategory extends Model
 
     public function codes()
     {
-        return $this->hasMany('App\Models\DocExternal\DocumentExternal', 'document_external_kks_categories_id', 'id');
+        return $this->hasMany('App\Models\DocExternal\DocumentExternal', 'document_external_kks_category_id', 'id');
     }
 }

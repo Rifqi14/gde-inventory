@@ -17,7 +17,7 @@
 
 @section('button')
 <button type="button" id="add-goods_receipt" class="btn btn-labeled text-sm btn-sm btn-success btn-flat legitRipple" onclick="windowLocation('{{ route('grievance.create') }}')">
-    <b><i class="fas fa-plus"></i></b> 
+    <b><i class="fas fa-plus"></i></b>
     Create
 </button>
 <div class="mb-2"></div>
@@ -43,7 +43,7 @@
                         <div class="tab-content" >
                             <div class="tab-pane fade {{ ($type=='app')?'show active':'' }}" id="tab-app" role="tabpanel" aria-labelledby="grievance-tab-app">
                                 <table class="table table-striped datatable" id="table-grievance" width="100%">
-                                    <thead>                  
+                                    <thead>
                                         <tr>
                                             <!-- <th width="5%">No.</th> -->
                                             <th width="20%">Number</th>
@@ -61,7 +61,7 @@
                             </div>
                             <div class="tab-pane fade {{ ($type=='report')?'show active':'' }}" id="tab-report" role="tabpanel" aria-labelledby="grievance-tab-report">
                                 <table id="table-report" class="table table-striped" style="width: 100%">
-                                    <thead>                  
+                                    <thead>
                                         <tr>
                                         <!-- <th width="5%">No.</th> -->
                                         <th width="20%">Number</th>
@@ -76,9 +76,9 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        
+
                                     </tbody>
-                                </table> 
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -152,7 +152,7 @@
                 { className: "text-center", targets: [3,4,5] }
             ],
             columns: [
-                {  
+                {
                     data: "id",
                     width: 100,
                     sortable: false,
@@ -190,7 +190,7 @@
                 {
                     width: 100,
                     sortable: false,
-                    className:"text-center", 
+                    className:"text-center",
                     render: function(data, type, full, meta) {
                         if (full.status=='waiting') {
                             return `<span class="badge bg-warning text-sm">Waiting</span>`;
@@ -208,7 +208,7 @@
                 {
                     width: 100,
                     sortable: false,
-                    className:"text-center", 
+                    className:"text-center",
                     render: function(data, type, full, meta) {
                         if (full.approval_status=='queue') {
                             return `<span class="badge bg-warning text-sm">Queue</span>`;
@@ -223,9 +223,9 @@
                         }
                     }
                 },
-                { 
-                    width:30, 
-                    className:"text-center", 
+                {
+                    width:30,
+                    className:"text-center",
                     sortable: false,
                     render: function( data, type, full, meta ) {
                         if(userid == full.created_user){
@@ -269,6 +269,7 @@
             filter:false,
             info:false,
             lengthChange:false,
+            pageLength: 50,
             responsive: true,
             order: [[ 0, "asc" ]],
             ajax: {
@@ -290,7 +291,7 @@
                 { className: "text-center", targets: [3,4,5] }
             ],
             columns: [
-                {  
+                {
                     data: "id",
                     width: 100,
                     sortable: false,
@@ -315,7 +316,7 @@
                     width: 100,
                     sortable: false,
                     render: function(data, type, full, meta) {
-                        if(full.pic){  
+                        if(full.pic){
                         return `<b>${full.pic}</b><br>
                                 <div class="text-xs">
                                     Last Edit: <b>${full.updated_at}</b>
@@ -335,7 +336,7 @@
                 {
                     width: 100,
                     sortable: false,
-                    className:"text-center", 
+                    className:"text-center",
                     render: function(data, type, full, meta) {
                         if (full.status=='waiting') {
                            return `<span class="badge bg-warning text-sm">Waiting</span>`;
@@ -351,7 +352,7 @@
                 {
                     width: 100,
                     sortable: false,
-                    className:"text-center", 
+                    className:"text-center",
                     render: function(data, type, full, meta) {
                         if (full.approval_status=='queue') {
                            return `<span class="badge bg-warning text-sm">Queue</span>`;
@@ -366,9 +367,9 @@
                         }
                     }
                 },
-                { 
-                    width:30, 
-                    className:"text-center", 
+                {
+                    width:30,
+                    className:"text-center",
                     sortable: false,
                     render: function( data, type, full, meta ) {
                         if(userid == full.updated_user){
@@ -394,7 +395,7 @@
                                     </div>
                                 </div>`;
                         }
-                        
+
                     }
                 }
             ]
@@ -511,7 +512,7 @@ function destroy(id) {
         cancelButtonText: 'Cancel'
     }).then((result) => {
         if (result.value) {
-            var data = { 
+            var data = {
                 id: id,
                 _token: "{{ csrf_token() }}"
             };

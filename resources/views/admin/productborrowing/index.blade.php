@@ -56,7 +56,7 @@
                                             <tr>
                                                 <th width="5%" class="text-center">No</th>
                                                 <th width="30%" class="text-center">Borrowing Date</th>
-                                                <th width="30%">Borrowing Number</th>                                                
+                                                <th width="30%">Borrowing Number</th>
                                                 <th width="20%">Issued By</th>
                                                 <th width="10%" class="text-center">Status</th>
                                                 <th width="5%" class="text-center">Action</th>
@@ -73,7 +73,7 @@
                                             <tr>
                                                 <th width="5%" class="text-center">No</th>
                                                 <th width="30%" class="text-center">Borrowing Date</th>
-                                                <th width="30%">Borrowing Number</th>                                                
+                                                <th width="30%">Borrowing Number</th>
                                                 <th width="20%">Issued By</th>
                                                 <th width="10%" class="text-center">Status</th>
                                                 <th width="5%" class="text-center">Action</th>
@@ -90,7 +90,7 @@
                                             <tr>
                                                 <th width="5%" class="text-center">No</th>
                                                 <th width="30%" class="text-center">Borrowing Date</th>
-                                                <th width="30%">Borrowing Number</th>                                                
+                                                <th width="30%">Borrowing Number</th>
                                                 <th width="20%">Issued By</th>
                                                 <th width="10%" class="text-center">Status</th>
                                                 <th width="5%" class="text-center">Action</th>
@@ -195,7 +195,7 @@
         "showMethod": "fadeIn",
         "hideMethod": "fadeOut"
     };
-    
+
     $(function() {
         $('.select2').select2({
             allowClear: true
@@ -224,6 +224,7 @@
             filter: false,
             responsive: true,
             lengthChange: false,
+            pageLength: 50,
             order: [
                 [2, "desc"]
             ],
@@ -318,7 +319,7 @@
                 },
                 {
                     data: "borrowing_number"
-                },                
+                },
                 {
                     data: "issued"
                 },
@@ -339,6 +340,7 @@
             filter: false,
             responsive: true,
             lengthChange: false,
+            pageLength: 50,
             order: [
                 [2, "desc"]
             ],
@@ -373,7 +375,7 @@
                     targets : [2]
                 },
                 {
-                    render: function(data, type, row) {                    
+                    render: function(data, type, row) {
                         return `<span class="badge badge-info text-sm" style="text-transform: capitalize;">approved</span>`;
 
                     },
@@ -383,7 +385,7 @@
                     render: function(data, type, row) {
                         var button = `<a class="dropdown-item" href="javascript:void(0);" onclick="show(${row.id})">
                                         <i class="far fa-eye"></i>View Data
-                                    </a>`;                     
+                                    </a>`;
                         return `<div class="btn-group">
                                     <button type="button" class="btn btn-flat btn-sm dropdown-toggle" data-toggle="dropdown">
                                         <i class="fas fa-bars"></i>
@@ -405,7 +407,7 @@
                 },
                 {
                     data: "borrowing_number"
-                },                
+                },
                 {
                     data: "issued"
                 },
@@ -426,6 +428,7 @@
             filter: false,
             responsive: true,
             lengthChange: false,
+            pageLength: 50,
             order: [
                 [2, "desc"]
             ],
@@ -459,7 +462,7 @@
                     render: function(data, type, row) {
                         var button = `<a class="dropdown-item" href="javascript:void(0);" onclick="archive(${row.id})">
                                         <i class="far fa-eye"></i>View Data
-                                    </a>`;                     
+                                    </a>`;
                         return `<div class="btn-group">
                                 <button type="button" class="btn btn-flat btn-sm dropdown-toggle" data-toggle="dropdown">
                                     <i class="fas fa-bars"></i>
@@ -475,7 +478,7 @@
             columns: [
                 {
                     data: "no"
-                },                
+                },
                 {
                     data: "borrowing_date"
                 },

@@ -135,7 +135,7 @@
         "hideMethod": "fadeOut"
     };
 
-    $(function() {        
+    $(function() {
         $(".select2").select2({
             allowClear: true
         });
@@ -151,6 +151,7 @@
             filter: false,
             responsive: true,
             lengthChange: false,
+            pageLength: 50,
             order: [
                 [1, "asc"]
             ],
@@ -207,7 +208,7 @@
                 },
                 {
                     width: "10%",
-                    render: function(data, type, row) {                        
+                    render: function(data, type, row) {
                         var button = '';
 
                         button += `<a class="dropdown-item" href="javascript:void(0);" onclick="detail(${row.id})">
@@ -264,8 +265,8 @@
             dataTable.draw();
             $('#form-filter').modal('hide');
         });
-        
-    });    
+
+    });
 
     const destroy = (id) => {
         bootbox.confirm({
@@ -296,15 +297,15 @@
                         }
                     }).done(function(response) {
                         $('#content').unblock();
-                        if (response.status) {                            
+                        if (response.status) {
                             toastr.success(response.message);
                             dataTable.ajax.reload(null, false);
-                        } else {                            
+                        } else {
                             toastr.warning(response.message);
                         }
                     }).fail(function(response) {
                         var response = response.responseJSON;
-                        $('#content').unblock();                        
+                        $('#content').unblock();
                         toastr.warning(response.message);
                     })
                 }

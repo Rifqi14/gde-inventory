@@ -123,7 +123,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form id="form-export" autocomplete="off">                                        
+                <form id="form-export" autocomplete="off">
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
@@ -133,7 +133,7 @@
                                     <div class="input-group-append">
                                         <span class="input-group-text"><i class="fas fa-calendar"></i></span>
                                     </div>
-                                </div>    
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-12">
@@ -195,6 +195,7 @@
             filter: false,
             responsive: true,
             lengthChange: false,
+            pageLength: 50,
             orderable: false,
             dom: "l",
             ajax: {
@@ -260,7 +261,7 @@
                                 button +=   `<a class="dropdown-item" href="javascript:void(0);" onclick="view(${row.id})">
                                                 <i class="far fa-eye"></i>View Data
                                             </a>`;
-                            }                            
+                            }
                             if (actionmenu.indexOf('update') >= 0) {
                                 button +=   `<a class="dropdown-item" href="javascript:void(0);" onclick="edit(${row.id})">
                                                 <i class="far fa-edit"></i>Update Data
@@ -280,7 +281,7 @@
                                             ${button}
                                         </div>
                                     </div>`;
-                        }                        
+                        }
                     },
                     targets: [3]
                 }
@@ -337,15 +338,15 @@
                             }
                         }).done(function(response) {
                             $('#content').unblock();
-                            if (response.status) {                                
+                            if (response.status) {
                                 toastr.success(response.message);
                                 dataTable.ajax.reload(null, false);
-                            } else {                                
+                            } else {
                                 toastr.warning(response.message);
                             }
                         }).fail(function(response) {
                             var response = response.responseJSON;
-                            $('#content').unblock();                            
+                            $('#content').unblock();
                             toastr.warning(response.message);
                         })
                     }
@@ -386,12 +387,12 @@
             }
         });
 
-        $('#period').daterangepicker({      
+        $('#period').daterangepicker({
             timePicker: false,
             timePickerIncrement: 30,
             drops: 'auto',
             opens: 'center',
-            ranges: {                
+            ranges: {
                 'Last 30 Days' : [moment().subtract(29, 'days'), moment()],
                 'This Month'   : [moment().startOf('month'), moment().endOf('month')],
                 'Last Month'   : [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]

@@ -115,6 +115,7 @@
       filter: false,
       responsive: true,
       lengthChange: false,
+      pageLength: 50,
       order: [[1, "asc"]],
       ajax: {
         url: "{{ route('sitecode.read') }}",
@@ -127,7 +128,7 @@
       columnDefs: [
         { orderable: false, targets: [0, 3] },
         { className: "text-center", targets: [0, 3] },
-        {   
+        {
           width: "10%",
           render: function ( data, type, row ) {
             var button = '';

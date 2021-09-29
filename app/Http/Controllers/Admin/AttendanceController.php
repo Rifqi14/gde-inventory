@@ -47,6 +47,7 @@ class AttendanceController extends Controller
         $date           = Carbon::parse($request->date);
         $employee       = $request->employee;
         $status         = $request->status;
+        $datenow        = Carbon::now();
 
         // Query Data
         $queryData      = Attendance::with(['employee', 'shift']);
@@ -56,6 +57,9 @@ class AttendanceController extends Controller
         if ($date) {
             $queryData->whereMonth('attendance_date', $date);
             $queryData->whereYear('attendance_date', $date);
+        }else{
+            $queryData->whereMonth('attendance_date', $datenow);
+            $queryData->whereYear('attendance_date', $datenow);
         }
         if ($employee) {
             $queryData->getByEmployee($employee);
@@ -65,7 +69,7 @@ class AttendanceController extends Controller
         $recordsTotal   = $row->count();
 
         $queryData->offset($start);
-        $queryData->limit($length);
+        // $queryData->limit($length);
         $queryData->orderBy($sort, $dir);
         $attendances    = $queryData->get();
 
@@ -83,7 +87,7 @@ class AttendanceController extends Controller
             'data'              => $data
         ], 200);
     }
-    
+
     /**
      * Display a listing of the resource.
      *
@@ -349,7 +353,7 @@ class AttendanceController extends Controller
                 $attendance     = Attendance::find($id);
                 $shift          = WorkingShift::find($attendance->working_shift_id);
                 $dayWork        = 0;
-                
+
                 $attendance->attendance_out = $time->toDateTime();
                 $attendance->working_time   = $this->countWorkingTime($attendance->attendance_in, $attendance->attendance_out) >= 8 ? 8 : $this->countWorkingTime($attendance->attendance_in, $attendance->attendance_out);
                 $attendance->over_time      = ($this->countWorkingTime($attendance->attendance_in, $attendance->attendance_out) - 8) >= 0 ? $this->countWorkingTime($attendance->attendance_in, $attendance->attendance_out) - 8 : 0;
@@ -363,7 +367,7 @@ class AttendanceController extends Controller
                 }
                 $attendance->day_work       = $dayWork;
                 $attendance->save();
-    
+
                 if ($attendance) {
                     $log        = AttendanceLog::create([
                         'attendance_id'     => $attendance->id,
@@ -429,7 +433,7 @@ class AttendanceController extends Controller
     }
 
     /**
-     * Count working time function. 
+     * Count working time function.
      *
      * @param $attendanceIn
      * @param $attendanceOut
@@ -443,7 +447,7 @@ class AttendanceController extends Controller
         } else {
             return 0;
         }
-    }                                                                   
+    }
 
     /**
      * Count Overtime function
@@ -513,7 +517,7 @@ class AttendanceController extends Controller
                 ], 400);
             }
         }
-                
+
         DB::commit();
         return response()->json([
             'status'    => true,
@@ -535,7 +539,7 @@ class AttendanceController extends Controller
                 'Message'   => "Error to generate attendance in month because employee for this user not found",
             ], 400);
         }
-        
+
         while ($date < $to) {
             $checkAttendance    = Attendance::where('employee_id', $employee_id->id)->where('attendance_date', $date->format('Y-m-d'))->first();
             $data[]     = $checkAttendance;
