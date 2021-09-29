@@ -147,6 +147,12 @@ class ProductBorrowingController extends Controller
                 //     'status'    => Response::HTTP_UNPROCESSABLE_ENTITY,
                 //     'message'   => 'Failed to get data.',
                 // ], Response::HTTP_UNPROCESSABLE_ENTITY);
+                $products = [];
+                foreach ($query->products as $key => $product) {
+                    $product->borrowing_date = $query->borrowing_date;
+                    $products[] = $product;
+                }
+                $query->products = $products;
 
                 $data = $query;
             }            
@@ -172,11 +178,13 @@ class ProductBorrowingController extends Controller
                         "qty_requested"=> 2,
                         "product"=> "Pipe Plug 1/2\"",
                         "uom"=> "each",
-                        "image"=> null
+                        "image"=> null,
+                        "borrowing_date" => "28 Sep 2021"
                     ]
                 ]            
         ];
 
+        
         return response()->json([
             'status' => Response::HTTP_OK,            
             'data'   => [
