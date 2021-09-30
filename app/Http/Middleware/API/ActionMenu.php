@@ -42,8 +42,7 @@ class ActionMenu
             $menu = $menu->first();            
 
             request()->merge([
-                'actionmenu' => $menu?$menu:[],
-                'param'      => $route
+                'actionmenu' => $menu?$menu:[]
             ]);
         }    
         
