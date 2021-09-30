@@ -4,12 +4,11 @@ namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\ProductBorrowingResource;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Carbon;
 use App\Http\Requests\API\ProductBorrowingRequest;
+use App\Exceptions\ProductBorrowingException;
 
 use App\User;
 use App\Models\Menu;
@@ -42,6 +41,8 @@ class ProductBorrowingController extends Controller
             $query = ProductBorrowing::selectRaw("
                 product_borrowings.id,
                 product_borrowings.borrowing_number,
+                product_borrowings.warehouse_id,
+                warehouses.name as warehouse,
                 TO_CHAR(product_borrowings.borrowing_date, 'DD Mon YYYY') as borrowing_date
             ");
             $query->with([  
@@ -49,6 +50,7 @@ class ProductBorrowingController extends Controller
                     $product->selectRaw("
                         product_borrowing_details.id,
                         product_borrowing_details.product_borrowing_id,
+                        product_borrowing_details.product_category_id,
                         product_borrowing_details.product_id,                    
                         product_borrowing_details.uom_id,
                         product_borrowing_details.qty_system,
@@ -60,13 +62,15 @@ class ProductBorrowingController extends Controller
                     $product->join('products','products.id','=','product_borrowing_details.product_id');
                     $product->join('uoms','uoms.id','=','product_borrowing_details.uom_id');
                 }
-            ]);
+            ]);    
+            $query->join('warehouses','warehouses.id','=','product_borrowings.warehouse_id');
             $query = $query->find($id);
 
             if($query){                
                 $products = [];
                 foreach ($query->products as $key => $product) {
                     $product->borrowing_date = $query->borrowing_date;
+                    $product->warehouse_id   = $query->warehouse_id;
                     $products[] = $product;
                 }
                 $query->products = $products;
@@ -81,56 +85,56 @@ class ProductBorrowingController extends Controller
             "role" => "Admin"
         ];
 
-        $data = [            
-                "id" =>  1,
-                "borrowing_number" => "BRW-2021-09-000001",
-                "borrowing_date" => "28 Sep 2021",
-                "products" => [
-                    [
-                        "id" => 1,
-                        "product_borrowing_id"=> 1,
-                        "product_id"=> 3,
-                        "uom_id"=> 2,
-                        "qty_system"=> 3,
-                        "qty_requested"=> 2,
-                        "product"=> "Pipe Plug 1/2\"",
-                        "uom"=> "each",
-                        "image"=> null,
-                        "borrowing_date" => "28 Sep 2021"
-                    ],
-                    [
-                        'id' => 4,
-                        "product_borrowing_id"=> 1,
-                        "product_id"=> 12,
-                        "uom_id"=> 2,
-                        "qty_system"=> 6,
-                        "qty_requested"=> 4,
-                        "product"=> "Stud Bolt Two Nuts 1-3/4",
-                        "uom"=> "each",
-                        "image"=> null,
-                        "borrowing_date" => "28 Sep 2021"
-                    ],
-                    [
-                        'id' => 3,
-                        "product_borrowing_id"=> 1,
-                        "product_id"=> 2,
-                        "uom_id"=> 2,
-                        "qty_system"=> 9,
-                        "qty_requested"=> 5,
-                        "product"=> 'Bull Plug 3\" x 1/2\"',
-                        "uom"=> "each",
-                        "image"=> null,
-                        "borrowing_date" => "28 Sep 2021"
-                    ]
-                ]            
-        ];
+        // $data = [            
+        //         "id" =>  1,
+        //         "borrowing_number" => "BRW-2021-09-000001",
+        //         "borrowing_date" => "28 Sep 2021",
+        //         "products" => [
+        //             [
+        //                 "id" => 1,
+        //                 "product_borrowing_id"=> 1,
+        //                 "product_id"=> 3,
+        //                 "uom_id"=> 2,
+        //                 "qty_system"=> 3,
+        //                 "qty_requested"=> 2,
+        //                 "product"=> "Pipe Plug 1/2\"",
+        //                 "uom"=> "each",
+        //                 "image"=> null,
+        //                 "borrowing_date" => "28 Sep 2021"
+        //             ],
+        //             [
+        //                 'id' => 4,
+        //                 "product_borrowing_id"=> 1,
+        //                 "product_id"=> 12,
+        //                 "uom_id"=> 2,
+        //                 "qty_system"=> 6,
+        //                 "qty_requested"=> 4,
+        //                 "product"=> "Stud Bolt Two Nuts 1-3/4",
+        //                 "uom"=> "each",
+        //                 "image"=> null,
+        //                 "borrowing_date" => "28 Sep 2021"
+        //             ],
+        //             [
+        //                 'id' => 3,
+        //                 "product_borrowing_id"=> 1,
+        //                 "product_id"=> 2,
+        //                 "uom_id"=> 2,
+        //                 "qty_system"=> 9,
+        //                 "qty_requested"=> 5,
+        //                 "product"=> 'Bull Plug 3\" x 1/2\"',
+        //                 "uom"=> "each",
+        //                 "image"=> null,
+        //                 "borrowing_date" => "28 Sep 2021"
+        //             ]
+        //         ]            
+        // ];
 
         
         return response()->json([
             'status' => Response::HTTP_OK,            
             'data'   => [
                 'employee'  => $user,
-                'borrowing' => $data?$data:[]
+                'borrowing' => $data?$data['products']:[]
             ],                        
         ], Response::HTTP_OK);
     }
@@ -218,21 +222,15 @@ class ProductBorrowingController extends Controller
         ], Response::HTTP_OK);
     }
 
-    public function update(Request $request, $id)
-    {                  
-        return $request->product;
-
-        if(!$id)    {
-            return response()->json([
-                'status'    => Response::HTTP_BAD_REQUEST,
-                'message'   => 'The given data was invalid.'
-            ], Response::HTTP_BAD_REQUEST);
-        }
-
+    public function update(ProductBorrowingRequest $request, $id)
+    {                                                  
         if($request->actionmenu->approval){
+            $products  = json_decode($request->products);
+            $status    = $request->status;   
 
-            $products  = $request->products;
-            $status    = $request->status;
+            if($status != 'rejected'){
+                $request->checkStock();
+            }         
             
             $query = ProductBorrowing::where('id', $id)->update(['status' => $status]);
 
@@ -256,10 +254,7 @@ class ProductBorrowingController extends Controller
                 $query = ProductBorrowingDetail::insert($items);
 
                 if(!$query){
-                    return response()->json([
-                        'status'    => Response::HTTP_UNPROCESSABLE_ENTITY,
-                        'message'   => 'Failed to update data.'
-                    ], Response::HTTP_UNPROCESSABLE_ENTITY);
+                    throw new ProductBorrowingException("Failed to update data.");
                 }
             }
 
