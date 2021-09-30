@@ -117,9 +117,21 @@ class WorkflowController extends Controller
         $workflows      = $queryData->get();
 
         $data           = [];
+
+        $total_review = 0;
+        $review_label = 0;
+
         foreach ($workflows as $key => $workflow) {
+
+            if (strpos($workflow->label_group, 'Reviewer') !== false) {
+                $total_review++;
+            }
+            if (strpos($workflow->label_group, 'Reviewer') !== false && $workflow->status) {
+                $review_label++;
+            }
+
             $data[]         = [
-                'role_id'   => "<span class='text-bold'>{$workflow->role->name}</span><br><small>$workflow->label_group</small>",
+                'role_id'   => "<span class='text-bold'>{$workflow->user->name}</span><br><small>$workflow->label_group</small>",
                 'comment'   => $workflow->comment,
                 'id'        => $workflow->id,
                 'sla'       => $workflow->sla ? "<span class='badge bg-success'><i class='fa fa-check'></i></span>" : '<span class="badge bg-red"><i class="fa fa-times"></i></span>',
@@ -127,13 +139,21 @@ class WorkflowController extends Controller
                 'need_approval' => $workflow->need_approval,
                 'status'        => $workflow->status,
                 'nos_of_pages'  => $workflow->workflow->revision->nos_of_pages,
+                'label'     => $workflow->label_group,
             ];
         }
+
+        $approve = false;
+        if ($total_review == $review_label) {
+            $approve = true;
+        }
+
         return response()->json([
             'draw'              => $request->draw,
             'recordsTotal'      => $recordsTotal,
             'recordsFiltered'   => $recordsTotal,
             'data'              => $data,
+            'approve'           => $approve,
         ], 200);
     }
 }
