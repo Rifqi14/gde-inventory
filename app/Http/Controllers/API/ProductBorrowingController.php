@@ -98,7 +98,7 @@ class ProductBorrowingController extends Controller
     }
 
     public function edit(Request $request, $id)
-    {
+    {        
         if(!$id){
             return response()->json([
                 'status' => Response::HTTP_BAD_REQUEST,
@@ -142,11 +142,7 @@ class ProductBorrowingController extends Controller
             ]);
             $query = $query->find($id);
 
-            if($query){
-                // return response()->json([
-                //     'status'    => Response::HTTP_UNPROCESSABLE_ENTITY,
-                //     'message'   => 'Failed to get data.',
-                // ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            if($query){                
                 $products = [];
                 foreach ($query->products as $key => $product) {
                     $product->borrowing_date = $query->borrowing_date;
@@ -180,6 +176,30 @@ class ProductBorrowingController extends Controller
                         "uom"=> "each",
                         "image"=> null,
                         "borrowing_date" => "28 Sep 2021"
+                    ],
+                    [
+                        'id' => 4,
+                        "product_borrowing_id"=> 1,
+                        "product_id"=> 12,
+                        "uom_id"=> 2,
+                        "qty_system"=> 5,
+                        "qty_requested"=> 2,
+                        "product"=> "Stud Bolt Two Nuts 1-3/4",
+                        "uom"=> "each",
+                        "image"=> null,
+                        "borrowing_date" => "28 Sep 2021"
+                    ],
+                    [
+                        'id' => 3,
+                        "product_borrowing_id"=> 1,
+                        "product_id"=> 2,
+                        "uom_id"=> 2,
+                        "qty_system"=> 5,
+                        "qty_requested"=> 2,
+                        "product"=> 'Bull Plug 3\" x 1/2\"',
+                        "uom"=> "each",
+                        "image"=> null,
+                        "borrowing_date" => "28 Sep 2021"
                     ]
                 ]            
         ];
@@ -194,8 +214,10 @@ class ProductBorrowingController extends Controller
         ], Response::HTTP_OK);
     }
 
-    public function update(ProductBorrowingRequest $request, $id)
-    {   
+    public function update(Request $request, $id)
+    {                  
+        return $request;
+
         if(!$id)    {
             return response()->json([
                 'status'    => Response::HTTP_BAD_REQUEST,
