@@ -9,6 +9,7 @@ use App\Models\DocExternal\Workflow\GroupWorkflow;
 use App\Traits\InteractWithApiResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use phpDocumentor\Reflection\Types\Null_;
 
 class GroupWorkflowController extends Controller
 {
@@ -85,20 +86,57 @@ class GroupWorkflowController extends Controller
                 $data   = [];
 
                 switch ($request->status) {
+                    case 'APPROVE':
+                        if ($groupWorkflow->comment) {
+                            $groupWorkflow->status  = 'APPROVE WITH COMMENT';
+                        }else{
+                            $groupWorkflow->status  = 'APPROVE WITHOUT COMMENT';
+                        }
+                        break;
+                    case 'REJECT':
+                        if ($groupWorkflow->comment) {
+                            $groupWorkflow->status  = 'REJECT WITH COMMENT';
+                        }else{
+                            $groupWorkflow->status  = 'REJECT WITHOUT COMMENT';
+                        }
+                        break;
                     case 'NO COMMENT':
                         $groupWorkflow->status  = $request->status;
                         break;
                     case 'COMMENT':
-                        $groupWorkflow->status          = $request->status;
+                        if ($groupWorkflow->status == 'APPROVE WITHOUT COMMENT') {
+                            $groupWorkflow->status          = 'APPROVE WITH COMMENT';
+                        }
+                        else if ($groupWorkflow->status == 'REJECT WITHOUT COMMENT') {
+                            $groupWorkflow->status          = 'REJECT WITH COMMENT';
+                        }else{
+                            $groupWorkflow->status          = $request->status;
+                        }
                         $groupWorkflow->nos_of_pages    = $request->nos_of_pages;
                         $groupWorkflow->comment         = $request->comment;
                         break;
-                    
+
                     default:
                         # code...
                         break;
                 }
                 $groupWorkflow->save();
+
+                if ($request->status == 'REJECT') {
+                    $group  = GroupWorkflow::find($id);
+                    $workflow_id = $group->workflow_id;
+
+                    $groupWorkflow = GroupWorkflow::where([
+                        'status' => NULL,
+                        'workflow_id' => $workflow_id
+                    ])->get();
+
+                    foreach ($groupWorkflow as $value) {
+                        $value->status = 'REJECT WITHOUT COMMENT';
+                        $value->save();
+                    }
+                }
+
             } catch (\Illuminate\Database\QueryException $th) {
                 throw new PropertiesException("Error delete data: {$th->errorInfo[2]}", Response::HTTP_BAD_REQUEST);
             }
