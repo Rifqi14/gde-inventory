@@ -6,7 +6,6 @@ use Closure;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-use App\Models\RoleUser;
 use App\Models\MenuRole;
 
 class ActionMenu
@@ -20,9 +19,9 @@ class ActionMenu
      */
     public function handle($request, Closure $next)
     {              
-        if(Auth::guard('api')->check()){            
+        if(Auth::guard('api')->user()){            
             $user_id = Auth::guard('api')->user()->id;
-            $route   = explode('.',Route::currentRouteName())[0];        
+            $route   = explode('.',explode('/',Route::current()->action['prefix'])[1]);        
 
             $menu = MenuRole::selectRaw("                
                 (case when menu_roles.create = '1' then true else false end) as create,
@@ -40,10 +39,13 @@ class ActionMenu
             $menu->join('role_users', function($join) use ($user_id){
                 $join->on('role_users.role_id','=','menu_roles.role_id')->where('role_users.user_id', $user_id);
             });            
-            $menu = $menu->first();
+            $menu = $menu->first();            
 
-            request()->merge(['actionmenu' => $menu?$menu:[]]);
-        }
+            request()->merge([
+                'actionmenu' => $menu?$menu:[]
+            ]);
+        }    
+        
         return $next($request);
     }
 }

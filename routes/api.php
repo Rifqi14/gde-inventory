@@ -46,7 +46,7 @@ Route::group([
     });
 
     // Role
-    Route::post('/role','API\RoleController@read');    
+    Route::post('/role','API\RoleController@read');        
 
     // Dashboard
     Route::group([
@@ -76,12 +76,12 @@ Route::group([
     // Product Borrowing
     Route::group([
         'middleware' => ['auth:api'],
-        'prefix'     => 'borrowing'
+        'prefix'     => 'productborrowing'
     ], function(){
         // List
         Route::get('/list', 'API\ProductBorrowingController@read');
         // Edit Product Borrowing
-        Route::get('/edit/{id}', 'API\ProductBorrowingController@edit')->name('productborrowing.edit');        
-        Route::resource('/','API\ProductBorrowingController');        
+        Route::get('/edit/{id}', 'API\ProductBorrowingController@edit')->name('productborrowing.edit');                
+        Route::resource('/action','API\ProductBorrowingController');
     });
 });
