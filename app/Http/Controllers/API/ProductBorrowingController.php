@@ -85,49 +85,52 @@ class ProductBorrowingController extends Controller
             "role" => "Admin"
         ];
 
-        // $data = [            
-        //         "id" =>  1,
-        //         "borrowing_number" => "BRW-2021-09-000001",
-        //         "borrowing_date" => "28 Sep 2021",
-        //         "products" => [
-        //             [
-        //                 "id" => 1,
-        //                 "product_borrowing_id"=> 1,
-        //                 "product_id"=> 3,
-        //                 "uom_id"=> 2,
-        //                 "qty_system"=> 3,
-        //                 "qty_requested"=> 2,
-        //                 "product"=> "Pipe Plug 1/2\"",
-        //                 "uom"=> "each",
-        //                 "image"=> null,
-        //                 "borrowing_date" => "28 Sep 2021"
-        //             ],
-        //             [
-        //                 'id' => 4,
-        //                 "product_borrowing_id"=> 1,
-        //                 "product_id"=> 12,
-        //                 "uom_id"=> 2,
-        //                 "qty_system"=> 6,
-        //                 "qty_requested"=> 4,
-        //                 "product"=> "Stud Bolt Two Nuts 1-3/4",
-        //                 "uom"=> "each",
-        //                 "image"=> null,
-        //                 "borrowing_date" => "28 Sep 2021"
-        //             ],
-        //             [
-        //                 'id' => 3,
-        //                 "product_borrowing_id"=> 1,
-        //                 "product_id"=> 2,
-        //                 "uom_id"=> 2,
-        //                 "qty_system"=> 9,
-        //                 "qty_requested"=> 5,
-        //                 "product"=> 'Bull Plug 3\" x 1/2\"',
-        //                 "uom"=> "each",
-        //                 "image"=> null,
-        //                 "borrowing_date" => "28 Sep 2021"
-        //             ]
-        //         ]            
-        // ];
+        $data = [            
+                "id" =>  1,
+                "borrowing_number" => "BRW-2021-09-000001",
+                "borrowing_date" => "28 Sep 2021",
+                "products" => [
+                    [
+                        "id" => 1,
+                        "product_borrowing_id"=> 1,
+                        "product_id"=> 3,
+                        "uom_id"=> 2,
+                        "qty_system"=> 3,
+                        "qty_requested"=> 2,
+                        "product"=> "Pipe Plug 1/2\"",
+                        "uom"=> "each",
+                        "image"=> null,
+                        "warehouse_id" => 1,
+                        "borrowing_date" => "28 Sep 2021"
+                    ],
+                    [
+                        'id' => 4,
+                        "product_borrowing_id"=> 1,
+                        "product_id"=> 12,
+                        "uom_id"=> 2,
+                        "qty_system"=> 6,
+                        "qty_requested"=> 4,
+                        "product"=> "Stud Bolt Two Nuts 1-3/4",
+                        "uom"=> "each",
+                        "image"=> null,
+                        "warehouse_id" => 1,
+                        "borrowing_date" => "28 Sep 2021"
+                    ],
+                    [
+                        'id' => 3,
+                        "product_borrowing_id"=> 1,
+                        "product_id"=> 2,
+                        "uom_id"=> 2,
+                        "qty_system"=> 9,
+                        "qty_requested"=> 5,
+                        "product"=> 'Bull Plug 3\" x 1/2\"',
+                        "uom"=> "each",
+                        "image"=> null,
+                        "warehouse_id" => 1,
+                        "borrowing_date" => "28 Sep 2021"
+                    ]
+                ]            
+        ];
 
         
         return response()->json([
