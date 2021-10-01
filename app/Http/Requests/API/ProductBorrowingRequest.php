@@ -3,14 +3,10 @@
 namespace App\Http\Requests\API;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Request;
 use Illuminate\Http\Response;
-use App\Jobs\MovementProcess;
 use App\Exceptions\GeneralException;
 
-use App\Models\ProductBorrowingDetail;
 use App\Models\StockWarehouse;
-use PhpParser\Node\Stmt\Switch_;
 
 class ProductBorrowingRequest extends FormRequest
 {
@@ -66,12 +62,12 @@ class ProductBorrowingRequest extends FormRequest
                 ['product_id','=', $product_id]
             ])->first();
     
-            if(!$warehouse){
-                $warehouse = StockWarehouse::create([
-                    'product_id'    => $product_id,
-                    'warehouse_id'  => $warehouse_id
-                ]);
-            }
+            // if(!$warehouse){
+            //     $warehouse = StockWarehouse::create([
+            //         'product_id'    => $product_id,
+            //         'warehouse_id'  => $warehouse_id
+            //     ]);
+            // }
             $stock     = $warehouse->stock;
             
             if($stock < $qty_request){
