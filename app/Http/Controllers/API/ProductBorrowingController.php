@@ -232,7 +232,8 @@ class ProductBorrowingController extends Controller
                 $request->checkStock();
             }         
             
-            $query = ProductBorrowing::where('id', $id)->update(['status' => $status]);
+            // $query = ProductBorrowing::where('id', $id)->update(['status' => $status]);
+            $query = true;
 
             if($query){
                 ProductBorrowingDetail::where('product_borrowing_id', $id)->delete();
