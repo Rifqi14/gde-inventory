@@ -16,7 +16,7 @@ class StockAdjustment extends Model
 
     public function getAutoNumberOptions()
     {
-        $code = 'STA';
+        $code = 'ADJ';
         $year = date('Y');
 
         return [
@@ -24,7 +24,7 @@ class StockAdjustment extends Model
                 'format' => "$code-$year-?",
                 'length' => 6
             ]
-        ];   
+        ];
     }
 
     /**
@@ -74,20 +74,5 @@ class StockAdjustment extends Model
 
     public function totalItems(){
         
-    }
-
-    use AutoNumberTrait;
-
-    public function getAutoNumberOptions()
-    {
-        $code = 'ADJ';
-        $year = date('Y');
-
-        return [
-            'key_number' => [
-                'format' => "$code-$year-?",
-                'length' => 6
-            ]
-        ];
-    }
+    }        
 }

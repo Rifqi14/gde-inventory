@@ -45,7 +45,7 @@
                                 <tr>
                                     <th width="5" class="text-center">No</th>
                                     <th width="30" class="text-center">Date</th>
-                                    <th width="200">Issued Number</th>                                    
+                                    <th width="200">Issued Number</th>
                                     <th width="20" class="text-right">Product</th>
                                     <th width="30" class="text-center">Status</th>
                                     <th width="10" class="text-center">Action</th>
@@ -81,7 +81,7 @@
                                     <div class="input-group-append">
                                         <span class="input-group-text"><i class="fas fa-calendar"></i></span>
                                     </div>
-                                </div>                                
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -147,12 +147,12 @@
         "hideMethod": "fadeOut"
     };
 
-    $(function() {        
+    $(function() {
         $('.select2').select2({
             allowClear: true
         });
 
-        $('.datepicker').daterangepicker({      
+        $('.datepicker').daterangepicker({
             timePicker: false,
             timePickerIncrement: 30,
             drops: 'auto',
@@ -175,6 +175,7 @@
             filter: false,
             responsive: true,
             lengthChange: false,
+            pageLength: 50,
             order: [
                 [2, "desc"]
             ],
@@ -222,10 +223,10 @@
                         var status = row.status;
                         var badge = '';
                         switch (row.status) {
-                            case 'approved':                                                                
+                            case 'approved':
                                 badge = 'badge-info';
                                 break;
-                            case 'rejected':                                
+                            case 'rejected':
                                 badge = 'bg-red';
                                 break;
 
@@ -261,7 +262,7 @@
                         // print
                         if (actionmenu.indexOf('export') >= 0 && row.status == 'approved') {
                             button +=   `<a class="dropdown-item" href="javascript:void(0);" onclick="ekspor(${row.id})">
-                                            <i class="fas fa-file-export"></i>Export Data                                        
+                                            <i class="fas fa-file-export"></i>Export Data
                                         </a>`;
                         }
                         return `<div class="btn-group">
@@ -363,13 +364,13 @@
     const resetTable = () => {
         var search = $('#form-search'),
             dates  = search.find('#date').data('daterangepicker');
-            
+
             dates.setStartDate(new moment().startOf('month'));
             dates.setEndDate(new moment().endOf('month'));
             search.find('#issued-number').val('');
             search.find('#products').val('');
-            search.find('#status').val(null).trigger('change');        
-        
+            search.find('#status').val(null).trigger('change');
+
             dataTable.draw();
     }
 
@@ -392,7 +393,7 @@
                     download.remove();
                 }else{
                     toastr.warning(response.message);
-                }             
+                }
             }
         });
     }

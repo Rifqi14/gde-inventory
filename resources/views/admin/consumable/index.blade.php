@@ -117,7 +117,7 @@
 @section('scripts')
 <script>
   var actionmenu = JSON.parse(`{!! json_encode($actionmenu) !!}`);
-  
+
   toastr.options = {
     "closeButton": false,
     "debug": false,
@@ -192,6 +192,7 @@
       filter: false,
       responsive: true,
       lengthChange: false,
+      pageLength: 50,
       order: [
         [1, "asc"]
       ],
@@ -384,8 +385,8 @@
 
   const resetTable = () => {
     var dates = $('#form-search').find('#dates').data('daterangepicker');
-    $('#form-search').find('#consume-number').val('');        
-    $('#status').val(null).trigger('change');    
+    $('#form-search').find('#consume-number').val('');
+    $('#status').val(null).trigger('change');
     $('#form-search').find('#issued-by').val(null).trigger('change');
     dates.setStartDate(moment().startOf('month'));
     dates.setEndDate(moment().endOf('month'));

@@ -47,7 +47,9 @@ class MovementProcess implements ShouldQueue
                 $move = $this->movein();
             }else if($this->type == 'out'){                
                 $move = $this->moveout();
-            }                            
+            }else if($this->type == 'adjustment'){
+                $move = $this->adjust();
+            }
 
             if($move){
                 return $this->log();
@@ -60,7 +62,7 @@ class MovementProcess implements ShouldQueue
         $role  = $this->role;
 
         if($role == 'adjustment'){
-            $move =$this->updateStock($this->destination_id, $qty);
+            $move =$this->updateStock($this->destination_id, $this->qty);
         }
 
         if($move){
@@ -88,7 +90,7 @@ class MovementProcess implements ShouldQueue
             $origin = StockWarehouse::where([
                 ['warehouse_id','=', $this->source_id],
                 ['product_id','=',$this->product_id]
-            ])->first();
+            ])->first();            
 
             $originStock = $origin->stock - $this->qty;
 
@@ -98,9 +100,19 @@ class MovementProcess implements ShouldQueue
         }
     }
 
+    public function adjust()
+    {                  
+        $warehouse = $this->stockwarehouse($this->destination_id, $this->product_id);        
+        $move      = $this->updateStock($warehouse->id, $this->qty);
+
+        if($move){
+            $this->log();
+        }
+    }
+
     
     public function updateStock($warehouse_id, $stock)
-    {
+    {        
         $warehouse = StockWarehouse::find($warehouse_id);
         $warehouse->stock = $stock;
         $warehouse->save();
@@ -117,6 +129,23 @@ class MovementProcess implements ShouldQueue
         $movement->status  = 'complete';
         $movement->proceed = 1;
         $movement->save();   
+    }
+
+    public function stockwarehouse($warehouse_id, $product_id)
+    {
+        $warehouse = StockWarehouse::where([
+            ['warehouse_id','=', $warehouse_id],
+            ['product_id','=', $product_id]
+        ])->first();
+
+        if(!$warehouse){
+            $warehouse = StockWarehouse::create([
+                'product_id'    => $product_id,
+                'warehouse_id'  => $warehouse_id
+            ]);
+        }
+                
+        return $warehouse;
     }
 }
 

@@ -255,7 +255,6 @@
     };
 
     $(function() {             
-
         $('.select2').select2({
             allowClear: true
         });        
@@ -499,10 +498,12 @@
                 $(element).removeClass('is-invalid');
             },
             submitHandler: function() {
-                var data = new FormData($('#form')[0]),
-                    adjustmentDate = $('#form').find('#adjustment-date').data('daterangepicker').startDate.format('YYYY-MM-DD'),
-                    products = [],
-                    zeroValue = false;
+                var data           = new FormData($('#form')[0]),
+                    adjustmentDate = $('#form').find('#adjustment-date').data('daterangepicker').startDate.format('YYYY-MM-DD'),                    
+                    siteID         = $('#site').find('option:selected').val(),
+                    warehouseID    = $('#warehouse').find('option:selected').val(),
+                    products       = [],
+                    zeroValue      = false;
 
                 $.each($('#table-product > tbody > .product-item'), function(index, value) {
                     var product     = $(this),
@@ -519,11 +520,13 @@
                     });
 
                     products.push({
-                        product_id: productID,
-                        uom_id: uomID,
-                        serial: serials,
-                        qty_before: qtyBefore,
-                        qty_after: qtyAfter
+                        product_id   : productID,
+                        uom_id       : uomID,
+                        serial       : serials,
+                        qty_before   : qtyBefore,
+                        qty_after    : qtyAfter,
+                        site_id      : siteID,
+                        warehouse_id : warehouseID
                     })
 
                 });                

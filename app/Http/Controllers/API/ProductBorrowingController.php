@@ -6,16 +6,147 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Resources\ProductBorrowingResource;
-use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Carbon;
+use App\Http\Requests\API\ProductBorrowingRequest;
+use App\Exceptions\ProductBorrowingException;
 
+use App\User;
 use App\Models\Menu;
 use App\Models\ProductBorrowing;
 use App\Models\ProductBorrowingDetail;
 
 class ProductBorrowingController extends Controller
-{    
+{        
+    public function edit(Request $request, $id)
+    {        
+        if(!$id){
+            return response()->json([
+                'status' => Response::HTTP_BAD_REQUEST,
+                'message' => 'The given data was invalid.'
+            ], Response::HTTP_BAD_REQUEST);
+        }            
+
+        $user = User::selectRaw("
+                        employees.name as employee_name,
+                        employees.photo,
+                        roles.name as role    
+                    ")
+                    ->join('employees','employees.id','=','users.employee_id')
+                    ->join('role_users','role_users.user_id','=','users.id')
+                    ->join('roles','roles.id','=','role_users.role_id')
+                    ->find(Auth::guard('api')->user()->id);
+
+        $data = [];        
+        if($request->actionmenu->approval){
+            $query = ProductBorrowing::selectRaw("
+                product_borrowings.id,
+                product_borrowings.borrowing_number,
+                product_borrowings.warehouse_id,
+                warehouses.name as warehouse,
+                TO_CHAR(product_borrowings.borrowing_date, 'DD Mon YYYY') as borrowing_date
+            ");
+            $query->with([  
+                'products' => function($product){
+                    $product->selectRaw("
+                        product_borrowing_details.id,
+                        product_borrowing_details.product_borrowing_id,
+                        product_borrowing_details.product_category_id,
+                        product_borrowing_details.product_id,                    
+                        product_borrowing_details.uom_id,
+                        product_borrowing_details.qty_system,
+                        product_borrowing_details.qty_requested,
+                        products.name as product,
+                        products.image,
+                        uoms.name as uom
+                    ");
+                    $product->join('products','products.id','=','product_borrowing_details.product_id');
+                    $product->join('uoms','uoms.id','=','product_borrowing_details.uom_id');
+                }
+            ]);    
+            $query->join('warehouses','warehouses.id','=','product_borrowings.warehouse_id');
+            $query = $query->find($id);
+
+            if($query){                
+                $products = [];
+                foreach ($query->products as $key => $product) {
+                    $product->borrowing_date = $query->borrowing_date;
+                    $product->warehouse_id   = $query->warehouse_id;
+                    $products[] = $product;
+                }
+                $query->products = $products;
+
+                $data = $query;
+            }            
+        }        
+
+        $user = [
+            "employee_name" => "Anonim",
+            "photo" => null,
+            "role" => "Admin"
+        ];
+
+        $data = [            
+                "id" =>  1,
+                "borrowing_number" => "BRW-2021-09-000001",
+                "borrowing_date" => "28 Sep 2021",
+                "products" => [
+                    [
+                        "id" => 1,
+                        "product_borrowing_id"=> 1,
+                        "product_id"=> 3,
+                        "uom_id"=> 2,
+                        "qty_system"=> 3,
+                        "qty_requested"=> 2,
+                        "product"=> "Pipe Plug 1/2\"",
+                        "uom"=> "each",
+                        "image"=> null,
+                        "warehouse_id" => 1,
+                        "borrowing_date" => "28 Sep 2021"
+                    ],
+                    [
+                        'id' => 4,
+                        "product_borrowing_id"=> 1,
+                        "product_id"=> 12,
+                        "uom_id"=> 2,
+                        "qty_system"=> 6,
+                        "qty_requested"=> 4,
+                        "product"=> "Stud Bolt Two Nuts 1-3/4",
+                        "uom"=> "each",
+                        "image"=> null,
+                        "warehouse_id" => 1,
+                        "borrowing_date" => "28 Sep 2021"
+                    ],
+                    [
+                        'id' => 3,
+                        "product_borrowing_id"=> 1,
+                        "product_id"=> 2,
+                        "uom_id"=> 2,
+                        "qty_system"=> 9,
+                        "qty_requested"=> 5,
+                        "product"=> 'Bull Plug 3\" x 1/2\"',
+                        "uom"=> "each",
+                        "image"=> null,
+                        "warehouse_id" => 1,
+                        "borrowing_date" => "28 Sep 2021"
+                    ]
+                ]            
+        ];
+
+        
+        return response()->json([
+            'status' => Response::HTTP_OK,            
+            'data'   => [
+                'employee'  => $user,
+                'borrowing' => $data?$data['products']:[]
+            ],                        
+        ], Response::HTTP_OK);
+    }
     
+    public function show(Request $request, $id)
+    {
+        # code...
+    }
+
     public function read(Request $request)
     {
         $length  = $request->limit ? $request->limit : 10;   
@@ -94,53 +225,53 @@ class ProductBorrowingController extends Controller
         ], Response::HTTP_OK);
     }
 
-    public function edit(Request $request, $id)
-    {
-        if(!$id){
-            return response()->json([
-                'status' => Response::HTTP_BAD_REQUEST,
-                'mesage' => 'The given data was invalid'
-            ], Response::HTTP_BAD_REQUEST);
-        }    
-
-        $data = [];
-
+    public function update(ProductBorrowingRequest $request, $id)
+    {                                                  
         if($request->actionmenu->approval){
-            $query = ProductBorrowing::selectRaw("
-                product_borrowings.id,
-                product_borrowings.borrowing_number,
-                TO_CHAR(product_borrowings.borrowing_date, 'DD Mon YYYY') as borrowing_date
-            ");
-            $query->with([  
-                'products' => function($product){
-                    $product->selectRaw("
-                        product_borrowing_details.id,
-                        product_borrowing_details.product_borrowing_id,
-                        product_borrowing_details.product_id,                    
-                        product_borrowing_details.uom_id,
-                        product_borrowing_details.qty_system,
-                        product_borrowing_details.qty_requested,
-                        products.name as product,
-                        uoms.name as uom
-                    ");
-                    $product->join('products','products.id','=','product_borrowing_details.product_id');
-                    $product->join('uoms','uoms.id','=','product_borrowing_details.uom_id');
+            $products  = json_decode($request->products);
+            $status    = $request->status;   
+
+            if($status != 'rejected'){
+                $request->checkStock();
+            }         
+            
+            // $query = ProductBorrowing::where('id', $id)->update(['status' => $status]);
+            $query = true;
+
+            if($query){
+                ProductBorrowingDetail::where('product_borrowing_id', $id)->delete();
+                
+                $items = [];
+                foreach ($products as $key => $product) {
+                    $items[] = [
+                        'product_borrowing_id' => $id,
+                        'product_id'           => $product->product_id,
+                        'product_category_id'  => $product->product_category_id,
+                        'uom_id'               => $product->uom_id,
+                        'qty_system'           => $product->qty_system,
+                        'qty_requested'        => $product->qty_requested,
+                        'created_at'           => Carbon::now(),
+                        'updated_at'           => Carbon::now()
+                    ];
                 }
-            ]);
 
-            $data = $query->find($id);
+                $query = ProductBorrowingDetail::insert($items);
 
-            if(!$data){
-                return response()->json([
-                    'status'    => Response::HTTP_UNPROCESSABLE_ENTITY,
-                    'message'   => 'Failed to get data.',
-                ], Response::HTTP_UNPROCESSABLE_ENTITY);
+                if(!$query){
+                    throw new ProductBorrowingException("Failed to update data.");
+                }
             }
-        }
 
-        return response()->json([
-            'status' => Response::HTTP_OK,
-            'data'   => $data,                        
-        ], Response::HTTP_OK);
+            return response()->json([
+                'status'  => Response::HTTP_OK,
+                'message' => 'Successfully update data.'
+            ], Response::HTTP_OK);
+
+        }else{
+            return response()->json([
+                'status'    => Response::HTTP_FORBIDDEN,
+                'message'   => 'Forbidden access.'
+            ],Response::HTTP_FORBIDDEN);
+        }
     }
 }

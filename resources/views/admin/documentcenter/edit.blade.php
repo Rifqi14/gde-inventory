@@ -142,11 +142,13 @@
           <div class="col-md-12">
             <input type="hidden" name="locked_status" value="lock">
             <div class="card-footer text-right">
+              @if (in_array('update', $actionmenu))
               <div class="locked">
                 <a href="javascript:void(0);" class="btn btn-md btn-danger color-palette btn-labeled legitRipple text-sm" onclick="lock('unlock')">
                   <b><i class="fas fa-edit"></i></b> Edit
                 </a>
               </div>
+              @endif
               <div class="unlocked d-none">
                 <button type="submit" class="btn bg-olive color-palette btn-labeled legitRipple text-sm btn-md" form="form">
                   <b><i class="fas fa-save"></i></b> Submit
@@ -164,7 +166,7 @@
           @php
           $status = $document->documents()->first() ? $document->documents()->latest()->first()->status : null;
           @endphp
-          @if (!in_array($status, ['DRAFT', 'WAITING', 'REVISED']) || !$status)
+          @if ((!in_array($status, ['DRAFT', 'WAITING', 'REVISED']) || !$status) && in_array('update', $actionmenu))
           <button type="button" class="btn btn-labeled text-md btn-md btn-success btn-flat legitRipple" onclick="documentModal('create')">
             <b><i class="fas fa-plus"></i></b> Create
           </button>
@@ -689,7 +691,7 @@
                     "showMethod": "fadeIn",
                     "hideMethod": "fadeOut"
                   };
-  
+
   const documentModal = (type, document_id = null) => {
     initApprovalButton(status);
     $('#form-document').modal('show');
@@ -712,7 +714,7 @@
         format: 'DD/MM/YYYY'
       }
     });
-    if (originator) { 
+    if (originator) {
       $('#distribution_id').empty().trigger('change');
       var option = new Option(originator.name, originator.id, true, true);
       $('#distribution_id').append(option).trigger('change');
@@ -729,7 +731,7 @@
 
   const addFormUpload = (e) => {
     var number = $(e).attr('data-document_number');
-    if (number <= 3) { 
+    if (number <= 3) {
       var html = `
                   <div class="input-group mt-2 add-on">
                     <input type="text" name="document_name[]" class="form-control" placeholder="Document Name">
@@ -1152,7 +1154,7 @@
   const documentReference = (id) => {
     document.location = `{{ url('admin/documentcenter') }}/${page}/${id}/edit`;
   }
-  
+
   $(function() {
     summernote();
     summernoteRevise();
@@ -1162,7 +1164,7 @@
     $('.select2').select2({
       allowClear: true,
     });
-    
+
     $('#form').validate({
       errorElement: 'span',
       errorClass: 'help-block',
@@ -1312,7 +1314,7 @@
         });
       }
     });
-    
+
     dataTable = $('#table-document').DataTable({
       processing: true,
       language: {
@@ -1380,13 +1382,13 @@
                   text    = document_type.ucwords();
                 }
               });
-          
+
           return `${docRef}<span class="badge bg-${label} text-sm">${text}</span>`;
         }, targets: [2] },
         { render: function (data, type, row) {
           var status  = '',
               label   = '';
-              
+
               if (row.status == 'DRAFT' || row.status == 'REVISED') {
                 status  = 'Waiting for Issue';
                 label   = 'bg-info';

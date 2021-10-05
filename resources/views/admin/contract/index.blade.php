@@ -37,7 +37,7 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
-                        
+
                     </div>
                     <div class="card-body table-responsive p-0">
                         <table id="table-contract" class="table table-striped datatable" width="100%">
@@ -88,6 +88,7 @@
             filter: false,
             responsive: true,
             lengthChange: false,
+            pageLength: 50,
             order: [[ 1, "asc" ]],
             ajax: {
                 url: "{{route('contract.read')}}",
@@ -122,7 +123,7 @@
                     return `<b>${row.status_pub}</b>`;
                     },targets: [5]
                 },
-                {   
+                {
                     width: "10%",
                     render: function ( data, type, row ) {
                     let check2 = $.inArray(group_code, watcher)

@@ -135,6 +135,7 @@
       filter: false,
       responsive: true,
       lengthChange: false,
+      pageLength: 50,
       order: [[ 1, "asc"]],
       ajax: {
         url: "{{ route('calendar.read') }}",
@@ -152,7 +153,7 @@
       },
       columns: [
         { "data": "no", "name": "no", width: 10, className: "text-center", orderable: false},
-        { 
+        {
           "data": "name",
           width: 120,
           orderable: false,
@@ -212,12 +213,12 @@
 	{
 		window.location.href = `{{url('admin/calendar')}}/${id}/edit`;
 	}
-  
+
 	function detail(id)
 	{
 		window.location.href = `{{url('admin/calendar')}}/${id}`;
 	}
-  
+
   function filter() {
     $("#add-filter").modal("show");
   }

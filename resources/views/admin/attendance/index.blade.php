@@ -174,6 +174,7 @@
         filter: false,
         responsive: true,
         lengthChange: false,
+        paging: false,
         order: [[ 1, "asc" ]],
         ajax: {
             url: "{{route('attendance.read')}}",
@@ -251,7 +252,7 @@
                   case '0':
                     workingday = `<small class="badge badge-danger">Absent</small>`;
                     break;
-                
+
                   default:
                     workingday = `<small class="badge badge-info">Not Completed</small>`;
                     break;
@@ -277,7 +278,7 @@
                     status  = 'Rejected';
                     badge   = 'danger';
                     break;
-                
+
                   default:
                     status  = 'Draft';
                     badge   = 'secondary';
@@ -292,7 +293,7 @@
 
               }, targets: [6]
             },
-            {   
+            {
                 width: "10%",
                 render: function ( data, type, row ) {
                   var button = '';
@@ -366,7 +367,7 @@
         },
         allowClear: true,
     });
-    
+
     @if (!in_array('approval', $actionmenu) && Auth::user()->employee_id)
       $('#employee').select2('trigger', 'select', {
         data: {
@@ -472,7 +473,7 @@
             }
         });
     });
-    
+
     dataTable.draw();
   })
 </script>

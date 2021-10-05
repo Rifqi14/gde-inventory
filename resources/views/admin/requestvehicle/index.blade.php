@@ -146,8 +146,8 @@
         $('.datepicker').on('apply.daterangepicker', function(ev, picker) {
             $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
         });
-        
-        $('.datepicker').on('cancel.daterangepicker', function(ev, picker) {            
+
+        $('.datepicker').on('cancel.daterangepicker', function(ev, picker) {
             $(this).val('');
         });
 
@@ -207,7 +207,7 @@
                         more: more,
                     };
                 },
-            },            
+            },
             allowClear: true,
         });
 
@@ -222,6 +222,7 @@
             filter: false,
             responsive: true,
             lengthChange: false,
+            pageLength: 50,
             order: [
                 [1, "asc"]
             ],
@@ -259,7 +260,7 @@
                         return `<p>${row.vehicle_name}<br><b>${row.police_number}</b></p>`;
                     },
                     targets: [1]
-                },                
+                },
                 {
                     render: function(data, type, row) {
                         var label   = '',
@@ -288,7 +289,7 @@
                             button += `<a class="dropdown-item" href="javascript:void(0);" onclick="show(${row.id})">
                                             <i class="fa fa-eye"></i> View Data
                                         </a>`;
-                    
+
                         $.each(global_status, function(index, value) {
                             if ((index == row.status) && !value.isLocked) {
                                 if (actionmenu.indexOf('update') > 0) {
@@ -303,7 +304,7 @@
                                             </a>`;
                                 }
                             }
-                        })            
+                        })
                         return `<div class="btn-group">
                                 <button type="button" class="btn btn-flat btn-sm dropdown-toggle" data-toggle="dropdown">
                                     <i class="fas fa-bars"></i>
@@ -481,6 +482,6 @@
         }
 
         return newdate;
-    }    
+    }
 </script>
 @endsection

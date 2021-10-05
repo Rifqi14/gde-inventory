@@ -139,6 +139,7 @@
             filter: false,
             responsive: true,
             lengthChange: false,
+            pageLength: 50,
             order: [[ 1, "asc" ]],
             ajax: {
                 url: "{{route('contractreceipt.read')}}",
@@ -181,7 +182,7 @@
                         return `${row.status_text}`;
                     },targets: [5]
                 },
-                {   
+                {
                     width: "10%",
                     render: function ( data, type, row ) {
                     return `<div class="btn-group">

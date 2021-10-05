@@ -49,7 +49,7 @@ const addFile = () => {
                                 <div class="custom-file">
                                     <input type="file" class="custom-file-input" name="file[]" required>
                                     <label class="custom-file-label" for="exampleInputFile">Attach a file</label>
-                                </div>                                
+                                </div>
                             </div>
                         </td>
                         <td class="text-center">
@@ -80,6 +80,36 @@ const removeFile = (e) => {
  * Comment Section
  */
 const noComment = (id, status = "NO COMMENT") => {
+    var data = {
+        status: status,
+        _token: token,
+    };
+    $.ajax({
+        url: `${base}/groupworkflow/${id}`,
+        type: "put",
+        data: data,
+        dataType: "JSON",
+        beforeSend: function () {
+            blockMessage("body", "Loading...", "#fff");
+        },
+    })
+        .done(function (response) {
+            $("body").unblock();
+            if (response.status) {
+                datatable.draw();
+            } else {
+                toastr.warning(response.message);
+            }
+            return;
+        })
+        .fail(function (response) {
+            $("body").unblock();
+            var response = response.responseJSON;
+            toastr.error(response.message);
+        });
+};
+
+const approveComment = (id, status) => {
     var data = {
         status: status,
         _token: token,
@@ -145,7 +175,7 @@ const showComment = (id) => {
             $("body").unblock();
             if (response.status) {
                 $("#modal-comment").modal("show");
-                $("#modal-comment").find("button").prop("disabled", true);
+                $("#modal-comment").find("button").prop("disabled", false);
                 $("#form-comment").find("[name=id]").val(id);
                 $("#form-comment").find("[name=nos_of_pages]").empty();
                 $("#form-comment")
@@ -212,14 +242,41 @@ $(function () {
                 targets: [1],
             },
             {
-                render: function (data, type, row) {
+                render: function (data, type, row, meta) {
                     var html = `<button type="button" id="no-comment" class="btn btn-labeled text-sm btn-sm btn-danger btn-flat legitRipple" onclick="noComment(${row.id})"><b><i class="fas fa-comment-slash"></i></b> No Comment</button>`;
                     if (row.need_approval) {
-                        html = `<button type="button" id="approval" class="mr-3 btn btn-labeled text-sm btn-sm btn-success btn-flat legitRipple" onclick="addComment(${row.id})"><b><i class="fas fa-check-circle"></i></b> Approved</button>`;
-                        html += `<button type="button" id="reject" class="btn btn-labeled text-sm btn-sm bg-maroon btn-flat legitRipple" onclick="addComment(${row.id})"><b><i class="fas fa-window-close"></i></b> Rejected</button>`;
+                        if (meta.settings.json.approve && row.label == 'Responsible Person' ) {
+
+                            html = `<button type="button" id="approval" class="mr-3 btn btn-labeled text-sm btn-sm btn-success btn-flat legitRipple" onclick="approveComment(${row.id}, 'APPROVE')"><b><i class="fas fa-check-circle"></i></b> Approved</button>`;
+                            html += `<button type="button" id="reject" class="btn btn-labeled text-sm btn-sm bg-maroon btn-flat legitRipple" onclick="approveComment(${row.id}, 'REJECT')"><b><i class="fas fa-window-close"></i></b> Rejected</button>`;
+
+                        }
+                        else if(meta.settings.json.approve && row.label.indexOf("Approver") >= 0){
+                            var index = data-2;
+                            var label = meta.settings.json.data[index];
+
+                            if (label.status) {
+                                html = `<button type="button" id="approval" class="mr-3 btn btn-labeled text-sm btn-sm btn-success btn-flat legitRipple" onclick="approveComment(${row.id}, 'APPROVE')"><b><i class="fas fa-check-circle"></i></b> Approved</button>`;
+                                html += `<button type="button" id="reject" class="btn btn-labeled text-sm btn-sm bg-maroon btn-flat legitRipple" onclick="approveComment(${row.id}, 'REJECT')"><b><i class="fas fa-window-close"></i></b> Rejected</button>`;
+                            }else{
+                                html = `<span type="button" class="mr-3 badge badge-labeled text-sm btn-sm btn-warning btn-flat legitRipple" >Waiting ${label.label}</span>`;
+                            }
+                        }
+                        else{
+                            html = `<span type="button" class="mr-3 badge badge-labeled text-sm btn-sm btn-warning btn-flat legitRipple" >Waiting Reviewer</span>`;
+                        }
                     }
                     if (row.status) {
-                        html = row.status;
+                        html = '';
+
+                        if (row.status && row.need_approval) {
+                            if (row.status.indexOf("APPROVE") >= 0) {
+                                html = `<span type="button" class="mr-3 badge badge-labeled text-sm btn-sm btn-success btn-flat legitRipple" >Approved</span>`;
+                            }
+                            if (row.status.indexOf("REJECT") >= 0) {
+                                html = `<span type="button" class="mr-3 badge badge-labeled text-sm btn-sm btn-danger btn-flat legitRipple" >Rejected</span>`;
+                            }
+                        }
                     }
                     return html;
                 },
@@ -272,6 +329,7 @@ $(function () {
             }
         },
         submitHandler: function () {
+            console.log('sini');
             $.ajax({
                 url: $("#form-comment").attr("action"),
                 method: "post",

@@ -57,8 +57,8 @@ class DocumentCenterController extends Controller
         $this->type = Route::current()->parameter('type');
         $route      = Menu::GetByRoute("documentcenter/$this->page")->first();
         $page       = $this->page;
+        return view('admin.documentcenter.create', compact('page', 'request'));
         if (in_array('create', $request->actionmenu) && $route) {
-            return view('admin.documentcenter.create', compact('page', 'request'));
         }
         abort(403);
     }
@@ -135,12 +135,12 @@ class DocumentCenterController extends Controller
      */
     public function edit(Request $request, $page, $id)
     {
+        $document   = DocumentCenter::find($id);
+        if ($document) {
+            return view('admin.documentcenter.edit', compact('document'));
+        }
+        abort(404);
         if (in_array('create', $request->actionmenu) && $id) {
-            $document   = DocumentCenter::find($id);
-            if ($document) {
-                return view('admin.documentcenter.edit', compact('document'));
-            }
-            abort(404);
         }
         abort(403);
     }

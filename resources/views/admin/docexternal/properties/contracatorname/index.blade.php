@@ -115,6 +115,7 @@
       filter: false,
       responsive: true,
       lengthChange: false,
+      pageLength: 50,
       order: [[1, "asc"]],
       ajax: {
         url: "{{ route('contractorname.read') }}",
@@ -127,13 +128,13 @@
       columnDefs: [
         { orderable: false, targets: [0, 3] },
         { className: "text-center", targets: [0, 3] },
-        {   
+        {
           width: "25%",
           render: function ( data, type, row ) {
           return `${row.role ? row.role.name : '-'}`;
           },targets: [1]
         },
-        {   
+        {
           width: "10%",
           render: function ( data, type, row ) {
             var button = '';
