@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Validator;
 
 use App\Models\Role;
 use App\Models\MenuRole;
+use Illuminate\Database\Eloquent\Builder;
 
 class RoleController extends Controller
 {
@@ -26,14 +27,20 @@ class RoleController extends Controller
         $length = $request->limit;
         $name = strtoupper($request->name);
         $eliminate = $request->eliminate;
+        $ownership = $request->ownership;
 
         //Count Data
         // $query = DB::table('roles');
         // $query->select('roles.*');
         // $query->whereRaw("upper(name) like '%$name%'");
-        $query = Role::whereRaw("upper(name) like '%$name%'");
+        $query = Role::when($ownership, function(\Illuminate\Database\Eloquent\Builder $q) {
+            $q->whereHas('categoryContractors.contractor', function(\Illuminate\Database\Eloquent\Builder $que){
+                $que->where('ownership', false);
+                $que->where('ownership', true);
+            });
+        })->whereRaw("upper(name) like '%$name%'");
         if ($eliminate == 'true') {
-            $query->doesnthave('category_contractors');
+            $query->doesnthave('categoryContractors');
         }
 
         $row = clone $query;

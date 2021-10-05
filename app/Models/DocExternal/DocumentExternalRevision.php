@@ -58,6 +58,11 @@ class DocumentExternalRevision extends Model
         return $this->hasOne(\App\Models\DocExternal\Workflow\Workflow::class, 'revision_id');
     }
 
+    public function outcoming()
+    {
+        return $this->hasOne(\App\Models\Transmittal\Outcoming\DocumentOutcomingTransmittal::class, 'revision_id', 'id');
+    }
+
     /**
      * Scope a query to only include 
      *

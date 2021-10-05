@@ -1,0 +1,164 @@
+@page {
+    size: A4;
+    margin: 0;
+}
+
+@media print {
+
+    html,
+    body {
+        width: 210mm;
+        height: 297mm;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .sender-identity {
+        display: block;
+    }
+
+    td,
+    th {
+        border: 1px solid #000;
+        padding: 8px;
+    }
+
+    .sender-name {
+        font: bold 14px/10px Arial, sans-serif;
+    }
+
+    .sender-address {
+        font: 500 11px/25px Arial, sans-serif;
+    }
+
+    .logo-section {
+        display: inline-flex;
+    }
+
+    .sender-logo,
+    .recipient-logo {
+        padding: 0 1rem .7rem 1rem;
+        height: 3cm;
+    }
+
+    .header-detail {
+        border: 2px solid #000 !important;
+        background-color: rgb(146, 208, 80);
+        font: bold 14px Arial, sans-serif;
+    }
+
+    .td-header-detail,
+    .td-data-detail {
+        font-size: 11px;
+        vertical-align: top;
+    }
+
+    .td-header-detail {
+        font-weight: bold;
+    }
+
+    .header-detail-document {
+        background-color: rgb(197, 217, 241);
+    }
+}
+
+html,
+body {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.sender-identity {
+    display: block;
+}
+
+td,
+th {
+    border: 1px solid #000;
+    padding: 8px;
+    font-size: 11px;
+}
+
+.sender-name {
+    font: bold 11px/10px Arial, sans-serif;
+}
+
+.sender-address {
+    font: 500 10px/25px Arial, sans-serif;
+}
+
+.logo-section {
+    display: inline-flex;
+}
+
+.sender-logo,
+.recipient-logo {
+    padding: 0 1rem .7rem 1rem;
+    height: 3cm;
+}
+
+.header-detail {
+    border: 2px solid #000 !important;
+    background-color: rgb(146, 208, 80);
+    font: bold 12px Arial, sans-serif;
+}
+
+.td-header-detail,
+.td-data-detail {
+    font-size: 10px;
+    vertical-align: top;
+}
+
+.td-header-detail {
+    font-weight: bold;
+}
+
+.header-detail-document {
+    background-color: rgb(197, 217, 241);
+}
+
+.header-detail-document th {
+    font: bold 11px Arial, sans-serif;
+}
+
+.header-detail-document td {
+    font: normal 11px Arial, sans-serif;
+}
+
+.footer {
+  position: flex;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+}
+
+.table-signature td, .table-signature th {
+    border: none;
+}
+
+footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    font: bold 11px Arial, sans-serif;
+    text-align: center;
+}
+

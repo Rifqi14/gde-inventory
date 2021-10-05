@@ -49,6 +49,17 @@
                   <select name="tagged_group_id[]" id="tagged_group_id" class="form-control" data-select_url="role" multiple="multiple" data-eliminate="true"></select>
                 </div>
               </div>
+              <div class="form-group row">
+                <label for="ownership" class="col-fomr-label col-sm-3">Ownership</label>
+                <div class="col-sm-9 p-0">
+                  <div class="icheck-primary">
+                    <input type="checkbox" name="ownership" id="ownership" @if ($data->ownership)
+                    checked
+                    @endif>
+                    <label for="ownership"></label>
+                  </div>
+                </div>
+              </div>
             </div>
             <div class="col-sm-5">
               <span class="title p-0">

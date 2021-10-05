@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Models\DocExternal\ReviewerMatrix\DocumentExternalMatrix;
 use App\Models\Transmittal\TransmittalProperties\CategoryContractor;
+use App\Models\Transmittal\TransmittalProperties\CategoryContractorGroup;
+use App\Models\Transmittal\TransmittalProperties\TransmittalOrganizationCode;
 use App\User;
 use Illuminate\Database\Eloquent\Model;
 
@@ -49,8 +51,13 @@ class Role extends Model
         return $this->belongsToMany(DocumentCenterDocument::class, 'document_center_distributors', 'distributors_id', 'document_id');
     }
 
-    public function category_contractors()
+    public function categoryContractors()
     {
-        return $this->belongsToMany(CategoryContractor::class, 'category_contractor_groups', 'role_id', 'category_contractor_id');
+        return $this->hasOne(CategoryContractorGroup::class, 'role_id', 'id');
+    }
+
+    public function organizationCodes()
+    {
+        return $this->belongsToMany(TransmittalOrganizationCode::class, 'transmittal_organization_code_groups', 'role_id', 'transmittal_organization_code_id');
     }
 }

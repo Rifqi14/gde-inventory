@@ -429,7 +429,7 @@ $(function () {
         ],
         columns: [
             { data: "no" },
-            { data: "name" },
+            { data: "code" },
             { data: "id" },
             { data: "id" },
         ],

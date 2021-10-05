@@ -16,6 +16,6 @@ class CategoryContractor extends Model
 
     public function groups()
     {
-        return $this->belongsToMany(Role::class, 'category_contractor_groups', 'category_contractor_id', 'role_id');
+        return $this->hasMany(CategoryContractorGroup::class, 'category_contractor_id', 'id');
     }
 }

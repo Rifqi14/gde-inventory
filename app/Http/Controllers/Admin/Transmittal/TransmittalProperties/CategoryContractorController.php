@@ -60,6 +60,7 @@ class CategoryContractorController extends Controller
                     "code"      => strtoupper($request->code),
                     "name"      => $request->name,
                     "address"   => $request->address,
+                    "ownership" => $request->ownership ? true : false,
                 ];
                 $create = CategoryContractor::create($data);
                 $create->groups()->sync($request->tagged_group_id);
@@ -129,6 +130,7 @@ class CategoryContractorController extends Controller
                 $update->code   = strtoupper($request->code);
                 $update->name   = $request->name;
                 $update->address= $request->address;
+                $update->ownership= $request->ownership ? true : false;
                 $update->save();
                 $update->groups()->sync($request->tagged_group_id);
                 if ($request->file('app_logo')) {

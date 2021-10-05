@@ -435,7 +435,6 @@ class EmployeeController extends Controller
                 $exist->email                       = $employee->email;
                 $exist->save();
             }
-            
             return true;
         }
     }

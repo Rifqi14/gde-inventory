@@ -11,6 +11,7 @@ use App\Models\DocExternal\Properties\DocumentExternalOriginatorCode;
 use App\Models\DocExternal\ReviewerMatrix\DocumentExternalMatrix;
 use App\Models\DocExternal\ReviewerMatrix\DocumentExternalMatrixGroup;
 use App\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
@@ -91,6 +92,18 @@ class DocumentExternal extends Model
     public function workflows()
     {
         return $this->hasMany(\App\Models\DocExternal\Workflow\Workflow::class, 'document_external_id');
+    }
+
+    public function latestRevisionOwnership()
+    {
+        return $this->hasOne(DocumentExternalRevision::class, 'document_external_id')->doesntHave('outcoming')->whereHas('workflow', function(Builder $q) { 
+            $q->whereNotNull('return_code');
+        })->latest();
+    }
+
+    public function latestRevision()
+    {
+        return $this->hasOne(DocumentExternalRevision::class, 'document_external_id')->doesntHave('outcoming')->where('status', 'WAITING')->latest();
     }
 
     /**

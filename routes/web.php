@@ -393,6 +393,7 @@ Route::group(['prefix' => 'admin'], function () {
 
         // Document Center Document
         Route::get('/centerdocument/read', 'Admin\DocumentCenterDocumentController@read')->name('centerdocument.read');
+        Route::get('/emaildata/{id}', 'Admin\DocumentCenterDocumentController@emailData')->name('emaildata');
         Route::resource('/centerdocument', 'Admin\DocumentCenterDocumentController');
 
         // Document Center Document Detail
@@ -510,8 +511,15 @@ Route::group(['prefix' => 'admin'], function () {
         // Outcoming Route
         Route::group(['prefix' => 'outcoming', 'as' => 'outcoming.', 'namespace' => 'Admin\Transmittal'], function() {
             Route::get('/{code}/create', 'OutcomingController@create')->name('create');
+            Route::get('/{code}/{id}/edit', 'OutcomingController@edit')->name('edit');
             Route::post('/defaultdata', 'OutcomingController@defaultData')->name('defaultdata');
             Route::get('/cc/select', 'OutcomingController@selectCC')->name('selectcc');
+            Route::get('/attention/select', 'OutcomingController@selectAttention')->name('selectattention');
+            Route::get('/contractor/select', 'OutcomingController@selectContractor')->name('selectcontractor');
+            Route::get('/read', 'OutcomingController@read')->name('read');
+            Route::get('/revision/select', 'OutcomingController@selectRevision')->name('selectrevision');
+            Route::delete('/destroydocument', 'OutcomingController@destroyDocument')->name('destroydocument');
+            Route::get('/generatepdf/{id}', 'OutcomingController@pdfview')->name('generatepdf');
             Route::resource('/', 'OutcomingController')->except([
                 'create',
                 'edit',

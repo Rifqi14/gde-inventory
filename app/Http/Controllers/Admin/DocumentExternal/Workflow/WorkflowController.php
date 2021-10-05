@@ -119,7 +119,7 @@ class WorkflowController extends Controller
         $data           = [];
         foreach ($workflows as $key => $workflow) {
             $data[]         = [
-                'role_id'   => "<span class='text-bold'>{$workflow->role->name}</span><br><small>$workflow->label_group</small>",
+                'role_id'   => "<span class='text-bold'>{@$workflow->role->name}</span><br><small>$workflow->label_group</small>",
                 'comment'   => $workflow->comment,
                 'id'        => $workflow->id,
                 'sla'       => $workflow->sla ? "<span class='badge bg-success'><i class='fa fa-check'></i></span>" : '<span class="badge bg-red"><i class="fa fa-times"></i></span>',
